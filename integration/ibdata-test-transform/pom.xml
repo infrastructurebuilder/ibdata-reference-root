@@ -1,0 +1,139 @@
+<!--
+
+    Copyright © 2019 admin (admin@infrastructurebuilder.org)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.infrastructurebuilder.data</groupId>
+    <artifactId>ibdata-reference-root</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>ibdata-test-transform</artifactId>
+  <packaging>ibdata</packaging>
+  <properties>
+    <surefire.failIfNoTests>false</surefire.failIfNoTests>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.infrastructurebuilder.data</groupId>
+      <artifactId>ibdata-default-transformers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ibdata-test-ingest</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+  <build>
+
+    <plugins>
+      <plugin>
+        <groupId>org.infrastructurebuilder.data</groupId>
+        <artifactId>ibdata-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.infrastructurebuilder.data</groupId>
+        <artifactId>ibdata-maven-plugin</artifactId>
+        <version>${project.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ibdata-default-transformers</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ibdata-test-ingest</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>ABS</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>transform</goal>
+            </goals>
+            <configuration>
+              <transformations>
+                <transformation>
+                  <id>transformed-xyz</id>
+                  <transformers>
+                    <transformer>
+                      <id>pass-thru</id>
+                      <configuration>
+                        <key1>val1</key1>
+                        <key2>val2</key2>
+                      </configuration>
+                    </transformer>
+                    <recordTransformer>
+                      <id>record-transformation-today</id>
+                      <hint>record-based</hint>
+                      <configuration>
+                        <key1>val1-record</key1>
+                        <key2>val2-record</key2>
+                      </configuration>
+                      <records>
+                        <record>
+                          <id>remove-whitespace</id>
+                          <hint>string-trim</hint>
+                        </record>
+                      </records>
+                      <recordFinalizer>string-finalizer</recordFinalizer>
+                    </recordTransformer>
+                  </transformers>
+                </transformation>
+              </transformations>
+            </configuration>
+
+          </execution>
+
+        </executions>
+        <configuration>
+          <skip>false</skip>
+          <ingestionConfig>
+            <id>id</id>
+            <dataSet>
+              <name>name</name>
+              <description>desc</description>
+              <metadata>
+                <x>
+                  <y>z                  </y>
+                  <xx.tty />
+                </x>
+              </metadata>
+            </dataSet>
+          </ingestionConfig>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

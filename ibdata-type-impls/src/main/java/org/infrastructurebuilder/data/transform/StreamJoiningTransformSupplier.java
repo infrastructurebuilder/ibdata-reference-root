@@ -1,0 +1,83 @@
+/**
+ * Copyright © 2019 admin (admin@infrastructurebuilder.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.infrastructurebuilder.data.transform;
+
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.IBDataSet;
+import org.infrastructurebuilder.data.IBDataStream;
+import org.infrastructurebuilder.data.IBDataTransformationResult;
+import org.infrastructurebuilder.data.IBDataTransformer;
+import org.infrastructurebuilder.data.IBDataTransformerSupplier;
+import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
+
+@Named(StreamJoiningTransformSupplier.STREAM_JOIN)
+public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSupplier {
+
+  public static final String STREAM_JOIN = "stream-join";
+
+  @Inject
+  public StreamJoiningTransformSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+    this(wps, null);
+  }
+
+  private StreamJoiningTransformSupplier(PathSupplier wps, ConfigMapSupplier cms) {
+    super(wps, cms);
+  }
+
+  @Override
+  public IBDataTransformerSupplier configure(ConfigMapSupplier cms) {
+    return new StreamJoiningTransformSupplier(getWps(), cms);
+  }
+
+  @Override
+  protected IBDataTransformer getUnconfiguredTransformerInstance(Path workingPath) {
+    return new StreamJoiningTransformer(workingPath);
+  }
+
+  private class StreamJoiningTransformer extends AbstractIBDataTransformer {
+
+    public StreamJoiningTransformer(Path p) {
+      this(p, new HashMap<>());
+    }
+
+    public StreamJoiningTransformer(Path p, Map<String, String> config) {
+      super(p, config);
+    }
+
+    @Override
+    public String getHint() {
+      return STREAM_JOIN;
+    }
+
+    @Override
+    public IBDataTransformationResult transform(IBDataSet ds, List<IBDataStream> suppliedStreams,  boolean failOnError) {
+      throw new IBDataException("Stream Joiner Not implemented ");
+      //      return new DefaultIBDataTransformationResult(null);
+    }
+
+  }
+
+}
