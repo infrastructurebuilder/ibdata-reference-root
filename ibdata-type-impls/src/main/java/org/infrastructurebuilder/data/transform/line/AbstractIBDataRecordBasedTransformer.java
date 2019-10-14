@@ -48,13 +48,10 @@ import org.infrastructurebuilder.data.DefaultIBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
-import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
-import org.infrastructurebuilder.data.IBMetadataUtils;
-import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
 import org.infrastructurebuilder.util.IBUtils;
@@ -70,9 +67,9 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   private final List<IBDataRecordTransformer<?, ?>> configuredTranformers;
   private final IBDataStreamRecordFinalizer configuredFinalizer;
 
-  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Map<String, String> config,
+  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log,  Map<String, String> config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
-    super(workingPath, config);
+    super(workingPath, log, config);
     this.dataLineSuppliers = dataRecTransformerSuppliers;
     this.configuredFinalizer = finalizer;
     if (config != null && config.containsKey(TRANSFORMERSLIST)

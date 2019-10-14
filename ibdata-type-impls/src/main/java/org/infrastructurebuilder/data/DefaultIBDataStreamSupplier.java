@@ -18,9 +18,7 @@ package org.infrastructurebuilder.data;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 public class DefaultIBDataStreamSupplier implements IBDataStreamSupplier {

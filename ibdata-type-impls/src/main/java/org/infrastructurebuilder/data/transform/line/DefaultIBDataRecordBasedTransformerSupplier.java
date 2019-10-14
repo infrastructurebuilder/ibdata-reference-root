@@ -25,8 +25,10 @@ import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplier;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @SuppressWarnings("rawtypes")
 @Named(DefaultIBDataRecordBasedTransformerSupplier.RECORD_BASED_TRANSFORMER_SUPPLIER)
@@ -38,35 +40,37 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
 
   @Inject
   protected DefaultIBDataRecordBasedTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
       Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers) {
-    this(wps, null, dataLineTransformerSuppliers, null);
+    this(wps,l, null, dataLineTransformerSuppliers, null);
   }
 
   protected DefaultIBDataRecordBasedTransformerSupplier(
       @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      //
+      LoggerSupplier l,
       // All config all the time
       ConfigMapSupplier cms,
       // All the available data line suppliers
       Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
-    super(wps, cms);
+    super(wps, l, cms);
     this.dataLineSuppliers = dataLineTransformerSuppliers;
     this.finalizer = finalizer;
   }
 
   @Override
   protected IBDataTransformer getUnconfiguredTransformerInstance(Path workingPath) {
-    return new DefaultIBDataRecordBasedTransformer(workingPath, this.dataLineSuppliers, this.finalizer);
+    return new DefaultIBDataRecordBasedTransformer(workingPath, getLog(), this.dataLineSuppliers, this.finalizer);
   }
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), cms, this.dataLineSuppliers, this.finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(),() -> getLog(),  cms, this.dataLineSuppliers, this.finalizer);
   }
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), null, dataLineSuppliers, finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), null, dataLineSuppliers, finalizer);
   }
 
 }

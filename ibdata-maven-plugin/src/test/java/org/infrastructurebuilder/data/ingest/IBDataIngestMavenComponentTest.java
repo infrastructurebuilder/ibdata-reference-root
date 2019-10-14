@@ -38,9 +38,12 @@ import org.infrastructurebuilder.util.config.WorkingPathSupplier;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IBDataIngestMavenComponentTest {
 
+  public final static Logger log = LoggerFactory.getLogger(IBDataIngestMavenComponentTest.class);
   private IBDataIngestMavenComponent dic;
   private WorkingPathSupplier wps;
   private Properties properties;
@@ -55,13 +58,11 @@ public class IBDataIngestMavenComponentTest {
   private ArrayList<DefaultIBDataStreamIdentifierConfigBean> streams;
   private DefaultIBDataStreamIdentifierConfigBean ds1;
   private URL sourceURL;
-  private DefaultIBDataStreamIdentifierConfigBean ds2,ds3, ds4;
-  private DefaultLog log;
+  private DefaultIBDataStreamIdentifierConfigBean ds2, ds3, ds4;
   private IBDataWorkingPathSupplier lbps;
 
   @Before
   public void setUp() throws Exception {
-    log = new DefaultLog(new ConsoleLogger(0, IBDataIngestMavenComponentTest.class.getName()));
     wps = new WorkingPathSupplier();
     target = wps.getRoot();
     sourceURL = target.resolve("test-classes").resolve("testfile.txt").toUri().toURL();
@@ -78,8 +79,8 @@ public class IBDataIngestMavenComponentTest {
     Path workingPath = wps.get();
     lbps = new IBDataWorkingPathSupplier();
     lbps.setPath(workingPath);
-    cms = new MavenConfigMapSupplier(mp,null,null);
-//    dic = new IBDataIngestMavenComponent(lbps, log, new DefaultTypeToExtensionMapper(), cms);
+    cms = new MavenConfigMapSupplier(mp, null, null);
+    //    dic = new IBDataIngestMavenComponent(lbps, log, new DefaultTypeToExtensionMapper(), cms);
     ds = new DefaultIBDataSetIdentifier();
     ds.setMetadata(new XmlPlexusConfiguration("metadata"));
     ds.setDescription("Descc");
@@ -94,7 +95,7 @@ public class IBDataIngestMavenComponentTest {
     ds1.setId("temp1");
     ds1.setSha512(
         "5e787c500552b5c75adb60b0cfd1ba3db2083d5a93d4d00480e16bff3d8918790e94032da47756b522b6cd458943f6a4b7f0c3dbb9ff035e7221f3a14d22e1eb");
-//    ds1.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
+    //    ds1.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
     ds1.setDescription("S1 desc");
     ds1.setName("somename");
     ds1.setMimeType("text/plain");
@@ -105,7 +106,7 @@ public class IBDataIngestMavenComponentTest {
     ds2.setId("temp2");
     ds2.setSha512(
         "b4ab0dbcf486d0c9fa98d9f1e3f19d392201150db79196f8ec54d4d05838038d0dea917f17f09e3a302f80d39ca36cca379bf0d002c97c479694e20e0db9a50d");
-//    ds2.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
+    //    ds2.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
     ds2.setDescription("S2 desc");
     ds2.setName("somename");
     ds2.setMimeType("application/pdf");
@@ -114,7 +115,7 @@ public class IBDataIngestMavenComponentTest {
     ds3.setId("temp3");
     ds3.setSha512(
         "09253eb87d097bdaa39f98cbbea3e6d83ee4641bca76c32c7eb1add17e9cb3117adb412d2e04ab251cca1fb19afa8b631d1e774b5dc8ae727f753fe2ffb5f288");
-//    ds3.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
+    //    ds3.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
     ds3.setDescription("S3 desc");
     ds3.setName("somename");
     ds3.setMimeType("application/pdf");
@@ -123,7 +124,7 @@ public class IBDataIngestMavenComponentTest {
     ds4.setId("temp4");
     ds4.setSha512(
         "5e33512e482ac4512cc8ffc3a579ee762c48f60dde3cea614b253b70fd619f129c6f0df48c8599f442b813c51e11a87dd452cf4e5bf0a8aefa195ae414cdaa41");
-//    ds4.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
+    //    ds4.set_metadata(IBDataSetIdentifier.emptyDocumentSupplier.get());
     ds4.setDescription("S4 desc");
     ds4.setName("somename");
     ds4.setMimeType("application/pdf");
@@ -136,12 +137,12 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestFile() {
     ds.setStreams(streams);
     config.dataSet = ds;
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, log);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
-//    IBChecksumPathType p = dic.ingest(config, ingester);
-//    assertNotNull(p);
+    //    IBChecksumPathType p = dic.ingest(config, ingester);
+    //    assertNotNull(p);
   }
 
   @Ignore
@@ -149,28 +150,29 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestDownload() {
     ds.setStreams(new ArrayList<>(Arrays.asList(ds3)));
     config.dataSet = ds;
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, log);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
 
-//    IBChecksumPathType qq = dic.ingest(config, ingester);
-//    assertNotNull(qq);
+    //    IBChecksumPathType qq = dic.ingest(config, ingester);
+    //    assertNotNull(qq);
   }
+
   @Ignore
   @Test
   public void testIngestMultiDownload() throws IOException {
     dsMulti.setStreams(Arrays.asList(ds4, ds3));
     config.dataSet = dsMulti;
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, log);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
 
-//    IBChecksumPathType qq = dic.ingest(config, ingester);
-//
-//    assertNotNull(qq);
-//    assertEquals(IBDataIngester.APPLICATION_IBDATA_ARCHIVE, qq.getType());
-//    assertEquals(3,Files.list(qq.getPath()).collect(Collectors.toSet()).size());
+    //    IBChecksumPathType qq = dic.ingest(config, ingester);
+    //
+    //    assertNotNull(qq);
+    //    assertEquals(IBDataIngester.APPLICATION_IBDATA_ARCHIVE, qq.getType());
+    //    assertEquals(3,Files.list(qq.getPath()).collect(Collectors.toSet()).size());
   }
 }

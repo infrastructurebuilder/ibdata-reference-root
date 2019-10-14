@@ -22,8 +22,6 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.w3c.dom.Document;
-
 abstract public class AbstractIBDataSet implements IBDataSet {
 
   private final UUID id;
@@ -53,11 +51,6 @@ abstract public class AbstractIBDataSet implements IBDataSet {
     this.groupId = requireNonNull(groupId);
     this.artifactId = requireNonNull(artifactId);
     this.version = requireNonNull(version);
-  }
-
-  @Override
-  public Document getMetadataAsDocument() {
-    return IBMetadataUtils.fromXpp3Dom.apply(this.metadata);
   }
 
   @Override

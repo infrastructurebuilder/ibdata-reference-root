@@ -18,35 +18,40 @@ package org.infrastructurebuilder.data.transform;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import javax.inject.Named;
-
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 abstract public class AbstractIBDataTransformerSupplier<T> implements IBDataTransformerSupplier<T> {
   private final PathSupplier wps;
   private final ConfigMapSupplier config;
+  private final LoggerSupplier logger;
 
   public AbstractIBDataTransformerSupplier(
       // These go into your impls
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+      PathSupplier wps, LoggerSupplier l) {
+    this(wps, l, null);
   }
 
   protected AbstractIBDataTransformerSupplier(
       // These go into your impls
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      ConfigMapSupplier cms) {
+      PathSupplier wps, LoggerSupplier l, ConfigMapSupplier cms) {
     this.wps = Objects.requireNonNull(wps);
     this.config = cms;
+    this.logger = Objects.requireNonNull(l);
   }
 
   public PathSupplier getWps() {
     return wps;
+  }
+
+  @Override
+  public Logger getLog() {
+    return this.logger.get();
   }
 
   @Override

@@ -24,7 +24,6 @@ import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DataSetEnabled;
 import org.infrastructurebuilder.data.IBMetadataUtils;
-import org.infrastructurebuilder.data.ingest.DefaultIBDataSetIdentifier;
 import org.infrastructurebuilder.data.model.DataSet;
 
 public class Transformation implements DataSetEnabled {
