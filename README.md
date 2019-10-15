@@ -15,7 +15,7 @@ cd ../ibdata-test-transform
 mvn clean install
 ```
 
-At the end of each Maven build, each should show:
+At it's end, each Maven build should show:
 
 ```
 [INFO] ------------------------------------------------------------------------
