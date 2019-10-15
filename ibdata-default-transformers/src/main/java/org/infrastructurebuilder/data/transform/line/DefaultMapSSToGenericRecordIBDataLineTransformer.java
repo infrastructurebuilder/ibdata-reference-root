@@ -22,9 +22,12 @@ import static org.infrastructurebuilder.data.IBDataAvroUtils.getSchema;
 
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -48,6 +51,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformer
 
   public final static String LOCALE_LANGUAGE_PARAM = "locale.language";
   public final static String LOCALE_REGION_PARAM = "locale.region";
+  private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Map.class.getCanonicalName());
 
   /**
    * @param workingPath
@@ -86,8 +90,8 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformer
 
   @Override
   public Schema getSchema() {
-    return getSchema.apply(ofNullable(getConfiguration(SCHEMA_PARAM))
-        .orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER)));
+    return getSchema.apply(
+        ofNullable(getConfiguration(SCHEMA_PARAM)).orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER)));
   }
 
   @Override
@@ -102,6 +106,16 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformer
   @Override
   public String getHint() {
     return NAME;
+  }
+
+  @Override
+  public Optional<List<String>> accepts() {
+    return Optional.of(ACCEPTABLE_TYPES);
+  }
+
+  @Override
+  public Optional<String> produces() {
+    return Optional.of(GenericRecord.class.getCanonicalName());
   }
 
   @Override

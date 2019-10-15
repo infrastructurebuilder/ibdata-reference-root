@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataException;
@@ -66,8 +67,9 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   private final Map<String, IBDataRecordTransformerSupplier> dataLineSuppliers;
   private final List<IBDataRecordTransformer<?, ?>> configuredTranformers;
   private final IBDataStreamRecordFinalizer configuredFinalizer;
+  private final Optional<String> finalType;
 
-  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log,  Map<String, String> config,
+  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, Map<String, String> config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
     super(workingPath, log, config);
     this.dataLineSuppliers = dataRecTransformerSuppliers;
@@ -92,22 +94,40 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
           throw new IBDataException("Missing record transformers " + tList + "\n Available transformers are "
               + dataRecTransformerSuppliers.keySet());
         configuredTranformers = new ArrayList<>();
-        theList.stream().forEach(li -> {
+        Optional<String> previousType = Optional.empty();
+        for (String li : theList) {
           String[] s = li.split(Pattern.quote(MAP_SPLITTER));
           IBDataRecordTransformerSupplier<?, ?> s2 = map.get(s[1]).configure(lcfg);
           IBDataRecordTransformer<?, ?> transformer = s2.get().configure(config);
+          if (acceptable(previousType, transformer.accepts()))
+            previousType = transformer.produces();
+          else
+            throw new IBDataException("Transformer " + s[0] + "/" + transformer.getHint() + " only responds to "
+                + transformer.accepts().get() + " and it's predecessor produces " + previousType.orElse("unknown"));
           configuredTranformers.add(transformer);
-        });
-      } else
+        }
+        this.finalType = previousType;
+      } else {
         this.configuredTranformers = null;
+        this.finalType = Optional.empty();
+      }
     } else {
-      //      this.failOnError = false;
       this.configuredTranformers = null;
+      this.finalType = Optional.empty();
     }
   }
 
+  private boolean acceptable(Optional<String> previous, Optional<List<String>> optional) {
+    return (!previous.isPresent() || !optional.isPresent() || optional.get().contains(previous.get()));
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public IBDataTransformationResult transform(IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
+    IBDataStreamRecordFinalizer cf = getConfiguredFinalizer();
+    if (!acceptable(finalType, cf.accepts()))
+      throw new IBDataException(
+          "Finalizer " + cf.getId() + " does not accept finally produced type " + finalType.get());
     return localTransform(ds, suppliedStreams, getConfiguredFinalizer(), failOnError);
   }
 
@@ -132,7 +152,44 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  // This is a LITTLE bit dangerous
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  protected String processStream(IBDataStream stream, IBDataStreamRecordFinalizer finalizer,
+      Map<String, List<Long>> errors, List<IBDataTransformationError> errorList) {
+    return cet.withReturningTranslation(() -> {
+      String inbound;
+      try (BufferedReader r = new BufferedReader(new InputStreamReader(stream.get()))) {
+        String line;
+        inbound = String.class.getCanonicalName();
+        Optional<Object> inboundObject = empty(), s;
+        long lineCount = 0;
+        while ((line = cet.withReturningTranslation(() -> r.readLine())) != null) {
+          lineCount++;
+          //              log.info(String.format("Line %05d '%s'", lineCount, line));
+          s = of(line);
+          for (IBDataRecordTransformer t : getConfiguredTransformers()) {
+
+            inboundObject = ofNullable(t.apply(s.get()));
+            //                log.info(String.format("           '%s'",  line));
+            if (!inboundObject.isPresent()) {
+              errors.computeIfAbsent(t.getHint(), k -> new ArrayList<Long>()).add(lineCount);
+              break;
+            }
+            s = inboundObject;
+            inbound = (String) t.produces().orElse(inbound);
+          }
+
+          inboundObject.ifPresent(l -> {
+            //                log.info(String.format("        as '%s'", l));
+            finalizer.writeRecord(l).ifPresent(e -> errorList.add((IBDataTransformationError) e));
+          });
+
+        }
+      }
+      return (String) finalizer.produces().orElse(stream.getMimeType());
+    });
+  }
+
   protected IBDataTransformationResult localTransform(IBDataSet ds2, List<IBDataStream> suppliedStreams,
       IBDataStreamRecordFinalizer finalizer, boolean failOnError) {
     requireNonNull(finalizer, "No finalizer supplied to localTransform");
@@ -140,38 +197,12 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     final List<IBDataTransformationError> errorList = new ArrayList<>();
     Map<UUID, IBDataStreamSupplier> map = new HashMap<>();
 
+    String finalType = null;
     for (IBDataStream stream : Stream
         .concat(requireNonNull(ds2, "Supplied transform dataset").asStreamsList().stream(), suppliedStreams.stream())
         .collect(Collectors.toList())) {
       if (this.respondsTo(stream)) {
-        cet.withTranslation(() -> {
-          try (BufferedReader r = new BufferedReader(new InputStreamReader(stream.get()))) {
-            String line;
-            Optional<Object> inboundObject = empty(), s;
-            long lineCount = 0;
-            while ((line = cet.withReturningTranslation(() -> r.readLine())) != null) {
-              lineCount++;
-//              log.info(String.format("Line %05d '%s'", lineCount, line));
-              s = of(line);
-              for (@SuppressWarnings("rawtypes")
-              IBDataRecordTransformer t : getConfiguredTransformers()) {
-                inboundObject = ofNullable(t.apply(s.get()));
-//                log.info(String.format("           '%s'",  line));
-                if (!inboundObject.isPresent()) {
-                  errors.computeIfAbsent(t.getHint(), k -> new ArrayList<Long>()).add(lineCount);
-                  break;
-                }
-                s = inboundObject;
-              }
-
-              inboundObject.ifPresent(l -> {
-//                log.info(String.format("        as '%s'", l));
-                finalizer.writeRecord(l).ifPresent(e -> errorList.add((IBDataTransformationError) e));
-              });
-            }
-          }
-
-        });
+        finalType = processStream(stream, finalizer, errors, errorList);
       }
     }
     cet.withTranslation(() -> finalizer.close());
@@ -179,6 +210,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     Checksum c = new Checksum(targetPath);
     ds2.getStreamSuppliers().forEach(ss -> map.put(ss.getId(), ss));
     DataStream newStream = new DataStream();
+    newStream.setMimeType(Optional.ofNullable(finalType).orElse(IBConstants.APPLICATION_OCTET_STREAM));
     newStream.setMetadata(new Xpp3Dom("metadata"));
     newStream.setCreationDate(new Date());
     newStream.setUuid(c.asUUID().get().toString());

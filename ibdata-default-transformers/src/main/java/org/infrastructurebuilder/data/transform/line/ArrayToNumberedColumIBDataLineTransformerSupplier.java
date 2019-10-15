@@ -15,9 +15,13 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import java.lang.reflect.Array;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -56,6 +60,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
 
     public static final String FORMAT_KEY = "format";
     public final static String FORMAT = "COLUMN%00d";
+    private final List<String> ACCEPTABLE_TYPES = Arrays.asList(Array.class.getCanonicalName());
     private final String format;
 
     /**
@@ -93,10 +98,21 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
     public IBDataRecordTransformer<String[], Map<String, String>> configure(Map<String, String> cms) {
       return new ArrayToNumberedColumIBDataLineTransformer(getWorkingPath(), cms);
     }
+
+    @Override
+    public Optional<List<String>> accepts() {
+      return Optional.of(ACCEPTABLE_TYPES);
+    }
+    @Override
+    public Optional<String> produces() {
+      return Optional.of(Map.class.getCanonicalName());
+    }
   }
 
   @Override
   public String getHint() {
     return ARRAY_TO_NUMBERED_COL;
   }
+
+
 }

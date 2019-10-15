@@ -18,7 +18,10 @@ package org.infrastructurebuilder.data.transform.line;
 import static java.util.Optional.ofNullable;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -28,6 +31,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 @Named(StringTrimIBDataLineTransformerSupplier.STRING_TRIM)
 public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecordTransformerSupplier<String, String> {
   public static final String STRING_TRIM = "string-trim";
+  private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
 
   @javax.inject.Inject
   public StringTrimIBDataLineTransformerSupplier(PathSupplier wps) {
@@ -49,6 +53,7 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
   }
 
   private class StringTrimIBDataLineTransformer extends AbstractIBDataRecordTransformer<String, String> {
+
 
     /**
      * @param ps
@@ -73,6 +78,11 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
     @Override
     public String getHint() {
       return STRING_TRIM;
+    }
+
+    @Override
+    public Optional<List<String>> accepts() {
+      return Optional.of(ACCEPTABLE_TYPES);
     }
 
     @Override

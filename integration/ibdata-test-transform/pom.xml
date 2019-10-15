@@ -87,6 +87,7 @@
                 <transformation>
                   <id>transformed-xyz</id>
                   <transformers>
+                  <!-- hint defaults to id if no hint is present -->
                     <transformer>
                       <id>pass-thru</id>
                       <configuration>
@@ -104,18 +105,22 @@
                       <records>
                         <record>
                           <id>remove-whitespace</id>
-                          <hint>string-trim</hint>
+                          <hint>string-trim</hint> <!-- Type of the supplier -->
                         </record>
+                        <!--  Adding the regex-array-split breaks teh string-finalizer -->
+                        <!--
+                        <record>
+                          <id>regex-array-split</id>
+                        </record>
+                         -->
                       </records>
-                      <recordFinalizer>string-finalizer</recordFinalizer>
+                      <recordFinalizer>string</recordFinalizer>
                     </recordTransformer>
                   </transformers>
                 </transformation>
               </transformations>
             </configuration>
-
           </execution>
-
         </executions>
         <configuration>
           <skip>false</skip>
