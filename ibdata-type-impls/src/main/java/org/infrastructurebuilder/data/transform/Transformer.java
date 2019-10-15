@@ -28,7 +28,6 @@ import java.util.Optional;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBMetadataUtils;
-import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.w3c.dom.Document;

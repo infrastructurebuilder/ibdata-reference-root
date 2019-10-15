@@ -15,8 +15,11 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import java.lang.reflect.Array;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +32,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 @Named(ArraySplitIBDataLineTransformerSupplier.REGEX_ARRAY_SPLIT)
 public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecordTransformerSupplier<String, String[]> {
   public static final String REGEX_ARRAY_SPLIT = "regex-array-split";
+  public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
 
   @javax.inject.Inject
   public ArraySplitIBDataLineTransformerSupplier(
@@ -84,6 +88,15 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
     @Override
     public String getHint() {
       return REGEX_ARRAY_SPLIT;
+    }
+
+    @Override
+    public Optional<java.util.List<String>> accepts() {
+      return Optional.of(ACCEPTABLE_TYPES);
+    }
+    @Override
+    public Optional<String> produces() {
+      return Optional.of(Array.class.getCanonicalName()); // Not a usable final type
     }
 
   }

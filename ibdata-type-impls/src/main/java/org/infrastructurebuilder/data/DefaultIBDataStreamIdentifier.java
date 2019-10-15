@@ -60,7 +60,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   public DefaultIBDataStreamIdentifier(IBDataSource source, Date creationDate, Optional<String> path) {
     this(UUID.randomUUID(), Optional.ofNullable(source.getSourceURL()), source.getName(), source.getDescription(),
         source.getChecksum().orElse(new Checksum()), creationDate,
-        source.getMetadata().orElse(IBDataSetIdentifier.emptyDocumentSupplier.get()),
+        source.getMetadata().orElse(IBMetadataUtils.emptyDocumentSupplier.get()),
         source.getMimeType().orElse(IBConstants.APPLICATION_OCTET_STREAM), path);
   }
 

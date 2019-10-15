@@ -26,22 +26,18 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
-import org.infrastructurebuilder.util.artifacts.Checksum;
 
 abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDataStreamRecordFinalizer<T> {
   private final Map<String, String> config;

@@ -30,8 +30,10 @@ import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(StreamJoiningTransformSupplier.STREAM_JOIN)
 public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSupplier {
@@ -39,32 +41,32 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
   public static final String STREAM_JOIN = "stream-join";
 
   @Inject
-  public StreamJoiningTransformSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public StreamJoiningTransformSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log) {
+    this(wps, log, null);
   }
 
-  private StreamJoiningTransformSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  private StreamJoiningTransformSupplier(PathSupplier wps, LoggerSupplier l, ConfigMapSupplier cms) {
+    super(wps, l, cms);
   }
 
   @Override
   public IBDataTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new StreamJoiningTransformSupplier(getWps(), cms);
+    return new StreamJoiningTransformSupplier(getWps(),() -> getLog(), cms);
   }
 
   @Override
   protected IBDataTransformer getUnconfiguredTransformerInstance(Path workingPath) {
-    return new StreamJoiningTransformer(workingPath);
+    return new StreamJoiningTransformer(workingPath, getLog());
   }
 
   private class StreamJoiningTransformer extends AbstractIBDataTransformer {
 
-    public StreamJoiningTransformer(Path p) {
-      this(p, new HashMap<>());
+    public StreamJoiningTransformer(Path p, Logger l) {
+      this(p, l , new HashMap<>());
     }
 
-    public StreamJoiningTransformer(Path p, Map<String, String> config) {
-      super(p, config);
+    public StreamJoiningTransformer(Path p, Logger l,  Map<String, String> config) {
+      super(p, l, config);
     }
 
     @Override

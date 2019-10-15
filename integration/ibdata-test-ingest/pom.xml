@@ -48,8 +48,6 @@
       <plugin>
         <groupId>org.infrastructurebuilder.data</groupId>
         <artifactId>ibdata-maven-plugin</artifactId>
-        <version>${project.version}</version>
-        <extensions>true</extensions>
         <dependencies>
           <dependency>
             <groupId>org.infrastructurebuilder.data</groupId>
@@ -96,22 +94,6 @@
             </configuration>
           </execution>
         </executions>
-        <configuration>
-          <skip>false</skip>
-          <ingestionConfig>
-            <id>id</id>
-            <dataSet>
-              <name>name</name>
-              <description>desc</description>
-              <metadata>
-                <x>
-                  <y>z                  </y>
-                  <xx.tty />
-                </x>
-              </metadata>
-            </dataSet>
-          </ingestionConfig>
-        </configuration>
       </plugin>
     </plugins>
   </build>

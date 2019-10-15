@@ -28,7 +28,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
@@ -46,51 +45,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named("default-ingest")
-public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier {
+public class DefaultIBDataSetJDBCIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier {
 
-  public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
+  public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetJDBCIngestionFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetIngestionFinalizerSupplier(@Nullable @Named("maven-log") LoggerSupplier l,
-      TypeToExtensionMapper t2e) {
+  public DefaultIBDataSetJDBCIngestionFinalizerSupplier(LoggerSupplier l, TypeToExtensionMapper t2e) {
     this(Optional.ofNullable(l).orElse(() -> logger).get(), null, null, t2e);
   }
 
-  private DefaultIBDataSetIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms,
-      TypeToExtensionMapper t2e) {
+  private DefaultIBDataSetJDBCIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms, TypeToExtensionMapper t2e) {
     super(logger, workingPath, cms, t2e);
   }
 
   @Override
   public IBDataSetFinalizerSupplier configure(ConfigMapSupplier config) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLogger(), () -> Paths.get(
-        //
-        requireNonNull(
-            // Get a config
-            requireNonNull(config, "Config Map Supplier").get()
-                // Get the working path because the one we have is bad? FIXME
-                .get(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER),
-            // Or report what's wrong
-            "Working Path Config")),
-        config, getTypeToExtensionMapper());
+    String q = requireNonNull(config, "Config Map Supplier").get().get(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER);
+    getLogger().debug("" + q + " is the config working path");
+    return new DefaultIBDataSetJDBCIngestionFinalizerSupplier(getLogger(), () -> Paths.get(requireNonNull(q, "Working Path Config")), config, getTypeToExtensionMapper());
   }
 
   @Override
   public IBDataSetFinalizer<Ingestion> get() {
-    return new IngestionIBDataSetFinalizer(requireNonNull(getCms(), "Config supplier is null").get(), getWps().get());
+    return new IngestionIBDataSetJDBCFinalizer(requireNonNull(getCms(), "Config supplier is null").get(), getWps().get());
   }
 
-  private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<Ingestion> {
+  private class IngestionIBDataSetJDBCFinalizer extends AbstractIBDataSetFinalizer<Ingestion> {
 
-    public IngestionIBDataSetFinalizer(Map<String, String> config, Path workingPath) {
+    public IngestionIBDataSetJDBCFinalizer(Map<String, String> config, Path workingPath) {
       super(config, workingPath);
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<IBDataStreamSupplier> ibdssList)
-        throws IOException {
-      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,
-          getTypeToExtensionMapper());
+    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<IBDataStreamSupplier> ibdssList) throws IOException {
+      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList, getTypeToExtensionMapper());
     }
 
   }

@@ -19,8 +19,11 @@ package org.infrastructurebuilder.data.transform.line;
 import static java.util.Optional.ofNullable;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -57,6 +60,7 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
 
     public static final String REGEX = "regex";
     public static final String DEFAULT_REGEX = ".*"; // Match pretty much anything
+    private final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
     private final Pattern splitRegex;
 
     /**
@@ -88,6 +92,16 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
     @Override
     public String getHint() {
       return REGEX_LINE_FILTER;
+    }
+
+    @Override
+    public Optional<List<String>> accepts() {
+      return Optional.of(ACCEPTABLE_TYPES);
+    }
+
+    @Override
+    public Optional<String> produces() {
+      return Optional.of(String.class.getCanonicalName());
     }
 
   }

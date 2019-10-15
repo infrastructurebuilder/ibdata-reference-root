@@ -21,19 +21,22 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.infrastructurebuilder.data.IBDataTransformer;
+import org.slf4j.Logger;
 
 abstract public class AbstractIBDataTransformer implements IBDataTransformer {
 
   private final Path workingPath;
   private final Map<String, String> config;
+  private final Logger logger;
 
-  public AbstractIBDataTransformer(Path p) {
-    this(p, new HashMap<>());
+  public AbstractIBDataTransformer(Path p, Logger l) {
+    this(p, l, new HashMap<>());
   }
 
-  protected AbstractIBDataTransformer(Path workingPath, Map<String, String> config) {
+  protected AbstractIBDataTransformer(Path workingPath, Logger l,  Map<String, String> config) {
     this.workingPath = Objects.requireNonNull(workingPath);
     this.config = config;
+    this.logger = Objects.requireNonNull(l);
   }
 
   protected Map<String, String> getConfig() {
@@ -44,4 +47,8 @@ abstract public class AbstractIBDataTransformer implements IBDataTransformer {
     return workingPath;
   }
 
+  @Override
+  public Logger getLog() {
+    return this.logger;
+  }
 }

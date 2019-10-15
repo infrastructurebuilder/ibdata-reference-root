@@ -17,10 +17,8 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapInputStreamToDataSet;
+import static org.infrastructurebuilder.data.IBDataModelUtils.mapInputStreamToDataSet;
 
-import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -29,15 +27,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.DataStream;
 
 public interface IBDataTypeImplsModelUtils {
   public final static Function<IBDataSetIdentifier, DataSet> dataSetIdentifierToDataSet = id -> {

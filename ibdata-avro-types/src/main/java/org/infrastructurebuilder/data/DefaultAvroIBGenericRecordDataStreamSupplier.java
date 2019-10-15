@@ -25,11 +25,16 @@ import org.apache.avro.file.DataFileReader;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 
-public final class DefaultAvroIBGenericRecordDataStreamSupplier extends DefaultIBTypedDataStreamSupplier<GenericRecord> {
+public final class DefaultAvroIBGenericRecordDataStreamSupplier
+    extends DefaultIBTypedDataStreamSupplier<GenericRecord> {
 
-  public DefaultAvroIBGenericRecordDataStreamSupplier(Optional<Path> targetPath, IBDataStream stream, boolean parallel, Schema schema) {
-    super(stream, cet.withReturningTranslation(() -> new DataFileReader<GenericRecord>(
-        new DefaultSeekableInputFromInputStream(targetPath, stream.get()), new GenericDatumReader<GenericRecord>(schema))), parallel);
+  public DefaultAvroIBGenericRecordDataStreamSupplier(Optional<Path> targetPath, IBDataStream stream, boolean parallel,
+      Schema schema) {
+    super(stream,
+        cet.withReturningTranslation(
+            () -> new DataFileReader<GenericRecord>(new DefaultSeekableInputFromInputStream(targetPath, stream.get()),
+                new GenericDatumReader<GenericRecord>(schema))),
+        parallel);
   }
 
 }

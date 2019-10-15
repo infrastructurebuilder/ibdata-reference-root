@@ -21,6 +21,8 @@ import static org.infrastructurebuilder.data.IBDataException.cet;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +39,8 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 @Named(StringIBDataStreamRecordFinalizerSupplier.NAME)
 public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStreamRecordFinalizerSupplier<String> {
 
-  public static final String NAME = "string-finalizer";
+  public static final String NAME = "string";
+  public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
 
   @Inject
   public StringIBDataStreamRecordFinalizerSupplier(
@@ -57,7 +60,8 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
   @Override
   public IBDataStreamRecordFinalizer<String> get() {
     // The working path needs to be stable and pre-existent
-    return new StringIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()), getCms().get());
+    return new StringIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
+        getCms().get());
   }
 
   private class StringIBDataStreamRecordFinalizer extends AbstractIBDataStreamRecordFinalizer<String, BufferedWriter> {
@@ -73,6 +77,10 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
       getWriter().write("\n");
     }
 
+    @Override
+    public Optional<List<String>> accepts() {
+      return Optional.of(ACCEPTABLE_TYPES);
+    }
   }
 
 }

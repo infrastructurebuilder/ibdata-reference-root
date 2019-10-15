@@ -31,8 +31,10 @@ import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplier;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(PassThruTransformerSupplier.NAME)
 public class PassThruTransformerSupplier extends AbstractIBDataTransformerSupplier {
@@ -40,34 +42,34 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
   public static final String NAME = "pass-thru";
 
   @Inject
-  public PassThruTransformerSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public PassThruTransformerSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+    this(wps, l, null);
   }
 
-  public PassThruTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  public PassThruTransformerSupplier(PathSupplier wps, LoggerSupplier l, ConfigMapSupplier cms) {
+    super(wps, l, cms);
   }
 
   @Override
   public IBDataTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new PassThruTransformerSupplier(getWps(), cms);
+    return new PassThruTransformerSupplier(getWps(), () -> getLog(), cms);
   }
 
   @Override
   protected IBDataTransformer getUnconfiguredTransformerInstance(Path wps2) {
-    return new PassThruTransformer(wps2);
+    return new PassThruTransformer(wps2, getLog());
   }
 
   @SuppressWarnings("rawtypes")
   @Override
   public PassThruTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
-    return new PassThruTransformerSupplier(getWps());
+    return new PassThruTransformerSupplier(getWps(), () -> getLog());
   }
 
   private final class PassThruTransformer extends AbstractIBDataTransformer implements IBDataTransformer {
 
-    public PassThruTransformer(Path wps2) {
-      super(wps2);
+    public PassThruTransformer(Path wps2, Logger l) {
+      super(wps2, l);
     }
 
     @Override

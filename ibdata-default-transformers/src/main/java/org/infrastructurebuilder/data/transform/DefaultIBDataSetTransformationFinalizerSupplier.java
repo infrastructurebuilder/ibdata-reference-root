@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,13 +32,13 @@ import javax.inject.Named;
 import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
+import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.IBDataModelUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -88,7 +89,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
       DataSet dsi = target.asDataSet();
       dsi.setPath(dsi2.getPath());
 
-      return IBDataModelUtils.forceToFinalizedPath(getWorkingPath(), dsi, ibdssList, getTypeToExtensionMapper());
+      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), dsi, ibdssList, getTypeToExtensionMapper());
     }
 
   }

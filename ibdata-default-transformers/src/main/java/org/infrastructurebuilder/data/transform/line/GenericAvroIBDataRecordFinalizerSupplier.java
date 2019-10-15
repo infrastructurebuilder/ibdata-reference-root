@@ -16,6 +16,8 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import javax.inject.Named;
 
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
@@ -33,9 +36,11 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 @Named(GenericAvroIBDataRecordFinalizerSupplier.NAME)
-public class GenericAvroIBDataRecordFinalizerSupplier extends AbstractIBDataStreamRecordFinalizerSupplier<GenericRecord> {
+public class GenericAvroIBDataRecordFinalizerSupplier
+    extends AbstractIBDataStreamRecordFinalizerSupplier<GenericRecord> {
 
-  public static final String NAME = "avro-finalizer";
+  public static final String NAME = "avro-generic";
+  private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(GenericRecord.class.getCanonicalName());
 
   @Inject
   public GenericAvroIBDataRecordFinalizerSupplier(
@@ -55,7 +60,8 @@ public class GenericAvroIBDataRecordFinalizerSupplier extends AbstractIBDataStre
   @Override
   public IBDataStreamRecordFinalizer<GenericRecord> get() {
     // The working path needs to be stable and pre-existent
-    return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()), getCms().get());
+    return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
+        getCms().get());
   }
 
   private class GenericAvroIBDataStreamRecordFinalizer
@@ -68,6 +74,15 @@ public class GenericAvroIBDataRecordFinalizerSupplier extends AbstractIBDataStre
     @Override
     protected void writeThrows(GenericRecord recordToWrite) throws Throwable {
       getWriter().append(recordToWrite);
+    }
+
+    @Override
+    public Optional<String> produces() {
+      return Optional.of(IBConstants.AVRO_BINARY);
+    }
+    @Override
+    public Optional<List<String>> accepts() {
+      return Optional.of(ACCEPTABLE_TYPES);
     }
 
   }

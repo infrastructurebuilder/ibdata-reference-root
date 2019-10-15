@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +35,6 @@ import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
-import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 

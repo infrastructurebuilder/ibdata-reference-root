@@ -36,22 +36,15 @@ import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.slf4j.Logger;
 
-public final class DefaultIBDataIngester implements IBDataIngester {
+public final class DefaultIBDataIngester extends AbstractIBDataIngester implements IBDataIngester {
 
-  /**
-   * Does NOT set the creation date!  Set that on return
-   */
-  private final Path workingPath;
-  private final Map<String, String> config;
-  private final Log log;
   private final Path cacheDirectory;
 
-  public DefaultIBDataIngester(Path workingPath, Map<String, String> config, Log log, Path cdir) {
-    this.workingPath = Objects.requireNonNull(workingPath);
-    this.config = config;
-    this.log = log;
-    this.cacheDirectory = Objects.requireNonNull(cdir);
+  public DefaultIBDataIngester(Path workingPath, Logger log, Map<String, String> config, Path cacheDirectory) {
+    super(workingPath, log, config);
+    this.cacheDirectory = cacheDirectory;
   }
 
   @Override
@@ -61,13 +54,13 @@ public final class DefaultIBDataIngester implements IBDataIngester {
     List<IBDataStreamSupplier> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
       IBDataSource source = dss.get()
           // Set the working _path
-          .withTargetPath(workingPath)
+          .withTargetPath(getWorkingPath())
           // Name or nothing
           .withName(dsi.getName().orElse(null))
           // description or nothing
           .withDescription(dsi.getDescription().orElse(null))
           // Supply the default cache location
-          .withDownloadCacheDirectory(cacheDirectory);
+          .withDownloadCacheDirectory(getCacheDirectory());
 
       //        IBChecksumPathType thisOne = cet
       //            .withReturningTranslation(() -> copyToDeletedOnExitTempChecksumAndPath(of(workingPath), IBDATA_PREFIX,
@@ -76,7 +69,7 @@ public final class DefaultIBDataIngester implements IBDataIngester {
       return source.get().map(thisOne -> {
 
         Path localPath = thisOne.getPath();
-        Optional<String> p =Optional.of( workingPath.relativize(localPath).toString());
+        Optional<String> p = Optional.of(getWorkingPath().relativize(localPath).toString());
 
         source.getChecksum().ifPresent(checksum -> {
           if (!thisOne.getChecksum().equals(checksum))
@@ -97,4 +90,7 @@ public final class DefaultIBDataIngester implements IBDataIngester {
     return ibdssList;
   }
 
+  protected Path getCacheDirectory() {
+    return cacheDirectory;
+  }
 }
