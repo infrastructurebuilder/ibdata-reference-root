@@ -14,3 +14,11 @@ mvn clean install
 cd ../ibdata-test-transform
 mvn clean install
 ```
+
+At the end of each Maven build, each should show:
+
+```
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+```
