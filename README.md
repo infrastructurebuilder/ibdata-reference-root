@@ -2,8 +2,10 @@
 
 How to test this:
 
-1. clone this repo
-1. ```
+First, clone this repo (obvs)
+Then:
+
+```
 rm -rf ~/.m2/repository/org/infrastructurebuilder
 mvn clean install
 cd integration
