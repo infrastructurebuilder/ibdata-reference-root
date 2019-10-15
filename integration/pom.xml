@@ -32,4 +32,16 @@
     <module>ibdata-test-ingest</module>
     <module>ibdata-test-transform</module>
   </modules>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.infrastructurebuilder.data</groupId>
+          <artifactId>ibdata-maven-plugin</artifactId>
+          <version>${project.version}</version>
+          <extensions>true</extensions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>
