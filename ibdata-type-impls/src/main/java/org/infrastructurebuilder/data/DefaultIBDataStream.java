@@ -31,6 +31,7 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.function.Supplier;
 
+import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -88,7 +89,7 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
     if (calculatedChecksum == null) {
       try (InputStream ins = get()) {
         calculatedChecksum = new Checksum(ins);
-      } catch (IOException e) {
+      } catch (IOException | IBException e) {
         throw new IBDataException("Error calculating checksum for " + getId());
       }
     }
@@ -98,7 +99,11 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   @Override
   public void close() throws Exception {
     this.createdInputStreamsForThisInstance.forEach(stream -> {
-      cet.withTranslation(() -> stream.close());
+      try {
+        stream.close();
+      } catch (IOException e) {
+        // If they won't close, we'll have to leak that
+      }
     });
   }
 
@@ -106,19 +111,19 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   public IBDataStream relocateTo(Path newWorkingPath, TypeToExtensionMapper t2e) {
     IBChecksumPathType newCpt;
     Path target;
-    if (this.cpt != null) {
+//    if (this.cpt != null) {
       newCpt = this.cpt;
-    } else {
-      Path temp = newWorkingPath.resolve(UUID.randomUUID().toString());
-      Checksum d;
-      try (InputStream ins = get(); OutputStream outs = Files.newOutputStream(temp, StandardOpenOption.CREATE_NEW)) {
-        d = cet.withReturningTranslation(() -> IBUtils.copyAndDigest(ins, outs));
-        String t = getMimeType();
-        newCpt = t == null ? new BasicIBChecksumPathType(temp, d) : new BasicIBChecksumPathType(temp, d, t);
-      } catch (IOException e) {
-        throw new IBDataException(e);
-      }
-    }
+//    } else {
+//      Path temp = newWorkingPath.resolve(UUID.randomUUID().toString());
+//      Checksum d;
+//      try (InputStream ins = get(); OutputStream outs = Files.newOutputStream(temp, StandardOpenOption.CREATE_NEW)) {
+//        d = cet.withReturningTranslation(() -> IBUtils.copyAndDigest(ins, outs));
+//        String t = getMimeType();
+//        newCpt = t == null ? new BasicIBChecksumPathType(temp, d) : new BasicIBChecksumPathType(temp, d, t);
+//      } catch (IOException e) {
+//        throw new IBDataException(e);
+//      }
+//    }
     target = newWorkingPath
         .resolve(newCpt.getChecksum().asUUID().get().toString() + t2e.getExtensionForType(newCpt.getType()));
     return new DefaultIBDataStream(this, cet.withReturningTranslation(() -> newCpt.moveTo(target)));

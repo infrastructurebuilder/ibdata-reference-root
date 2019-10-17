@@ -27,9 +27,17 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
-
 @Named
 public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
+
+  /** These aren't real MIME types (AFAIK) Move them to IBConstants */
+  public static final String TEXT_TSV = "text/tab-separated-values";
+  public static final String TEXT_PSV = "text/pipe-separated-values";
+  public static final String APPLICATION_XLS = "application/msexcel";
+  public static final String APPLICATION_XLSX = "application//vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  public static final String APPLICATION_ACCESS = "application/msaccess";
+  public static final String APPLICATION_MSWORD = "application/msword";
+  public static final String APPLICATION_MSWORDX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
   @Inject
   public DefaultTypeToExtensionMapper() {
@@ -46,6 +54,20 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       return ".zip";
     case TEXT_CSV:
       return ".csv";
+    case TEXT_TSV:
+      return ".tsv";
+    case APPLICATION_XLS:
+      return ".xls";
+    case APPLICATION_XLSX:
+      return ".xlsx";
+    case APPLICATION_ACCESS:
+      return ".mdb";
+    case APPLICATION_MSWORD:
+      return ".doc";
+    case APPLICATION_MSWORDX:
+      return ".docx";
+    case TEXT_PSV:
+      return ".psv";
     case APPLICATION_PDF:
       return ".pdf";
     case "avro/binary":

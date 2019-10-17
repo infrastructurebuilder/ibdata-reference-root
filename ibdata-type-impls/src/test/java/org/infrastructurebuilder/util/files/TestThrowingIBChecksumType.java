@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.infrastructurebuilder.util.files;
 
-package org.infrastructurebuilder.data.archiver;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 
-import java.io.OutputStream;
-import java.nio.file.Path;
-import java.util.Optional;
+import org.infrastructurebuilder.util.artifacts.Checksum;
 
-import org.infrastructurebuilder.data.archive.IBDataSetFinalizerConfig;
+public class TestThrowingIBChecksumType extends BasicIBChecksumPathType {
 
-public class DefaultIBDataTransformationWriter implements IBDataFinalizerOutputGenerator {
-  public DefaultIBDataTransformationWriter(final IBDataSetFinalizerConfig c) {
+  public TestThrowingIBChecksumType() throws IOException {
+    super(Paths.get("."), new Checksum(), "doesnt/matter");
   }
 
   @Override
-  public void write(OutputStream out, Optional<Path> rootPath) {
+  public InputStream get() {
+    return new TestThrowingInputStream(IOException.class);
   }
 
 }

@@ -13,23 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data.archiver;
+package org.infrastructurebuilder.util.files;
 
-import java.io.OutputStream;
-import java.nio.file.Path;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
-import org.infrastructurebuilder.data.archive.IBDataSetFinalizerConfig;
+public class TestThrowingInputStream extends InputStream {
 
+  private Class<? extends Throwable> throwable;
 
-public class DefaultIBDataIngestionWriter implements IBDataFinalizerOutputGenerator {
-  public DefaultIBDataIngestionWriter(final IBDataSetFinalizerConfig c) {
+  public TestThrowingInputStream(Class<? extends IOException> t) {
+    this.throwable = t;
   }
 
-  /** {@inheritDoc} */
   @Override
-  public void write(OutputStream out, Optional<Path> rootPath) {
+  public int read() throws IOException {
+    if (this.throwable != null)
+      try {
+        throw throwable.newInstance();
+      } catch (Throwable e) {
+        throw new IOException(e);
+      }
+    return 0;
+  }
 
+  @Override
+  public void close() throws IOException {
+    if (read() == 0)
+      return;
   }
 
 }

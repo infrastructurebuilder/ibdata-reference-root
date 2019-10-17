@@ -19,6 +19,11 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Optional;
 
+/**
+ * Currently unused
+ * @author mykel.alvis
+ *
+ */
 public interface IBDataFinalizerOutputGenerator {
 
   void write(OutputStream w, Optional<Path> of);
