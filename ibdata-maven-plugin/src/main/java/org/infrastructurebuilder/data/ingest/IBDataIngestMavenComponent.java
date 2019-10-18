@@ -48,6 +48,8 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
+import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
+import org.slf4j.Logger;
 
 @Named("ingest")
 public final class IBDataIngestMavenComponent extends AbstractIBDataMavenComponent {
@@ -81,9 +83,9 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     this.allIngesters = requireNonNull(allIngesters);
   }
 
-  public final static SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i, Log log,
+  public final static SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i, Log l,
       TypeToExtensionMapper mapper) {
-
+    Logger log = new SLF4JFromMavenLogger(l);
     List<DefaultIBDataSourceSupplier> k = i.getDataSet().getStreams().stream().map(v -> {
       return new DefaultIBDataSourceSupplier(v.getTemporaryId(),
           new DefaultIBDataSource(log, cet.withReturningTranslation(() -> v.getURL().get()),

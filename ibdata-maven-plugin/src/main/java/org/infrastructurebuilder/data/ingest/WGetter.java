@@ -54,10 +54,12 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.maven.monitor.logging.DefaultLog;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
@@ -65,6 +67,7 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
+import org.slf4j.Logger;
 
 import com.googlecode.download.maven.plugin.internal.HttpFileRequester;
 import com.googlecode.download.maven.plugin.internal.LoggingProgressReport;
@@ -80,10 +83,13 @@ public class WGetter {
 
   private final WGet wget;
 
-  public WGetter(Log log, Optional<BasicCredentials> creds, TypeToExtensionMapper t2e) {
+  public WGetter(Logger log, Optional<BasicCredentials> creds, TypeToExtensionMapper t2e) {
     //    this.wps = requireNonNull(wps);
     this.wget = new WGet();
-    this.wget.setLog(log);
+    // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then create a new LoggingMavenComponent from log
+//    Log l2 = new LoggingMavenComponent(log);
+    Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
+    this.wget.setLog(l2);
     requireNonNull(creds).ifPresent(bc -> {
       wget.setUsername(bc.getKeyId());
       wget.setPassword(bc.getSecret().orElse(null));

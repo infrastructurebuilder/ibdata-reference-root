@@ -36,11 +36,11 @@ import org.w3c.dom.Document;
 
 public class Ingestion implements DataSetEnabled {
 
-  String id = "default";
-  String ingester = "default";
-  DefaultIBDataSetIdentifier dataSet = new DefaultIBDataSetIdentifier();
-  String finalizer = "default-ingest";
-  Map<String, String> finalizerConfig = new HashMap<>();
+  private String id = "default";
+  private String ingester = "default";
+  private DefaultIBDataSetIdentifier dataSet = new DefaultIBDataSetIdentifier();
+  private String finalizer = null;
+  private Map<String, String> finalizerConfig = new HashMap<>();
 
   public String getId() {
     return id;
@@ -55,7 +55,7 @@ public class Ingestion implements DataSetEnabled {
   }
 
   public String getFinalizer() {
-    return finalizer;
+    return ofNullable(finalizer).orElse("default-ingest");
   }
 
   public Map<String, String> getFinalizerConfig() {
@@ -67,7 +67,9 @@ public class Ingestion implements DataSetEnabled {
     return getDataSet().asDataSet();
   }
 
-
+  public void setDataSet(DefaultIBDataSetIdentifier dataSet) {
+    this.dataSet = dataSet;
+  }
 
   public static class IngestionDataSet {
 

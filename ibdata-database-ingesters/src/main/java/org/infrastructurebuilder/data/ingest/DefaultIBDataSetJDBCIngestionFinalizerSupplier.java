@@ -44,7 +44,7 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Named("default-ingest")
+@Named("default-jdbc")
 public class DefaultIBDataSetJDBCIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier {
 
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetJDBCIngestionFinalizerSupplier.class);

@@ -29,13 +29,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.maven.plugin.logging.Log;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
+import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
 public class DefaultIBDataSource extends AbstractIBDataSource {
@@ -44,7 +44,7 @@ public class DefaultIBDataSource extends AbstractIBDataSource {
   private final String name;
   private final String description;
   private final Path cacheDirectory;
-  private final Log log;
+  private final Logger log;
   private final TypeToExtensionMapper t2e;
   private final Optional<String> mimeType;
 
@@ -75,12 +75,12 @@ public class DefaultIBDataSource extends AbstractIBDataSource {
   }
 
   public DefaultIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata, Log log, Optional<String> mimeType, TypeToExtensionMapper t2e) {
+      Optional<Document> metadata,Logger log, Optional<String> mimeType, TypeToExtensionMapper t2e) {
     this(id, source, creds, checksum, metadata, null, null, null, null, log, mimeType, t2e);
   }
 
   private DefaultIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata, Path targetPath, String name, String description, Path cacheDir, Log log,
+      Optional<Document> metadata, Path targetPath, String name, String description, Path cacheDir, Logger log,
       Optional<String> mimeType, TypeToExtensionMapper t2e) {
 
     super(id, source, creds, checksum, metadata);
@@ -94,7 +94,7 @@ public class DefaultIBDataSource extends AbstractIBDataSource {
 
   }
 
-  public DefaultIBDataSource(Log log, URL source, Optional<Checksum> checksum, Optional<Document> metadata, Optional<String> targetType,
+  public DefaultIBDataSource(Logger log, URL source, Optional<Checksum> checksum, Optional<Document> metadata, Optional<String> targetType,
       TypeToExtensionMapper t2e) {
     this(UUID.randomUUID().toString(), source, Optional.empty(), checksum, metadata, log, targetType, t2e);
   }

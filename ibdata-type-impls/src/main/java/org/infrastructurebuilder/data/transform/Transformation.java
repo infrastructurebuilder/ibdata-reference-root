@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +32,7 @@ public class Transformation implements DataSetEnabled {
 
   private String id = "default";
   private List<Transformer> transformers = new ArrayList<>();
-  private String finalizer = "default-transform";
+  private String finalizer = null;
   private Map<String, String> finalizerConfig = new HashMap<>();
 
   // Not set with plugin config
@@ -66,7 +68,7 @@ public class Transformation implements DataSetEnabled {
   }
 
   public String getFinalizer() {
-    return finalizer;
+    return ofNullable(finalizer).orElse("default-transform");
   }
 
   public Map<String, String> getFinalizerConfig() {

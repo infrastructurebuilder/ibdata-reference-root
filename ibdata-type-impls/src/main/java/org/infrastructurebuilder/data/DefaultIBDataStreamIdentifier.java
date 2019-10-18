@@ -16,12 +16,14 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static org.infrastructurebuilder.data.IBMetadataUtils.stringifyDocument;
 
 import java.net.URL;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -35,7 +37,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final Optional<String> description;
   private final Checksum checksum;
   private final Date creationDate;
-  private final Document metatdata;
+  private final Document metadata;
   private final String path;
   private final String mimeType;
 
@@ -47,7 +49,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     this.description = requireNonNull(description);
     this.checksum = requireNonNull(checksum);
     this.creationDate = requireNonNull(creationDate);
-    this.metatdata = requireNonNull(metadata);
+    this.metadata = requireNonNull(metadata);
     this.mimeType = requireNonNull(mimeType);
     this.path = requireNonNull(path).orElse(null);
   }
@@ -101,7 +103,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   @Override
   public Document getMetadata() {
 
-    return this.metatdata;
+    return this.metadata;
   }
 
   @Override
@@ -116,4 +118,86 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     return this.path;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (checksum.hashCode());
+    result = prime * result + (creationDate.hashCode());
+    result = prime * result + (description.hashCode());
+    result = prime * result + (id.hashCode());
+    result = prime * result + (metadata.hashCode());
+    result = prime * result + (mimeType.hashCode());
+    result = prime * result + (name.hashCode());
+    result = prime * result + ((path == null) ? 0 : path.hashCode());
+    result = prime * result + (url.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    DefaultIBDataStreamIdentifier other = (DefaultIBDataStreamIdentifier) obj;
+    if (checksum == null) {
+      if (other.checksum != null)
+        return false;
+    } else if (!checksum.equals(other.checksum))
+      return false;
+    if (creationDate == null) {
+      if (other.creationDate != null)
+        return false;
+    } else if (!creationDate.equals(other.creationDate))
+      return false;
+    if (description == null) {
+      if (other.description != null)
+        return false;
+    } else if (!description.equals(other.description))
+      return false;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    if (mimeType == null) {
+      if (other.mimeType != null)
+        return false;
+    } else if (!mimeType.equals(other.mimeType))
+      return false;
+    if (name == null) {
+      if (other.name != null)
+        return false;
+    } else if (!name.equals(other.name))
+      return false;
+    if (path == null) {
+      if (other.path != null)
+        return false;
+    } else if (!path.equals(other.path))
+      return false;
+    if (url == null) {
+      if (other.url != null)
+        return false;
+    } else if (!url.equals(other.url))
+      return false;
+    if (metadata == null) {
+      if (other.metadata != null)
+        return false;
+    } else {
+      if (w3cDocumentEqualser.apply(metadata, other.metadata))
+        return false;
+    }
+    return true;
+  }
+
+  /**
+   * FIXME Move this to IBMetadataUtils
+   * Function to compare W3c Dcoument instances (by string compare, like a filthy animal
+   */
+  public final static BiFunction<Document, Document, Boolean> w3cDocumentEqualser = (lhs, rhs) -> {
+    return stringifyDocument.apply(lhs).equals(stringifyDocument.apply(rhs));
+  };
 }

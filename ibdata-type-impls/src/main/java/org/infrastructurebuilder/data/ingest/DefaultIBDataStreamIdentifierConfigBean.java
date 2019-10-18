@@ -42,6 +42,26 @@ public class DefaultIBDataStreamIdentifierConfigBean implements IBDataStreamIden
   private Date creationDate;
   private UUID id;
 
+  public DefaultIBDataStreamIdentifierConfigBean() {
+  }
+
+  public DefaultIBDataStreamIdentifierConfigBean(DefaultIBDataStreamIdentifierConfigBean o) {
+    this.temporaryId = o.temporaryId;
+    this.name = o.name;
+    this.sha512 = o.sha512;
+    this.url = o.url;
+    this.metadata = o.metadata; // FIXME Make a copy!
+    this.mimeType = o.mimeType;
+    this.description = o.description;
+    this.path = o.path;
+    this.creationDate = o.creationDate;
+    this.id = o.id;
+  }
+
+  DefaultIBDataStreamIdentifierConfigBean copy() {
+    return new DefaultIBDataStreamIdentifierConfigBean(this);
+  }
+
   public void setId(String id) {
     this.temporaryId = id;
   }

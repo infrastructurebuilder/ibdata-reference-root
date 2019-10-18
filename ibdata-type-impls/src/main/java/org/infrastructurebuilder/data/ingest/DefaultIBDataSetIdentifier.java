@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
@@ -54,6 +55,19 @@ public class DefaultIBDataSetIdentifier implements IBDataSetIdentifier {
 
   public DefaultIBDataSetIdentifier() {
     this.name = "default";
+  }
+
+  public DefaultIBDataSetIdentifier(DefaultIBDataSetIdentifier i) {
+    this.name = i.getName().orElse("default");
+    this.description = i.getDescription().orElse(null);
+    this.path = i.getPath();
+    this.id = i.getId();
+    this.groupId = i.getGroupId();
+    this.artifactId = i.getArtifactId();
+    this.version = i.getVersion();
+    this.metadata = new XmlPlexusConfiguration((Xpp3Dom) IBMetadataUtils.translateToXpp3Dom.apply(i.getMetadata()));
+    this.streams = i.getStreams().stream().map(DefaultIBDataStreamIdentifierConfigBean::new)
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -110,6 +124,22 @@ public class DefaultIBDataSetIdentifier implements IBDataSetIdentifier {
 
   public void setPath(String path) {
     this.path = path;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  public void setArtifactId(String artifactId) {
+    this.artifactId = artifactId;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   @Override
