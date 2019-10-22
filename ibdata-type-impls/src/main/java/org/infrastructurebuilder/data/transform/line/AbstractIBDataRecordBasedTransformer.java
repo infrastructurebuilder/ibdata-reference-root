@@ -57,6 +57,7 @@ import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.slf4j.Logger;
@@ -69,7 +70,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   private final IBDataStreamRecordFinalizer configuredFinalizer;
   private final Optional<String> finalType;
 
-  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, Map<String, String> config,
+  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, ConfigMap config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
     super(workingPath, log, config);
     this.dataLineSuppliers = dataRecTransformerSuppliers;

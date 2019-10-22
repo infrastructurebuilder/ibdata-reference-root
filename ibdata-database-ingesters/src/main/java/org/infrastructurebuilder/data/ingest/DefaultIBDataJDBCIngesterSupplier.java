@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 
@@ -41,6 +40,7 @@ import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
@@ -73,7 +73,7 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
 
   public final class DefaultIBDataJDBCIngester extends AbstractIBDataIngester {
 
-    public DefaultIBDataJDBCIngester(Path workingPath, Logger l, Map<String, String> config) {
+    public DefaultIBDataJDBCIngester(Path workingPath, Logger l, ConfigMap config) {
       super(workingPath, l, config);
     }
 

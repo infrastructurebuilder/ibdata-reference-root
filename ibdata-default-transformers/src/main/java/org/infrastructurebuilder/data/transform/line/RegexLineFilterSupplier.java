@@ -20,15 +20,14 @@ import static java.util.Optional.ofNullable;
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -67,7 +66,7 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
      * @param ps
      * @param config
      */
-    public RegexLineFilter(Path ps, Map<String, String> config) {
+    public RegexLineFilter(Path ps, ConfigMap config) {
       super(ps, config);
       this.splitRegex = Pattern.compile(getConfiguration(REGEX, DEFAULT_REGEX));
     }
@@ -76,11 +75,11 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
      * @param ps
      */
     public RegexLineFilter(Path ps) {
-      this(ps, new HashMap<>());
+      this(ps, new ConfigMap());
     }
 
     @Override
-    public IBDataRecordTransformer<String, String> configure(Map<String, String> cms) {
+    public IBDataRecordTransformer<String, String> configure(ConfigMap cms) {
       return new RegexLineFilter(getWorkingPath(), cms);
     }
 

@@ -28,6 +28,7 @@ import java.util.Optional;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.w3c.dom.Document;
@@ -38,7 +39,7 @@ public class Transformer {
    */
   private String id;
   private String hint;
-  private Map<String, String> configuration = new HashMap<>();
+  private ConfigMap configuration = new ConfigMap();
   private boolean failOnAnyError = true;
   private List<DataStreamMatcher> sources = new ArrayList<>();
   private XmlPlexusConfiguration targetStreamMetadata;
@@ -51,7 +52,7 @@ public class Transformer {
     return Optional.ofNullable(this.hint).orElse(id);
   }
 
-  public Map<String, String> getConfiguration() {
+  public ConfigMap getConfiguration() {
     return configuration;
   }
 
@@ -63,7 +64,7 @@ public class Transformer {
     this.hint = hint;
   }
 
-  public void setConfiguration(Map<String, String> configuration) {
+  public void setConfiguration(ConfigMap configuration) {
     this.configuration = requireNonNull(configuration);
   }
 

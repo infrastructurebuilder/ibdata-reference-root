@@ -26,6 +26,7 @@ import java.util.Optional;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -67,7 +68,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
      * @param ps
      * @param config
      */
-    protected ArrayToNumberedColumIBDataLineTransformer(Path ps, Map<String, String> config) {
+    protected ArrayToNumberedColumIBDataLineTransformer(Path ps, ConfigMap config) {
       super(ps, config);
       this.format = getConfiguration(FORMAT_KEY, FORMAT);
     }
@@ -95,7 +96,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
     }
 
     @Override
-    public IBDataRecordTransformer<String[], Map<String, String>> configure(Map<String, String> cms) {
+    public IBDataRecordTransformer<String[], Map<String, String>> configure(ConfigMap cms) {
       return new ArrayToNumberedColumIBDataLineTransformer(getWorkingPath(), cms);
     }
 

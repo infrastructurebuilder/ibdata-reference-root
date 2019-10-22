@@ -26,6 +26,7 @@ import java.util.Optional;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -63,20 +64,20 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
     private final String splitRegex;
 
     ArraySplitIBDataLineTransformer(Path workingPath) {
-      this(workingPath, new HashMap<>());
+      this(workingPath, new ConfigMap());
     }
 
     /**
      * @param ps
      * @param config
      */
-    ArraySplitIBDataLineTransformer(Path ps, Map<String, String> config) {
+    ArraySplitIBDataLineTransformer(Path ps, ConfigMap config) {
       super(ps, config);
       this.splitRegex = getConfiguration(REGEX, DEFAULT_SPLIT_REGEX);
     }
 
     @Override
-    public IBDataRecordTransformer<String, String[]> configure(Map<String, String> cms) {
+    public IBDataRecordTransformer<String, String[]> configure(ConfigMap cms) {
       return new ArraySplitIBDataLineTransformer(getWorkingPath(), cms);
     }
 

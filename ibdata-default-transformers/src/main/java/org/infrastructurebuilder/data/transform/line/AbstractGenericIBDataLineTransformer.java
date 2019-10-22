@@ -16,9 +16,9 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import java.nio.file.Path;
-import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 abstract public class AbstractGenericIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, GenericRecord> {
 
@@ -26,7 +26,7 @@ abstract public class AbstractGenericIBDataLineTransformer<I> extends AbstractIB
     this(workingPath, null);
   }
 
-  protected AbstractGenericIBDataLineTransformer(Path workingPath, Map<String,String> config) {
+  protected AbstractGenericIBDataLineTransformer(Path workingPath, ConfigMap config) {
     super(workingPath, config);
   }
 

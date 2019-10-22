@@ -20,16 +20,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.infrastructurebuilder.util.config.ConfigMap;
+
 abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRecordTransformer<I, O> {
 
   private final Path workingPath;
-  private final Map<String, String> config;
+  private final ConfigMap config;
 
   public AbstractIBDataRecordTransformer(Path ps) {
     this(ps, null);
   }
 
-  protected AbstractIBDataRecordTransformer(Path ps, Map<String, String> config) {
+  protected AbstractIBDataRecordTransformer(Path ps, ConfigMap config) {
     this.workingPath = Objects.requireNonNull(ps);
     this.config = config;
   }
@@ -38,7 +40,7 @@ abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRec
     return workingPath;
   }
 
-  protected Map<String, String> getConfig() {
+  protected ConfigMap getConfig() {
     return config;
   }
 

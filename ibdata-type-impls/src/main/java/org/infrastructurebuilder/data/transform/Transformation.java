@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.transform;
 
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DataSetEnabled;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 public class Transformation implements DataSetEnabled {
 
@@ -71,8 +73,10 @@ public class Transformation implements DataSetEnabled {
     return ofNullable(finalizer).orElse("default-transform");
   }
 
-  public Map<String, String> getFinalizerConfig() {
-    return finalizerConfig;
+  public ConfigMap getFinalizerConfig() {
+    return new ConfigMap(
+        finalizerConfig.entrySet().stream().collect(toMap(k -> k.getKey(), v -> v.getValue())));
+
   }
 
   public void injectRequird(String groupId, String artifactId, String version, String name, String description) {

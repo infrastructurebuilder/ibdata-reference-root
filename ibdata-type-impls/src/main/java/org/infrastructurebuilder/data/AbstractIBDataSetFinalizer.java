@@ -18,15 +18,16 @@ package org.infrastructurebuilder.data;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Objects;
+
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 abstract public class AbstractIBDataSetFinalizer<T> implements IBDataSetFinalizer<T> {
 
-  private final Map<String, String> config;
+  private final ConfigMap config;
   private final Path   workingPath;
 
-  protected AbstractIBDataSetFinalizer(Map<String, String> map, Path workingPath) {
+  protected AbstractIBDataSetFinalizer(ConfigMap map, Path workingPath) {
     this.config = Objects.requireNonNull(map);
     this.workingPath = Objects.requireNonNull(workingPath);
     try {
@@ -36,7 +37,7 @@ abstract public class AbstractIBDataSetFinalizer<T> implements IBDataSetFinalize
     }
   }
 
-  protected Map<String, String> getConfig() {
+  protected ConfigMap getConfig() {
     return config;
   }
 

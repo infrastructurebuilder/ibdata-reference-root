@@ -36,6 +36,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformer;
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 public interface IBDataAvroUtils {
   public static final String NO_SCHEMA_CONFIG_FOR_MAPPER = "No schema config for mapper";
@@ -51,7 +52,7 @@ public interface IBDataAvroUtils {
     }
   };
 
-  public final static BiFunction<Path, Map<String, String>, DataFileWriter<GenericRecord>> fromMapAndWP = (workingPath,
+  public final static BiFunction<Path, ConfigMap, DataFileWriter<GenericRecord>> fromMapAndWP = (workingPath,
       map) -> {
     // Get the schema or die
     Schema s = getSchema.apply(

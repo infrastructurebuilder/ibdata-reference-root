@@ -18,15 +18,16 @@ package org.infrastructurebuilder.data;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
-import java.util.Map;
+
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 public abstract class AbstractIBDataStreamFinalizer implements IBDataStreamFinalizer {
 
 
   private final Path workingPath;
-  private final Map<String, String> config;
+  private final ConfigMap config;
 
-  public AbstractIBDataStreamFinalizer(Path path, Map<String, String> map) {
+  public AbstractIBDataStreamFinalizer(Path path, ConfigMap map) {
     this.workingPath = requireNonNull(path);
     this.config = requireNonNull(map);
   }
@@ -34,7 +35,7 @@ public abstract class AbstractIBDataStreamFinalizer implements IBDataStreamFinal
   protected Path getWorkingPath() {
     return workingPath;
   }
-  protected Map<String, String> getConfig() {
+  protected ConfigMap getConfig() {
     return config;
   }
 

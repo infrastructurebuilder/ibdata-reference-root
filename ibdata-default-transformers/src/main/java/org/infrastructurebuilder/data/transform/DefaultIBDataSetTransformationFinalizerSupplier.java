@@ -40,6 +40,7 @@ import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -79,7 +80,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
 
   private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<Transformation> {
 
-    public TransformationIBDataSetFinalizer(Map<String, String> config, Path workingPath) {
+    public TransformationIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath.resolve(UUID.randomUUID().toString()));
     }
 

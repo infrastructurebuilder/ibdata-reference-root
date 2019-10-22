@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -57,7 +58,7 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
   }
   private class DefaultIBDataStreamFinalizer extends AbstractIBDataStreamFinalizer {
 
-    DefaultIBDataStreamFinalizer(Path path, Map<String, String> map) {
+    DefaultIBDataStreamFinalizer(Path path, ConfigMap map) {
       super(path,map);
     }
   }

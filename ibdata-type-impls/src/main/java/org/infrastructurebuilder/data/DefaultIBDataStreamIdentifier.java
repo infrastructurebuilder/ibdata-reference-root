@@ -125,7 +125,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     result = prime * result + (checksum.hashCode());
     result = prime * result + (creationDate.hashCode());
     result = prime * result + (description.hashCode());
-    result = prime * result + (id.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + (metadata.hashCode());
     result = prime * result + (mimeType.hashCode());
     result = prime * result + (name.hashCode());
@@ -143,53 +143,30 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     if (getClass() != obj.getClass())
       return false;
     DefaultIBDataStreamIdentifier other = (DefaultIBDataStreamIdentifier) obj;
-    if (checksum == null) {
-      if (other.checksum != null)
-        return false;
-    } else if (!checksum.equals(other.checksum))
+    if (!checksum.equals(other.checksum))
       return false;
-    if (creationDate == null) {
-      if (other.creationDate != null)
-        return false;
-    } else if (!creationDate.equals(other.creationDate))
+    if (!creationDate.equals(other.creationDate))
       return false;
-    if (description == null) {
-      if (other.description != null)
-        return false;
-    } else if (!description.equals(other.description))
+    if (!description.equals(other.description))
       return false;
     if (id == null) {
       if (other.id != null)
         return false;
     } else if (!id.equals(other.id))
       return false;
-    if (mimeType == null) {
-      if (other.mimeType != null)
-        return false;
-    } else if (!mimeType.equals(other.mimeType))
+    if (!mimeType.equals(other.mimeType))
       return false;
-    if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
+    if (!name.equals(other.name))
       return false;
     if (path == null) {
       if (other.path != null)
         return false;
     } else if (!path.equals(other.path))
       return false;
-    if (url == null) {
-      if (other.url != null)
-        return false;
-    } else if (!url.equals(other.url))
+    if (!url.equals(other.url))
       return false;
-    if (metadata == null) {
-      if (other.metadata != null)
-        return false;
-    } else {
-      if (w3cDocumentEqualser.apply(metadata, other.metadata))
-        return false;
-    }
+    if (!w3cDocumentEqualser.apply(metadata, other.metadata))
+      return false;
     return true;
   }
 

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.infrastructurebuilder.util.config.ConfigMap;
+
 public class Record {
 
   String id;
@@ -44,12 +46,11 @@ public class Record {
   public String joinKey() {
     return requireNonNull(getId()) + MAP_SPLITTER + requireNonNull(getHint());
   }
-  public Map<String, String> configurationAsMap() {
-    Map<String,String> map = new HashMap<>();
-    map.putAll(getConfig().entrySet().stream().collect(Collectors.toMap(
+
+  public ConfigMap configurationAsMap() {
+    ConfigMap map = new ConfigMap(getConfig().entrySet().stream().collect(Collectors.toMap(
         // Key is id + hint (possibly same) joined by a splittable item
-        k ->  joinKey() + "." + k.getKey(),
-        v -> v.getValue())));
+        k -> joinKey() + "." + k.getKey(), v -> v.getValue())));
     return map;
   }
 

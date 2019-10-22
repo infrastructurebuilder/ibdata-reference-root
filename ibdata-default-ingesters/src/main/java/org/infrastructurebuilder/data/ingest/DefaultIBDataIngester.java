@@ -36,13 +36,14 @@ import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
 public final class DefaultIBDataIngester extends AbstractIBDataIngester implements IBDataIngester {
 
   private final Path cacheDirectory;
 
-  public DefaultIBDataIngester(Path workingPath, Logger log, Map<String, String> config, Path cacheDirectory) {
+  public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config, Path cacheDirectory) {
     super(workingPath, log, config);
     this.cacheDirectory = cacheDirectory;
   }

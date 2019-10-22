@@ -21,7 +21,6 @@ import static java.util.Optional.ofNullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.maven.execution.MavenSession;
@@ -29,6 +28,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -63,11 +63,11 @@ abstract public class AbstractIBDataMavenComponent {
     this.streamerFactory = requireNonNull(streamerFactory);
   }
 
-  public final IBDataSetFinalizer<?> getDataSetFinalizerSupplier(String key, Map<String, String> config)
+  public final IBDataSetFinalizer<?> getDataSetFinalizerSupplier(String key, ConfigMap config)
       throws MojoFailureException {
     return ofNullable(allDataSetFinalizers.get(key))
         .map(dsfs -> dsfs.configure(
-            new DefaultConfigMapSupplier(getConfigMapSupplier()).overrideConfiguration(Objects.requireNonNull(config))))
+            new DefaultConfigMapSupplier(getConfigMapSupplier()).overrideConfiguration(requireNonNull(config))))
         .orElseThrow(() -> new MojoFailureException("No finalizer name " + key)).get();
 
   }

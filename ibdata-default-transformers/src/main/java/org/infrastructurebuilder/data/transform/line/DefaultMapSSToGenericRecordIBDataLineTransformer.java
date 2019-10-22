@@ -23,7 +23,6 @@ import static org.infrastructurebuilder.data.IBDataAvroUtils.getSchema;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,6 +33,7 @@ import javax.inject.Named;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 @Named(DefaultMapSSToGenericRecordIBDataLineTransformer.NAME)
 public class DefaultMapSSToGenericRecordIBDataLineTransformer
@@ -57,7 +57,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformer
    * @param workingPath
    * @param config
    */
-  public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, Map<String, String> config) {
+  public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
     super(workingPath, config);
   }
 
@@ -65,7 +65,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformer
    * @param workingPath
    */
   public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath) {
-    this(workingPath, new HashMap<>());
+    this(workingPath, new ConfigMap());
   }
 
   @Override
@@ -119,7 +119,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformer
   }
 
   @Override
-  public IBDataRecordTransformer<Map<String, String>, GenericRecord> configure(Map<String, String> cms) {
+  public IBDataRecordTransformer<Map<String, String>, GenericRecord> configure(ConfigMap cms) {
     return new DefaultMapSSToGenericRecordIBDataLineTransformer(getWorkingPath(), cms);
   }
 

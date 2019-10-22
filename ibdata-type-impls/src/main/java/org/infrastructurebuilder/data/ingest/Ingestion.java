@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +33,7 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.w3c.dom.Document;
 
 public class Ingestion implements DataSetEnabled {
@@ -58,8 +60,9 @@ public class Ingestion implements DataSetEnabled {
     return ofNullable(finalizer).orElse("default-ingest");
   }
 
-  public Map<String, String> getFinalizerConfig() {
-    return finalizerConfig;
+  public ConfigMap getFinalizerConfig() {
+    return new ConfigMap(
+        finalizerConfig.entrySet().stream().collect(toMap(k -> k.getKey(), v -> v.getValue())));
   }
 
   @Override

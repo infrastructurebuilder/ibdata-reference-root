@@ -33,6 +33,7 @@ import org.apache.avro.data.TimeConversions;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
     extends AbstractGenericIBDataLineTransformer<Map<String, String>> {
@@ -41,7 +42,7 @@ abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
     super(workingPath);
   }
 
-  protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, Map<String,String> config) {
+  protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
     super(workingPath, config);
   }
 

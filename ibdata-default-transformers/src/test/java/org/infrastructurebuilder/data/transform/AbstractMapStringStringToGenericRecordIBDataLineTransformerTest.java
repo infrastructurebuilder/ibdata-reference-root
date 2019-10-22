@@ -31,6 +31,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.transform.line.AbstractMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.util.IBUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.WorkingPathSupplier;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +68,7 @@ public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
 
     workingPath = wps.get();
 
-    test = new DefaultMapSSToGenericRecordIBDataLineTransformer(workingPath, IBUtils.propertiesToMapSS.apply(p1));
+    test = new DefaultMapSSToGenericRecordIBDataLineTransformer(workingPath, new ConfigMap(p1));
   }
 
   @Test

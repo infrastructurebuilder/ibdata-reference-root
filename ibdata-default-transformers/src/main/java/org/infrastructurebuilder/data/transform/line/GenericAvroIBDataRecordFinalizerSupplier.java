@@ -32,6 +32,7 @@ import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -67,7 +68,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
   private class GenericAvroIBDataStreamRecordFinalizer
       extends AbstractIBDataStreamRecordFinalizer<GenericRecord, DataFileWriter<GenericRecord>> {
 
-    public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, Map<String, String> map) {
+    public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
       super(id, workingPath, map, Optional.of(IBDataAvroUtils.fromMapAndWP.apply(workingPath, map)));
     }
 

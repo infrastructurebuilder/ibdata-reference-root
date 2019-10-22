@@ -38,6 +38,7 @@ import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -82,7 +83,7 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
 
   private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<Ingestion> {
 
-    public IngestionIBDataSetFinalizer(Map<String, String> config, Path workingPath) {
+    public IngestionIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath);
     }
 

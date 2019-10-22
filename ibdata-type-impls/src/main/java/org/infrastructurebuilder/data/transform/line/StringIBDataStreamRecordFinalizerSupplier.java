@@ -33,6 +33,7 @@ import javax.inject.Named;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -66,7 +67,7 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
 
   private class StringIBDataStreamRecordFinalizer extends AbstractIBDataStreamRecordFinalizer<String, BufferedWriter> {
 
-    public StringIBDataStreamRecordFinalizer(String id, Path workingPath, Map<String, String> map) {
+    public StringIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
       super(id, workingPath, map,
           Optional.of(cet.withReturningTranslation(() -> Files.newBufferedWriter(workingPath, CREATE_NEW))));
     }

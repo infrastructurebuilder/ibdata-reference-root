@@ -34,7 +34,7 @@ public class IngestionTest {
   private static final String DEFAULT_INGEST = "default-ingest";
   private Ingestion i;
   private DefaultIBDataSetIdentifier ds;
-  private Map<String, String> fc;
+  private Map<String, Object> fc;
   private DataSet targetDs;
   private final XmlPlexusConfiguration metadata = new XmlPlexusConfiguration("metadata");
   BiFunction<? extends DataSet, ? extends DataSet, Boolean> equalser;
@@ -99,7 +99,7 @@ public class IngestionTest {
 
   @Test
   public void testGetFinalizerConfig() {
-    assertEquals(fc, i.getFinalizerConfig());
+    assertEquals(0, i.getFinalizerConfig().size());
   }
 
   @Ignore // Need .equals to work properly
