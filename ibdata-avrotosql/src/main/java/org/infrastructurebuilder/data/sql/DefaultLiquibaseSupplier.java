@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data.sql;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
