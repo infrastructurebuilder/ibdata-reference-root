@@ -45,6 +45,7 @@ import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -76,6 +77,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
   private final Date creationDate = new Date();
   private IBDataRecordTransformerSupplier test1;
   private IBDataRecordTransformerSupplier test2;
+  private Transformer transformer;
 
   @Before
   public void setUp() throws Exception {
@@ -106,6 +108,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
     d1.setCreationDate(creationDate);
     ds = new DefaultIBDataSet(d1);
 
+    transformer = new Transformer();
+
     suppliedStreams = new ArrayList<>();
 
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg")));
@@ -134,7 +138,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   @Test
   public void testTransform() {
-    IBDataTransformationResult q = t.configure(cfg).transform(ds, suppliedStreams, true);
+    IBDataTransformationResult q = t.configure(cfg).transform(transformer, ds, suppliedStreams, true);
     assertEquals(0, q.getErrors().size());
 
     // FIXME Test the actual output

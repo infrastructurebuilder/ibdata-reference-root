@@ -37,8 +37,8 @@ import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.TestThrowingIBChecksumType;
-import org.infrastructurebuilder.util.files.TestThrowingInputStream;
+import org.infrastructurebuilder.util.files.ThrowingIBChecksumType;
+import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.joor.Reflect;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,7 +89,7 @@ public class DefaultIBDataStreamTest {
     identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL()), of(NAME), of(DESC),
         checksum, now, metadata, mimeType, of(path.toString()));
     ib1 = new DefaultIBDataStream(identifier, path);
-    ib2 = new DefaultIBDataStream(identifier, new TestThrowingIBChecksumType());
+    ib2 = new DefaultIBDataStream(identifier, new ThrowingIBChecksumType());
 
     ds = new DataStream();
     ds.setPath(path.relativize(p1).toString());
@@ -101,7 +101,7 @@ public class DefaultIBDataStreamTest {
 
   @Test(expected = IBException.class)
   public void testCopyAndDigest() {
-    copyAndDigest(new TestThrowingInputStream(IOException.class), path);
+    copyAndDigest(new ThrowingInputStream(IOException.class), path);
   }
 
   //  @Test
@@ -123,7 +123,7 @@ public class DefaultIBDataStreamTest {
 
   @Test(expected = IBDataException.class)
   public void testGetChecksumWithFailingInputStream() {
-    Supplier<InputStream> ins = () -> new TestThrowingInputStream(IOException.class);
+    Supplier<InputStream> ins = () -> new ThrowingInputStream(IOException.class);
     Reflect.on(ib2).set("ss", ins).set("calculatedChecksum", null);
     ib2.getChecksum(); // Setup to fail
   }
@@ -138,7 +138,7 @@ public class DefaultIBDataStreamTest {
   @Test
   public void testClose() throws Exception {
     List<InputStream> s = Reflect.on(ib1).get("createdInputStreamsForThisInstance");
-    s.add(new TestThrowingInputStream(IOException.class));
+    s.add(new ThrowingInputStream(IOException.class));
     ib1.close();
   }
 

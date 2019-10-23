@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.util.files;
+package org.infrastructurebuilder.data.transform;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Paths;
+import java.util.List;
 
-import org.infrastructurebuilder.util.artifacts.Checksum;
+public class NamedFields {
 
-public class TestThrowingIBChecksumType extends BasicIBChecksumPathType {
+  private  List<String> names;
 
-  public TestThrowingIBChecksumType() throws IOException {
-    super(Paths.get("."), new Checksum(), "doesnt/matter");
+  public void setNames(List<String> names) {
+    this.names = names;
   }
-
-  @Override
-  public InputStream get() {
-    return new TestThrowingInputStream(IOException.class);
+  public String keyFor(int i) {
+    return this.names.get(i);
   }
 
 }

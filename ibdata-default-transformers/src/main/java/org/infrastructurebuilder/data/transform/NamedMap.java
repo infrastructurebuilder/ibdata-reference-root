@@ -13,12 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
+package org.infrastructurebuilder.data.transform;
 
-import org.infrastructurebuilder.data.model.DataSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-public interface DataSetEnabled {
+public class NamedMap {
+  Map<String,String> names = new HashMap<>();
 
-  DataSet asDataSet();
+  public void setNames(Map<String, String> names) {
+    this.names = names;
+  }
+
+  public Map<String, String> getNames() {
+    return names;
+  }
+
+  public String keyFor(String key, String defaultValue) {
+    return Optional.ofNullable(names.getOrDefault(key, defaultValue)).orElse(null);
+  }
 
 }

@@ -41,7 +41,7 @@ import org.w3c.dom.Document;
 public class DefaultIBDataSource extends AbstractIBDataSource {
 
   private final Path targetPath;
-  private final String name;
+  private final String name;  // FIXME Move name, description, cacheDirectory into AbstractIBDataSource
   private final String description;
   private final Path cacheDirectory;
   private final Logger log;

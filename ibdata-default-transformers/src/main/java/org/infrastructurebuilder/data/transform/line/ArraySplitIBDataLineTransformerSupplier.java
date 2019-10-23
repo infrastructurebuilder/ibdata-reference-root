@@ -18,10 +18,9 @@ package org.infrastructurebuilder.data.transform.line;
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
@@ -73,7 +72,7 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
      */
     ArraySplitIBDataLineTransformer(Path ps, ConfigMap config) {
       super(ps, config);
-      this.splitRegex = getConfiguration(REGEX, DEFAULT_SPLIT_REGEX);
+      this.splitRegex = Pattern.quote( getConfiguration(REGEX, DEFAULT_SPLIT_REGEX));
     }
 
     @Override

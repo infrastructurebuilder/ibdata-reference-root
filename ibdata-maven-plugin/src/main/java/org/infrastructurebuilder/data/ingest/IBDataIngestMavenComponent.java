@@ -117,7 +117,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         .orElseThrow(() -> new MojoFailureException("No ingester named " + ingest.getIngester()));
     List<IBDataStreamSupplier> suppliers = i
         // Get a new instance of the ingester supplier from configuration
-        .config(getConfigMapSupplier())
+        .configure(getConfigMapSupplier())
         // Get the instance
         .get()
         // do the ingestion

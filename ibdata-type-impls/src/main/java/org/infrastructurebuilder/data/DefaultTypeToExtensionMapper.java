@@ -15,12 +15,19 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.IBConstants.APPLICATION_ACCESS;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORD;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORDX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_PDF;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_XLS;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_XLSX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XML;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_ZIP;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
+import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
+import static org.infrastructurebuilder.IBConstants.TEXT_TSV;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,15 +36,6 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 @Named
 public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
-
-  /** These aren't real MIME types (AFAIK) Move them to IBConstants */
-  public static final String TEXT_TSV = "text/tab-separated-values";
-  public static final String TEXT_PSV = "text/pipe-separated-values";
-  public static final String APPLICATION_XLS = "application/msexcel";
-  public static final String APPLICATION_XLSX = "application//vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-  public static final String APPLICATION_ACCESS = "application/msaccess";
-  public static final String APPLICATION_MSWORD = "application/msword";
-  public static final String APPLICATION_MSWORDX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
   @Inject
   public DefaultTypeToExtensionMapper() {
@@ -70,8 +68,8 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       return ".psv";
     case APPLICATION_PDF:
       return ".pdf";
-    case "avro/binary":
-      return AVRO_BINARY;
+    case AVRO_BINARY:
+      return ".avro";
     default:
       return ".bin";
     }

@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,7 +34,6 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
-import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
@@ -65,16 +63,16 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
   }
 
   @Override
-  public IBDataSetFinalizerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetTransformationFinalizerSupplier(getLogger(),
-        () -> Paths.get(requireNonNull(requireNonNull(cms).get().get(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER),
+  public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
+    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(),
+        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER),
             "Working Path Config")),
         cms, getTypeToExtensionMapper());
   }
 
   @Override
-  public IBDataSetFinalizer<Transformation> get() {
-    return new TransformationIBDataSetFinalizer(requireNonNull(getCms(), "Config supplier is null").get(),
+  protected IBDataSetFinalizer<Transformation> configuredType(ConfigMapSupplier config) {
+    return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         getWps().get());
   }
 
@@ -90,7 +88,8 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
       DataSet dsi = target.asDataSet();
       dsi.setPath(dsi2.getPath());
 
-      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), dsi, ibdssList, getTypeToExtensionMapper());
+      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), dsi, ibdssList,
+          getTypeToExtensionMapper());
     }
 
   }

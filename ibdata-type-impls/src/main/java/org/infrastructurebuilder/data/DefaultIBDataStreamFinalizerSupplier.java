@@ -48,7 +48,7 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
   @Override
   public IBDataStreamFinalizerSupplier configure(ConfigMapSupplier cms) {
     return new DefaultIBDataStreamFinalizerSupplier(
-        () -> Paths.get(requireNonNull(requireNonNull(cms).get().get(WORKING_PATH_CONFIG_ITEM), "Working Path Config")),
+        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(WORKING_PATH_CONFIG_ITEM), "Working Path Config")),
         cms);
   }
   @Override

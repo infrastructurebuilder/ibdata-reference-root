@@ -31,8 +31,8 @@ public class DefaultIBDataTransformationResult implements IBDataTransformationRe
   private Optional<IBDataSet> dataSet;
   private List<IBDataTransformationError> errors;
 
-  public DefaultIBDataTransformationResult(IBDataSet createdStream) {
-    this(Optional.ofNullable(createdStream), new ArrayList<>());
+  public DefaultIBDataTransformationResult(IBDataSet createdDataSet) {
+    this(Optional.ofNullable(createdDataSet), new ArrayList<>());
   }
 
   public DefaultIBDataTransformationResult(Optional<IBDataSet> createdSet, List<IBDataTransformationError> errors) {

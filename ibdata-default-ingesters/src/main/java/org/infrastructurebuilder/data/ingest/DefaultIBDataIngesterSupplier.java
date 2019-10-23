@@ -15,6 +15,9 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -24,7 +27,6 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngester;
-import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -41,7 +43,8 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     this(wps, log, cms, null);
   }
 
-  private DefaultIBDataIngesterSupplier(PathSupplier wps, LoggerSupplier log, ConfigMapSupplier cms, Path cacheDirectory) {
+  private DefaultIBDataIngesterSupplier(PathSupplier wps, LoggerSupplier log, ConfigMapSupplier cms,
+      Path cacheDirectory) {
     super(wps, log, cms);
     this.cacheDirectory = cacheDirectory;
   }
@@ -51,16 +54,17 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   }
 
   @Override
-  public IBDataIngesterSupplier config(ConfigMapSupplier cms) {
-    Optional<String> configItem = Optional.ofNullable(cms.get().get(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM));
-    Path cacheConfig = configItem.map(Paths::get)
-        .orElseThrow(() -> new IBDataException("No cache directory specified"));
-    return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), cms, cacheConfig);
+  final protected IBDataIngester configuredType(ConfigMapSupplier config) {
+    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get(), getCacheDirectory());
   }
 
   @Override
-  public IBDataIngester get() {
-    return new DefaultIBDataIngester(getWps().get(), getLog(), getConfig().get(), getCacheDirectory());
+  public DefaultIBDataIngesterSupplier getConfiguredSupplier(ConfigMapSupplier config) {
+    Optional<String> configItem = ofNullable(
+        requireNonNull(config, "Config map not supplied").get().getString(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM));
+    Path cacheConfig = configItem.map(Paths::get)
+        .orElseThrow(() -> new IBDataException("No cache directory specified"));
+    return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config, cacheConfig);
   }
 
 }

@@ -21,13 +21,17 @@ import static org.infrastructurebuilder.IBConstants.HTTPS_PREFIX;
 import static org.infrastructurebuilder.IBConstants.HTTP_PREFIX;
 import static org.infrastructurebuilder.IBConstants.ZIP_PREFIX;
 import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -35,14 +39,19 @@ import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
 public interface IBDataAvroUtils {
   public static final String NO_SCHEMA_CONFIG_FOR_MAPPER = "No schema config for mapper";
 
   public static final Function<String, Schema> getSchema = schema -> {
-    String s = ofNullable(schema).orElseThrow(() -> new IBDataException("No schema config for mapper"));
+    String s = ofNullable(schema).orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER + "3"));
+    try {
+      s = (Files.exists(Paths.get(schema))) ? Paths.get(schema).toUri().toURL().toExternalForm() : s;
+    } catch (MalformedURLException e1) {
+      // Do nothing.  see if it works!
+    }
+
     boolean isURL = s.startsWith(HTTP_PREFIX) || s.startsWith(HTTPS_PREFIX) || s.startsWith(FILE_PREFIX)
         || s.startsWith(ZIP_PREFIX);
     try (InputStream in = isURL ? new URL(s).openStream() : IBDataAvroUtils.class.getResourceAsStream(s)) {
@@ -52,12 +61,10 @@ public interface IBDataAvroUtils {
     }
   };
 
-  public final static BiFunction<Path, ConfigMap, DataFileWriter<GenericRecord>> fromMapAndWP = (workingPath,
-      map) -> {
+  public final static BiFunction<Path, ConfigMap, DataFileWriter<GenericRecord>> fromMapAndWP = (workingPath, map) -> {
     // Get the schema or die
-    Schema s = getSchema.apply(
-        ofNullable(Objects.requireNonNull(map).get(DefaultMapSSToGenericRecordIBDataLineTransformer.SCHEMA_PARAM))
-            .orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER)));
+    Optional<String> schema = ofNullable(Objects.requireNonNull(map).getString(SCHEMA_PARAM));
+    Schema s = getSchema.apply(schema.orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER + " 2")));
     // Get the DataFileWriter or die
     DataFileWriter<GenericRecord> w = new DataFileWriter<GenericRecord>(new GenericDatumWriter<GenericRecord>(s));
     // create the working data file or die

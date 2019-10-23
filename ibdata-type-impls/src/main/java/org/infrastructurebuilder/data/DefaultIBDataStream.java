@@ -16,7 +16,9 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.util.IBUtils.nullSafeObjectToString;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,14 +28,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.function.Supplier;
 
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
-import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -61,7 +61,7 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins) {
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
-        identifier.getMimeType(), Optional.ofNullable(identifier.getPath()));
+        identifier.getMimeType(), ofNullable(identifier.getPath()));
     this.cpt = new BasicIBChecksumPathType(Objects.requireNonNull(ins), identifier.getChecksum(),
         identifier.getMimeType());
     this.ss = this.cpt;
@@ -70,7 +70,8 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, IBChecksumPathType ins) {
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         requireNonNull(ins).getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
-        requireNonNull(ins).getType(), Optional.ofNullable(identifier.getPath()));
+        requireNonNull(ins).getType(),
+        nullSafeObjectToString.apply(ofNullable(ins.getPath()).map(Path::getFileName).orElse(null)));
     this.cpt = ins;
     this.calculatedChecksum = this.cpt.getChecksum();
     this.ss = requireNonNull(ins);
@@ -111,21 +112,9 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   public IBDataStream relocateTo(Path newWorkingPath, TypeToExtensionMapper t2e) {
     IBChecksumPathType newCpt;
     Path target;
-//    if (this.cpt != null) {
-      newCpt = this.cpt;
-//    } else {
-//      Path temp = newWorkingPath.resolve(UUID.randomUUID().toString());
-//      Checksum d;
-//      try (InputStream ins = get(); OutputStream outs = Files.newOutputStream(temp, StandardOpenOption.CREATE_NEW)) {
-//        d = cet.withReturningTranslation(() -> IBUtils.copyAndDigest(ins, outs));
-//        String t = getMimeType();
-//        newCpt = t == null ? new BasicIBChecksumPathType(temp, d) : new BasicIBChecksumPathType(temp, d, t);
-//      } catch (IOException e) {
-//        throw new IBDataException(e);
-//      }
-//    }
-    target = newWorkingPath
-        .resolve(newCpt.getChecksum().asUUID().get().toString() + t2e.getExtensionForType(newCpt.getType()));
+    newCpt = this.cpt;
+    String newTargetName = newCpt.getChecksum().asUUID().get().toString() + t2e.getExtensionForType(newCpt.getType());
+    target = newWorkingPath.resolve(newTargetName);
     return new DefaultIBDataStream(this, cet.withReturningTranslation(() -> newCpt.moveTo(target)));
   }
 

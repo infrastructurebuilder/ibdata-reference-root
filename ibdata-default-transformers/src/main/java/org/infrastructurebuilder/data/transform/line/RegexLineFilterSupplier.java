@@ -68,7 +68,7 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
      */
     public RegexLineFilter(Path ps, ConfigMap config) {
       super(ps, config);
-      this.splitRegex = Pattern.compile(getConfiguration(REGEX, DEFAULT_REGEX));
+      this.splitRegex = Pattern.compile(Pattern.quote(getConfiguration(REGEX, DEFAULT_REGEX)));
     }
 
     /**

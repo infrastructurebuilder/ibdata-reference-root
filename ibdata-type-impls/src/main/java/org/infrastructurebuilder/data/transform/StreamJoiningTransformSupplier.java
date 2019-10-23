@@ -76,7 +76,7 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
     }
 
     @Override
-    public IBDataTransformationResult transform(IBDataSet ds, List<IBDataStream> suppliedStreams,  boolean failOnError) {
+    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams,  boolean failOnError) {
       throw new IBDataException("Stream Joiner Not implemented ");
       //      return new DefaultIBDataTransformationResult(null);
     }

@@ -57,7 +57,7 @@ public interface SchemaToLiquibaseTranslator extends BiFunction<Optional<Path>, 
     ConfigMap parameters = cms.get();
     if (parameters != null) {
       for (String entry : parameters.keySet()) {
-        liquibase.setChangeLogParameter(entry, parameters.get(entry));
+        liquibase.setChangeLogParameter(entry, parameters.getString(entry));
       }
     }
 

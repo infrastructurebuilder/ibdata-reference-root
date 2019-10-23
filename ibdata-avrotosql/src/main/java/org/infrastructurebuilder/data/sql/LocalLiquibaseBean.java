@@ -402,7 +402,7 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean, 
     liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
     if (parameters != null) {
       for (String entry : parameters.keySet()) {
-        liquibase.setChangeLogParameter(entry, parameters.getObject(entry));
+        liquibase.setChangeLogParameter(entry, parameters.get(entry));
       }
     }
 

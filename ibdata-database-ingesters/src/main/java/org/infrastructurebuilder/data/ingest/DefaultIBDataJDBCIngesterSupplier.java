@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -33,13 +32,13 @@ import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngester;
-import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -59,16 +58,16 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
   }
 
   @Override
-  public IBDataIngesterSupplier config(ConfigMapSupplier cms) {
-    Optional<String> configItem = Optional.ofNullable(cms.get().get(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM));
-    Path cacheConfig = configItem.map(Paths::get)
-        .orElseThrow(() -> new IBDataException("No cache directory specified"));
+  public AbstractCMSConfigurableSupplier<IBDataIngester> getConfiguredSupplier(ConfigMapSupplier cms) {
+//    Optional<String> configItem = Optional.ofNullable(cms.get().get(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM));
+//    Path cacheConfig = configItem.map(Paths::get)
+//        .orElseThrow(() -> new IBDataException("No cache directory specified"));
     return new DefaultIBDataJDBCIngesterSupplier(getWps(), () -> getLog(), cms);
   }
 
   @Override
-  public IBDataIngester get() {
-    return new DefaultIBDataJDBCIngester(getWps().get(), getLog(), getConfig().get());
+  protected IBDataIngester configuredType(ConfigMapSupplier config) {
+    return new DefaultIBDataJDBCIngester(getWps().get(), getLog(), config.get());
   }
 
   public final class DefaultIBDataJDBCIngester extends AbstractIBDataIngester {
