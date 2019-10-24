@@ -29,15 +29,19 @@
   <name>${project.artifactId}</name>
   <description>Maven plugin for IBData</description>
   <properties>
-    <jacoco.max.missed.classes>99</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>0</test.coverage.percentage.required>
-    <surefire.failIfNoTests>false</surefire.failIfNoTests>
+    <jacoco.max.missed.classes>29</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>44</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
       <artifactId>ibdata-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.infrastructurebuilder</groupId>
+      <artifactId>ibcore</artifactId>
+      <type>test-jar</type>
     </dependency>
     <dependency>
       <groupId>org.jooq</groupId>
@@ -52,6 +56,10 @@
       <groupId>org.eclipse.sisu</groupId>
       <artifactId>org.eclipse.sisu.plexus</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
       <groupId>net.sf.corn</groupId>

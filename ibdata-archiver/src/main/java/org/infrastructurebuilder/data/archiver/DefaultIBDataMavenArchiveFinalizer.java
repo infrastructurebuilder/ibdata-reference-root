@@ -29,10 +29,13 @@ import org.codehaus.plexus.archiver.AbstractArchiveFinalizer;
 import org.codehaus.plexus.archiver.ArchiveFinalizer;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.FileSet;
 import org.codehaus.plexus.archiver.UnArchiver;
-import org.codehaus.plexus.logging.Logger;
+import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.slf4j.Logger;
 
 @Named(DefaultIBDataMavenArchiveFinalizer.NAME)
 public class DefaultIBDataMavenArchiveFinalizer extends AbstractArchiveFinalizer implements ArchiveFinalizer {
@@ -44,8 +47,8 @@ public class DefaultIBDataMavenArchiveFinalizer extends AbstractArchiveFinalizer
   private List vFiles = Collections.emptyList();
 
   @Inject
-  public DefaultIBDataMavenArchiveFinalizer(Logger logger, IBDataLateBindingFinalizerConfigSupplier cffconfigSupplier) {
-    this.logger = Objects.requireNonNull(logger);
+  public DefaultIBDataMavenArchiveFinalizer(LoggerSupplier logger, IBDataLateBindingFinalizerConfigSupplier cffconfigSupplier) {
+    this.logger = Objects.requireNonNull(logger).get();
     configSupplier = Objects.requireNonNull(cffconfigSupplier);
   }
 
@@ -53,34 +56,35 @@ public class DefaultIBDataMavenArchiveFinalizer extends AbstractArchiveFinalizer
   @Override
   public void finalizeArchiveCreation(final Archiver archiver) throws ArchiverException {
     logger.info("Finalizing " + this + " with " + archiver);
-      config  = Optional.ofNullable(configSupplier.get())
+    config = Optional.ofNullable(configSupplier.get())
         .orElseThrow(() -> new ArchiverException("No finalizer config available"));
-      vFiles = new ArrayList();
-      IBDataException.cet.withReturningTranslation(() -> Files.newDirectoryStream(config.getPath())).forEach(vFiles::add);
-      archiver.addDirectory(config.getPath().toFile());
-//    // Only valid entry criteria
-//    final Path path = config.getWorkingPath().resolve(IBDataEngine.IBDATA_IBDATASET_XML).toAbsolutePath();
-//    path.getParent().toFile().mkdirs();
-//    IBDataFinalizerOutputGenerator writer;
-//
-//    switch (config.getExecutionType()) {
-//    case IBDataSetFinalizerConfig.INGESTER:
-//      // Build the current data using the original data
-//      writer = new DefaultIBDataIngestionWriter(config);
-//      break;
-//    case IBDataSetFinalizerConfig.TRANSFORMER:
-//      writer = new DefaultIBDataTransformationWriter(config);
-//      break;
-//    default:
-//      throw new ArchiverException("Invalid type " + config.getExecutionType());
-//    }
-//
-//    try (OutputStream w = Files.newOutputStream(path, StandardOpenOption.CREATE)) {
-//      writer.write(w, Optional.of(config.getWorkingPath()));
-//    } catch (final IOException e) {
-//      throw new ArchiverException("Failed to write metadata file", e);
-//    }
-//    archiver.addFile(path.toFile(), IBDataEngine.IBDATA_IBDATASET_XML);
+    vFiles = new ArrayList();
+    IBDataException.cet.withReturningTranslation(() -> Files.newDirectoryStream(config.getPath())).forEach(vFiles::add);
+    FileSet fs = new DefaultFileSet(config.getPath().toFile());
+    archiver.addFileSet(fs);
+    //    // Only valid entry criteria
+    //    final Path path = config.getWorkingPath().resolve(IBDataEngine.IBDATA_IBDATASET_XML).toAbsolutePath();
+    //    path.getParent().toFile().mkdirs();
+    //    IBDataFinalizerOutputGenerator writer;
+    //
+    //    switch (config.getExecutionType()) {
+    //    case IBDataSetFinalizerConfig.INGESTER:
+    //      // Build the current data using the original data
+    //      writer = new DefaultIBDataIngestionWriter(config);
+    //      break;
+    //    case IBDataSetFinalizerConfig.TRANSFORMER:
+    //      writer = new DefaultIBDataTransformationWriter(config);
+    //      break;
+    //    default:
+    //      throw new ArchiverException("Invalid type " + config.getExecutionType());
+    //    }
+    //
+    //    try (OutputStream w = Files.newOutputStream(path, StandardOpenOption.CREATE)) {
+    //      writer.write(w, Optional.of(config.getWorkingPath()));
+    //    } catch (final IOException e) {
+    //      throw new ArchiverException("Failed to write metadata file", e);
+    //    }
+    //    archiver.addFile(path.toFile(), IBDataEngine.IBDATA_IBDATASET_XML);
   }
 
   /** {@inheritDoc} */

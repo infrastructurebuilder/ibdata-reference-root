@@ -26,7 +26,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,15 +37,16 @@ import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
+import org.infrastructurebuilder.util.config.ConfigMap;
 
 abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDataStreamRecordFinalizer<T> {
-  private final Map<String, String> config;
+  private final ConfigMap config;
   private final String id;
   private final Path workingPath;
   private final Optional<O> writer;
   private boolean closed = false;
 
-  public AbstractIBDataStreamRecordFinalizer(String id, Path workingPath, Map<String, String> map,
+  public AbstractIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map,
       Optional<O> optionalWriter) {
     this.config = map;
     this.workingPath = Objects.requireNonNull(workingPath);
@@ -57,7 +57,7 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
     this.writer = requireNonNull(optionalWriter);
   }
 
-  protected Map<String, String> getConfig() {
+  protected ConfigMap getConfig() {
     return config;
   }
 

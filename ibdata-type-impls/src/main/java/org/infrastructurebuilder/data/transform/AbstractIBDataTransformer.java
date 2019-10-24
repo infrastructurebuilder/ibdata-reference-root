@@ -16,30 +16,29 @@
 package org.infrastructurebuilder.data.transform;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import org.infrastructurebuilder.data.IBDataTransformer;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBDataTransformer implements IBDataTransformer {
 
   private final Path workingPath;
-  private final Map<String, String> config;
+  private final ConfigMap config;
   private final Logger logger;
 
   public AbstractIBDataTransformer(Path p, Logger l) {
-    this(p, l, new HashMap<>());
+    this(p, l, new ConfigMap());
   }
 
-  protected AbstractIBDataTransformer(Path workingPath, Logger l,  Map<String, String> config) {
+  protected AbstractIBDataTransformer(Path workingPath, Logger l,  ConfigMap config) {
     this.workingPath = Objects.requireNonNull(workingPath);
     this.config = config;
     this.logger = Objects.requireNonNull(l);
   }
 
-  protected Map<String, String> getConfig() {
+  protected ConfigMap getConfig() {
     return config;
   }
 

@@ -15,19 +15,21 @@
  */
 package org.infrastructurebuilder.data.archiver;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.codehaus.plexus.logging.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultIBDataPlexusIoZipFileResourceCollectionTest {
-
-
-  private Logger logger;
+  public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataPlexusIoZipFileResourceCollectionTest.class);
 
   @Test
   public void testIoZipFileResourceCollection() {
-    assertNotNull(new DefaultIBDataPlexusIoZipFileResourceCollection(logger));
+    DefaultIBDataPlexusIoZipFileResourceCollection v = new DefaultIBDataPlexusIoZipFileResourceCollection(() -> logger);
+    assertNotNull(v);
+    assertEquals(logger, v.getLogger());
   }
 
 }

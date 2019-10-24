@@ -15,19 +15,22 @@
  */
 package org.infrastructurebuilder.data.archiver;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
+import org.slf4j.Logger;
+
 @javax.inject.Named("ibdata")
 @org.eclipse.sisu.Typed(org.codehaus.plexus.components.io.resources.PlexusIoResourceCollection.class)
 public class DefaultIBDataPlexusIoZipFileResourceCollection
     extends org.codehaus.plexus.components.io.resources.PlexusIoZipFileResourceCollection {
-  private final org.codehaus.plexus.logging.Logger logger;
+  private final Logger logger;
 
   @javax.inject.Inject
-  public DefaultIBDataPlexusIoZipFileResourceCollection(org.codehaus.plexus.logging.Logger logger) {
+  public DefaultIBDataPlexusIoZipFileResourceCollection(LoggerSupplier logger) {
     super();
-    this.logger = logger;
+    this.logger = logger.get();
   }
 
-  public org.codehaus.plexus.logging.Logger getLogger() {
+  public Logger getLogger() {
     return logger;
   }
 }

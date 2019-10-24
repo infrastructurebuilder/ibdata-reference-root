@@ -55,8 +55,10 @@ import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
+import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.slf4j.Logger;
@@ -69,7 +71,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   private final IBDataStreamRecordFinalizer configuredFinalizer;
   private final Optional<String> finalType;
 
-  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, Map<String, String> config,
+  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, ConfigMap config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
     super(workingPath, log, config);
     this.dataLineSuppliers = dataRecTransformerSuppliers;
@@ -83,8 +85,9 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
       //      this.failOnError = ofNullable(config.get(FAIL_ON_ERROR_KEY)).map(Boolean::parseBoolean).orElse(false);
       ConfigMapSupplier lcfg = new DefaultConfigMapSupplier().addConfiguration(config);
       // If the map contains the key, then the suppliers MUST contain all indicated line transformers
-      String theListString = config.get(TRANSFORMERSLIST);
-      List<String> theList = Arrays.asList(theListString.split(Pattern.quote(RECORD_SPLITTER)));
+      Optional<String> transformersList = ofNullable(config.getString(TRANSFORMERSLIST));
+      Optional<String> theListString = transformersList.map(IBUtils.nullIfBlank);
+      List<String> theList = theListString.map(str -> Arrays.asList(str.split(Pattern.quote(RECORD_SPLITTER)))).orElse(new ArrayList<>());
       if (theList.size() > 0) {
         Map<String, String> idToHint = theList.stream().map(s -> s.split(Pattern.quote(MAP_SPLITTER)))
             .collect(Collectors.toMap(k -> k[0], v -> v[1]));
@@ -98,7 +101,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
         for (String li : theList) {
           String[] s = li.split(Pattern.quote(MAP_SPLITTER));
           IBDataRecordTransformerSupplier<?, ?> s2 = map.get(s[1]).configure(lcfg);
-          IBDataRecordTransformer<?, ?> transformer = s2.get().configure(config);
+          IBDataRecordTransformer<?, ?> transformer = s2.get().configure(lcfg.get());
           if (acceptable(previousType, transformer.accepts()))
             previousType = transformer.produces();
           else
@@ -123,11 +126,11 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public IBDataTransformationResult transform(IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
+  public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
     IBDataStreamRecordFinalizer cf = getConfiguredFinalizer();
     if (!acceptable(finalType, cf.accepts()))
       throw new IBDataException(
-          "Finalizer " + cf.getId() + " does not accept finally produced type " + finalType.get());
+          "Finalizer '" + cf.getId() + "' does not accept finally produced type '" + finalType.get() + "'");
     return localTransform(ds, suppliedStreams, getConfiguredFinalizer(), failOnError);
   }
 

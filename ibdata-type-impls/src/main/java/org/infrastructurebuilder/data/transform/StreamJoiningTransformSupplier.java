@@ -31,6 +31,7 @@ import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
@@ -62,10 +63,10 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
   private class StreamJoiningTransformer extends AbstractIBDataTransformer {
 
     public StreamJoiningTransformer(Path p, Logger l) {
-      this(p, l , new HashMap<>());
+      this(p, l , new ConfigMap());
     }
 
-    public StreamJoiningTransformer(Path p, Logger l,  Map<String, String> config) {
+    public StreamJoiningTransformer(Path p, Logger l,  ConfigMap config) {
       super(p, l, config);
     }
 
@@ -75,7 +76,7 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
     }
 
     @Override
-    public IBDataTransformationResult transform(IBDataSet ds, List<IBDataStream> suppliedStreams,  boolean failOnError) {
+    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams,  boolean failOnError) {
       throw new IBDataException("Stream Joiner Not implemented ");
       //      return new DefaultIBDataTransformationResult(null);
     }

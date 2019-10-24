@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -47,7 +48,7 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
   @Override
   public IBDataStreamFinalizerSupplier configure(ConfigMapSupplier cms) {
     return new DefaultIBDataStreamFinalizerSupplier(
-        () -> Paths.get(requireNonNull(requireNonNull(cms).get().get(WORKING_PATH_CONFIG_ITEM), "Working Path Config")),
+        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(WORKING_PATH_CONFIG_ITEM), "Working Path Config")),
         cms);
   }
   @Override
@@ -57,7 +58,7 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
   }
   private class DefaultIBDataStreamFinalizer extends AbstractIBDataStreamFinalizer {
 
-    DefaultIBDataStreamFinalizer(Path path, Map<String, String> map) {
+    DefaultIBDataStreamFinalizer(Path path, ConfigMap map) {
       super(path,map);
     }
   }

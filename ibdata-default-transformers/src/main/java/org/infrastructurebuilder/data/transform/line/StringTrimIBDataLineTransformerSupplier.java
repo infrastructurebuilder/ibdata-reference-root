@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -59,7 +60,7 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
      * @param ps
      * @param config
      */
-    protected StringTrimIBDataLineTransformer(Path ps, Map<String, String> config) {
+    protected StringTrimIBDataLineTransformer(Path ps, ConfigMap config) {
       super(ps, config);
     }
 
@@ -86,7 +87,7 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
     }
 
     @Override
-    public IBDataRecordTransformer<String, String> configure(Map<String, String> cms) {
+    public IBDataRecordTransformer<String, String> configure(ConfigMap cms) {
       return new StringTrimIBDataLineTransformer(getWorkingPath(), cms);
     }
   }

@@ -135,13 +135,13 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         // call the supplier
         .map(IBDataStreamSupplier::get).collect(Collectors.toMap(k -> k.getId(), Function.identity()));
 
-//    IBDataStream s = availableStreams.get(UUID.fromString("cf031c5a-3a34-3175-8140-26819803d395"));
-//    try (InputStream ins = s.get(); BufferedReader bin = new BufferedReader(new InputStreamReader(ins))) {
-//      bin.lines().forEach(content -> getLog().info(content));
-//    } catch (IOException e1) {
-//      // TODO Auto-generated catch block
-//      e1.printStackTrace();
-//    }
+    //    IBDataStream s = availableStreams.get(UUID.fromString("cf031c5a-3a34-3175-8140-26819803d395"));
+    //    try (InputStream ins = s.get(); BufferedReader bin = new BufferedReader(new InputStreamReader(ins))) {
+    //      bin.lines().forEach(content -> getLog().info(content));
+    //    } catch (IOException e1) {
+    //      // TODO Auto-generated catch block
+    //      e1.printStackTrace();
+    //    }
     IBChecksumPathType retVal = null;
     // Every Transformation produces a single DataStream
     try { // Outer catch for throwing MojoFailureException if anything goes awry
@@ -181,7 +181,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
                     .orElseThrow(
                         () -> new IBDataException("Record finalizer  " + g.getRecordFinalizer() + " not found"))
                     // Then configure the supplier
-                    .config(g.getConfigurationAsConfigMapSupplier(defaults))
+                    .config(g.getRecordFinalizerConfig(defaults))
                     // Get the record finalizer
                     .get());
           }
@@ -195,7 +195,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         for (Transformer t : transformation.getTransformers()) {
           if (ref.get().isPresent()) {
             IBDataTransformer transformer = configuredMap.get(t.getId());
-            ref = transformer.transform(ref.get().get(), sources, t.isFailOnAnyError());
+            ref = transformer.transform(t, ref.get().get(), sources, t.isFailOnAnyError());
           }
         }
 

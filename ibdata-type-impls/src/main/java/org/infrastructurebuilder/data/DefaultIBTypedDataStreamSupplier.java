@@ -19,24 +19,21 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Spliterators.spliteratorUnknownSize;
 import static java.util.stream.StreamSupport.stream;
 
-import java.net.URL;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.infrastructurebuilder.util.artifacts.Checksum;
-import org.w3c.dom.Document;
-
-public class DefaultIBTypedDataStreamSupplier<T> implements IBTypedDataStreamSupplier<T> {
+public class DefaultIBTypedDataStreamSupplier<T> extends DefaultIBDataStreamIdentifier
+    implements IBTypedDataStreamSupplier<T> {
 
   private final Iterator<T> iterable;
   private final boolean parallel;
-  private final IBDataStream original;
+
+  public DefaultIBTypedDataStreamSupplier(IBDataStream original, Iterator<T> iterable) {
+    this(original, iterable, false);
+  }
 
   public DefaultIBTypedDataStreamSupplier(IBDataStream original, Iterator<T> iterable, boolean parallel) {
-    this.original = requireNonNull(original);
+    super(original);
     this.iterable = requireNonNull(iterable);
     this.parallel = parallel;
   }
@@ -46,53 +43,4 @@ public class DefaultIBTypedDataStreamSupplier<T> implements IBTypedDataStreamSup
     return stream(spliteratorUnknownSize(requireNonNull(iterable), 0), parallel);
   }
 
-  @Override
-  public UUID getId() {
-    return original.getId();
-  }
-
-  @Override
-  public Optional<URL> getURL() {
-    return original.getURL();
-  }
-
-  @Override
-  public Checksum getChecksum() {
-    return original.getChecksum();
-  }
-
-  @Override
-  public Date getCreationDate() {
-    return original.getCreationDate();
-  }
-
-  @Override
-  public Document getMetadataAsDocument() {
-    return original.getMetadataAsDocument();
-  }
-
-  @Override
-  public Object getMetadata() {
-    return original.getMetadata();
-  }
-
-  @Override
-  public String getMimeType() {
-    return original.getMimeType();
-  }
-
-  @Override
-  public Optional<String> getName() {
-    return original.getName();
-  }
-
-  @Override
-  public Optional<String> getDescription() {
-    return original.getDescription();
-  }
-
-  @Override
-  public String getPath() {
-    return original.getPath();
-  }
 }

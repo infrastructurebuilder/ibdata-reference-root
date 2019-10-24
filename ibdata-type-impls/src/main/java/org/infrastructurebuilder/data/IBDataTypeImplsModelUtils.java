@@ -34,11 +34,13 @@ import java.util.function.Function;
 import org.infrastructurebuilder.data.model.DataSet;
 
 public interface IBDataTypeImplsModelUtils {
-  public final static Function<IBDataSetIdentifier, DataSet> dataSetIdentifierToDataSet = id -> {
-    DataSet retVal = new DataSet();
-    return retVal;
-  };
+//  public final static Function<IBDataSetIdentifier, DataSet> dataSetIdentifierToDataSet = id -> {
+//    DataSet retVal = new DataSet();
+//    return retVal;
+//  };
+//
 
+  // FIXME Relocate to IBDataEngine
   public static Optional<FileSystemProvider> getZipFSProvider() {
     FileSystemProvider retVal = null;
     for (FileSystemProvider provider : FileSystemProvider.installedProviders()) {
@@ -79,9 +81,9 @@ public interface IBDataTypeImplsModelUtils {
         datasetRoot = optFs.getPath(optFs.getSeparator());
         pathToIBDataXml = optFs.getPath(uset[1]);
       } else if (uset[0].startsWith("file")) {
-        pathToIBDataXml = IBDataException.cet.withReturningTranslation(() -> Paths.get(url.toURI()));
+        pathToIBDataXml = cet.withReturningTranslation(() -> Paths.get(url.toURI()));
         datasetRoot = pathToIBDataXml.getParent().getParent();
-        left = IBDataException.cet.withReturningTranslation(() -> datasetRoot.toUri().toURL());
+        left = cet.withReturningTranslation(() -> datasetRoot.toUri().toURL());
       } else
         throw new IBDataException("Unrecognized URL for mapping to data set " + uset[0]);
 

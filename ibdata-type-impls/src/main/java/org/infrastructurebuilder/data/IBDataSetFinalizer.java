@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.Configurable;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 /**
@@ -27,7 +30,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
  *
  * @param <T>
  */
-public interface IBDataSetFinalizer<T> {
+public interface IBDataSetFinalizer<T>  {
 
   IBChecksumPathType finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> suppliers) throws IOException;
 

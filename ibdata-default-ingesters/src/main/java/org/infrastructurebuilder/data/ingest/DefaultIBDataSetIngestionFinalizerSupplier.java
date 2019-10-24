@@ -16,13 +16,13 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
+import static org.infrastructurebuilder.data.IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -36,8 +36,8 @@ import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -46,7 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named("default-ingest")
-public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier {
+public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier
+    implements IBDataSetFinalizerSupplier {
 
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
 
@@ -62,27 +63,22 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   }
 
   @Override
-  public IBDataSetFinalizerSupplier configure(ConfigMapSupplier config) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLogger(), () -> Paths.get(
-        //
-        requireNonNull(
-            // Get a config
-            requireNonNull(config, "Config Map Supplier").get()
-                // Get the working path because the one we have is bad? FIXME
-                .get(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER),
-            // Or report what's wrong
-            "Working Path Config")),
-        config, getTypeToExtensionMapper());
+  public DefaultIBDataSetIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
+    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(),
+        () -> Paths
+            .get(requireNonNull(requireNonNull(cms, "Config Map Supplier").get().getString(IBDATA_WORKING_PATH_SUPPLIER),
+                "Working Path Config '" + IBDATA_WORKING_PATH_SUPPLIER + "' not present")),
+        cms, getTypeToExtensionMapper());
   }
 
   @Override
-  public IBDataSetFinalizer<Ingestion> get() {
-    return new IngestionIBDataSetFinalizer(requireNonNull(getCms(), "Config supplier is null").get(), getWps().get());
+  protected IngestionIBDataSetFinalizer configuredType(ConfigMapSupplier config) {
+    return new IngestionIBDataSetFinalizer(requireNonNull(config, "Config supplier is null").get(), getWps().get());
   }
 
   private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<Ingestion> {
 
-    public IngestionIBDataSetFinalizer(Map<String, String> config, Path workingPath) {
+    public IngestionIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath);
     }
 

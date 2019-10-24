@@ -134,7 +134,7 @@ public class IBDataIngestMavenComponentTest {
   @Test
   public void testIngestFile() {
     ds.setStreams(streams);
-    config.dataSet = ds;
+    config.setDataSet(ds);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
@@ -147,7 +147,7 @@ public class IBDataIngestMavenComponentTest {
   @Test
   public void testIngestDownload() {
     ds.setStreams(new ArrayList<>(Arrays.asList(ds3)));
-    config.dataSet = ds;
+    config.setDataSet(ds);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
@@ -161,7 +161,7 @@ public class IBDataIngestMavenComponentTest {
   @Test
   public void testIngestMultiDownload() throws IOException {
     dsMulti.setStreams(Arrays.asList(ds4, ds3));
-    config.dataSet = dsMulti;
+    config.setDataSet(dsMulti);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());

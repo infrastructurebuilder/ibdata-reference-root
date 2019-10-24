@@ -15,38 +15,24 @@
  */
 package org.infrastructurebuilder.data;
 
+import org.infrastructurebuilder.data.ingest.AbstractIBDataConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
-public abstract class AbstractIBDataSetFinalizerSupplier implements IBDataSetFinalizerSupplier {
-  private final ConfigMapSupplier cms;
-  private final PathSupplier wps;
-  private final Logger logger;
+public abstract class AbstractIBDataSetFinalizerSupplier
+    extends AbstractIBDataConfigurableSupplier<IBDataSetFinalizer> implements IBDataSetFinalizerSupplier {
   private final TypeToExtensionMapper t2e;
 
-  protected AbstractIBDataSetFinalizerSupplier(Logger logger, PathSupplier workingPathSupplier, ConfigMapSupplier cms, TypeToExtensionMapper t2e) {
-    this.logger = logger;
-    this.wps = workingPathSupplier;
-    this.cms = cms;
+  protected AbstractIBDataSetFinalizerSupplier(Logger logger, PathSupplier workingPathSupplier, ConfigMapSupplier cms,
+      TypeToExtensionMapper t2e) {
+    super(workingPathSupplier, () -> logger, cms);
     this.t2e = t2e;
-  }
-
-  protected PathSupplier getWps() {
-    return wps;
-  }
-
-  protected ConfigMapSupplier getCms() {
-    return cms;
   }
 
   protected TypeToExtensionMapper getTypeToExtensionMapper() {
     return t2e;
   }
 
-  @Override
-  public Logger getLogger() {
-    return logger;
-  }
 }

@@ -44,6 +44,7 @@ import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.archiver.DefaultIBDataMavenArchiveFinalizer;
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
 
 /**
  * This is a transplant from the existing jar plugin for packaging.
@@ -75,10 +76,8 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
   @Parameter(property = "maven.jar.classifier")
   private String classifier;
 
-
   @Component
   IBDataPackageMavenComponent component;
-
 
   /**
    * Path to the default MANIFEST file to use. It will be used if
@@ -154,8 +153,8 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
 
     final IBDataLateBindingFinalizerConfigSupplier lbconfig = new IBDataLateBindingFinalizerConfigSupplier();
     lbconfig.setT(context);
-    final Logger l = new ConsoleLogger(Logger.LEVEL_DEBUG, IBDataLateBindingFinalizerConfigSupplier.class.getName());
-    theArchiver.addArchiveFinalizer(new DefaultIBDataMavenArchiveFinalizer(l, lbconfig));
+    theArchiver.addArchiveFinalizer(
+        new DefaultIBDataMavenArchiveFinalizer(() -> new SLF4JFromMavenLogger(getLog()), lbconfig));
     //    theArchiver.addArchiveFinalizer(new DefaultIBDataMavenStreamFinalizer(l, lbconfig));
 
     archiver.setArchiver(theArchiver);
@@ -197,11 +196,12 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
     getLog().info("Executing Packaging");
     final Map pc = getPluginContext();
 
-    if (!pc.containsKey(INGESTION_TARGET)  && !pc.containsKey(TRANSFORMATION_TARGET))
+    if (!pc.containsKey(INGESTION_TARGET) && !pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoExecutionException("Target does not exist");
-    if (pc.containsKey(INGESTION_TARGET)  && pc.containsKey(TRANSFORMATION_TARGET))
+    if (pc.containsKey(INGESTION_TARGET) && pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoExecutionException("Cannot package ingestion and transformation at the same time");
-    final IBChecksumPathType context = (IBChecksumPathType) pc.getOrDefault(INGESTION_TARGET,pc.get(TRANSFORMATION_TARGET));
+    final IBChecksumPathType context = (IBChecksumPathType) pc.getOrDefault(INGESTION_TARGET,
+        pc.get(TRANSFORMATION_TARGET));
     final Path target = context.getPath();
     getLog().debug("Context payload acquired " + target.toString());
     try {
@@ -225,10 +225,10 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
 
   }
 
-//  @Override
-//  protected void _setup() throws MojoFailureException {
-//    super._setup();
-//  }
+  //  @Override
+  //  protected void _setup() throws MojoFailureException {
+  //    super._setup();
+  //  }
 
   /**
    * Returns the Jar file to generate, based on an optional classifier.

@@ -15,10 +15,8 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.util.function.Supplier;
-
 import org.infrastructurebuilder.util.IBLoggerEnabled;
-import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
 /**
  * The contract for finalization:
@@ -27,7 +25,5 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
  * @author mykel.alvis
  *
  */
-public interface IBDataSetFinalizerSupplier extends IBLoggerEnabled , Supplier<IBDataSetFinalizer> {
-
-  IBDataSetFinalizerSupplier configure(ConfigMapSupplier cms);
+public interface IBDataSetFinalizerSupplier extends CMSConfigurableSupplier<IBDataSetFinalizer>, IBLoggerEnabled  {
 }

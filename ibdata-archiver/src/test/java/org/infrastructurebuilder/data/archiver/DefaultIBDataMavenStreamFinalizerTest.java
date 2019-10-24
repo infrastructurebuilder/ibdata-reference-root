@@ -15,22 +15,56 @@
  */
 package org.infrastructurebuilder.data.archiver;
 
-public class DefaultIBDataMavenStreamFinalizerTest  {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-//  @Test
-//  public void testDataStreamArchiveFinalizer() {
-//    assertNotNull("Existential", new DefaultIBDataMavenStreamFinalizer(c));
-//  }
-//
-//  @Test
-//  public void testFinalizeArchiveExtractionUnArchiver() {
-//    new DefaultIBDataMavenStreamFinalizer(c).finalizeArchiveExtraction(new ZipUnArchiver());
-//  }
-//
-//  @Test
-//  public void testGetVirtualFiles() {
-//    List<?> l = new DefaultIBDataMavenStreamFinalizer(c).getVirtualFiles();
-//    assertEquals("3", 3, l.size());
-//  }
+import java.util.List;
+
+import org.codehaus.plexus.archiver.ArchiverException;
+import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class DefaultIBDataMavenStreamFinalizerTest extends AbstractIBDataConfigTestSetup {
+
+  public final static Logger l = LoggerFactory.getLogger(DefaultIBDataMavenStreamFinalizerTest.class);
+
+  @Before
+  public void setup() {
+    super.abstractSetup();
+    logger = l;
+  }
+
+  @Test
+  public void testDataStreamArchiveFinalizer() {
+    assertNotNull("Existential", new DefaultIBDataMavenStreamFinalizer(() -> logger, c));
+  }
+
+  @Test
+  public void testDataStreamArchiveFinalizerCreation() {
+    DefaultIBDataMavenStreamFinalizer sf = new DefaultIBDataMavenStreamFinalizer(() -> logger, c);
+    sf.finalizeArchiveCreation(new JarArchiver());
+  }
+
+  @Test(expected =ArchiverException.class)
+  public void testDataStreamArchiveFinalizerCreationNullConfig() {
+    c.setT(null);
+    DefaultIBDataMavenStreamFinalizer sf = new DefaultIBDataMavenStreamFinalizer(() -> logger, c);
+    sf.finalizeArchiveCreation(new JarArchiver());
+  }
+
+  @Test
+  public void testFinalizeArchiveExtractionUnArchiver() {
+    new DefaultIBDataMavenStreamFinalizer(() -> logger, c).finalizeArchiveExtraction(new ZipUnArchiver());
+  }
+
+  @Test
+  public void testGetVirtualFiles() {
+    List<?> l = new DefaultIBDataMavenStreamFinalizer(() -> logger, c).getVirtualFiles();
+    assertEquals("none", 0, l.size());
+  }
 
 }

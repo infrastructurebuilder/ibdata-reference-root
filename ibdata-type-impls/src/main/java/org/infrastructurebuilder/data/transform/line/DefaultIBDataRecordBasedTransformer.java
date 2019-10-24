@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
 @SuppressWarnings("rawtypes")
@@ -31,7 +32,7 @@ public class DefaultIBDataRecordBasedTransformer extends AbstractIBDataRecordBas
     this(p, l, null, dataRecTransformerSuppliers, finalizer);
   }
 
-  protected DefaultIBDataRecordBasedTransformer(Path workingPath, Logger l, Map<String, String> config,
+  protected DefaultIBDataRecordBasedTransformer(Path workingPath, Logger l, ConfigMap config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers,
       // finalizer
       IBDataStreamRecordFinalizer finalizer) {
@@ -39,7 +40,7 @@ public class DefaultIBDataRecordBasedTransformer extends AbstractIBDataRecordBas
   }
 
   @Override
-  public IBDataTransformer configure(Map<String, String> map) {
+  public IBDataTransformer configure(ConfigMap map) {
     return new DefaultIBDataRecordBasedTransformer(getWorkingPath(),getLog(), map, getDataLineSuppliers(),
         getConfiguredFinalizer());
   }

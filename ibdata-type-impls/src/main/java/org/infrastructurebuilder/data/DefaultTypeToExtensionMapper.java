@@ -15,18 +15,24 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.IBConstants.APPLICATION_ACCESS;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORD;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORDX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_PDF;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_XLS;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_XLSX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XML;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_ZIP;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
+import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
+import static org.infrastructurebuilder.IBConstants.TEXT_TSV;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-
 
 @Named
 public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
@@ -46,10 +52,24 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       return ".zip";
     case TEXT_CSV:
       return ".csv";
+    case TEXT_TSV:
+      return ".tsv";
+    case APPLICATION_XLS:
+      return ".xls";
+    case APPLICATION_XLSX:
+      return ".xlsx";
+    case APPLICATION_ACCESS:
+      return ".mdb";
+    case APPLICATION_MSWORD:
+      return ".doc";
+    case APPLICATION_MSWORDX:
+      return ".docx";
+    case TEXT_PSV:
+      return ".psv";
     case APPLICATION_PDF:
       return ".pdf";
-    case "avro/binary":
-      return AVRO_BINARY;
+    case AVRO_BINARY:
+      return ".avro";
     default:
       return ".bin";
     }

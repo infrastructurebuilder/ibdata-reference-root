@@ -16,40 +16,48 @@
 package org.infrastructurebuilder.data.archiver;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
+import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultIBDataMavenArchiveFinalizerTest extends AbstractIBDataConfigTestSetup {
+  private Logger l = LoggerFactory.getLogger(DefaultIBDataMavenArchiveFinalizerTest.class);
 
-  @Ignore
-  @Test
-  public void testMetadataArchiveFinalizer() {
-    assertNotNull(new DefaultIBDataMavenArchiveFinalizer(logger, c));
+  @Before
+  public void setup() {
+    super.abstractSetup();
+    logger = l;
   }
 
-  @Ignore
   @Test
   public void testFinalizeArchiveCreationArchiver() {
-    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(logger, c);
+    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(() -> logger, c);
     f.finalizeArchiveCreation(new JarArchiver());
   }
 
-  @Ignore
+  @Test(expected = ArchiverException.class)
+  public void testNullArchiverConfig() {
+    c.setT(null);
+    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(() -> logger, c);
+    f.finalizeArchiveCreation(new JarArchiver());
+  }
+
+
   @Test
   public void testFinalizeArchiveExtractionUnArchiver() {
-    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(logger, c);
+    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(() -> logger, c);
     f.finalizeArchiveExtraction(new ZipUnArchiver());
   }
 
-  @Ignore
   @Test
   public void testGetVirtualFiles() {
-    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(logger, c);
-    assertEquals(1, f.getVirtualFiles().size());
+    final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(() -> logger, c);
+    assertEquals(0, f.getVirtualFiles().size());
   }
 
 }

@@ -31,6 +31,7 @@ import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplier;
+import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -73,7 +74,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
     }
 
     @Override
-    public IBDataTransformationResult transform(IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
+    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
       return new DefaultIBDataTransformationResult(ds);
     }
 

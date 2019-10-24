@@ -29,8 +29,9 @@ import org.codehaus.plexus.archiver.ArchiveFinalizer;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.UnArchiver;
-import org.codehaus.plexus.logging.Logger;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.slf4j.Logger;
 
 @Named
 public class DefaultIBDataMavenStreamFinalizer extends AbstractArchiveFinalizer implements ArchiveFinalizer {
@@ -39,9 +40,9 @@ public class DefaultIBDataMavenStreamFinalizer extends AbstractArchiveFinalizer 
   private final Logger logger;
 
   @Inject
-  public DefaultIBDataMavenStreamFinalizer(Logger logger, IBDataLateBindingFinalizerConfigSupplier cusplier) {
+  public DefaultIBDataMavenStreamFinalizer(LoggerSupplier logger, IBDataLateBindingFinalizerConfigSupplier cusplier) {
     this.configSupplier = requireNonNull(cusplier);
-    this.logger = requireNonNull(logger);
+    this.logger = requireNonNull(logger).get();
   }
 
   @Override
