@@ -39,6 +39,11 @@
       <artifactId>ibdata-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.infrastructurebuilder</groupId>
+      <artifactId>ibcore</artifactId>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.jooq</groupId>
       <artifactId>joor-java-8</artifactId>
       <scope>test</scope>
