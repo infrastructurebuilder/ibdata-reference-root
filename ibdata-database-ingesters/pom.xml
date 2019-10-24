@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-reference-root</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
   </parent>
   <artifactId>ibdata-database-ingesters</artifactId>
   <packaging>jar</packaging>
