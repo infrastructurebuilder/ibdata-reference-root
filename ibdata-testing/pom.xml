@@ -15,7 +15,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-reference-root</artifactId>
@@ -29,8 +31,14 @@
   <properties>
     <test.coverage.percentage.required>99</test.coverage.percentage.required>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
+    <surefire.failIfNoTests>false</surefire.failIfNoTests>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>

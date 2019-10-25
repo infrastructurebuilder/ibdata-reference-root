@@ -70,6 +70,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   private final List<IBDataRecordTransformer<?, ?>> configuredTranformers;
   private final IBDataStreamRecordFinalizer configuredFinalizer;
   private final Optional<String> finalType;
+  private int countOfRowsSkippedSoFar = 0;;
 
   protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, ConfigMap config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
@@ -87,7 +88,8 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
       // If the map contains the key, then the suppliers MUST contain all indicated line transformers
       Optional<String> transformersList = ofNullable(config.getString(TRANSFORMERSLIST));
       Optional<String> theListString = transformersList.map(IBUtils.nullIfBlank);
-      List<String> theList = theListString.map(str -> Arrays.asList(str.split(Pattern.quote(RECORD_SPLITTER)))).orElse(new ArrayList<>());
+      List<String> theList = theListString.map(str -> Arrays.asList(str.split(Pattern.quote(RECORD_SPLITTER))))
+          .orElse(new ArrayList<>());
       if (theList.size() > 0) {
         Map<String, String> idToHint = theList.stream().map(s -> s.split(Pattern.quote(MAP_SPLITTER)))
             .collect(Collectors.toMap(k -> k[0], v -> v[1]));
@@ -126,7 +128,8 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
+  public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams,
+      boolean failOnError) {
     IBDataStreamRecordFinalizer cf = getConfiguredFinalizer();
     if (!acceptable(finalType, cf.accepts()))
       throw new IBDataException(
@@ -147,6 +150,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     return configuredFinalizer;
   }
 
+/* TODO Make this a (non-parallel!) stream process
   private Stream<String> streamFor(IBDataStreamSupplier ibds) {
     try (InputStream ins = Objects.requireNonNull(ibds).get().get()) {
       return IBUtils.readInputStreamAsStringStream(ins);
@@ -154,12 +158,14 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
       throw new IBDataException(e);
     }
   }
+*/
 
   // This is a LITTLE bit dangerous
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected String processStream(IBDataStream stream, IBDataStreamRecordFinalizer finalizer,
       Map<String, List<Long>> errors, List<IBDataTransformationError> errorList) {
     return cet.withReturningTranslation(() -> {
+      int skipRows = finalizer.getNumberOfRowsToSkip();
       String inbound;
       try (BufferedReader r = new BufferedReader(new InputStreamReader(stream.get()))) {
         String line;
@@ -168,6 +174,11 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
         long lineCount = 0;
         while ((line = cet.withReturningTranslation(() -> r.readLine())) != null) {
           lineCount++;
+          if (skipRows > 0) {
+            skipRows -= 1;
+            getLog().debug("Skipping row " + lineCount);
+            continue;
+          }
           //              log.info(String.format("Line %05d '%s'", lineCount, line));
           s = of(line);
           for (IBDataRecordTransformer t : getConfiguredTransformers()) {

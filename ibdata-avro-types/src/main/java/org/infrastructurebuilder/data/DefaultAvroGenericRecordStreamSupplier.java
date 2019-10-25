@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Vector;
 import java.util.stream.Stream;
 
 import org.apache.avro.file.DataFileStream;
@@ -35,23 +35,33 @@ import org.apache.avro.generic.GenericRecord;
 public class DefaultAvroGenericRecordStreamSupplier implements IBDataSpecificStreamFactory {
   public final static List<String> TYPES = Arrays.asList(AVRO_BINARY);
 
-  // FIXME Probably dangles an unclosed file
   @Override
-  public Optional<Stream<Object>> from(IBDataStream ds) {
+  public Optional<Stream<? extends Object>> from(IBDataStream ds) {
     return Optional.ofNullable(ds).map(d -> {
-      try (InputStream ins = d.get()) {
-      return stream(
-          // From splterator
-          spliteratorUnknownSize(
-              // From DataFileStream
-              cet.withReturningTranslation(
-                  () -> new DataFileStream<GenericRecord>(ins, new GenericDatumReader<GenericRecord>())),
-              // with no characteristics
-              0),
-          // not parallel
-          false);
-      } catch (IOException e) {
-        throw new IBDataException(e);
+      // FIXME This stream close prematurely
+
+      final InputStream ins = d.get();
+      DataFileStream<GenericRecord> s = cet.withReturningTranslation(() -> {
+        return new DataFileStream<GenericRecord>(ins, new GenericDatumReader<GenericRecord>());
+      });
+      try {
+        // FIXME OBVIOUSLY NOT CORRECT!!!!
+        List<GenericRecord> l = new Vector<>();
+        s.forEach(a -> l.add(a));
+        return l.stream();
+//        stream(
+//            // From splterator
+//            spliteratorUnknownSize(s, 0), // with no characteristics
+//            // not parallel
+//            false);
+      } finally {
+        if (s != null)
+          try {
+            s.close();
+            ins.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
       }
     });
 

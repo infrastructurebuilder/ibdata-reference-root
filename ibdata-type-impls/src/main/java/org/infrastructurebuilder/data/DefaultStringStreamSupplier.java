@@ -36,7 +36,7 @@ public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory 
 
 
   @Override
-  public Optional<Stream<Object>> from(IBDataStream ds) {
+  public Optional<Stream<? extends Object>> from(IBDataStream ds) {
     return Optional.ofNullable(ds)
         // We have a datastream
         .map(d -> {

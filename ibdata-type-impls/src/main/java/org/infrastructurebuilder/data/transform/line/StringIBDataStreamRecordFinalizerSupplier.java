@@ -67,9 +67,17 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
 
   private class StringIBDataStreamRecordFinalizer extends AbstractIBDataStreamRecordFinalizer<String, BufferedWriter> {
 
+    private final int numberOfRowsToSkip;
+
     public StringIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
       super(id, workingPath, map,
           Optional.of(cet.withReturningTranslation(() -> Files.newBufferedWriter(workingPath, CREATE_NEW))));
+      this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
+    }
+
+    @Override
+    public int getNumberOfRowsToSkip() {
+      return this.numberOfRowsToSkip;
     }
 
     @Override
