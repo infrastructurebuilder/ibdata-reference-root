@@ -170,11 +170,4 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     return true;
   }
 
-  /**
-   * FIXME Move this to IBMetadataUtils
-   * Function to compare W3c Dcoument instances (by string compare, like a filthy animal
-   */
-  public final static BiFunction<Document, Document, Boolean> w3cDocumentEqualser = (lhs, rhs) -> {
-    return stringifyDocument.apply(lhs).equals(stringifyDocument.apply(rhs));
-  };
 }
