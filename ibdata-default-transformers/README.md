@@ -20,7 +20,7 @@ Just a quick list of the "default" transformers.  These are available from this 
 | random-line-filter | `String` | `String` | Filters lines based on a random number generator.  | `percentage` - Percentage of lines as a floating point number (Default : `.5`) |
 | regex-array-split | `String` | `Array[String]` | Splits a line (like a CSV) to an array using a simple regex  | `regex` - Value to split on (Default : `,`) |
 | array-to-numbered-column | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a pattern supplied with the index  | `format` - Map key format (Default : `COLUMN%00d`) |
-| array-to-name-map | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a list of keys index by field position within the array | `fields` - a List of fields (see below) (Default : none) |
+| array-to-name-map | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a list of keys index by field position within the array | `fields` - a List of fields ( [see below](#list-of-fields) ) (Default : none) |
 
 
 ## List of Fields
