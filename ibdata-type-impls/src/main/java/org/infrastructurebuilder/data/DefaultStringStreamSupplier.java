@@ -15,7 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
+import static org.infrastructurebuilder.IBConstants.*;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
 
 import java.io.IOException;
@@ -32,22 +32,20 @@ import org.infrastructurebuilder.util.IBUtils;
 
 @Named
 public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory {
-  public final static List<String> TYPES = Arrays.asList(TEXT_CSV, TEXT_PLAIN);
-
+  public final static List<String> TYPES = Arrays.asList(TEXT_CSV, TEXT_PSV, TEXT_TSV, TEXT_PLAIN);
 
   @Override
   public Optional<Stream<? extends Object>> from(IBDataStream ds) {
-    return Optional.ofNullable(ds)
-        // We have a datastream
-        .map(d -> {
-          try (InputStream ins = d.get()) {
-            Stream<Object> s = (Stream<Object>) IBUtils.readInputStreamAsStringStream(ins).map(o -> (Object) o)
-                .collect(Collectors.toList());
-            return s;
-          } catch (IOException e) {
-            throw new IBDataException(e);
-          }
-        });
+    if (ds == null || !getRespondTypes().contains(ds.getMimeType()))
+      return Optional.empty();
+    IBDataStream d = ds;
+
+    try (InputStream ins = d.get()) {
+      Stream<Object> s = (Stream<Object>) IBUtils.readInputStreamAsStringStream(ins).map(o -> (Object) o);
+      return Optional.of(s);
+    } catch (IOException e) {
+      throw new IBDataException(e);
+    }
   }
 
   @Override

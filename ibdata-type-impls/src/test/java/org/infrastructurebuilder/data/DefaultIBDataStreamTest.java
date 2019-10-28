@@ -37,6 +37,10 @@ import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
+import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBCoreReadDetectResponse;
 import org.infrastructurebuilder.util.files.ThrowingIBChecksumType;
 import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.joor.Reflect;
@@ -65,16 +69,18 @@ public class DefaultIBDataStreamTest {
     }
   }
 
-  private Path path;
-  private DefaultIBDataStreamIdentifier identifier;
+  private Path path, path2;
+  private DefaultIBDataStreamIdentifier identifier, identifier2;
   private DefaultIBDataStream ib1;
-  private Checksum checksum;
+  private Checksum checksum, checksum2;
   private Document metadata;
   private String mimeType;
-  private InputStream rick;
+  private InputStream rick, lines;
   private Path p1;
   private DefaultIBDataStream ib2;
   private DataStream ds;
+  private IBChecksumPathType cType;
+  private DataStream ds2;
   private final static Date now = new Date();
   private static TestingPathSupplier wps = new TestingPathSupplier();
 
@@ -82,21 +88,29 @@ public class DefaultIBDataStreamTest {
   public void setUp() throws Exception {
     p1 = wps.get();
     path = p1.resolve(UUID.randomUUID().toString() + ".jpg");
+    path2 = p1.resolve(UUID.randomUUID().toString() + ".txt");
     metadata = IBMetadataUtils.emptyDocumentSupplier.get();
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);
+    cType = IBCoreReadDetectResponse.copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",  getClass().getResourceAsStream("/lines.txt"));
     identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL()), of(NAME), of(DESC),
         checksum, now, metadata, mimeType, of(path.toString()));
     ib1 = new DefaultIBDataStream(identifier, path);
     ib2 = new DefaultIBDataStream(identifier, new ThrowingIBChecksumType());
 
     ds = new DataStream();
-    ds.setPath(path.relativize(p1).toString());
+    ds.setPath(path.toString());
     ds.setSha512("abcd");
     ds.setUuid(UUID.randomUUID().toString());
     ds.setMimeType(JPG);
     ds.setCreationDate(now);
+    ds2 = new DataStream();
+    ds2.setPath(path.toString());
+    ds2.setSha512("defa");
+    ds2.setUuid(UUID.randomUUID().toString());
+    ds2.setMimeType(cType.getType());
+    ds2.setCreationDate(now);
   }
 
   @Test(expected = IBException.class)
@@ -192,6 +206,23 @@ public class DefaultIBDataStreamTest {
   @Test
   public void testFrom() {
     DefaultIBDataStream v = DefaultIBDataStream.from(ds, () -> path);
+  }
+
+  @Test
+  public void testStringStreamInappropriateSupplier() {
+    DefaultIBDataStream v = DefaultIBDataStream.from(ds, () -> path);
+    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
+    assertFalse(dss.from(v).isPresent());
+  }
+  @Test
+  public void testStringStreamAppropriateSupplier() throws IOException {
+    DefaultIBDataStream v = DefaultIBDataStream.from(ds2, () -> path2);
+    InputStream i = v.get();
+    i.close();
+    i = v.get();
+    i.close();
+    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
+    assertTrue(dss.from(v).isPresent());
   }
 
 }
