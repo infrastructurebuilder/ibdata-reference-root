@@ -15,8 +15,6 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.StreamSupport.stream;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
