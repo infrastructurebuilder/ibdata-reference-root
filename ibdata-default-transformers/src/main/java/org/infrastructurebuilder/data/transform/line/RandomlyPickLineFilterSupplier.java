@@ -61,7 +61,7 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
   private class RandomLineFilter extends AbstractIBDataRecordTransformer<Object, Object> {
 
     public static final String RANDOMVAL = "percentage";
-    public static final String DEFAULT_REGEX = ".5"; // Match pretty much anything
+    public static final String DEFAULT_RANDOM = ".5"; // Match pretty much anything
     private final List<String> ACCEPTABLE_TYPES = Arrays.asList(IBDataConstants.ANY_TYPE);
     private final float random;
     private final Random randomGen = new Random(Instant.now().toEpochMilli());
@@ -72,7 +72,7 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
      */
     public RandomLineFilter(Path ps, ConfigMap config) {
       super(ps, config);
-      this.random = Float.parseFloat((getConfiguration(RANDOMVAL, DEFAULT_REGEX)));
+      this.random = Float.parseFloat((getConfiguration(RANDOMVAL, DEFAULT_RANDOM)));
     }
 
     /**
