@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 import static org.infrastructurebuilder.data.IBMetadataUtils.stringifyDocument;
+import static org.infrastructurebuilder.data.IBMetadataUtils.w3cDocumentEqualser;
 
 import java.net.URL;
 import java.util.Date;
