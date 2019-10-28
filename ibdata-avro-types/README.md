@@ -6,12 +6,7 @@ These tranformers (and finalizers) are for managing Avro types.
 
 | Hint | Accepts | Produces | Effect | Parameters |
 | ---- | ------- | -------- | ------ | ---------- |
-| `map-to-generic-avro` | `Map[String,String]` | `GenericRecord` | Trims lines that are processed String entries (like csv, etc) | * `schema` - Path to schema (avsc)
-* `timestamp.formatter` - Timestamp format (Default : `DateTimeFormatter.ISO_ZONED_DATE_TIME`
-* `time.formatter` - Time field type formatter (Default: `HH:MM` - 24 hour with hours 00-23 )
-* `date.formatter` - Date field type formatter (DEfault: `mm-DD-yy`
-* `locale.language`- Locale (Default: default for system)
-* `locale.region` - Locale (Default: default for system) |
+| `map-to-generic-avro` | `Map[String,String]` | `GenericRecord` | Maps a string map of fields to a schema-backed GenericRecord | <ul><li>`schema` - Path to schema (avsc)</li><li>`timestamp.formatter` - Timestamp format (Default : `DateTimeFormatter.ISO_ZONED_DATE_TIME`) </li><li>`time.formatter` - Time field type formatter (Default: `HH:MM` - 24 hour with hours 00-23 )</li><li>`date.formatter` - Date field type formatter (DEfault: `mm-DD-yy`) </li><li>`locale.language`- Locale (Default: default for system)</li><li>`locale.region` - Locale (Default: default for system)</li> </ul> |
 
 
 ## Record Finalizers
