@@ -32,11 +32,12 @@ The list of fields in the `array-to-name-map` is described in the `<configuratio
     <fields>
       <field>field_name_1</field>
       <field>field_name_2</field>
-      ...
       <field>last_Field_named</field>
     </fields>
   </configuration>
 ```
+
+In this case, the string `A,B,C,D` would be mapped to the map `field_name_1=A, field_name_2=B, last_Field_named=C`, as the order matters.  Without a corresponding field in the list, the value `D` gets dropped.
 
 ## Notes
 
