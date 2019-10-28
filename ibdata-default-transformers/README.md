@@ -7,8 +7,8 @@ Just a quick list of the "default" transformers.  These are available from this 
 
 | Hint | Effect | Parameters |
 | ---- | ------ | ---------- |
-| pass-thru| Does nothing | none |
-| add-stream | Add a stream to the final DataSet | `addedPath` Path to the new stream |
+| `pass-thru` | Does nothing | none |
+| `add-stream` | Brute-force add a stream to the final DataSet | `addedPath` Path to the new stream (moving to a URL) |
 
 
 ## Record Transformers
