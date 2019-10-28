@@ -22,6 +22,14 @@ Just a quick list of the "default" transformers.  These are available from this 
 | `array-to-numbered-column` | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a pattern supplied with the index  | `format` - Map key format (Default : `COLUMN%00d`) |
 | `array-to-name-map` | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a list of keys index by field position within the array | `fields` - a List of fields ( [see below](#list-of-fields) ) (Default : none) |
 
+## Record Finalizers
+
+| Hint | Accepts | Produces | Effect | Parameters |
+| ---- | ------- | -------- | ------ | ---------- |
+| `string` | `text/plain` | `text/plain` and equivalents (like `text/csv`, `text/tab-separated-values`, and `text/pipe-separated-values`) | Writes a file of lines of strings (MimeType defaults to `text/plain` but can be overriden) | `numberOfRowsToSkip` Skip the supplied number of rows (Default: `0`) |
+
+
+
 
 ## List of Fields
 
