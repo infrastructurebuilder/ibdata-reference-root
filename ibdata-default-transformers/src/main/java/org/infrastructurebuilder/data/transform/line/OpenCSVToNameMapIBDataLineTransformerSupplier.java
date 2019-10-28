@@ -36,24 +36,24 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.ICSVParser;
 
-@Named(StringToNameMapIBDataLineTransformerSupplier.STRING_TO_NAME_MAP)
-public class StringToNameMapIBDataLineTransformerSupplier
+@Named(OpenCSVToNameMapIBDataLineTransformerSupplier.STRING_TO_NAME_MAP)
+public class OpenCSVToNameMapIBDataLineTransformerSupplier
     extends AbstractIBDataRecordTransformerSupplier<String, Map<String, String>> {
   public static final String STRING_TO_NAME_MAP = "opencsv-to-name-map";
 
   @javax.inject.Inject
-  public StringToNameMapIBDataLineTransformerSupplier(
+  public OpenCSVToNameMapIBDataLineTransformerSupplier(
       @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 
-  private StringToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
+  private OpenCSVToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
     super(wps, cms);
   }
 
   @Override
-  public StringToNameMapIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new StringToNameMapIBDataLineTransformerSupplier(getWps(), cms);
+  public OpenCSVToNameMapIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
+    return new OpenCSVToNameMapIBDataLineTransformerSupplier(getWps(), cms);
   }
 
   @Override

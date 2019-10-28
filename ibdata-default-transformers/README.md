@@ -38,3 +38,7 @@ The list of fields in the `array-to-name-map` is described in the `<configuratio
   </configuration>
 ```
 
+## Notes
+
+The `regex-array-split` is a fairly simplistic field splitter.  It does not recognize that the split `regex` delimiter value can be inside quotes, which is often the case with deliminated files.
+The upcoming `opencsv-to-name-map` transformer will deal with this problem.
