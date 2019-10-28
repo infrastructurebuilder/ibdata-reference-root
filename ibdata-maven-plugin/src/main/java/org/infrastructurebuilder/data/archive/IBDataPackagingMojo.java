@@ -45,7 +45,7 @@ import org.infrastructurebuilder.data.archiver.DefaultIBDataMavenArchiveFinalize
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
-
+import static org.infrastructurebuilder.data.IBDataConstants.*;
 /**
  * This is a transplant from the existing jar plugin for packaging.
  * Many of the same javadoc comments have been left  in place

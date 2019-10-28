@@ -29,8 +29,8 @@
   <name>${project.artifactId}</name>
   <description>IBData types for avro-specific transformation</description>
   <properties>
-    <jacoco.max.missed.classes>1</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>68</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>62</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -108,23 +108,6 @@
               <sources>
                 <source>${project.build.directory}/generated-test-sources/avro</source>
               </sources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>attach-schema</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <inherited>false</inherited>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <classifier>schema</classifier>
-                  <file>${project.build.outputDirectory}/${project.artifactId}.avsc</file>
-                  <type>avsc</type>
-                </artifact>
-              </artifacts>
             </configuration>
           </execution>
         </executions>

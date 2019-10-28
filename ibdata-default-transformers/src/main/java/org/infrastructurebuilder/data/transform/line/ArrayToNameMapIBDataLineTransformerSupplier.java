@@ -29,7 +29,6 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBMetadataUtils;
-import org.infrastructurebuilder.data.transform.NamedFields;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;

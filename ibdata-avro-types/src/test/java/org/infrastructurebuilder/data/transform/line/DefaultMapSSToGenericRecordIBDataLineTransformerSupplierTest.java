@@ -18,6 +18,9 @@ package org.infrastructurebuilder.data.transform.line;
 import static org.junit.Assert.*;
 
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,7 +39,7 @@ import org.junit.Test;
 
 public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
 
-  public static final String NCCIREFDATAPACKAGER = "nccirefdatapackager";
+  public static final String BA = "ba";
   private final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @BeforeClass
@@ -56,7 +59,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    schemaFile = wps.getTestClasses().resolve(NCCIREFDATAPACKAGER + ".avsc").toAbsolutePath();
+    schemaFile = wps.getTestClasses().resolve(BA + ".avsc").toAbsolutePath();
     cm = new ConfigMap();
     cm.put(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
     wp = wps.get();
@@ -81,19 +84,32 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
     DefaultMapSSToGenericRecordIBDataLineTransformer q = (DefaultMapSSToGenericRecordIBDataLineTransformer) v.get();
 
     assertTrue(q.isBlankFieldNullInUnion());
-    assertEquals(NCCIREFDATAPACKAGER, q.getSchema().getName());
+    assertEquals(BA.toUpperCase(), q.getSchema().getName());
     assertEquals(Locale.getDefault(), q.getLocale());
     assertNotNull(q.getTimeFormatter());
     assertNotNull(q.getDateFormatter());
     assertNotNull(q.getTimestampFormatter());
 
+    Map<String, String> m = new HashMap<>();
+    m.put("index", "7");
+    m.put("last_name", "alvis");
+    m.put("first_name", "mkel");
+    m.put("country", "USA");
+    m.put("date_of_birth", "10-15-07");
+    m.put("id", "3598");
+
+    GenericRecord g = q.apply(m);
+
+    Object d = "13528";
+
+    assertEquals(d, g.get("date_of_birth").toString());
   }
 
   @Test(expected = IBDataException.class)
   public void testConfigureConfigMapSupplierNoSchema() {
     AbstractIBDataRecordTransformerSupplier<Map<String, String>, GenericRecord> v = s
         .configure(new DefaultConfigMapSupplier());
-    assertFalse( v == s);
+    assertFalse(v == s);
     v.get();
   }
 

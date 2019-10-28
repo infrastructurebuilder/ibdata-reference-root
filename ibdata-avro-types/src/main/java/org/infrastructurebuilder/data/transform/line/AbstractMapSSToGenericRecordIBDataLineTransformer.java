@@ -39,10 +39,6 @@ import org.infrastructurebuilder.util.config.ConfigMap;
 abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
     extends AbstractGenericIBDataLineTransformer<Map<String, String>> {
 
-  public AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath) {
-    super(workingPath);
-  }
-
   protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
     super(workingPath, config);
   }
