@@ -15,6 +15,35 @@
  */
 package org.infrastructurebuilder.data.sql;
 
+import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.util.IBUtils.nullIfBlank;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import javax.inject.Named;
+import javax.sql.DataSource;
+
+import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.ExecutionEnabled;
+import org.infrastructurebuilder.util.ExecutionResponse;
+import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
+
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -28,52 +57,12 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.integration.spring.SpringLiquibase;
 import liquibase.logging.LogService;
 import liquibase.logging.LogType;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
-import liquibase.util.file.FilenameUtils;
-//import org.springframework.beans.factory.BeanNameAware;
-//import org.springframework.beans.factory.InitializingBean;
-//import org.springframework.context.ResourceLoaderAware;
-//import org.springframework.core.io.Resource;
-//import org.springframework.core.io.ResourceLoader;
-//import org.springframework.core.io.support.ResourcePatternUtils;
-
-import javax.inject.Named;
-import javax.sql.DataSource;
-
-import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.util.ExecutionEnabled;
-import org.infrastructurebuilder.util.ExecutionResponse;
-import org.infrastructurebuilder.util.config.ConfigMap;
-import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
-
-import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.util.IBUtils.nullIfBlank;
-
-import java.io.*;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * A Spring-ified wrapper for Liquibase.

@@ -13,42 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
-
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
-
-import java.nio.file.Path;
-import java.util.Optional;
-
-abstract public class AbstractIBSerializer<T, C, S extends AutoCloseable> implements IBSerializer<T, C, S> {
-
-  private final Optional<Path> path;
-  private final Optional<C> config;
-
-  protected AbstractIBSerializer(Optional<Path> p, Optional<C> c) {
-    this.path = requireNonNull(p);
-    this.config = requireNonNull(c);
-  }
-
-  protected Optional<C> getConfig() {
-    return config;
-  }
-
-  protected Optional<Path> getPath() {
-    return path;
-  }
-
-  abstract protected IBSerializer<T, C, S> newInstance(Optional<Path> p, Optional<C> c);
-
-  @Override
-  public IBSerializer<T, C, S> toPath(Path p) {
-    return newInstance(ofNullable(p), config);
-  }
-
-  @Override
-  public IBSerializer<T, C, S> withSerializationConfiguration(C c) {
-    return newInstance(path, ofNullable(c));
-  }
-
-}
+//package org.infrastructurebuilder.data;
+//
+//import static java.util.Objects.requireNonNull;
+//import static java.util.Optional.ofNullable;
+//
+//import java.nio.file.Path;
+//import java.util.Optional;
+//
+//abstract public class AbstractIBSerializer<T, C, S extends AutoCloseable> implements IBSerializer<T, C, S> {
+//
+//  private final Optional<Path> path;
+//  private final Optional<C> config;
+//
+//  protected AbstractIBSerializer(Optional<Path> p, Optional<C> c) {
+//    this.path = requireNonNull(p);
+//    this.config = requireNonNull(c);
+//  }
+//
+//  protected Optional<C> getConfig() {
+//    return config;
+//  }
+//
+//  protected Optional<Path> getPath() {
+//    return path;
+//  }
+//
+//  abstract protected IBSerializer<T, C, S> newInstance(Optional<Path> p, Optional<C> c);
+//
+//  @Override
+//  public IBSerializer<T, C, S> toPath(Path p) {
+//    return newInstance(ofNullable(p), config);
+//  }
+//
+//  @Override
+//  public IBSerializer<T, C, S> withSerializationConfiguration(C c) {
+//    return newInstance(path, ofNullable(c));
+//  }
+//
+//}

@@ -18,7 +18,6 @@ package org.infrastructurebuilder.data.transform.line;
 import static java.util.Optional.ofNullable;
 
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 

@@ -28,6 +28,7 @@ import java.util.Optional;
 
 import org.apache.avro.LogicalType;
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.data.TimeConversions;
 import org.apache.avro.generic.GenericData;
@@ -37,10 +38,6 @@ import org.infrastructurebuilder.util.config.ConfigMap;
 
 abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
     extends AbstractGenericIBDataLineTransformer<Map<String, String>> {
-
-  public AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath) {
-    super(workingPath);
-  }
 
   protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
     super(workingPath, config);
@@ -53,7 +50,14 @@ abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
 
     final GenericRecord r = new GenericData.Record(s);
     t.keySet().forEach(k -> {
-      r.put(k, managedValue(s.getField(k).schema(), k, t.get(k)));
+      Field v = s.getField(k);
+      if (v != null) {
+        r.put(k, managedValue(v.schema(), k, t.get(k)));
+      }
+      else
+      {
+        // FIXME (I need a logger to warn of missing fields)
+      }
     });  // FIXME mebbe we need to catch some of the RuntimeException instances
     return r;
   }

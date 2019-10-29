@@ -15,16 +15,19 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -34,18 +37,14 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.infrastructurebuilder.util.config.SingletonLateBindingPathSupplier;
+import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 public abstract class AbstractIBDataMojo extends AbstractMojo {
-
-  public static final String IBDATA_WORKING_DIRECTORY = "ibdata.working.directory";
-  protected final static String INGESTION_TARGET = "IBDATA_INGESTION_TARGET_@3123";
-  protected final static String TRANSFORMATION_TARGET = "IBDATA_TRANSFORMATION_TARGET_@3123";
 
   /**
    * Before we can do any
    */
-  @Component(hint = IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER)
+  @Component(hint = IBDATA_WORKING_PATH_SUPPLIER)
   private IBDataWorkingPathSupplier workingPathSupplier;
 
   @Parameter(defaultValue = "${mojoExecution}", readonly = true)
@@ -76,6 +75,8 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
     return streamerFactory;
   }
 
+  private OpenOption[] options = { StandardOpenOption.CREATE, StandardOpenOption.WRITE };
+
   public IBDataEngine getEngine() {
     return engine;
   }
@@ -90,13 +91,13 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
       getLog().warn("Skipping...");
     }
   }
-//
-//  @Override
-//  public IBDataEngine getIBDataEngineInstance() throws MojoFailureException {
-//    // Get the data engine from the injected map of IBDataEngineSuppliers or throw an IBDataException
-//    return ofNullable(dataEngine).flatMap(e -> ofNullable(dataEngines.get(e)))
-//        .orElseThrow(() -> new MojoFailureException("No supplier for data engine " + dataEngine)).get();
-//  }
+  //
+  //  @Override
+  //  public IBDataEngine getIBDataEngineInstance() throws MojoFailureException {
+  //    // Get the data engine from the injected map of IBDataEngineSuppliers or throw an IBDataException
+  //    return ofNullable(dataEngine).flatMap(e -> ofNullable(dataEngines.get(e)))
+  //        .orElseThrow(() -> new MojoFailureException("No supplier for data engine " + dataEngine)).get();
+  //  }
 
   public MojoExecution getMojo() {
     return mojo;
@@ -110,17 +111,21 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
     return session;
   }
 
+  public Path getWorkingDirectory() {
+    return this.workingDirectory.toPath();
+  }
+
   protected abstract AbstractIBDataMavenComponent getComponent();
 
   protected abstract void _execute() throws MojoExecutionException, MojoFailureException;
 
   protected void _setup() throws MojoFailureException {
-//    int x = getEngine().prepopulate();
-//    getLog().info("Located " + x + " DataSets with " + getEngine());
+    //    int x = getEngine().prepopulate();
+    //    getLog().info("Located " + x + " DataSets with " + getEngine());
     IBDataException.cet.withTranslation(() -> Files.createDirectories(workingDirectory.toPath()));
     workingPathSupplier.setPath(workingDirectory.toPath()); // workingPathSupplier is a Singleton
     if (getSession() != null) {
-      getComponent().addConfig(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM,
+      getComponent().addConfig(CACHE_DIRECTORY_CONFIG_ITEM,
           Paths.get(getSession().getLocalRepository().getBasedir()).resolve(".cache").resolve("download-maven-plugin")
               .toAbsolutePath().toString());
     }
@@ -128,6 +133,15 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
     getComponent().setProject(getProject());
     getComponent().setSession(getSession());
 
+  }
+
+  protected final void writeMarker(String marker, IBChecksumPathType output) throws MojoFailureException {
+    try (PrintWriter w = new PrintWriter(
+        Files.newBufferedWriter(getWorkingDirectory().resolve(marker + ".json"), options))) {
+      w.print(output.asJSON().toString(2));
+    } catch (IOException e) {
+      throw new MojoFailureException("Failed to write marker file", e);
+    }
   }
 
 }

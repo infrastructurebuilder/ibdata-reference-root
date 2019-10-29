@@ -47,7 +47,7 @@
 //  public static final String COMPLEX_ARRAY_SPLIT = "complex.array.split";
 //
 //  public ComplexArraySplitIBDataLineTransformerSupplier(
-//      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) WorkingPathSupplier wps,
+//      @Named(IBDATA_WORKING_PATH_SUPPLIER) WorkingPathSupplier wps,
 //      @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier cms) {
 //    super(wps, cms);
 //  }

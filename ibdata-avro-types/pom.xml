@@ -15,21 +15,22 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-reference-root</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
   </parent>
   <artifactId>ibdata-avro-types</artifactId>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>IBData types for avro-specific transformation</description>
   <properties>
-    <jacoco.max.missed.classes>99</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>0</test.coverage.percentage.required>
-    <surefire.failIfNoTests>false</surefire.failIfNoTests>
+    <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>62</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -54,11 +55,64 @@
      -->
   </dependencies>
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+        <excludes>
+          <exclude>**/*.avro</exclude>
+        </excludes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>**/*.avro</include>
+        </includes>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.infrastructurebuilder.maven</groupId>
         <artifactId>ibversions-maven-plugin</artifactId>
       </plugin>
+            <plugin>
+        <groupId>org.apache.avro</groupId>
+        <artifactId>avro-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>first</id>
+            <goals>
+              <goal>idl-protocol</goal>
+              <goal>schema</goal>
+            </goals>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <testSourceDirectory>${basedir}/src/test/resources</testSourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-avro</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <inherited>false</inherited>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-test-sources/avro</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 </project>

@@ -15,10 +15,11 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,7 +32,6 @@ import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -45,7 +45,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
   @Inject
   public GenericAvroIBDataRecordFinalizerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 
@@ -68,8 +68,15 @@ public class GenericAvroIBDataRecordFinalizerSupplier
   private class GenericAvroIBDataStreamRecordFinalizer
       extends AbstractIBDataStreamRecordFinalizer<GenericRecord, DataFileWriter<GenericRecord>> {
 
+    private final int numberOfRowsToSkip;
     public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
       super(id, workingPath, map, Optional.of(IBDataAvroUtils.fromMapAndWP.apply(workingPath, map)));
+      this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
+    }
+
+    @Override
+    public int getNumberOfRowsToSkip() {
+      return this.numberOfRowsToSkip;
     }
 
     @Override

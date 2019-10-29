@@ -17,12 +17,12 @@ package org.infrastructurebuilder.data.transform;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.data.IBDataTypeImplsModelUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.DataStream;
@@ -66,21 +66,28 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 @Named("transform")
 public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComponent {
 
-  public final static BiFunction<MavenProject, Path, IBDataTransformationResult> fromProject = (p, wp) -> {
-    requireNonNull(p);
+  public final static BiFunction<MavenProject, Path, IBDataTransformationResult> fromProject = (project,
+      workingPath) -> {
+    requireNonNull(project);
     DataSet ds = new DataSet();
     ds.setUuid(UUID.randomUUID().toString());
-    ds.setGroupId(p.getGroupId());
-    ds.setArtifactId(p.getArtifactId());
-    ds.setVersion(p.getVersion());
-    ds.setDataSetName(p.getName());
-    ds.setDataSetDescription(p.getDescription());
+    ds.setGroupId(project.getGroupId());
+    ds.setArtifactId(project.getArtifactId());
+    ds.setVersion(project.getVersion());
+    ds.setDataSetName(project.getName());
+    ds.setDataSetDescription(project.getDescription());
     ds.setCreationDate(new Date());
     ds.setMetadata(new Xpp3Dom("metadata"));
 
-    ds.setPath(
-        IBDataException.cet.withReturningTranslation(() -> wp.toAbsolutePath().toUri().toURL().toExternalForm()));
-    return new DefaultIBDataTransformationResult(new DefaultIBDataSet(ds));
+    ds.setPath(IBDataException.cet
+        .withReturningTranslation(() -> workingPath.toAbsolutePath().toUri().toURL().toExternalForm()));
+    return new DefaultIBDataTransformationResult(new DefaultIBDataSet(ds), workingPath);
+  };
+
+  public final static Function<IBChecksumPathType, IBDataTransformationResult> fromPrevious = (previous) -> {
+    Optional<DefaultIBDataSet> ds = IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet.apply(
+        cet.withReturningTranslation(() -> previous.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL()));
+    return new DefaultIBDataTransformationResult(ds.get(), previous.getPath());
   };
 
   private final Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers;
@@ -101,7 +108,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
   @Inject
   public IBDataTransformMavenComponent(
       // Late-bound  PathSupplier.  Must be set in the executor before use
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       // The logger
       Log log,
       // Mapper for extensions to mime types
@@ -142,25 +149,35 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     //      // TODO Auto-generated catch block
     //      e1.printStackTrace();
     //    }
+    MavenProject p = getProject().orElseThrow(() -> new IBDataException("No project available"));
     IBChecksumPathType retVal = null;
     // Every Transformation produces a single DataStream
     try { // Outer catch for throwing MojoFailureException if anything goes awry
       IBDataTransformationResult ref = null;
       for (Transformation transformation : transformations) {
-        // Get the configured finalizer
-        requireNonNull(transformation);
+        requireNonNull(transformation); // FIXME is this redundant?
         // Inject the required stuff here
-        MavenProject theMavenProject = getProject().orElseThrow(() -> new IBDataException("No project available"));
-        transformation.injectRequird(theMavenProject.getGroupId(), theMavenProject.getArtifactId(),
-            theMavenProject.getVersion(), theMavenProject.getName(), theMavenProject.getDescription());
+        transformation.forceDefaults(p.getGroupId(), p.getArtifactId(), p.getVersion());
+        // Set name and desc if null
+        if (transformation.getName() == null)
+          transformation.setName(p.getName());
+        if (transformation.getName() == null)
+          throw new IBDataException("Transformation name required for " + transformation.getId());
+        if (transformation.getDescription() == null)
+          transformation.setDescription(p.getDescription());
+        if (transformation.getDescription() == null)
+          throw new IBDataException("Transformation description required for " + transformation.getId());
 
+        // Get the configured finalizer
         // Acquire DataSet finalizer
         IBDataSetFinalizer<Transformation> finalizer;
         try {
           finalizer = (IBDataSetFinalizer<Transformation>) getDataSetFinalizerSupplier(transformation.getFinalizer(),
-              transformation.getFinalizerConfig());
+              transformation.getFinalizerConfig(),
+              Optional.ofNullable(ref).map(IBDataTransformationResult::getWorkingPathSupplier)); // FIXME Type erasure here.  This probably isn't going to work
         } catch (ClassCastException e) {
-          throw new IBDataException("Finalizer " + transformation.getFinalizer() + " was not considered viable", e);
+          throw new IBDataException("Finalizer " + transformation.getFinalizer() + " in transformation "
+              + transformation.getId() + " was not considered viable", e);
         }
 
         //
@@ -190,7 +207,11 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
           sources = t.asMatchingStreams(availableStreams.values());
         }
 
-        ref = fromProject.apply(theMavenProject, finalizer.getWorkingPath());
+        if (retVal == null) {
+          ref = fromProject.apply(p, finalizer.getWorkingPath());
+        } else {
+          ref = fromPrevious.apply(retVal);
+        }
         // Walk the transformations list.
         for (Transformer t : transformation.getTransformers()) {
           if (ref.get().isPresent()) {

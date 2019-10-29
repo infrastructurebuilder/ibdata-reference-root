@@ -19,7 +19,7 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataAvroUtils.NO_SCHEMA_CONFIG_FOR_MAPPER;
 import static org.infrastructurebuilder.data.IBDataAvroUtils.getSchema;
-import static org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
@@ -27,9 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,7 +35,6 @@ import javax.inject.Named;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -47,12 +44,20 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
     extends AbstractIBDataRecordTransformerSupplier<Map<String, String>, GenericRecord> {
   public final static String NAME = "map-to-generic-avro";
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Map.class.getCanonicalName());
-  public final static String DEFAULT_TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME.toString();;
+  public final static DateTimeFormatter DEFAULT_TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME;
   public final static String SCHEMA_PARAM = "schema"; // Required **
+  public final static String TIMESTAMP_FORMATTER = "timestamp.formatter";
+  public final static String TIME_FORMATTER = "time.formatter";
+  public final static String DEFAULT_TIME_FORMATTER = "HH:MM";
+  public final static String DATE_FORMATTER = "date.formatter";
+  public final static String DEFAULT_DATE_FORMATTER = "mm-DD-yy";
+
+  public final static String LOCALE_LANGUAGE_PARAM = "locale.language";
+  public final static String LOCALE_REGION_PARAM = "locale.region";
 
   @Inject
   public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 
@@ -66,7 +71,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
   }
 
   @Override
-  public AbstractIBDataRecordTransformerSupplier<Map<String, String>, GenericRecord> configure(ConfigMapSupplier cms) {
+  public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
     return new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(getWps(), cms);
   }
 
@@ -79,14 +84,6 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
   public static class DefaultMapSSToGenericRecordIBDataLineTransformer
       extends AbstractMapSSToGenericRecordIBDataLineTransformer {
 
-    public final static String TIMESTAMP_FORMATTER = NAME + "timestamp.formatter";
-    public final static String TIME_FORMATTER = "time.formatter";
-    public final static String DEFAULT_TIME_FORMATTER = "HH:MM";
-    public final static String DATE_FORMATTER = "date.formatter";
-    public final static String DEFAULT_DATE_FORMATTER = "mm-DD-yy";
-
-    public final static String LOCALE_LANGUAGE_PARAM = "locale.language";
-    public final static String LOCALE_REGION_PARAM = "locale.region";
     private final Schema schema;
 
     /**
@@ -96,17 +93,11 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
     public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
       super(workingPath, config);
 
-      if (config != null) {
-        Set<String> l1 = config.keySet();
-        if (!l1.contains(SCHEMA_PARAM)) {
-          // Uh oh
-          @SuppressWarnings("unused")
-          int x = 1;
-        }
-      }
+      if (config != null && !config.keySet().contains(SCHEMA_PARAM))
+        throw new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER);
       this.schema = config == null ? null
           : getSchema.apply(ofNullable(getConfiguration(SCHEMA_PARAM))
-              .orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER)));
+              .orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER + " (invalid?)")));
     }
 
     /**
@@ -128,7 +119,8 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
 
     @Override
     DateTimeFormatter getTimestampFormatter() {
-      return ofPattern(getConfiguration(TIMESTAMP_FORMATTER, DEFAULT_TIMESTAMP_FORMATTER));
+      return ofNullable(getObjectConfiguration(TIMESTAMP_FORMATTER, null)).map(Object::toString)
+          .map(DateTimeFormatter::ofPattern).orElse(DEFAULT_TIMESTAMP_FORMATTER);
     }
 
     @Override

@@ -16,14 +16,13 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
-import static org.infrastructurebuilder.data.IBMetadataUtils.stringifyDocument;
+import static org.infrastructurebuilder.data.IBMetadataUtils.w3cDocumentEqualser;
 
 import java.net.URL;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiFunction;
 
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -170,11 +169,4 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     return true;
   }
 
-  /**
-   * FIXME Move this to IBMetadataUtils
-   * Function to compare W3c Dcoument instances (by string compare, like a filthy animal
-   */
-  public final static BiFunction<Document, Document, Boolean> w3cDocumentEqualser = (lhs, rhs) -> {
-    return stringifyDocument.apply(lhs).equals(stringifyDocument.apply(rhs));
-  };
 }

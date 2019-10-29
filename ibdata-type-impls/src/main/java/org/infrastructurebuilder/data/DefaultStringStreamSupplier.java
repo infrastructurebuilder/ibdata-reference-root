@@ -17,13 +17,14 @@ package org.infrastructurebuilder.data;
 
 import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
+import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
+import static org.infrastructurebuilder.IBConstants.TEXT_TSV;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Named;
@@ -32,22 +33,20 @@ import org.infrastructurebuilder.util.IBUtils;
 
 @Named
 public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory {
-  public final static List<String> TYPES = Arrays.asList(TEXT_CSV, TEXT_PLAIN);
-
+  public final static List<String> TYPES = Arrays.asList(TEXT_CSV, TEXT_PSV, TEXT_TSV, TEXT_PLAIN);
 
   @Override
-  public Optional<Stream<Object>> from(IBDataStream ds) {
-    return Optional.ofNullable(ds)
-        // We have a datastream
-        .map(d -> {
-          try (InputStream ins = d.get()) {
-            Stream<Object> s = (Stream<Object>) IBUtils.readInputStreamAsStringStream(ins).map(o -> (Object) o)
-                .collect(Collectors.toList());
-            return s;
-          } catch (IOException e) {
-            throw new IBDataException(e);
-          }
-        });
+  public Optional<Stream<? extends Object>> from(IBDataStream ds) {
+    if (ds == null || !getRespondTypes().contains(ds.getMimeType()))
+      return Optional.empty();
+    IBDataStream d = ds;
+
+    try (InputStream ins = d.get()) {
+      Stream<Object> s = (Stream<Object>) IBUtils.readInputStreamAsStringStream(ins).map(o -> (Object) o);
+      return Optional.of(s);
+    } catch (IOException e) {
+      throw new IBDataException(e);
+    }
   }
 
   @Override

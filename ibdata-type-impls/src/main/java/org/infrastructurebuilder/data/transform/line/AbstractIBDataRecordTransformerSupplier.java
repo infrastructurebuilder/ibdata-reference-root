@@ -32,7 +32,7 @@ abstract public class AbstractIBDataRecordTransformerSupplier<I, O> implements I
 
   @Override
   public IBDataRecordTransformer<I, O> get() {
-    return getUnconfiguredTransformerInstance(this.wps.get()).configure(this.config.get());
+    return getUnconfiguredTransformerInstance(this.wps.get()).configure(getConfigSupplier().get());
   }
 
   @Override

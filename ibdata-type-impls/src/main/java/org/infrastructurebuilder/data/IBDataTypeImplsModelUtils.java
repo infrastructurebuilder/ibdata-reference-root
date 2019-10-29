@@ -32,8 +32,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.infrastructurebuilder.data.model.DataSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface IBDataTypeImplsModelUtils {
+  public final static Logger log = LoggerFactory.getLogger(IBDataTypeImplsModelUtils.class);
 //  public final static Function<IBDataSetIdentifier, DataSet> dataSetIdentifierToDataSet = id -> {
 //    DataSet retVal = new DataSet();
 //    return retVal;
@@ -56,6 +59,7 @@ public interface IBDataTypeImplsModelUtils {
   public static final Function<URL, Optional<DefaultIBDataSet>> mapDataSetToDefaultIBDataSet = (url) -> {
     try {
       Objects.requireNonNull(url, "Mapping URL");
+      log.info("Mapping " + url.toExternalForm());
       final String[] uset = new String[2];
       String uu = url.toExternalForm();
       if (uu.contains("!")) {
@@ -69,6 +73,7 @@ public interface IBDataTypeImplsModelUtils {
       Path pathToIBDataXml, datasetRoot;
       URL left;
       if (uset[0].startsWith("jar") || uset[0].startsWith("zip")) {
+        log.info("Reading from archive " + uset[0]);
         uset[0] += "!/"; // FIXME somehow we need to make this work without "/" althought that's correct
 
         left = cet.withReturningTranslation(() -> new URL(uset[0])); // URL of the "root"
@@ -81,11 +86,14 @@ public interface IBDataTypeImplsModelUtils {
         datasetRoot = optFs.getPath(optFs.getSeparator());
         pathToIBDataXml = optFs.getPath(uset[1]);
       } else if (uset[0].startsWith("file")) {
+        log.info("Reading from file location " + uset[0] );
         pathToIBDataXml = cet.withReturningTranslation(() -> Paths.get(url.toURI()));
         datasetRoot = pathToIBDataXml.getParent().getParent();
         left = cet.withReturningTranslation(() -> datasetRoot.toUri().toURL());
       } else
         throw new IBDataException("Unrecognized URL for mapping to data set " + uset[0]);
+
+      log.info("Dataset root is " + datasetRoot + " [" + left.toExternalForm()+ "]");
 
       Optional<? extends DataSet> optDataSet = Optional.of(pathToIBDataXml)
           //      // To Stream

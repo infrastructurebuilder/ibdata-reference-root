@@ -15,7 +15,7 @@
  */
 package org.infrastructurebuilder.data.sql;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.nio.file.Path;
 import java.util.UUID;

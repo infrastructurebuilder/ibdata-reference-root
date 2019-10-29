@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform;
 
+import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
-
 @Mojo(name = "transform", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresProject = true)
 public class IBDataTransformMojo extends AbstractIBDataMojo {
 
@@ -51,6 +52,8 @@ public class IBDataTransformMojo extends AbstractIBDataMojo {
     final Map pc = getPluginContext();
     pc.put(TRANSFORMATION_TARGET, thePath);
     setPluginContext(pc);
+    writeMarker(TRANSFORMATION_TARGET, thePath);
+
     getLog().debug("plugin context set");
     getLog().info("Data transformations complete with "
         + thePath.getPath() + " as " + thePath.getChecksum());

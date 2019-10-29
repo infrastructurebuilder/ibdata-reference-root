@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data.transform.line;
+package org.infrastructurebuilder.data.transform;
+
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -28,10 +30,6 @@ import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
-import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
-import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplier;
-import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -43,7 +41,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
   public static final String NAME = "pass-thru";
 
   @Inject
-  public PassThruTransformerSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+  public PassThruTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
     this(wps, l, null);
   }
 
@@ -75,7 +73,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
 
     @Override
     public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
-      return new DefaultIBDataTransformationResult(ds);
+      return new DefaultIBDataTransformationResult(ds, getWorkingPath());
     }
 
     @Override

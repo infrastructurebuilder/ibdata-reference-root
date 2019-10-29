@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data;
 
 import org.infrastructurebuilder.util.IBLoggerEnabled;
 import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
 
 /**
  * The contract for finalization:
@@ -26,4 +27,5 @@ import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
  *
  */
 public interface IBDataSetFinalizerSupplier extends CMSConfigurableSupplier<IBDataSetFinalizer>, IBLoggerEnabled  {
+  IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps);
 }

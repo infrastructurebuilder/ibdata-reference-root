@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,8 +33,8 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
+import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -59,8 +60,14 @@ public class DefaultIBDataSetJDBCIngestionFinalizerSupplier extends AbstractIBDa
   }
 
   @Override
+  public IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps) {
+    return new DefaultIBDataSetJDBCIngestionFinalizerSupplier(getLog(), wps, getConfig(), getTypeToExtensionMapper());
+  }
+
+  @Override
   public DefaultIBDataSetJDBCIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier config) {
-    String q = requireNonNull(config, "Config Map Supplier").get().getString(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER);
+    String q = requireNonNull(config, "Config Map Supplier").get()
+        .getString(IBDATA_WORKING_PATH_SUPPLIER);
     getLog().debug("" + q + " is the config working path");
     return new DefaultIBDataSetJDBCIngestionFinalizerSupplier(getLog(),
         () -> Paths.get(requireNonNull(q, "Working Path Config")), config, getTypeToExtensionMapper());

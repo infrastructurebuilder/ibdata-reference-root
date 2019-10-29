@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.infrastructurebuilder.data.transform.line;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.lang.reflect.Array;
 import java.nio.file.Path;
@@ -25,7 +26,6 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -37,7 +37,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
 
   @javax.inject.Inject
   public ArrayToNumberedColumIBDataLineTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 

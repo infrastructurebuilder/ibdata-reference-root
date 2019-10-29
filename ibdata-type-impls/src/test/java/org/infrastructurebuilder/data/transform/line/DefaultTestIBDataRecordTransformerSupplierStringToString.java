@@ -16,7 +16,6 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import java.nio.file.Path;
-import java.util.Map;
 
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;

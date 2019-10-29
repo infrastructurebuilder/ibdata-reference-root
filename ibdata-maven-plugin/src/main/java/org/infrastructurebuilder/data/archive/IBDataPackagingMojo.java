@@ -16,6 +16,8 @@
 package org.infrastructurebuilder.data.archive;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
+import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,15 +39,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.archiver.ArchiveFinalizer;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
-import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.archiver.DefaultIBDataMavenArchiveFinalizer;
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
-
 /**
  * This is a transplant from the existing jar plugin for packaging.
  * Many of the same javadoc comments have been left  in place

@@ -1,0 +1,17 @@
+@namespace("org.infrastructurebuilder.data.transform")
+
+
+protocol BAProtocol {
+  record BA {
+    @order("ignore")
+    int index;
+    string first_name;
+    string last_name;
+    string gender;
+    union {null, string} country;
+    int age;
+    date date_of_birth;
+    string id;
+    union {null, boolean} alive;
+  }
+}

@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -24,19 +26,18 @@ import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
-@Named(ArraySplitIBDataLineTransformerSupplier.REGEX_ARRAY_SPLIT)
+@Named(ArraySplitIBDataLineTransformerSupplier.REGEX_ARRAY_SPLIT) // ArrayJoinIBDataLineTransformerSupplier
 public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecordTransformerSupplier<String, String[]> {
   public static final String REGEX_ARRAY_SPLIT = "regex-array-split";
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
 
   @javax.inject.Inject
   public ArraySplitIBDataLineTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 

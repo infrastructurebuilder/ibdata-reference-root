@@ -13,59 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
-
-import static java.nio.file.Files.newBufferedWriter;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
-import static java.util.Optional.empty;
-import static org.infrastructurebuilder.data.IBDataException.cet;
-
-import java.io.PrintWriter;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.Properties;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-@Named
-public class DefaultIBSerializer extends AbstractIBSerializer<String, Properties, PrintWriter> {
-
-  public final Optional<PrintWriter> serializer;
-
-  @Inject
-  public DefaultIBSerializer() {
-    this(empty(), empty());
-  }
-
-  private DefaultIBSerializer(Optional<Path> p, Optional<Properties> c) {
-    super(p, c);
-    if (getConfig().isPresent() && getPath().isPresent()) {
-      OpenOption[] options = getOpenOptionsFromConfig(getConfig().get());
-      serializer = Optional
-          .of(new PrintWriter(cet.withReturningTranslation(() -> newBufferedWriter(getPath().get(), options))));
-    } else {
-      serializer = empty();
-
-    }
-  }
-
-  private OpenOption[] getOpenOptionsFromConfig(Properties properties) {
-    // TODO Get open formats for whatever the config is
-    OpenOption[] val = new OpenOption[] { CREATE, TRUNCATE_EXISTING };
-    return val;
-  }
-
-  @Override
-  public Optional<PrintWriter> getSerializer() {
-    return serializer;
-  }
-
-  @Override
-  protected IBSerializer<String, Properties, PrintWriter> newInstance(Optional<Path> p, Optional<Properties> c) {
-    return new DefaultIBSerializer(getPath(), getConfig());
-  }
-
-}
+//package org.infrastructurebuilder.data;
+//
+//import static java.nio.file.Files.newBufferedWriter;
+//import static java.nio.file.StandardOpenOption.CREATE;
+//import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+//import static java.util.Optional.empty;
+//import static org.infrastructurebuilder.data.IBDataException.cet;
+//
+//import java.io.PrintWriter;
+//import java.nio.file.OpenOption;
+//import java.nio.file.Path;
+//import java.util.Optional;
+//import java.util.Properties;
+//
+//import javax.inject.Inject;
+//import javax.inject.Named;
+//
+//@Named
+//public class DefaultIBSerializer extends AbstractIBSerializer<String, Properties, PrintWriter> {
+//
+//  public final Optional<PrintWriter> serializer;
+//
+//  @Inject
+//  public DefaultIBSerializer() {
+//    this(empty(), empty());
+//  }
+//
+//  private DefaultIBSerializer(Optional<Path> p, Optional<Properties> c) {
+//    super(p, c);
+//    if (getConfig().isPresent() && getPath().isPresent()) {
+//      OpenOption[] options = getOpenOptionsFromConfig(getConfig().get());
+//      serializer = Optional
+//          .of(new PrintWriter(cet.withReturningTranslation(() -> newBufferedWriter(getPath().get(), options))));
+//    } else {
+//      serializer = empty();
+//
+//    }
+//  }
+//
+//  private OpenOption[] getOpenOptionsFromConfig(Properties properties) {
+//    // TODO Get open formats for whatever the config is
+//    OpenOption[] val = new OpenOption[] { CREATE, TRUNCATE_EXISTING };
+//    return val;
+//  }
+//
+//  @Override
+//  public Optional<PrintWriter> getSerializer() {
+//    return serializer;
+//  }
+//
+//  @Override
+//  protected IBSerializer<String, Properties, PrintWriter> newInstance(Optional<Path> p, Optional<Properties> c) {
+//    return new DefaultIBSerializer(getPath(), getConfig());
+//  }
+//
+//}

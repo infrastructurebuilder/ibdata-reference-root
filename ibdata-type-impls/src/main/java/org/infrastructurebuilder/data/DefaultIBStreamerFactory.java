@@ -46,7 +46,7 @@ public class DefaultIBStreamerFactory implements IBStreamerFactory {
   }
 
   @Override
-  public Optional<Stream<Object>> from(IBDataStream ds) {
+  public Optional<Stream<? extends Object>> from(IBDataStream ds) {
     return sortedSuppliers.stream()
         // Only get responsive elements
         .filter(ss -> ss.respondsTo(ds.getMimeType()))

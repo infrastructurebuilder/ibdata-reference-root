@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.transform.Record.FIELD_KEY;
 
 import java.lang.reflect.Array;
@@ -28,8 +29,6 @@ import java.util.Optional;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBMetadataUtils;
-import org.infrastructurebuilder.data.transform.NamedFields;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -41,7 +40,7 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
 
   @javax.inject.Inject
   public ArrayToNameMapIBDataLineTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 

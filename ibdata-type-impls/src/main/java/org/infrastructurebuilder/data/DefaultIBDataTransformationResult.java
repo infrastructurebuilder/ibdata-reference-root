@@ -15,10 +15,15 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+
+import org.infrastructurebuilder.util.config.PathSupplier;
 
 /**
  * An object containing the result of a transformation and any errors.
@@ -30,14 +35,16 @@ public class DefaultIBDataTransformationResult implements IBDataTransformationRe
 
   private Optional<IBDataSet> dataSet;
   private List<IBDataTransformationError> errors;
+  private final Path workingPath;
 
-  public DefaultIBDataTransformationResult(IBDataSet createdDataSet) {
-    this(Optional.ofNullable(createdDataSet), new ArrayList<>());
+  public DefaultIBDataTransformationResult(IBDataSet createdDataSet, Path workingPath) {
+    this(ofNullable(createdDataSet), new ArrayList<>(), workingPath);
   }
 
-  public DefaultIBDataTransformationResult(Optional<IBDataSet> createdSet, List<IBDataTransformationError> errors) {
-    this.dataSet = Objects.requireNonNull(createdSet);
-    this.errors = Objects.requireNonNull(errors);
+  public DefaultIBDataTransformationResult(Optional<IBDataSet> createdSet, List<IBDataTransformationError> errors, Path workingPath) {
+    this.dataSet = requireNonNull(createdSet);
+    this.errors = requireNonNull(errors);
+    this.workingPath = requireNonNull(workingPath);
   }
 
   @Override
@@ -48,6 +55,11 @@ public class DefaultIBDataTransformationResult implements IBDataTransformationRe
   @Override
   public Optional<IBDataSet> get() {
     return dataSet;
+  }
+
+  @Override
+  public PathSupplier getWorkingPathSupplier() {
+    return () -> this.workingPath;
   }
 
 }

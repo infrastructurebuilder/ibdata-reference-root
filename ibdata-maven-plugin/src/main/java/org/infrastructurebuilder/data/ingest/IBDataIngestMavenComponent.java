@@ -18,12 +18,14 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -41,7 +43,6 @@ import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -50,7 +51,6 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
 import org.slf4j.Logger;
-
 @Named("ingest")
 public final class IBDataIngestMavenComponent extends AbstractIBDataMavenComponent {
 
@@ -66,7 +66,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
   @Inject
   public IBDataIngestMavenComponent(
       // Late-bound  PathSupplier.  Must be set in the executor before use
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       // The logger
       Log log,
       // Mapper for extensions to mime types
@@ -108,7 +108,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     IBDataSetFinalizer<Ingestion> finalizer;
     try {
       finalizer = (IBDataSetFinalizer<Ingestion>) getDataSetFinalizerSupplier(ingest.getFinalizer(),
-          ingest.getFinalizerConfig());
+          ingest.getFinalizerConfig(), Optional.empty());
     } catch (ClassCastException e) {
       throw new MojoFailureException("Finalizer " + ingest.getFinalizer() + " was not considered viable", e);
     }

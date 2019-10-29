@@ -15,6 +15,9 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
+import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
+
 import java.util.Map;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -24,8 +27,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
-import org.infrastructurebuilder.data.LocalProxyInfoSupplier;
-import org.infrastructurebuilder.data.ProxyInfoSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 @Mojo(name = "ingest", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
@@ -36,6 +37,7 @@ public class IBDataIngestMojo extends AbstractIBDataMojo {
 
   @Component
   IBDataIngestMavenComponent component;
+
 
   @Override
   protected IBDataIngestMavenComponent getComponent() {
@@ -50,6 +52,7 @@ public class IBDataIngestMojo extends AbstractIBDataMojo {
     if (pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoFailureException("Transformation and Ingestion cannot be performed in the same module build.");
     IBChecksumPathType thePath = component.ingest(ingest);
+    writeMarker(INGESTION_TARGET, thePath);
     pc.put(INGESTION_TARGET, thePath);
     setPluginContext(pc);
     getLog().info("Data ingestion is complete with " + thePath.getPath() + " as " + thePath.getChecksum());

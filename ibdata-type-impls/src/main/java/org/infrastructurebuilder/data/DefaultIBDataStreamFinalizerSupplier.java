@@ -16,11 +16,10 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
-import static org.infrastructurebuilder.data.IBMetadataUtils.WORKING_PATH_CONFIG_ITEM;
+import static org.infrastructurebuilder.data.IBDataConstants.WORKING_PATH_CONFIG_ITEM;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;

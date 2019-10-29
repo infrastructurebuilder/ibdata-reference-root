@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data.transform;
+package test;
 
-import java.util.List;
-
-public class NamedFields {
-
-  private  List<String> names;
-
-  public void setNames(List<String> names) {
-    this.names = names;
-  }
-  public String keyFor(int i) {
-    return this.names.get(i);
-  }
-
+public class App
+{
+    public static void main(String[] args )
+    {
+		
+    }
 }
