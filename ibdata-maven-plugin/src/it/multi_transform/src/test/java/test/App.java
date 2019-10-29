@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
+package test;
 
-import org.infrastructurebuilder.util.IBLoggerEnabled;
-import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
-
-/**
- * The contract for finalization:
- *
- * 1. Finalization happens for a single DataSet
- * @author mykel.alvis
- *
- */
-public interface IBDataSetFinalizerSupplier extends CMSConfigurableSupplier<IBDataSetFinalizer>, IBLoggerEnabled  {
-  IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps);
+public class App
+{
+    public static void main(String[] args )
+    {
+		
+    }
 }

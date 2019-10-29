@@ -16,7 +16,7 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
-import static org.infrastructurebuilder.data.IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,7 +33,6 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
-import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -60,6 +59,11 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   private DefaultIBDataSetIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms,
       TypeToExtensionMapper t2e) {
     super(logger, workingPath, cms, t2e);
+  }
+
+  @Override
+  public IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps) {
+    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), wps, getConfig(), getTypeToExtensionMapper());
   }
 
   @Override

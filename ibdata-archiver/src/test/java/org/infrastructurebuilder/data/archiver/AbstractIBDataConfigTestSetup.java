@@ -15,15 +15,15 @@
  */
 package org.infrastructurebuilder.data.archiver;
 
+import static org.infrastructurebuilder.data.IBDataConstants.APPLICATION_IBDATA_ARCHIVE;
+
 import java.nio.file.Path;
 
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AbstractIBDataConfigTestSetup {
   protected IBDataLateBindingFinalizerConfigSupplier c;
@@ -36,7 +36,7 @@ public class AbstractIBDataConfigTestSetup {
 
  public void abstractSetup() {
    Path p1 = wps.get();
-   t= DefaultIBChecksumPathType.from(p1, new Checksum(), IBMetadataUtils.APPLICATION_IBDATA_ARCHIVE);
+   t= DefaultIBChecksumPathType.from(p1, new Checksum(), APPLICATION_IBDATA_ARCHIVE);
    c = new IBDataLateBindingFinalizerConfigSupplier();
    c.setT(t);
  }

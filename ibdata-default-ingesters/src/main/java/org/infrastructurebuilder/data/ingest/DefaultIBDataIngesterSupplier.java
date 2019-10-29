@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 package org.infrastructurebuilder.data.ingest;
-
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,7 +28,6 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngester;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -38,7 +38,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   private Path cacheDirectory;
 
   @Inject
-  public DefaultIBDataIngesterSupplier(@Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+  public DefaultIBDataIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier cms, LoggerSupplier log) {
     this(wps, log, cms, null);
   }
@@ -61,7 +61,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   @Override
   public DefaultIBDataIngesterSupplier getConfiguredSupplier(ConfigMapSupplier config) {
     Optional<String> configItem = ofNullable(
-        requireNonNull(config, "Config map not supplied").get().getString(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM));
+        requireNonNull(config, "Config map not supplied").get().getString(CACHE_DIRECTORY_CONFIG_ITEM));
     Path cacheConfig = configItem.map(Paths::get)
         .orElseThrow(() -> new IBDataException("No cache directory specified"));
     return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config, cacheConfig);

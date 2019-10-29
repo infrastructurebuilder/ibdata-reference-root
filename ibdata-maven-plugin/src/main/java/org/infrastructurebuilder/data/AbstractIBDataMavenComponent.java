@@ -17,9 +17,8 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
-import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,7 +32,6 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-
 abstract public class AbstractIBDataMavenComponent {
   private final ConfigMapSupplier configMapSupplier;
   private final PathSupplier lateBoundWorkingPathSupplier;
@@ -63,19 +61,28 @@ abstract public class AbstractIBDataMavenComponent {
     this.streamerFactory = requireNonNull(streamerFactory);
   }
 
-  public final IBDataSetFinalizer<?> getDataSetFinalizerSupplier(String key, ConfigMap config)
-      throws MojoFailureException {
-    return ofNullable(allDataSetFinalizers.get(key))
+  public final IBDataSetFinalizer<?> getDataSetFinalizerSupplier(String key, ConfigMap config,
+      Optional<PathSupplier> overrideWorkingPath) throws MojoFailureException {
+
+    overrideWorkingPath = Optional.empty(); // FIXME Remove this parameter
+
+    final Optional<IBDataSetFinalizerSupplier> supplier = ofNullable(allDataSetFinalizers.get(key));
+    // Little bit of a hack here
+    Optional<IBDataSetFinalizerSupplier> s2 = overrideWorkingPath.map(wp -> {
+      return Optional.of(supplier.get().forceOverrideOfWorkingPath(wp));
+    }).orElse(supplier);
+    IBDataSetFinalizer<?> k = s2
         .map(dsfs -> dsfs.configure(
             new DefaultConfigMapSupplier(getConfigMapSupplier()).overrideConfiguration(requireNonNull(config))))
         .orElseThrow(() -> new MojoFailureException("No finalizer name " + key)).get();
+    return k;
 
   }
 
   public ConfigMapSupplier getConfigMapSupplier() {
     return new DefaultConfigMapSupplier(configMapSupplier)
         // Force the Working PAth Supplier value
-        .overrideValue(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER,
+        .overrideValue(IBDATA_WORKING_PATH_SUPPLIER,
             getWorkingPathSupplier().get().toAbsolutePath().toString());
   }
 

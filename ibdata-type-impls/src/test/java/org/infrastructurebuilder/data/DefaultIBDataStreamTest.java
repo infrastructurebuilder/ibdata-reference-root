@@ -16,7 +16,10 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Optional.of;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,8 +40,6 @@ import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
-import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBCoreReadDetectResponse;
 import org.infrastructurebuilder.util.files.ThrowingIBChecksumType;

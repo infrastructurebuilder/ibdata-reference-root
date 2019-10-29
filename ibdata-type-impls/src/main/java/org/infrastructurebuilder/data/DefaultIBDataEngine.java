@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 package org.infrastructurebuilder.data;
-
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
-import static org.infrastructurebuilder.data.IBMetadataUtils.IBDATA;
-import static org.infrastructurebuilder.data.IBMetadataUtils.IBDATASET_XML;
 
 import java.net.URL;
 import java.net.URLClassLoader;

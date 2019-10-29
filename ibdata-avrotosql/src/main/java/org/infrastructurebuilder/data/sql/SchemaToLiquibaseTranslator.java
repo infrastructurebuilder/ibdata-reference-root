@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -27,7 +26,6 @@ import org.apache.avro.Schema;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.w3c.dom.Document;
 
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeLogParameters;
@@ -38,10 +36,6 @@ import liquibase.exception.LiquibaseException;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.ChangeLogSerializer;
-import liquibase.serializer.ChangeLogSerializerFactory;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 
 public interface SchemaToLiquibaseTranslator extends BiFunction<Optional<Path>, Schema, Path> {
   public static ResourceAccessor createResourceOpener() {

@@ -19,14 +19,12 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
+import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
+import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.IBMetadataUtils.MAP_SPLITTER;
-import static org.infrastructurebuilder.data.IBMetadataUtils.RECORD_SPLITTER;
-import static org.infrastructurebuilder.data.IBMetadataUtils.TRANSFORMERSLIST;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -35,7 +33,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -55,6 +52,7 @@ import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
+import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -128,13 +126,13 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams,
+  public IBDataTransformationResult transform(Transformer transformation, IBDataSet ds, List<IBDataStream> suppliedStreams,
       boolean failOnError) {
     IBDataStreamRecordFinalizer cf = getConfiguredFinalizer();
     if (!acceptable(finalType, cf.accepts()))
       throw new IBDataException(
           "Finalizer '" + cf.getId() + "' does not accept finally produced type '" + finalType.get() + "'");
-    return localTransform(ds, suppliedStreams, getConfiguredFinalizer(), failOnError);
+    return localTransform(transformation , ds, suppliedStreams, getConfiguredFinalizer(), failOnError);
   }
 
   public List<IBDataRecordTransformer<?, ?>> getConfiguredTransformers() {
@@ -204,7 +202,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     });
   }
 
-  protected IBDataTransformationResult localTransform(IBDataSet ds2, List<IBDataStream> suppliedStreams,
+  protected IBDataTransformationResult localTransform(Transformer t, IBDataSet ds2, List<IBDataStream> suppliedStreams,
       IBDataStreamRecordFinalizer finalizer, boolean failOnError) {
     requireNonNull(finalizer, "No finalizer supplied to localTransform");
     final Map<String, List<Long>> errors = new HashMap<>();
@@ -230,10 +228,12 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     newStream.setUuid(c.asUUID().get().toString());
     newStream.setSourceURL(cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm()));
     newStream.setSha512(c.toString());
+    newStream.setDataStreamDescription(t.getTransformation().getDescription());
+    newStream.setDataStreamName(t.getTransformation().getName());
     IBDataStreamSupplier x = finalizer.finalizeRecord(newStream);
     map.put(x.getId(), x);
     IBDataSet newSet = new DefaultIBDataSet(ds2).withStreamSuppliers(map);
-    return new DefaultIBDataTransformationResult(ofNullable(newSet), errorList);
+    return new DefaultIBDataTransformationResult(ofNullable(newSet), errorList, getWorkingPath());
   }
 
 }

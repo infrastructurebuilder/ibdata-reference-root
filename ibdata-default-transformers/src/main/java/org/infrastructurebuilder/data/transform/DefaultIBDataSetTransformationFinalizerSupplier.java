@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.transform;
 
 import static java.util.Objects.requireNonNull;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,8 +35,8 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
+import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -63,10 +64,15 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
   }
 
   @Override
+  public IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps) {
+    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), wps, getConfig(), getTypeToExtensionMapper());
+  }
+
+  @Override
   public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
     return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(),
-        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER),
-            "Working Path Config")),
+        () -> Paths.get(requireNonNull(
+            requireNonNull(cms).get().getString(IBDATA_WORKING_PATH_SUPPLIER), "Working Path Config")),
         cms, getTypeToExtensionMapper());
   }
 

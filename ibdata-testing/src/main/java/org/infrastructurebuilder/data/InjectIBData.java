@@ -15,10 +15,11 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
 import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
-import static org.infrastructurebuilder.data.IBMetadataUtils.*;
 
 import java.io.IOException;
 import java.net.URL;

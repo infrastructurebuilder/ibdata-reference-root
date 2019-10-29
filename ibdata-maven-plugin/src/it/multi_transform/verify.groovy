@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
+File buildLog = new File(basedir, 'build.log')
+assert new File(basedir, 'target').exists();
+assert buildLog.exists()
+assert buildLog.text.contains("BUILD SUCCESS")
+assert buildLog.text.contains("About to execute ingest")
+assert buildLog.text.contains("[INFO] Data ingestion is complete with ")
 
-import org.infrastructurebuilder.util.IBLoggerEnabled;
-import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
-
-/**
- * The contract for finalization:
- *
- * 1. Finalization happens for a single DataSet
- * @author mykel.alvis
- *
- */
-public interface IBDataSetFinalizerSupplier extends CMSConfigurableSupplier<IBDataSetFinalizer>, IBLoggerEnabled  {
-  IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps);
-}
+assert buildLog.text.contains("About to execute package")

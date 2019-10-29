@@ -15,17 +15,17 @@
  */
 package org.infrastructurebuilder.data.archive;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.maven.plugin.logging.Log;
+import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
-import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
-import org.infrastructurebuilder.data.IBDataWorkingPathSupplier;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -44,7 +44,7 @@ public class IBDataPackageMavenComponent extends AbstractIBDataMavenComponent {
   @Inject
   public IBDataPackageMavenComponent(
       // Late-bound  PathSupplier.  Must be set in the executor before use
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       // The logger
       Log log,
       // Mapper for extensions to mime types

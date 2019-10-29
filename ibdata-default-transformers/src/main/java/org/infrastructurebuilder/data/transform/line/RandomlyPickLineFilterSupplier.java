@@ -17,6 +17,7 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -27,9 +28,7 @@ import java.util.Random;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataConstants;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -40,7 +39,7 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
 
   @javax.inject.Inject
   public RandomlyPickLineFilterSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 

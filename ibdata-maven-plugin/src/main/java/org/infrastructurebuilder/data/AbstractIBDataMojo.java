@@ -15,7 +15,9 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +44,7 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
   /**
    * Before we can do any
    */
-  @Component(hint = IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER)
+  @Component(hint = IBDATA_WORKING_PATH_SUPPLIER)
   private IBDataWorkingPathSupplier workingPathSupplier;
 
   @Parameter(defaultValue = "${mojoExecution}", readonly = true)
@@ -123,7 +125,7 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
     IBDataException.cet.withTranslation(() -> Files.createDirectories(workingDirectory.toPath()));
     workingPathSupplier.setPath(workingDirectory.toPath()); // workingPathSupplier is a Singleton
     if (getSession() != null) {
-      getComponent().addConfig(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM,
+      getComponent().addConfig(CACHE_DIRECTORY_CONFIG_ITEM,
           Paths.get(getSession().getLocalRepository().getBasedir()).resolve(".cache").resolve("download-maven-plugin")
               .toAbsolutePath().toString());
     }

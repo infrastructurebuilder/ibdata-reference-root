@@ -15,26 +15,6 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
-import org.infrastructurebuilder.util.config.PathSupplier;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
 //@Named
 //@Singleton
 //public class DefaultIBDataMetadataCodec implements IBDataMetadataCodec {

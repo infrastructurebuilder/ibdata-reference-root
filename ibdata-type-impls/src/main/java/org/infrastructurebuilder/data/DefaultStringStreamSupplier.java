@@ -15,15 +15,16 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.infrastructurebuilder.IBConstants.*;
+import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
+import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
+import static org.infrastructurebuilder.IBConstants.TEXT_TSV;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Named;

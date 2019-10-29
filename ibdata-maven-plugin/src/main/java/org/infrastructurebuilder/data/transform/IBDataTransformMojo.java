@@ -15,7 +15,6 @@
  */
 package org.infrastructurebuilder.data.transform;
 
-import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
 import java.util.ArrayList;

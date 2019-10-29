@@ -16,10 +16,10 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Optional.of;
-import static org.infrastructurebuilder.data.IBMetadataUtils.RECORD_SPLITTER;
-import static org.infrastructurebuilder.data.IBMetadataUtils.MAP_SPLITTER;
+import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
+import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
+import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -45,6 +45,7 @@ import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -54,7 +55,6 @@ import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBCoreReadDetectResponse;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     rs.put("test1", test1);
     rs.put("test2", test2);
     HashMap<String,Object> hm = new HashMap<>();
-    hm.put(IBMetadataUtils.TRANSFORMERSLIST, sj.toString());
+    hm.put(TRANSFORMERSLIST, sj.toString());
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
     //    s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
@@ -108,7 +108,12 @@ public class DefaultIBDataRecordBasedTransformerTest {
     d1.setCreationDate(creationDate);
     ds = new DefaultIBDataSet(d1);
 
-    transformer = new Transformer();
+    Transformation transformation = new Transformation();
+    transformation.setName("some name");
+    transformation.setDescription("some description");
+
+
+    transformer = new Transformer().copy(transformation);
 
     suppliedStreams = new ArrayList<>();
 

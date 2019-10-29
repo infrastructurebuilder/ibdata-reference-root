@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +32,6 @@ import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -44,7 +45,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
   @Inject
   public GenericAvroIBDataRecordFinalizerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 

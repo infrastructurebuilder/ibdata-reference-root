@@ -15,7 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import java.io.FileReader;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -26,14 +27,11 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReaderHeaderAware;
 import com.opencsv.ICSVParser;
 
 @Named(OpenCSVToNameMapIBDataLineTransformerSupplier.STRING_TO_NAME_MAP)
@@ -43,7 +41,7 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
 
   @javax.inject.Inject
   public OpenCSVToNameMapIBDataLineTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 

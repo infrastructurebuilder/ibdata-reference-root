@@ -93,7 +93,7 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
           transformer.getTargetMimeType(), Optional.of(targetPath.toAbsolutePath().toString()));
       createdDataSet.getStreamSuppliers()
           .add(new DefaultIBDataStreamSupplier(new DefaultIBDataStream(identifier, targetPath)));
-      return new DefaultIBDataTransformationResult(createdDataSet);
+      return new DefaultIBDataTransformationResult(createdDataSet, getWorkingPath());
     }
 
   }

@@ -15,17 +15,19 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.*;
-import static org.infrastructurebuilder.data.IBMetadataUtils.*;
-import static org.junit.Assert.*;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_IBDATASET_XML;
+import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.getZipFSProvider;
+import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Function;
 
-import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;

@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -23,12 +25,10 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.slf4j.Logger;
 
 @SuppressWarnings("rawtypes")
 @Named(DefaultIBDataRecordBasedTransformerSupplier.RECORD_BASED_TRANSFORMER_SUPPLIER)
@@ -40,13 +40,13 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
 
   @Inject
   protected DefaultIBDataRecordBasedTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
       Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers) {
     this(wps,l, null, dataLineTransformerSuppliers, null);
   }
 
   protected DefaultIBDataRecordBasedTransformerSupplier(
-      @Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       //
       LoggerSupplier l,
       // All config all the time

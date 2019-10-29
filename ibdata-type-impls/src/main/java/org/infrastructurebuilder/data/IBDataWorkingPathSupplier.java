@@ -15,9 +15,11 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import org.infrastructurebuilder.util.config.AbstractPathSupplierHolder;
 
-@javax.inject.Named(IBMetadataUtils.IBDATA_WORKING_PATH_SUPPLIER)
+@javax.inject.Named(IBDATA_WORKING_PATH_SUPPLIER)
 @javax.inject.Singleton
 public class IBDataWorkingPathSupplier extends AbstractPathSupplierHolder {
 }

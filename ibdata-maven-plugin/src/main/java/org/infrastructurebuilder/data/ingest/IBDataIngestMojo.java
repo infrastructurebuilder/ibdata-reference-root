@@ -18,13 +18,6 @@ package org.infrastructurebuilder.data.ingest;
 import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
 import org.apache.maven.plugin.MojoExecutionException;
