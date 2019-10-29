@@ -21,6 +21,7 @@ Just a quick list of the "default" transformers.  These are available from this 
 | `regex-array-split` | `String` | `Array[String]` | Splits a line (like a CSV) to an array using a simple regex  | `regex` - Value to split on (Default : `,`) |
 | `array-to-numbered-column` | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a pattern supplied with the index  | `format` - Map key format (Default : `COLUMN%00d`) |
 | `array-to-name-map` | `Array[String]` | `Map[String,String]` | Maps an array to a map with keys based on a list of keys index by field position within the array | `fields` - a List of fields ( [see below](#list-of-fields) ) (Default : none) |
+| `tostring-array-join` | `Array[Object]` | `String` | Joins an array back into a string, joined by a delimiter and optional bounding prefix and suffix.  Each value has `.toString()` applied to acquire the actual value| `delimiter` - Value between items  (Default : `,`)<br/>`prefix` - prepended to the string if present<br/>`suffix` appended to string if `prefix` is present (also, value for `prefix` is used if no `suffix` is defined) |
 
 ## Record Finalizers
 
