@@ -24,7 +24,7 @@
   </parent>
   <groupId>org.infrastructurebuilder.data</groupId>
   <artifactId>ibdata-reference-root</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <description>Reference Implementation for ibdata</description>
@@ -48,7 +48,7 @@
       <dependency>
         <groupId>org.infrastructurebuilder.util</groupId>
         <artifactId>ibcore-bom</artifactId>
-        <version>0.11.5.0</version>
+        <version>0.12.0.0-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
