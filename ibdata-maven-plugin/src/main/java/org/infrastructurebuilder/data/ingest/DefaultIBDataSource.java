@@ -19,7 +19,7 @@ import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SUFFIX;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.util.files.IBCoreReadDetectResponse.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Optional.of;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -41,7 +42,6 @@ import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBCoreReadDetectResponse;
 import org.infrastructurebuilder.util.files.ThrowingIBChecksumType;
 import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.joor.Reflect;
@@ -94,7 +94,7 @@ public class DefaultIBDataStreamTest {
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);
-    cType = IBCoreReadDetectResponse.copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",  getClass().getResourceAsStream("/lines.txt"));
+    cType = copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",  getClass().getResourceAsStream("/lines.txt"));
     identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL()), of(NAME), of(DESC),
         checksum, now, metadata, mimeType, of(path.toString()));
     ib1 = new DefaultIBDataStream(identifier, path);

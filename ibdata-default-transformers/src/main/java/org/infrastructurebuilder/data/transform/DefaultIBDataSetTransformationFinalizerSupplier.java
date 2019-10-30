@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data.transform;
 
 import static java.util.Objects.requireNonNull;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataModelUtils.forceToFinalizedPath;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,7 +33,6 @@ import javax.inject.Named;
 import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
-import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
@@ -71,8 +71,8 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
   @Override
   public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
     return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(),
-        () -> Paths.get(requireNonNull(
-            requireNonNull(cms).get().getString(IBDATA_WORKING_PATH_SUPPLIER), "Working Path Config")),
+        () -> Paths.get(
+            requireNonNull(requireNonNull(cms).get().getString(IBDATA_WORKING_PATH_SUPPLIER), "Working Path Config")),
         cms, getTypeToExtensionMapper());
   }
 
@@ -89,13 +89,12 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, Transformation target, List<IBDataStreamSupplier> ibdssList)
-        throws IOException {
-      DataSet dsi = target.asDataSet();
-      dsi.setPath(dsi2.getPath());
+    public IBChecksumPathType finalize(IBDataSet inboundDataSet, Transformation target,
+        List<IBDataStreamSupplier> ibdssList) throws IOException {
+      DataSet targetDataSet = target.asDataSet();
+      targetDataSet.setPath(inboundDataSet.getPath());
 
-      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), dsi, ibdssList,
-          getTypeToExtensionMapper());
+      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, getTypeToExtensionMapper());
     }
 
   }

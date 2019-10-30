@@ -50,6 +50,7 @@ import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
+import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
 import org.infrastructurebuilder.data.transform.Transformation;
@@ -223,7 +224,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     ds2.getStreamSuppliers().forEach(ss -> map.put(ss.getId(), ss));
     DataStream newStream = new DataStream();
     newStream.setMimeType(Optional.ofNullable(finalType).orElse(IBConstants.APPLICATION_OCTET_STREAM));
-    newStream.setMetadata(new Xpp3Dom("metadata"));
+    newStream.setMetadata(IBMetadataUtils.translateToXpp3Dom.apply(t.getTargetStreamMetadataAsDocument()));
     newStream.setCreationDate(new Date());
     newStream.setUuid(c.asUUID().get().toString());
     newStream.setSourceURL(cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm()));

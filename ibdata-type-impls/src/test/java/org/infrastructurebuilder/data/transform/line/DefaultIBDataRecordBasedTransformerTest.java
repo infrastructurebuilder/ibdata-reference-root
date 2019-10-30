@@ -19,6 +19,7 @@ import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 
 import java.io.InputStream;
@@ -53,7 +54,6 @@ import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBCoreReadDetectResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -132,7 +132,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   private IBChecksumPathType readPathTypeFromFile(URL resource) throws Exception {
     try (InputStream in = resource.openStream()) {
-      return IBCoreReadDetectResponse.copyToDeletedOnExitTempChecksumAndPath(of(thePath), "abc", "b", in);
+      return copyToDeletedOnExitTempChecksumAndPath(of(thePath), "abc", "b", in);
     }
   }
 
