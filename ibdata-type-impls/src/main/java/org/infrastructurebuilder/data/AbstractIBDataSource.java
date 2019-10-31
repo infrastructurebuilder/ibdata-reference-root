@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.w3c.dom.Document;
 
 abstract public class AbstractIBDataSource  implements IBDataSource{
@@ -31,15 +32,17 @@ abstract public class AbstractIBDataSource  implements IBDataSource{
   protected final Optional<BasicCredentials> creds;
   protected final Optional<Checksum> checksum;
   protected final Optional<Document> metadata;
+  protected final Optional<ConfigMap> additionalConfig;
 
   public AbstractIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata) {
+      Optional<Document> metadata, Optional<ConfigMap> config) {
     super();
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);
     this.checksum = requireNonNull(checksum);
-    
+    this.additionalConfig = requireNonNull(config);
+
     this.metadata = requireNonNull(metadata);
 
   }
@@ -69,4 +72,13 @@ abstract public class AbstractIBDataSource  implements IBDataSource{
     return this.id;
   }
 
+  @Override
+  public Optional<ConfigMap> getAdditionalConfig() {
+    return this.additionalConfig;
+  }
+
+  @Override
+  public IBDataSource withAdditionalConfig(ConfigMap config) {
+    return null;
+  }
 }

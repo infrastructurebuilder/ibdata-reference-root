@@ -20,6 +20,9 @@ import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +46,11 @@ import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 
 @Named("jdbc")
@@ -71,49 +79,65 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
 
   public final class DefaultIBDataJDBCIngester extends AbstractIBDataIngester {
 
-
     private final String sql;
+    private DSLContext create;
+    private final String url;
 
     public DefaultIBDataJDBCIngester(Path workingPath, Logger l, ConfigMap config) {
       super(workingPath, l, config);
       sql = config.getString(QUERY);
+      url = config.getString("url");
+
     }
 
     @Override
     public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi,
         SortedMap<String, IBDataSourceSupplier> dssList) {
       requireNonNull(dsi);
-      Date now = new Date(); // Ok for "now"  (Get it?)
+      try (
+          DefaultDatabaseIBDataSource source = new DefaultDatabaseIBDataSource(ingest.getId(), url, sql)// Set the working _path
+              .withTargetPath(getWorkingPath())
+              // Name or nothing
+              .withName(dsi.getName().orElse(null))
+              // description or nothing
+              .withDescription(dsi.getDescription().orElse(null))) {
+        Date now = new Date(); // Ok for "now"  (Get it?)
 
-      List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
-        IBDataSource source = dss.get()
-            // Set the working _path
-            .withTargetPath(getWorkingPath())
-            // Name or nothing
-            .withName(dsi.getName().orElse(null))
-            // description or nothing
-            .withDescription(dsi.getDescription().orElse(null))
-        //
+        Result<Record> res = create.fetch(sql);
+
         ;
+        for (Record r : res) {
+          String s = r.format();
 
-        return source.get().map(thisOne -> {
-          Path localPath = thisOne.getPath();
-          Optional<String> p = Optional.of(getWorkingPath().relativize(localPath).toString());
+        }
 
-          source.getChecksum().ifPresent(checksum -> {
-            if (!thisOne.getChecksum().equals(checksum))
-              throw new IBDataException("Read stream failed to match expected checksum " + checksum);
-          });
-          DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(source, now, p);
-          return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, thisOne));
-        });
-      })
-          // JAVA 11+ .flatMap(Optional::stream)
-          .filter(Optional::isPresent) // JAVA 8
-          .map(Optional::get)
+        List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
+          IBDataSource source = dss.get()
+
           //
-          .collect(toList());
-      return ibdssList;
+          ;
+
+          return source.get().map(thisOne -> {
+            Path localPath = thisOne.getPath();
+            Optional<String> p = Optional.of(getWorkingPath().relativize(localPath).toString());
+
+            source.getChecksum().ifPresent(checksum -> {
+              if (!thisOne.getChecksum().equals(checksum))
+                throw new IBDataException("Read stream failed to match expected checksum " + checksum);
+            });
+            DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(source, now, p);
+            return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, thisOne));
+          });
+        })
+            // JAVA 11+ .flatMap(Optional::stream)
+            .filter(Optional::isPresent) // JAVA 8
+            .map(Optional::get)
+            //
+            .collect(toList());
+        return ibdssList;
+      } catch (SQLException e) {
+        throw new IBDataException(e);
+      }
     }
 
   }

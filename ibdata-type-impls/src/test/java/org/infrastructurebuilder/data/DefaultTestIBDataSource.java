@@ -21,14 +21,15 @@ import java.util.Optional;
 
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.w3c.dom.Document;
 
 public class DefaultTestIBDataSource extends AbstractIBDataSource {
 
   public DefaultTestIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata) {
-    super(id, source, creds, checksum, metadata);
+      Optional<Document> metadata, Optional<ConfigMap> additionalConfig) {
+    super(id, source, creds, checksum, metadata, additionalConfig);
     // TODO Auto-generated constructor stub
   }
 

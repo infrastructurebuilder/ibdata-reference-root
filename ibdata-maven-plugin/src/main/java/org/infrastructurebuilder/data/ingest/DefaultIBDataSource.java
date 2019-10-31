@@ -33,6 +33,7 @@ import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ import org.w3c.dom.Document;
 public class DefaultIBDataSource extends AbstractIBDataSource {
 
   private final Path targetPath;
-  private final String name;  // FIXME Move name, description, cacheDirectory into AbstractIBDataSource
+  private final String name; // FIXME Move name, description, cacheDirectory into AbstractIBDataSource
   private final String description;
   private final Path cacheDirectory;
   private final Logger log;
@@ -53,37 +54,40 @@ public class DefaultIBDataSource extends AbstractIBDataSource {
   @Override
   public final DefaultIBDataSource withTargetPath(Path targetPath) {
     return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(),
-        Objects.requireNonNull(targetPath), name, description, cacheDirectory, log, mimeType, t2e);
+        getAdditionalConfig(), Objects.requireNonNull(targetPath), name, description, cacheDirectory, log, mimeType,
+        t2e);
   }
 
   @Override
   public final DefaultIBDataSource withName(String name) {
-    return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(), targetPath,
-        Objects.requireNonNull(name), description, cacheDirectory, log, mimeType, t2e);
+    return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(),
+        getAdditionalConfig(), targetPath, Objects.requireNonNull(name), description, cacheDirectory, log, mimeType,
+        t2e);
   }
 
   @Override
   public final DefaultIBDataSource withDescription(String description) {
-    return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(), targetPath,
-        name, Objects.requireNonNull(description), cacheDirectory, log, mimeType, t2e);
+    return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(),
+        getAdditionalConfig(), targetPath, name, Objects.requireNonNull(description), cacheDirectory, log, mimeType,
+        t2e);
   }
 
   @Override
   public final DefaultIBDataSource withDownloadCacheDirectory(Path cacheDir) {
-    return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(), targetPath,
-        name, description, Objects.requireNonNull(cacheDir), log, mimeType, t2e);
+    return new DefaultIBDataSource(getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(),
+        getAdditionalConfig(), targetPath, name, description, Objects.requireNonNull(cacheDir), log, mimeType, t2e);
   }
 
   public DefaultIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata,Logger log, Optional<String> mimeType, TypeToExtensionMapper t2e) {
-    this(id, source, creds, checksum, metadata, null, null, null, null, log, mimeType, t2e);
+      Optional<Document> metadata, Logger log, Optional<String> mimeType, TypeToExtensionMapper t2e) {
+    this(id, source, creds, checksum, metadata, Optional.empty(), null, null, null, null, log, mimeType, t2e);
   }
 
   private DefaultIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata, Path targetPath, String name, String description, Path cacheDir, Logger log,
-      Optional<String> mimeType, TypeToExtensionMapper t2e) {
+      Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath, String name,
+      String description, Path cacheDir, Logger log, Optional<String> mimeType, TypeToExtensionMapper t2e) {
 
-    super(id, source, creds, checksum, metadata);
+    super(id, source, creds, checksum, metadata, additionalConfig);
     this.targetPath = targetPath;
     this.name = name;
     this.description = description;
@@ -94,8 +98,8 @@ public class DefaultIBDataSource extends AbstractIBDataSource {
 
   }
 
-  public DefaultIBDataSource(Logger log, URL source, Optional<Checksum> checksum, Optional<Document> metadata, Optional<String> targetType,
-      TypeToExtensionMapper t2e) {
+  public DefaultIBDataSource(Logger log, URL source, Optional<Checksum> checksum, Optional<Document> metadata,
+      Optional<String> targetType, TypeToExtensionMapper t2e) {
     this(UUID.randomUUID().toString(), source, Optional.empty(), checksum, metadata, log, targetType, t2e);
   }
 

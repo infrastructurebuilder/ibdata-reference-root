@@ -27,7 +27,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 public class DefaultTestingSource extends AbstractIBDataSource implements IBDataSource {
 
   public DefaultTestingSource(URL source) {
-    super(UUID.randomUUID().toString(), source, empty(), empty(), empty());
+    super(UUID.randomUUID().toString(), source, empty(), empty(), empty(), empty());
   }
 
   @Override
