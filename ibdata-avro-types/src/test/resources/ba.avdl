@@ -1,5 +1,6 @@
 @namespace("org.infrastructurebuilder.data.transform")
 
+// NOT THE SAME AS ba.avsc!
 
 protocol BAProtocol {
   record BA {

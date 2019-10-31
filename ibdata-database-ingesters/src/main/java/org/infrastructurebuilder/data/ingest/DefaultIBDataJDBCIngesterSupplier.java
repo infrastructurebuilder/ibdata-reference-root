@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 
 @Named("jdbc")
 public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSupplier {
+  public static final String QUERY = "query";
 
   @Inject
   public DefaultIBDataJDBCIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
@@ -60,9 +61,6 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
 
   @Override
   public AbstractCMSConfigurableSupplier<IBDataIngester> getConfiguredSupplier(ConfigMapSupplier cms) {
-//    Optional<String> configItem = Optional.ofNullable(cms.get().get(IBMetadataUtils.CACHE_DIRECTORY_CONFIG_ITEM));
-//    Path cacheConfig = configItem.map(Paths::get)
-//        .orElseThrow(() -> new IBDataException("No cache directory specified"));
     return new DefaultIBDataJDBCIngesterSupplier(getWps(), () -> getLog(), cms);
   }
 
@@ -73,14 +71,20 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
 
   public final class DefaultIBDataJDBCIngester extends AbstractIBDataIngester {
 
+
+    private final String sql;
+
     public DefaultIBDataJDBCIngester(Path workingPath, Logger l, ConfigMap config) {
       super(workingPath, l, config);
+      sql = config.getString(QUERY);
     }
 
     @Override
-    public List<Supplier<IBDataStream>> ingest(IBDataSetIdentifier dsi, SortedMap<String, IBDataSourceSupplier> dssList) {
+    public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi,
+        SortedMap<String, IBDataSourceSupplier> dssList) {
       requireNonNull(dsi);
       Date now = new Date(); // Ok for "now"  (Get it?)
+
       List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
         IBDataSource source = dss.get()
             // Set the working _path

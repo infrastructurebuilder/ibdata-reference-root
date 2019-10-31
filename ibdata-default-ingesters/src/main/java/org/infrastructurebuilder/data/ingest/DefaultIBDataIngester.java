@@ -47,7 +47,7 @@ public final class DefaultIBDataIngester extends AbstractIBDataIngester implemen
   }
 
   @Override
-  public List<Supplier<IBDataStream>> ingest(IBDataSetIdentifier dsi, SortedMap<String, IBDataSourceSupplier> dssList) {
+  public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi, SortedMap<String, IBDataSourceSupplier> dssList) {
     requireNonNull(dsi);
     Date now = new Date(); // Ok for "now"  (Get it?)
     List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {

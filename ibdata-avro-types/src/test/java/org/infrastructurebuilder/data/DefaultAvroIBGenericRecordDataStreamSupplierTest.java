@@ -39,7 +39,7 @@ import org.junit.Test;
 
 public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
 
-  private static final String LOAD1 = "ba.avro";
+  public static final String LOAD1 = "ba.avro";
   public final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @BeforeClass

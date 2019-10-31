@@ -51,15 +51,6 @@
       <artifactId>ibcore-read-detect</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.sisu</groupId>
-      <artifactId>org.eclipse.sisu.plexus</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
       <groupId>net.sf.corn</groupId>
       <artifactId>corn-cps</artifactId>
       <exclusions>

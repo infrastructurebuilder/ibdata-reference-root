@@ -122,7 +122,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // Get the instance
         .get()
         // do the ingestion
-        .ingest(ingest.getDataSet(), mapIngestionToSourceSuppliers(ingest, getLog(), getTypeToExtensionMapper()));
+        .ingest(ingest, ingest.getDataSet(), mapIngestionToSourceSuppliers(ingest, getLog(), getTypeToExtensionMapper()));
 
     // Ingestion self-returns the IBChecksumPathType, because that's easier and ingestion is easy.
 
