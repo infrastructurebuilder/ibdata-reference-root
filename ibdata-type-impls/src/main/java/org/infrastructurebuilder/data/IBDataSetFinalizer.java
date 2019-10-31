@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
@@ -29,7 +30,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
  */
 public interface IBDataSetFinalizer<T>  {
 
-  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> suppliers) throws IOException;
+  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> suppliers) throws IOException;
 
   Path getWorkingPath();
 

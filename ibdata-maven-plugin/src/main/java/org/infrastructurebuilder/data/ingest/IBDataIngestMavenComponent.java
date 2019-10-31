@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -42,7 +43,7 @@ import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -115,7 +116,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     IBDataIngesterSupplier i = ofNullable(requireNonNull(ingest).getIngester())
         .flatMap(j -> ofNullable(this.allIngesters.get(j)))
         .orElseThrow(() -> new MojoFailureException("No ingester named " + ingest.getIngester()));
-    List<IBDataStreamSupplier> suppliers = i
+    List<Supplier<IBDataStream>> suppliers = i
         // Get a new instance of the ingester supplier from configuration
         .configure(getConfigMapSupplier())
         // Get the instance

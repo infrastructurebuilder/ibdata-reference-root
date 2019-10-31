@@ -28,14 +28,15 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
@@ -76,7 +77,7 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
   }
 
   @Override
-  public IBDataStreamSupplier finalizeRecord(IBDataStreamIdentifier ds) {
+  public Supplier<IBDataStream> finalizeRecord(IBDataStreamIdentifier ds) {
     DefaultIBDataStream stream = new DefaultIBDataStream(ds, getWorkingPath());
     return new DefaultIBDataStreamSupplier(stream);
   }

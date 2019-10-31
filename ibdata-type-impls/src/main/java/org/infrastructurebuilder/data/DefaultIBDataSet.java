@@ -32,12 +32,12 @@ import org.infrastructurebuilder.data.model.DataSet;
 
 public class DefaultIBDataSet extends AbstractIBDataSet {
 
-  private final Map<UUID, IBDataStreamSupplier> streamSuppliers;
+  private final Map<UUID, Supplier<IBDataStream>> streamSuppliers;
 
   public final static DefaultIBDataSet readWithSuppliers(DataSet ds, Supplier<Path> pathToRoot) {
-    Map<UUID, IBDataStreamSupplier> v = ds.getStreams().stream()
+    Map<UUID, Supplier<IBDataStream>> v = ds.getStreams().stream()
         .map(d ->      new DefaultIBDataStreamSupplier(DefaultIBDataStream.from(d, pathToRoot)))
-        .collect(Collectors.toMap(k -> k.getId(), Function.identity()));
+        .collect(Collectors.toMap(k -> k.get().getId(), Function.identity()));
     return new DefaultIBDataSet(ds, v);
   }
 
@@ -45,7 +45,7 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
     this(ds, emptyMap());
   }
 
-  private DefaultIBDataSet(IBDataSetIdentifier ds, Map<UUID, IBDataStreamSupplier> streamSuppliers) {
+  private DefaultIBDataSet(IBDataSetIdentifier ds, Map<UUID, Supplier<IBDataStream>> streamSuppliers) {
     super(requireNonNull(ds).getId(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
         ds.getDescription(), ofNullable(ds.getPath()), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
 
@@ -53,22 +53,22 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 
-  private DefaultIBDataSet(IBDataSet ds, Map<UUID, IBDataStreamSupplier> streamSuppliers) {
+  private DefaultIBDataSet(IBDataSet ds, Map<UUID, Supplier<IBDataStream>> streamSuppliers) {
     super(requireNonNull(ds).getId(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
         ds.getDescription(), ofNullable(ds.getPath()), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 
   public DefaultIBDataSet(IBDataSet ds) {
-    this(ds, ds.getStreamSuppliers().stream().collect(Collectors.toMap(k -> k.getId(), Function.identity())));
+    this(ds, ds.getStreamSuppliers().stream().collect(Collectors.toMap(k -> k.get().getId(), Function.identity())));
   }
 
-  public IBDataSet withStreamSuppliers(Map<UUID, IBDataStreamSupplier> streamSuppliers) {
+  public IBDataSet withStreamSuppliers(Map<UUID, Supplier<IBDataStream>> streamSuppliers) {
     return new DefaultIBDataSet(this, streamSuppliers);
   }
 
   @Override
-  public List<IBDataStreamSupplier> getStreamSuppliers() {
+  public List<Supplier<IBDataStream>> getStreamSuppliers() {
     return this.streamSuppliers.values().stream().collect(toList());
   }
 

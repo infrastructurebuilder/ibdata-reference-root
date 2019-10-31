@@ -22,7 +22,6 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -50,7 +50,6 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
@@ -140,7 +139,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         // To the stream suppliers
         .flatMap(s -> s.getStreamSuppliers().stream())
         // call the supplier
-        .map(IBDataStreamSupplier::get).collect(Collectors.toMap(k -> k.getId(), Function.identity()));
+        .map(Supplier::get).collect(Collectors.toMap(k -> k.getId(), Function.identity()));
 
     //    IBDataStream s = availableStreams.get(UUID.fromString("cf031c5a-3a34-3175-8140-26819803d395"));
     //    try (InputStream ins = s.get(); BufferedReader bin = new BufferedReader(new InputStreamReader(ins))) {

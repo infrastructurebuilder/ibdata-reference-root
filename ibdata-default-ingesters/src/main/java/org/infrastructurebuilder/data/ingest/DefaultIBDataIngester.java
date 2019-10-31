@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedMap;
+import java.util.function.Supplier;
 
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
@@ -32,7 +33,7 @@ import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
@@ -46,10 +47,10 @@ public final class DefaultIBDataIngester extends AbstractIBDataIngester implemen
   }
 
   @Override
-  public List<IBDataStreamSupplier> ingest(IBDataSetIdentifier dsi, SortedMap<String, IBDataSourceSupplier> dssList) {
+  public List<Supplier<IBDataStream>> ingest(IBDataSetIdentifier dsi, SortedMap<String, IBDataSourceSupplier> dssList) {
     requireNonNull(dsi);
     Date now = new Date(); // Ok for "now"  (Get it?)
-    List<IBDataStreamSupplier> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
+    List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
       IBDataSource source = dss.get()
           // Set the working _path
           .withTargetPath(getWorkingPath())

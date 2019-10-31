@@ -15,13 +15,10 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.nio.file.Path;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Supplier;
 
-import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-
-public class DefaultIBDataStreamSupplier implements IBDataStreamSupplier {
+public class DefaultIBDataStreamSupplier implements Supplier<IBDataStream> {
 
   private final IBDataStream dataStream;
 
@@ -34,14 +31,9 @@ public class DefaultIBDataStreamSupplier implements IBDataStreamSupplier {
     return dataStream;
   }
 
-  @Override
-  public UUID getId() {
-    return this.get().getId();
-  }
-
-  @Override
-  public IBDataStreamSupplier relocateTo(Path newWorkingPath, TypeToExtensionMapper t2e) {
-    return new DefaultIBDataStreamSupplier(get().relocateTo(newWorkingPath, t2e));
-  }
-
+//  @Override
+//  public IBDataStreamSupplier relocateTo(Path newWorkingPath, TypeToExtensionMapper t2e) {
+//    return new DefaultIBDataStreamSupplier(get().relocateTo(newWorkingPath, t2e));
+//  }
+//
 }

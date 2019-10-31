@@ -35,11 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationResult;
@@ -47,13 +47,11 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformer;
-import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -208,7 +206,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     requireNonNull(finalizer, "No finalizer supplied to localTransform");
     final Map<String, List<Long>> errors = new HashMap<>();
     final List<IBDataTransformationError> errorList = new ArrayList<>();
-    Map<UUID, IBDataStreamSupplier> map = new HashMap<>();
+    Map<UUID, Supplier<IBDataStream>> map = new HashMap<>();
 
     String finalType = null;
     for (IBDataStream stream : Stream
@@ -221,7 +219,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     cet.withTranslation(() -> finalizer.close());
     Path targetPath = finalizer.getWorkingPath();
     Checksum c = new Checksum(targetPath);
-    ds2.getStreamSuppliers().forEach(ss -> map.put(ss.getId(), ss));
+    ds2.getStreamSuppliers().forEach(ss -> map.put(ss.get().getId(), ss));
     DataStream newStream = new DataStream();
     newStream.setMimeType(Optional.ofNullable(finalType).orElse(IBConstants.APPLICATION_OCTET_STREAM));
     newStream.setMetadata(IBMetadataUtils.translateToXpp3Dom.apply(t.getTargetStreamMetadataAsDocument()));
@@ -231,8 +229,8 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     newStream.setSha512(c.toString());
     newStream.setDataStreamDescription(t.getTransformation().getDescription());
     newStream.setDataStreamName(t.getTransformation().getName());
-    IBDataStreamSupplier x = finalizer.finalizeRecord(newStream);
-    map.put(x.getId(), x);
+    Supplier<IBDataStream> x = finalizer.finalizeRecord(newStream);
+    map.put(x.get().getId(), x);
     IBDataSet newSet = new DefaultIBDataSet(ds2).withStreamSuppliers(map);
     return new DefaultIBDataTransformationResult(ofNullable(newSet), errorList, getWorkingPath());
   }

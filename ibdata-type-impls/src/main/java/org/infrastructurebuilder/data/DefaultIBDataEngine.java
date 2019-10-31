@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -97,7 +98,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
   @Override
   public Optional<IBDataStream> fetchDataStreamById(UUID id) {
     return cachedDataSets.values().stream().flatMap(ds -> ds.getStreamSuppliers().stream())
-        .filter(s -> s.getId().equals(id)).findFirst().map(IBDataStreamSupplier::get);
+        .filter(s -> s.get().getId().equals(id)).findFirst().map(Supplier::get);
   }
 
   @Override

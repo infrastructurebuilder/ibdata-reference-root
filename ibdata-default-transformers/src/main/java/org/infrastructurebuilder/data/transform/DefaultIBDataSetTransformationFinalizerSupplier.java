@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,7 +37,7 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -90,7 +91,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
 
     @Override
     public IBChecksumPathType finalize(IBDataSet inboundDataSet, Transformation target,
-        List<IBDataStreamSupplier> ibdssList) throws IOException {
+        List<Supplier<IBDataStream>> ibdssList) throws IOException {
       DataSet targetDataSet = target.asDataSet();
       targetDataSet.setPath(inboundDataSet.getPath());
 

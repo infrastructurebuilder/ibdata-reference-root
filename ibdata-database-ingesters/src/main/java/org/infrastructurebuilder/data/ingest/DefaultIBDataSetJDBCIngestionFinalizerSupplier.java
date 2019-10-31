@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,7 +35,7 @@ import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
-import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -85,7 +86,7 @@ public class DefaultIBDataSetJDBCIngestionFinalizerSupplier extends AbstractIBDa
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<IBDataStreamSupplier> ibdssList)
+    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList)
         throws IOException {
       return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,
           getTypeToExtensionMapper());
