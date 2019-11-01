@@ -39,20 +39,19 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
   private final IBDataStreamRecordFinalizer finalizer;
 
   @Inject
-  protected DefaultIBDataRecordBasedTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
-      Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers) {
-    this(wps,l, null, dataLineTransformerSuppliers, null);
+  public DefaultIBDataRecordBasedTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l, Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers) {
+    this(wps, l, null, dataLineTransformerSuppliers, null);
   }
 
-  protected DefaultIBDataRecordBasedTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+  protected DefaultIBDataRecordBasedTransformerSupplier(PathSupplier wps,
       //
       LoggerSupplier l,
       // All config all the time
       ConfigMapSupplier cms,
       // All the available data line suppliers
-      Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
+      Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers,
+      IBDataStreamRecordFinalizer finalizer) {
     super(wps, l, cms);
     this.dataLineSuppliers = dataLineTransformerSuppliers;
     this.finalizer = finalizer;
@@ -65,12 +64,14 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(),() -> getLog(),  cms, this.dataLineSuppliers, this.finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), cms, this.dataLineSuppliers,
+        this.finalizer);
   }
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), null, dataLineSuppliers, finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), null, dataLineSuppliers,
+        finalizer);
   }
 
 }

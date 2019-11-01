@@ -29,7 +29,6 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
-import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -50,7 +49,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
   }
 
   @Override
-  public IBDataTransformerSupplier configure(ConfigMapSupplier cms) {
+  public PassThruTransformerSupplier configure(ConfigMapSupplier cms) {
     return new PassThruTransformerSupplier(getWps(), () -> getLog(), cms);
   }
 
@@ -59,20 +58,20 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
     return new PassThruTransformer(wps2, getLog());
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
-  public PassThruTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
+  public PassThruTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer<?> finalizer) {
     return new PassThruTransformerSupplier(getWps(), () -> getLog());
   }
 
-  private final class PassThruTransformer extends AbstractIBDataTransformer implements IBDataTransformer {
+  private final class PassThruTransformer extends AbstractIBDataTransformer {
 
     public PassThruTransformer(Path wps2, Logger l) {
       super(wps2, l);
     }
 
     @Override
-    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams, boolean failOnError) {
+    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds,
+        List<IBDataStream> suppliedStreams, boolean failOnError) {
       return new DefaultIBDataTransformationResult(ds, getWorkingPath());
     }
 

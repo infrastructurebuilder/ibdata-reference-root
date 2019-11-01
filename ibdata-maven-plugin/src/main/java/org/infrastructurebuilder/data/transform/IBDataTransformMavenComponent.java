@@ -90,10 +90,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
   };
 
   private final Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers;
-  private final Map<String, IBDataTransformerSupplier<?>> allTransformers;
-
-  private Function<DataStream, IBDataStream> transformToIBDataStream;
-
+  private final Map<String, IBDataTransformerSupplier> allTransformers;
   private final IBDataEngine engine;
 
   /*
@@ -115,7 +112,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       // The configuration map. Does not include config from components
       @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier mavenConfigMapSupplier,
       // All avilable transformers
-      Map<String, IBDataTransformerSupplier<?>> allTransformers,
+      Map<String, IBDataTransformerSupplier> allTransformers,
       // All available IBDataDataStreamRecordFinalizerSupplier instances
       Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers,
       Map<String, IBDataSetFinalizerSupplier> allDSFinalizers, IBStreamerFactory streamerFactory, IBDataEngine engine) {
@@ -186,7 +183,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         List<IBDataStream> sources = null;
         for (Transformer t : transformation.getTransformers()) {
           ConfigMapSupplier tConfig = t.getConfigurationAsConfigMapSupplier(defaults);
-          IBDataTransformerSupplier<?> ts = ofNullable(allTransformers.get(t.getHint()))
+          IBDataTransformerSupplier ts = ofNullable(allTransformers.get(t.getHint()))
               .orElseThrow(() -> new IBDataException("Transformer " + t.getHint() + " not found"));
           // Special instance of configuration.
           if (t instanceof RecordTransformer) {

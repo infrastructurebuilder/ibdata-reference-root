@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data.transform;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.net.URL;
@@ -45,12 +46,13 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 @Named(AddStreamTransformerSupplier.ADD_STREAM)
-public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSupplier<Path> {
+public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSupplier {
   public static final String ADD_STREAM = "add-stream";
   public static final String ADDED_PATH = "addedPath";
 
   @Inject
-  public AddStreamTransformerSupplier(PathSupplier wps, @Nullable @Named("maven-log") LoggerSupplier loggerSupplier) {
+  public AddStreamTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier loggerSupplier) {
     this(wps, loggerSupplier, null);
   }
 
@@ -69,7 +71,6 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
   }
 
   public static class AddStreamTransformer extends AbstractIBDataTransformer {
-
 
     public AddStreamTransformer(Path path, Logger l) {
       super(path, l, null);

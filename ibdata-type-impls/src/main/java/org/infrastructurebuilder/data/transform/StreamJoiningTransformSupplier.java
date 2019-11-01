@@ -50,7 +50,7 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
   }
 
   @Override
-  public IBDataTransformerSupplier configure(ConfigMapSupplier cms) {
+  public StreamJoiningTransformSupplier configure(ConfigMapSupplier cms) {
     return new StreamJoiningTransformSupplier(getWps(),() -> getLog(), cms);
   }
 

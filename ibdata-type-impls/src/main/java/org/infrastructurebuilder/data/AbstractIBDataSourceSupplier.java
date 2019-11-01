@@ -28,18 +28,17 @@ abstract public class AbstractIBDataSourceSupplier implements IBDataSourceSuppli
   }
 
   @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
   public IBDataSource get() {
     return this.src;
   }
 
+  public String getId() {
+    return this.src.getId();
+  }
+
   @Override
   public int compareTo(IBDataSourceSupplier o) {
-    return getId().compareTo(o.getId());
+    return this.get().getId().compareTo(o.get().getId());
   }
 
 }

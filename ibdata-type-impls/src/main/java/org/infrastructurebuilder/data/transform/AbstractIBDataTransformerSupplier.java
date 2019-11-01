@@ -21,12 +21,13 @@ import java.util.Objects;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
+import org.infrastructurebuilder.util.LoggerEnabled;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataTransformerSupplier<T> implements IBDataTransformerSupplier<T> {
+abstract public class AbstractIBDataTransformerSupplier implements IBDataTransformerSupplier, LoggerEnabled {
   private final PathSupplier wps;
   private final ConfigMapSupplier config;
   private final LoggerSupplier logger;
@@ -55,10 +56,10 @@ abstract public class AbstractIBDataTransformerSupplier<T> implements IBDataTran
   }
 
   @Override
-  public abstract IBDataTransformerSupplier<T> configure(ConfigMapSupplier cms);
+  public abstract IBDataTransformerSupplier configure(ConfigMapSupplier cms);
 
   @Override
-  public IBDataTransformerSupplier<T> withFinalizer(IBDataStreamRecordFinalizer<?> ts2) {
+  public IBDataTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer<?> ts2) {
     return this;
   }
 

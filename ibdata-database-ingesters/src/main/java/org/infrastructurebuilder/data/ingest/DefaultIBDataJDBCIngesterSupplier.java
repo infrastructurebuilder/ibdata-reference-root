@@ -19,9 +19,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -32,13 +32,14 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
+import org.infrastructurebuilder.data.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSetIdentifier;
-import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -49,8 +50,6 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 
 @Named("jdbc")
@@ -94,8 +93,9 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
     public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi,
         SortedMap<String, IBDataSourceSupplier> dssList) {
       requireNonNull(dsi);
-      try (
-          DefaultDatabaseIBDataSource source = new DefaultDatabaseIBDataSource(ingest.getId(), url, sql)// Set the working _path
+      try (DefaultDatabaseIBDataSource source = new DefaultDatabaseIBDataSource(getLog(), new URL(url),
+          Optional.empty(), Optional.empty(), Optional.of(IBConstants.AVRO_BINARY), new DefaultTypeToExtensionMapper())
+              //          DefaultDatabaseIBDataSource source = new DefaultDatabaseIBDataSource(ingest.getId(), url, sql)// Set the working _path
               .withTargetPath(getWorkingPath())
               // Name or nothing
               .withName(dsi.getName().orElse(null))
@@ -112,7 +112,7 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
         }
 
         List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
-          IBDataSource source = dss.get()
+          //          IBDataSource source = dss.get()
 
           //
           ;
@@ -135,8 +135,10 @@ public class DefaultIBDataJDBCIngesterSupplier extends AbstractIBDataIngesterSup
             //
             .collect(toList());
         return ibdssList;
-      } catch (SQLException e) {
+      } catch (SQLException | MalformedURLException e) {
         throw new IBDataException(e);
+      } catch (Exception e1) {
+        throw new IBDataException(e1);
       }
     }
 

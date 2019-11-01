@@ -52,6 +52,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
 import org.slf4j.Logger;
+
 @Named("ingest")
 public final class IBDataIngestMavenComponent extends AbstractIBDataMavenComponent {
 
@@ -78,34 +79,29 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       @Named(IBDataLateBindingFinalizerConfigSupplier.NAME) IBDataLateBindingFinalizerConfigSupplier configSupplier,
       Map<String, IBDataIngesterSupplier> allIngesters,
       // All DataSetFinalizer suppliers
-      Map<String, IBDataSetFinalizerSupplier> allDSFinalizers,
-      final IBStreamerFactory streamerFactory) {
-    super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers, streamerFactory);
+      Map<String, IBDataSetFinalizerSupplier> allDSFinalizers, final IBStreamerFactory streamerFactory) {
+    super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
+        streamerFactory);
     this.allIngesters = requireNonNull(allIngesters);
   }
 
-  public final static SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i, Log l,
+  public final static SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i, Logger log,
       TypeToExtensionMapper mapper) {
-    Logger log = new SLF4JFromMavenLogger(l);
     List<DefaultIBDataSourceSupplier> k = i.getDataSet().getStreams().stream().map(v -> {
       return new DefaultIBDataSourceSupplier(v.getTemporaryId(),
           new DefaultIBDataSource(log, cet.withReturningTranslation(() -> v.getURL().get()),
-
-              ofNullable(v.getChecksum()), of(v.getMetadata()), ofNullable(v.getMimeType()),
-              mapper));
+              ofNullable(v.getChecksum()), of(v.getMetadata()), ofNullable(v.getMimeType()), mapper));
     }).collect(Collectors.toList());
-    return new TreeMap<>(k.stream().collect(Collectors.toMap(key -> key.getId(), Function.identity())));
+    return k.stream().collect(Collectors.toMap(DefaultIBDataSourceSupplier::getId, Function.identity(), (prev, now)-> now, () -> new TreeMap<>()));
+//    return new TreeMap<>(
+//        k.stream().collect(Collectors.toMap(key -> key.get().getId(), (IBDataSourceSupplier) Function.identity())));
 
   }
 
   @SuppressWarnings("unchecked")
   public IBChecksumPathType ingest(Ingestion ingest) throws MojoFailureException {
-
-    Objects.requireNonNull(ingest);
-
     MavenProject p = getProject().orElseThrow(() -> new MojoFailureException("No supplied project"));
-
-    ingest.getDataSet().injectGAV(p.getGroupId(), p.getArtifactId(), p.getVersion()); // Ugh...side effects
+    Objects.requireNonNull(ingest).getDataSet().injectGAV(p.getGroupId(), p.getArtifactId(), p.getVersion()); // Ugh...side effects
     IBDataSetFinalizer<Ingestion> finalizer;
     try {
       finalizer = (IBDataSetFinalizer<Ingestion>) getDataSetFinalizerSupplier(ingest.getFinalizer(),
@@ -122,7 +118,8 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // Get the instance
         .get()
         // do the ingestion
-        .ingest(ingest, ingest.getDataSet(), mapIngestionToSourceSuppliers(ingest, getLog(), getTypeToExtensionMapper()));
+        .ingest(ingest, ingest.getDataSet(),
+            mapIngestionToSourceSuppliers(ingest, new SLF4JFromMavenLogger(getLog()), getTypeToExtensionMapper()));
 
     // Ingestion self-returns the IBChecksumPathType, because that's easier and ingestion is easy.
 
