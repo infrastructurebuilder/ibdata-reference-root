@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -40,6 +41,8 @@ import org.slf4j.Logger;
 abstract public class AbstractMapToGenericRecordIBDataLineTransformer
     extends AbstractGenericIBDataLineTransformer<Map<String, Object>> {
 
+  private final List<String> alreadyWarned = new ArrayList<>();
+
   protected AbstractMapToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
     super(workingPath, config, l);
   }
@@ -55,7 +58,10 @@ abstract public class AbstractMapToGenericRecordIBDataLineTransformer
       if (v != null) {
         r.put(k, managedValue(v.schema(), k, t.get(k)));
       } else {
-        // FIXME (I need a logger to warn of missing fields)
+        if (!alreadyWarned.contains(k)) {
+          getLogger().warn("*** Field '" + k + "' not known in schema!  ");
+          alreadyWarned.add(k);
+        }
       }
     }); // FIXME mebbe we need to catch some of the RuntimeException instances
     return r;
