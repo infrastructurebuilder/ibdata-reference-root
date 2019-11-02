@@ -37,8 +37,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
+  public final static Logger log = LoggerFactory
+      .getLogger(DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest.class);
 
   public static final String BA = "ba";
   private final static TestingPathSupplier wps = new TestingPathSupplier();
@@ -65,7 +69,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
     cm.put(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
     wp = wps.get();
     cms = new DefaultConfigMapSupplier().addConfiguration(cm);
-    s = new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(wps);
+    s = new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(wps, () -> log);
   }
 
   @After
@@ -79,7 +83,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
 
   @Test
   public void testConfigureConfigMapSupplier() {
-    AbstractIBDataRecordTransformerSupplier<Map<String, String>, GenericRecord> v = s.configure(cms);
+    AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> v = s.configure(cms);
     assertFalse(v == s);
 
     DefaultMapSSToGenericRecordIBDataLineTransformer q = (DefaultMapSSToGenericRecordIBDataLineTransformer) v.get();
@@ -91,7 +95,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
     assertNotNull(q.getDateFormatter());
     assertNotNull(q.getTimestampFormatter());
 
-    Map<String, String> m = new HashMap<>();
+    Map<String, Object> m = new HashMap<>();
     m.put("index", "7");
     m.put("last_name", "alvis");
     m.put("first_name", "mkel");
@@ -108,7 +112,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
 
   @Test(expected = IBDataException.class)
   public void testConfigureConfigMapSupplierNoSchema() {
-    AbstractIBDataRecordTransformerSupplier<Map<String, String>, GenericRecord> v = s
+    AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> v = s
         .configure(new DefaultConfigMapSupplier());
     assertFalse(v == s);
     v.get();

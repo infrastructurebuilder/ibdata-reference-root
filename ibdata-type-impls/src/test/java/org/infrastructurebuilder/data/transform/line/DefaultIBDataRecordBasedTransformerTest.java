@@ -48,6 +48,7 @@ import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -85,8 +86,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformersList.forEach(t -> sj.add(t + MAP_SPLITTER + t));
     thePath = wps.get();
     rs = new HashMap<>();
-    test1 = new DefaultTestingIBDataRecordTransformerSupplier(1, () -> thePath);
-    test2 = new DefaultTestingIBDataRecordTransformerSupplier(2, () -> thePath);
+    test1 = new DefaultTestingIBDataRecordTransformerSupplier(1, () -> thePath, () -> log);
+    test2 = new DefaultTestingIBDataRecordTransformerSupplier(2, () -> thePath, () -> log);
     rs.put("test1", test1);
     rs.put("test2", test2);
     HashMap<String,Object> hm = new HashMap<>();
@@ -149,18 +150,18 @@ public class DefaultIBDataRecordBasedTransformerTest {
     // FIXME Test the actual output
   }
 
-  public class DefaultTestingIBDataRecordTransformerSupplier extends AbstractIBDataRecordTransformerSupplier
-      implements IBDataRecordTransformerSupplier {
+  public class DefaultTestingIBDataRecordTransformerSupplier extends AbstractIBDataRecordTransformerSupplier<String,String>
+       {
 
     private int type;
 
-    public DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps) {
-      super(wps, null);
+    public DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, LoggerSupplier l) {
+      super(wps, null, l);
       this.type = type;
     }
 
-    private DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, ConfigMapSupplier cms) {
-      super(wps, cms);
+    private DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l ) {
+      super(wps, cms, l);
       this.type = type;
     }
 
@@ -170,17 +171,17 @@ public class DefaultIBDataRecordBasedTransformerTest {
     }
 
     @Override
-    public AbstractIBDataRecordTransformerSupplier configure(ConfigMapSupplier cms) {
-      return new DefaultTestingIBDataRecordTransformerSupplier(type, getWps(), cms);
+    public AbstractIBDataRecordTransformerSupplier<String,String> configure(ConfigMapSupplier cms) {
+      return new DefaultTestingIBDataRecordTransformerSupplier(type, getWps(), cms, () -> getLogger());
     }
 
     @Override
-    protected IBDataRecordTransformer getUnconfiguredTransformerInstance(Path workingPath) {
+    protected IBDataRecordTransformer<String,String> getUnconfiguredTransformerInstance(Path workingPath) {
       switch (type) {
       case 1:
-        return new Test1(getWps().get(), getConfigSupplier().get());
+        return new Test1(getWps().get(), getConfigSupplier().get(), log);
       case 2:
-        return new Test2(getWps().get(), getConfigSupplier().get());
+        return new Test2(getWps().get(), getConfigSupplier().get(), log);
       default:
         throw new IBDataException("Wrong type, moron");
       }
@@ -188,8 +189,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     public class Test1 extends AbstractIBDataRecordTransformer<String, String> {
 
-      protected Test1(Path ps, ConfigMap config) {
-        super(ps, config);
+      protected Test1(Path ps, ConfigMap config, Logger l) {
+        super(ps, config, l);
         // TODO Auto-generated constructor stub
       }
 
@@ -212,8 +213,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     public class Test2 extends AbstractIBDataRecordTransformer<String, String> {
 
-      protected Test2(Path ps, ConfigMap config) {
-        super(ps, config);
+      protected Test2(Path ps, ConfigMap config, Logger l) {
+        super(ps, config, l);
       }
 
       @Override

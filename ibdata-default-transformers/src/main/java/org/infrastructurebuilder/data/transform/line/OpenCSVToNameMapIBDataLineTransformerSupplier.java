@@ -27,9 +27,11 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.ICSVParser;
@@ -40,23 +42,23 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
   public static final String STRING_TO_NAME_MAP = "opencsv-to-name-map";
 
   @javax.inject.Inject
-  public OpenCSVToNameMapIBDataLineTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public OpenCSVToNameMapIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
+    this(wps, null, l);
   }
 
-  private OpenCSVToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  private OpenCSVToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
+    super(wps, cms, l);
   }
 
   @Override
   public OpenCSVToNameMapIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new OpenCSVToNameMapIBDataLineTransformerSupplier(getWps(), cms);
+    return new OpenCSVToNameMapIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
   }
 
   @Override
   protected IBDataRecordTransformer<String, Map<String, String>> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new StringToNameMapIBDataLineTransformer(workingPath);
+    return new StringToNameMapIBDataLineTransformer(workingPath, getLogger());
   }
 
   private class StringToNameMapIBDataLineTransformer
@@ -70,8 +72,8 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
      * @param config
      */
     @SuppressWarnings("unchecked")
-    protected StringToNameMapIBDataLineTransformer(Path ps, ConfigMap config) {
-      super(ps, config);
+    protected StringToNameMapIBDataLineTransformer(Path ps, ConfigMap config, Logger l) {
+      super(ps, config, l);
 
       if (config != null) {
         CSVParserBuilder builder = new CSVParserBuilder();
@@ -91,8 +93,8 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
     /**
      * @param ps
      */
-    protected StringToNameMapIBDataLineTransformer(Path ps) {
-      this(ps, null);
+    protected StringToNameMapIBDataLineTransformer(Path ps, Logger l) {
+      this(ps, null, l);
     }
 
     @Override
@@ -109,7 +111,7 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
 
     @Override
     public IBDataRecordTransformer<String, Map<String, String>> configure(ConfigMap cms) {
-      return new StringToNameMapIBDataLineTransformer(getWorkingPath(), cms);
+      return new StringToNameMapIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }
 
     @Override

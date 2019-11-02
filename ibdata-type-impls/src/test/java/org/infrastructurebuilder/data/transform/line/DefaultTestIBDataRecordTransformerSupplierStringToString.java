@@ -17,15 +17,17 @@ package org.infrastructurebuilder.data.transform.line;
 
 import java.nio.file.Path;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 public class DefaultTestIBDataRecordTransformerSupplierStringToString
     extends AbstractIBDataRecordTransformerSupplier<String, String> {
 
-  protected DefaultTestIBDataRecordTransformerSupplierStringToString(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  protected DefaultTestIBDataRecordTransformerSupplierStringToString(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
+    super(wps, cms, l);
   }
 
   @Override
@@ -40,17 +42,17 @@ public class DefaultTestIBDataRecordTransformerSupplierStringToString
 
   @Override
   protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new StringToStringRecordTransformer(getWps().get());
+    return new StringToStringRecordTransformer(getWps().get(), getLogger());
   }
 
   public static class StringToStringRecordTransformer extends AbstractIBDataRecordTransformer<String, String> {
 
-    public StringToStringRecordTransformer(Path path) {
-      super(path);
+    public StringToStringRecordTransformer(Path path, Logger l) {
+      super(path, l);
     }
 
-    private StringToStringRecordTransformer(Path workingPath, ConfigMap config) {
-      super(workingPath, config);
+    private StringToStringRecordTransformer(Path workingPath, ConfigMap config, Logger l) {
+      super(workingPath, config, l);
     }
 
     @Override
@@ -60,7 +62,7 @@ public class DefaultTestIBDataRecordTransformerSupplierStringToString
 
     @Override
     public IBDataRecordTransformer<String,String> configure(ConfigMap config) {
-      return new StringToStringRecordTransformer(getWorkingPath(), config);
+      return new StringToStringRecordTransformer(getWorkingPath(), config, getLogger());
     }
 
     @Override

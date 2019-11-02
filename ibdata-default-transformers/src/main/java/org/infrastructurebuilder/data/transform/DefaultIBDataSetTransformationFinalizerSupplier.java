@@ -54,9 +54,9 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetTransformationFinalizerSupplier(@Nullable @Named("maven-log") LoggerSupplier l,
+  public DefaultIBDataSetTransformationFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, @Nullable @Named("maven-log") LoggerSupplier l,
       TypeToExtensionMapper t2e) {
-    this(Optional.ofNullable(l).orElse(() -> logger).get(), null, null, t2e);
+    this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
   }
 
   private DefaultIBDataSetTransformationFinalizerSupplier(Logger logger, PathSupplier workingPath,
@@ -71,9 +71,9 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
 
   @Override
   public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(),
-        () -> Paths.get(
-            requireNonNull(requireNonNull(cms).get().getString(IBDATA_WORKING_PATH_SUPPLIER), "Working Path Config")),
+    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), getWps(),
+//        () -> Paths.get(
+//            requireNonNull(requireNonNull(cms).get().getString(IBDATA_WORKING_PATH_SUPPLIER), "Working Path Config")),
         cms, getTypeToExtensionMapper());
   }
 

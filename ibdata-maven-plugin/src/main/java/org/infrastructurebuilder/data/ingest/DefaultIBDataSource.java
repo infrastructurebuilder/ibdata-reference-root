@@ -78,7 +78,7 @@ public class DefaultIBDataSource extends AbstractIBDataSource {
         getAdditionalConfig(), targetPath, name, description, Objects.requireNonNull(cacheDir), log, mimeType, t2e);
   }
 
-  public DefaultIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
+  private DefaultIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
       Optional<Document> metadata, Logger log, Optional<String> mimeType, TypeToExtensionMapper t2e) {
     this(id, source, creds, checksum, metadata, Optional.empty(), null, null, null, null, log, mimeType, t2e);
   }

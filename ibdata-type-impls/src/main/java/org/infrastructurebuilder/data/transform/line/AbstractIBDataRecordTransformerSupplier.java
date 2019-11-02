@@ -18,16 +18,20 @@ package org.infrastructurebuilder.data.transform.line;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 abstract public class AbstractIBDataRecordTransformerSupplier<I, O> implements IBDataRecordTransformerSupplier<I, O> {
   private final PathSupplier wps;
   private final ConfigMapSupplier config;
+  private Logger logger;
 
-  protected AbstractIBDataRecordTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
+  protected AbstractIBDataRecordTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
     this.wps = Objects.requireNonNull(wps);
     this.config = cms;
+    this.logger = l.get();
   }
 
   @Override
@@ -51,6 +55,11 @@ abstract public class AbstractIBDataRecordTransformerSupplier<I, O> implements I
 
   protected ConfigMapSupplier getConfigSupplier() {
     return config;
+  }
+
+  @Override
+  public Logger getLogger() {
+    return this.logger;
   }
 
 }

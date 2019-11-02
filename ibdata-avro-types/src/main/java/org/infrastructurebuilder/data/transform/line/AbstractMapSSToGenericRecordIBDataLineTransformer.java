@@ -35,16 +35,17 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
 
 abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
-    extends AbstractGenericIBDataLineTransformer<Map<String, String>> {
+    extends AbstractGenericIBDataLineTransformer<Map<String, Object>> {
 
-  protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
-    super(workingPath, config);
+  protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
+    super(workingPath, config, l);
   }
 
   @Override
-  public GenericRecord apply(Map<String, String> t) {
+  public GenericRecord apply(Map<String, Object> t) {
     Objects.requireNonNull(t);
     Schema s = getSchema();
 
@@ -53,16 +54,14 @@ abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
       Field v = s.getField(k);
       if (v != null) {
         r.put(k, managedValue(v.schema(), k, t.get(k)));
-      }
-      else
-      {
+      } else {
         // FIXME (I need a logger to warn of missing fields)
       }
-    });  // FIXME mebbe we need to catch some of the RuntimeException instances
+    }); // FIXME mebbe we need to catch some of the RuntimeException instances
     return r;
   }
 
-  private Object managedValue(Schema f, String k, String strValue) {
+  private Object managedValue(Schema f, String k, Object strValue) {
     if (f.isUnion()) {
       return valueFromUnion(f, strValue);
     } else {
@@ -84,25 +83,27 @@ abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
    * @param strValue
    * @return
    */
-  protected Object valueFromUnion(Schema f, String strValue) {
+  protected Object valueFromUnion(Schema f, Object in) {
     Schema[] types = f.getTypes().toArray(new Schema[0]);
 
     // Nullable field as element of a 2-part union
     if ("null".equals(types[0].getName()))
       if (types.length == 2) {
-         String sVal = strValue.trim();
+        String strValue = Optional.ofNullable(in).orElse("").toString();
+        String sVal = strValue.trim();
         if (sVal.trim().length() == 0)
           return isBlankFieldNullInUnion() ? null : sVal;
         else
           return valueFromTypeLogicalType(types[1],
               Optional.ofNullable(types[1].getLogicalType()).map(LogicalType::getName), sVal);
       } else {
-
+        throw new IBDataException("Null unions can only have 2 fields");
       }
     return null;
   }
 
-  protected Object valueFromTypeLogicalType(Schema f, Optional<String> lType, String strValue) {
+  protected Object valueFromTypeLogicalType(Schema f, Optional<String> lType, Object in) {
+    String strValue = in.toString();
     Type t = f.getType();
     switch (t) {
     case STRING:

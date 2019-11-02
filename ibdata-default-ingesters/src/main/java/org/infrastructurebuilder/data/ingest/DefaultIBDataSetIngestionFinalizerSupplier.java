@@ -52,9 +52,9 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetIngestionFinalizerSupplier(@Nullable @Named("maven-log") LoggerSupplier l,
+  public DefaultIBDataSetIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, @Nullable @Named("maven-log") LoggerSupplier l,
       TypeToExtensionMapper t2e) {
-    this(Optional.ofNullable(l).orElse(() -> logger).get(), null, null, t2e);
+    this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
   }
 
   private DefaultIBDataSetIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms,
@@ -69,10 +69,10 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
 
   @Override
   public DefaultIBDataSetIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(),
-        () -> Paths
-            .get(requireNonNull(requireNonNull(cms, "Config Map Supplier").get().getString(IBDATA_WORKING_PATH_SUPPLIER),
-                "Working Path Config '" + IBDATA_WORKING_PATH_SUPPLIER + "' not present")),
+    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), getWps(),
+//        () -> Paths
+//            .get(requireNonNull(requireNonNull(cms, "Config Map Supplier").get().getString(IBDATA_WORKING_PATH_SUPPLIER),
+//                "Working Path Config '" + IBDATA_WORKING_PATH_SUPPLIER + "' not present")),
         cms, getTypeToExtensionMapper());
   }
 

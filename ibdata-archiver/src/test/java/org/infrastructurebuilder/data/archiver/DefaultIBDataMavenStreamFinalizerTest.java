@@ -49,8 +49,9 @@ public class DefaultIBDataMavenStreamFinalizerTest extends AbstractIBDataConfigT
     sf.finalizeArchiveCreation(new JarArchiver());
   }
 
-  @Test(expected =ArchiverException.class)
+  @Test(expected = ArchiverException.class)
   public void testDataStreamArchiveFinalizerCreationNullConfig() {
+    c = new IBDataLateBindingFinalizerConfigSupplier();
     c.setT(null);
     DefaultIBDataMavenStreamFinalizer sf = new DefaultIBDataMavenStreamFinalizer(() -> logger, c);
     sf.finalizeArchiveCreation(new JarArchiver());

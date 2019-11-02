@@ -29,9 +29,11 @@ import java.util.Optional;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(ArrayToNameMapIBDataLineTransformerSupplier.ARRAY_TO_NAME_MAP)
 public class ArrayToNameMapIBDataLineTransformerSupplier
@@ -39,24 +41,23 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
   public static final String ARRAY_TO_NAME_MAP = "array-to-name-map";
 
   @javax.inject.Inject
-  public ArrayToNameMapIBDataLineTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public ArrayToNameMapIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+    this(wps, null, l);
   }
 
-  private ArrayToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  private ArrayToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l ) {
+    super(wps, cms, l);
   }
 
   @Override
   public ArrayToNameMapIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArrayToNameMapIBDataLineTransformerSupplier(getWps(), cms);
+    return new ArrayToNameMapIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
   }
 
   @Override
   protected IBDataRecordTransformer<String[], Map<String, String>> getUnconfiguredTransformerInstance(
       Path workingPath) {
-    return new ArrayToNameMapIBDataLineTransformer(workingPath);
+    return new ArrayToNameMapIBDataLineTransformer(workingPath, getLogger());
   }
 
   private class ArrayToNameMapIBDataLineTransformer
@@ -70,8 +71,8 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
      * @param config
      */
     @SuppressWarnings("unchecked")
-    protected ArrayToNameMapIBDataLineTransformer(Path ps, ConfigMap config) {
-      super(ps, config);
+    protected ArrayToNameMapIBDataLineTransformer(Path ps, ConfigMap config, Logger l) {
+      super(ps, config, l);
       try {
         this.format = (List<String>) getOptionalObjectConfiguration(FIELD_KEY)
             .orElseThrow(() -> new IBDataException("No " + FIELD_KEY + " found in config"));
@@ -83,8 +84,8 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
     /**
      * @param ps
      */
-    protected ArrayToNameMapIBDataLineTransformer(Path ps) {
-      super(ps);
+    protected ArrayToNameMapIBDataLineTransformer(Path ps, Logger l) {
+      super(ps, l);
       this.format = null;
     }
 
@@ -104,7 +105,7 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
 
     @Override
     public IBDataRecordTransformer<String[], Map<String, String>> configure(ConfigMap cms) {
-      return new ArrayToNameMapIBDataLineTransformer(getWorkingPath(), cms);
+      return new ArrayToNameMapIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }
 
     @Override

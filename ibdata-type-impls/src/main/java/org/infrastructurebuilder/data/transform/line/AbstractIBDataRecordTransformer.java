@@ -15,26 +15,34 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
 
 abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRecordTransformer<I, O> {
 
   private final Path workingPath;
   private final ConfigMap config;
+  private final Logger logger;
 
-  public AbstractIBDataRecordTransformer(Path ps) {
-    this(ps, null);
+  public AbstractIBDataRecordTransformer(Path ps, Logger l) {
+    this(ps, null, l);
   }
 
-  protected AbstractIBDataRecordTransformer(Path ps, ConfigMap config) {
-    this.workingPath = Objects.requireNonNull(ps);
+  protected AbstractIBDataRecordTransformer(Path ps, ConfigMap config, Logger l) {
+    this.workingPath = requireNonNull(ps);
     this.config = config;
+    this.logger = requireNonNull(l);
+  }
+
+  @Override
+  public Logger getLogger() {
+    return logger;
   }
 
   protected Path getWorkingPath() {

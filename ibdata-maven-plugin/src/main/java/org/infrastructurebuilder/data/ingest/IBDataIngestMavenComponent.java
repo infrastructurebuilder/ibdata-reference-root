@@ -39,6 +39,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
+import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
@@ -89,13 +90,12 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       TypeToExtensionMapper mapper) {
     List<DefaultIBDataSourceSupplier> k = i.getDataSet().getStreams().stream().map(v -> {
       return new DefaultIBDataSourceSupplier(v.getTemporaryId(),
-          new DefaultIBDataSource(log, cet.withReturningTranslation(() -> v.getURL().get()),
+          new DefaultIBDataSource(log,
+              v.getURL().orElseThrow(() -> new IBDataException("No url for " + v.getTemporaryId())),
               ofNullable(v.getChecksum()), of(v.getMetadata()), ofNullable(v.getMimeType()), mapper));
     }).collect(Collectors.toList());
-    return k.stream().collect(Collectors.toMap(DefaultIBDataSourceSupplier::getId, Function.identity(), (prev, now)-> now, () -> new TreeMap<>()));
-//    return new TreeMap<>(
-//        k.stream().collect(Collectors.toMap(key -> key.get().getId(), (IBDataSourceSupplier) Function.identity())));
-
+    return k.stream().collect(Collectors.toMap(DefaultIBDataSourceSupplier::getId, Function.identity(),
+        (prev, now) -> now, () -> new TreeMap<>()));
   }
 
   @SuppressWarnings("unchecked")
@@ -105,7 +105,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     IBDataSetFinalizer<Ingestion> finalizer;
     try {
       finalizer = (IBDataSetFinalizer<Ingestion>) getDataSetFinalizerSupplier(ingest.getFinalizer(),
-          ingest.getFinalizerConfig(), Optional.empty());
+          ingest.getFinalizerConfig() /*, Optional.empty()*/);
     } catch (ClassCastException e) {
       throw new MojoFailureException("Finalizer " + ingest.getFinalizer() + " was not considered viable", e);
     }
@@ -120,9 +120,6 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // do the ingestion
         .ingest(ingest, ingest.getDataSet(),
             mapIngestionToSourceSuppliers(ingest, new SLF4JFromMavenLogger(getLog()), getTypeToExtensionMapper()));
-
-    // Ingestion self-returns the IBChecksumPathType, because that's easier and ingestion is easy.
-
     try {
       return finalizer.finalize(null, ingest, suppliers);
     } catch (IOException e) {

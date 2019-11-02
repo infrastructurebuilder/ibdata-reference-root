@@ -51,8 +51,9 @@ public class DefaultIBDataSetJDBCIngestionFinalizerSupplier extends AbstractIBDa
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetJDBCIngestionFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetJDBCIngestionFinalizerSupplier(LoggerSupplier l, TypeToExtensionMapper t2e) {
-    this(Optional.ofNullable(l).orElse(() -> logger).get(), null, null, t2e);
+  public DefaultIBDataSetJDBCIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l, TypeToExtensionMapper t2e) {
+    this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
   }
 
   private DefaultIBDataSetJDBCIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms,
@@ -67,11 +68,11 @@ public class DefaultIBDataSetJDBCIngestionFinalizerSupplier extends AbstractIBDa
 
   @Override
   public DefaultIBDataSetJDBCIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier config) {
-    String q = requireNonNull(config, "Config Map Supplier").get()
-        .getString(IBDATA_WORKING_PATH_SUPPLIER);
-    getLog().debug("" + q + " is the config working path");
-    return new DefaultIBDataSetJDBCIngestionFinalizerSupplier(getLog(),
-        () -> Paths.get(requireNonNull(q, "Working Path Config")), config, getTypeToExtensionMapper());
+//    String q = requireNonNull(config, "Config Map Supplier").get().getString(IBDATA_WORKING_PATH_SUPPLIER);
+//    getLog().debug("" + q + " is the config working path");
+    return new DefaultIBDataSetJDBCIngestionFinalizerSupplier(getLog(), getWps(),
+         /*() -> Paths.get(requireNonNull(q, "Working Path Config")), */
+        config, getTypeToExtensionMapper());
   }
 
   @Override

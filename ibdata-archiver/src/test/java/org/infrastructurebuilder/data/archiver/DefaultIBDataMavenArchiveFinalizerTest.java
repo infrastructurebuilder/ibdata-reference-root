@@ -42,6 +42,7 @@ public class DefaultIBDataMavenArchiveFinalizerTest extends AbstractIBDataConfig
 
   @Test(expected = ArchiverException.class)
   public void testNullArchiverConfig() {
+    c = new IBDataLateBindingFinalizerConfigSupplier();
     c.setT(null);
     final DefaultIBDataMavenArchiveFinalizer f = new DefaultIBDataMavenArchiveFinalizer(() -> logger, c);
     f.finalizeArchiveCreation(new JarArchiver());

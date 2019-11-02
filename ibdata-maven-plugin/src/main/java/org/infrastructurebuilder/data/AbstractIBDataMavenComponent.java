@@ -32,6 +32,7 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
+
 abstract public class AbstractIBDataMavenComponent {
   private final ConfigMapSupplier configMapSupplier;
   private final PathSupplier lateBoundWorkingPathSupplier;
@@ -61,29 +62,29 @@ abstract public class AbstractIBDataMavenComponent {
     this.streamerFactory = requireNonNull(streamerFactory);
   }
 
-  public final IBDataSetFinalizer<?> getDataSetFinalizerSupplier(String key, ConfigMap config,
-      Optional<PathSupplier> overrideWorkingPath) throws MojoFailureException {
+  public final IBDataSetFinalizer<?> getDataSetFinalizerSupplier(String key, ConfigMap config
+  /*,Optional<PathSupplier> overrideWorkingPath*/ ) throws MojoFailureException {
 
-    overrideWorkingPath = Optional.empty(); // FIXME Remove this parameter
+    //    overrideWorkingPath = Optional.empty(); // FIXME Remove this parameter (FIXED)
 
-    final Optional<IBDataSetFinalizerSupplier> supplier = ofNullable(allDataSetFinalizers.get(key));
+    final IBDataSetFinalizerSupplier supplier = ofNullable(allDataSetFinalizers.get(key))
+        .orElseThrow(() -> new MojoFailureException("No finalizer name " + key));
+    requireNonNull(config);
     // Little bit of a hack here
-    Optional<IBDataSetFinalizerSupplier> s2 = overrideWorkingPath.map(wp -> {
-      return Optional.of(supplier.get().forceOverrideOfWorkingPath(wp));
-    }).orElse(supplier);
-    IBDataSetFinalizer<?> k = s2
-        .map(dsfs -> dsfs.configure(
-            new DefaultConfigMapSupplier(getConfigMapSupplier()).overrideConfiguration(requireNonNull(config))))
-        .orElseThrow(() -> new MojoFailureException("No finalizer name " + key)).get();
+    //    Optional<IBDataSetFinalizerSupplier> s2 = overrideWorkingPath.map(wp -> {
+    //      return Optional.of(supplier.get().forceOverrideOfWorkingPath(wp));
+    //    }).orElse(supplier);
+    IBDataSetFinalizer<?> k = supplier
+        .configure(new DefaultConfigMapSupplier(getConfigMapSupplier()).overrideConfiguration(config)).get();
     return k;
 
   }
 
   public ConfigMapSupplier getConfigMapSupplier() {
-    return new DefaultConfigMapSupplier(configMapSupplier)
-        // Force the Working PAth Supplier value
-        .overrideValue(IBDATA_WORKING_PATH_SUPPLIER,
-            getWorkingPathSupplier().get().toAbsolutePath().toString());
+
+    return new DefaultConfigMapSupplier(configMapSupplier);
+    //        // Force the Working PAth Supplier value
+    //        .overrideValue(IBDATA_WORKING_PATH_SUPPLIER, getWorkingPathSupplier().get().toAbsolutePath().toString());
   }
 
   public Log getLog() {

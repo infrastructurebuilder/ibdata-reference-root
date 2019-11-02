@@ -26,9 +26,11 @@ import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(ArraySplitIBDataLineTransformerSupplier.REGEX_ARRAY_SPLIT) // ArrayJoinIBDataLineTransformerSupplier
 public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecordTransformerSupplier<String, String[]> {
@@ -37,24 +39,24 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
 
   @javax.inject.Inject
   public ArraySplitIBDataLineTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+    this(wps, null, l);
   }
 
-  private ArraySplitIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  private ArraySplitIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
+    super(wps, cms, l);
   }
 
   @Override
   public ArraySplitIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
     // TODO Auto-generated method stub
-    return new ArraySplitIBDataLineTransformerSupplier(getWps(), cms);
+    return new ArraySplitIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
   }
 
   @Override
   protected IBDataRecordTransformer<String, String[]> getUnconfiguredTransformerInstance(Path workingPath) {
     // TODO Auto-generated method stub
-    return new ArraySplitIBDataLineTransformer(workingPath);
+    return new ArraySplitIBDataLineTransformer(workingPath, getLogger());
   }
 
   private class ArraySplitIBDataLineTransformer extends AbstractIBDataRecordTransformer<String, String[]> {
@@ -63,22 +65,22 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
     public static final String DEFAULT_SPLIT_REGEX = ",";
     private final String splitRegex;
 
-    ArraySplitIBDataLineTransformer(Path workingPath) {
-      this(workingPath, new ConfigMap());
+    ArraySplitIBDataLineTransformer(Path workingPath, Logger l) {
+      this(workingPath, new ConfigMap(), l);
     }
 
     /**
      * @param ps
      * @param config
      */
-    ArraySplitIBDataLineTransformer(Path ps, ConfigMap config) {
-      super(ps, config);
+    ArraySplitIBDataLineTransformer(Path ps, ConfigMap config, Logger l) {
+      super(ps, config, l);
       this.splitRegex = Pattern.quote( getConfiguration(REGEX, DEFAULT_SPLIT_REGEX));
     }
 
     @Override
     public IBDataRecordTransformer<String, String[]> configure(ConfigMap cms) {
-      return new ArraySplitIBDataLineTransformer(getWorkingPath(), cms);
+      return new ArraySplitIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }
 
     @Override

@@ -169,8 +169,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         IBDataSetFinalizer<Transformation> finalizer;
         try {
           finalizer = (IBDataSetFinalizer<Transformation>) getDataSetFinalizerSupplier(transformation.getFinalizer(),
-              transformation.getFinalizerConfig(),
-              Optional.ofNullable(ref).map(IBDataTransformationResult::getWorkingPathSupplier)); // FIXME Type erasure here.  This probably isn't going to work
+              transformation.getFinalizerConfig()); //,              Optional.ofNullable(ref).map(IBDataTransformationResult::getWorkingPathSupplier)*/);
         } catch (ClassCastException e) {
           throw new IBDataException("Finalizer " + transformation.getFinalizer() + " in transformation "
               + transformation.getId() + " was not considered viable", e);

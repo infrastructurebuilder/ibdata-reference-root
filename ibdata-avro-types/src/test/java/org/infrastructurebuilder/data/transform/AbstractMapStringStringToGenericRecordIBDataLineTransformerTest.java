@@ -31,12 +31,21 @@ import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.transform.line.AbstractMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.config.WorkingPathSupplier;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
+  static final String BA_AVSC = "ba.avsc";
+
+  static final String LOAD1_PROPERTIES = "load1.properties";
+
+  public final static Logger log = LoggerFactory
+      .getLogger(AbstractMapStringStringToGenericRecordIBDataLineTransformerTest.class);
 
   protected static final String DATE_PATTERN = "yyyy-MM-dd";
   protected static final String TIME_PATTERN = "HH:mm";
@@ -44,24 +53,28 @@ public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
 
   private AbstractMapSSToGenericRecordIBDataLineTransformer test;
   private Schema s;
-  private Map<String, String> testData = new HashMap<>();
-  private WorkingPathSupplier wps = new WorkingPathSupplier();
+  private Map<String, Object> testData = new HashMap<>();
+  private TestingPathSupplier wps = new TestingPathSupplier();
   private Path workingPath;
 
   @Before
   public void setUp() throws Throwable {
-    testData.put("column1", "c1");
-    testData.put("column2", "c2");
-    testData.put("pre1996", "false");
-    testData.put("effective", "2099-10-04");
-    testData.put("deletion", "2299-10-11");
+    Path schemaP = wps.getTestClasses().resolve(BA_AVSC);
+    testData.put("first_name", "c1");
+    testData.put("last_name", "c2");
+    testData.put("gender", "f");
+    testData.put("country", "usa");
+    testData.put("age", "323");
+    testData.put("date_of_birth", "11-10-99");
+    testData.put("id", "1");
     Object[] a = Arrays.asList("A", "B", 1, 2, 3).toArray(new Object[0]);
     Properties p1 = new Properties();
-    try (InputStream in = getClass().getResourceAsStream("/load1.properties")) {
+    try (InputStream in = getClass().getResourceAsStream("/" + LOAD1_PROPERTIES)) {
       p1.load(in);
     }
+    p1.setProperty(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaP.toAbsolutePath().toString());
 
-    try (InputStream ins = getClass().getResourceAsStream("/nccirefdatapackager.avsc")) {
+    try (InputStream ins = getClass().getResourceAsStream("/" + BA_AVSC)) {
       Parser p = new Schema.Parser();
       s = p.parse(ins);
     }
@@ -69,10 +82,9 @@ public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
     workingPath = wps.get();
 
     test = new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer(
-        workingPath, new ConfigMap(p1));
+        workingPath, new ConfigMap(p1), log);
   }
 
-  @Ignore
   @Test
   public void test() {
     GenericRecord r = test.apply(testData);

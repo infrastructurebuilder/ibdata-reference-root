@@ -35,13 +35,15 @@ import javax.inject.Named;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.NAME)
 public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
-    extends AbstractIBDataRecordTransformerSupplier<Map<String, String>, GenericRecord> {
+    extends AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> {
   public final static String NAME = "map-to-generic-avro";
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Map.class.getCanonicalName());
   public final static DateTimeFormatter DEFAULT_TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -56,13 +58,14 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
   public final static String LOCALE_REGION_PARAM = "locale.region";
 
   @Inject
-  public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
+    this(wps, null, l);
   }
 
-  private DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
+  private DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms,
+      LoggerSupplier l) {
+    super(wps, cms, l);
   }
 
   @Override
@@ -72,13 +75,13 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
 
   @Override
   public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(getWps(), cms);
+    return new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
   }
 
   @Override
-  protected IBDataRecordTransformer<Map<String, String>, GenericRecord> getUnconfiguredTransformerInstance(
+  protected IBDataRecordTransformer<Map<String, Object>, GenericRecord> getUnconfiguredTransformerInstance(
       Path workingPath) {
-    return new DefaultMapSSToGenericRecordIBDataLineTransformer(workingPath);
+    return new DefaultMapSSToGenericRecordIBDataLineTransformer(workingPath, getLogger());
   }
 
   public static class DefaultMapSSToGenericRecordIBDataLineTransformer
@@ -90,8 +93,8 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
      * @param workingPath
      * @param config
      */
-    public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config) {
-      super(workingPath, config);
+    public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
+      super(workingPath, config, l);
 
       if (config != null && !config.keySet().contains(SCHEMA_PARAM))
         throw new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER);
@@ -103,8 +106,8 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
     /**
      * @param workingPath
      */
-    public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath) {
-      this(workingPath, null);
+    public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, Logger l) {
+      this(workingPath, null, l);
     }
 
     @Override
@@ -158,8 +161,8 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
     }
 
     @Override
-    public IBDataRecordTransformer<Map<String, String>, GenericRecord> configure(ConfigMap cms) {
-      return new DefaultMapSSToGenericRecordIBDataLineTransformer(getWorkingPath(), cms);
+    public IBDataRecordTransformer<Map<String, Object>, GenericRecord> configure(ConfigMap cms) {
+      return new DefaultMapSSToGenericRecordIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }
 
   }

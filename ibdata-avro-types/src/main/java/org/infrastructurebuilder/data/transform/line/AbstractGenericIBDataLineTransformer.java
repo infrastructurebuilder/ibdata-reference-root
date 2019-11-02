@@ -19,15 +19,16 @@ import java.nio.file.Path;
 
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
 
 abstract public class AbstractGenericIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, GenericRecord> {
 
-  public AbstractGenericIBDataLineTransformer(Path workingPath) {
-    this(workingPath, null);
+  public AbstractGenericIBDataLineTransformer(Path workingPath, Logger l) {
+    this(workingPath, null, l);
   }
 
-  protected AbstractGenericIBDataLineTransformer(Path workingPath, ConfigMap config) {
-    super(workingPath, config);
+  protected AbstractGenericIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
+    super(workingPath, config, l);
   }
 
 

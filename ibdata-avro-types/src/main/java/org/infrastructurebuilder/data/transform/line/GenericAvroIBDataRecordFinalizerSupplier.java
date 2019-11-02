@@ -44,8 +44,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
   private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(GenericRecord.class.getCanonicalName());
 
   @Inject
-  public GenericAvroIBDataRecordFinalizerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
+  public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
     this(wps, null);
   }
 
@@ -69,6 +68,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
       extends AbstractIBDataStreamRecordFinalizer<GenericRecord, DataFileWriter<GenericRecord>> {
 
     private final int numberOfRowsToSkip;
+
     public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
       super(id, workingPath, map, Optional.of(IBDataAvroUtils.fromMapAndWP.apply(workingPath, map)));
       this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
@@ -88,6 +88,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
     public Optional<String> produces() {
       return Optional.of(IBConstants.AVRO_BINARY);
     }
+
     @Override
     public Optional<List<String>> accepts() {
       return Optional.of(ACCEPTABLE_TYPES);
