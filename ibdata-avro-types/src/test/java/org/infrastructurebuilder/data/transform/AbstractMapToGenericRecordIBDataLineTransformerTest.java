@@ -28,8 +28,8 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericRecord;
-import org.infrastructurebuilder.data.transform.line.AbstractMapSSToGenericRecordIBDataLineTransformer;
-import org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformerSupplier;
+import org.infrastructurebuilder.data.transform.line.AbstractMapToGenericRecordIBDataLineTransformer;
+import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.config.WorkingPathSupplier;
@@ -39,19 +39,19 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
+public class AbstractMapToGenericRecordIBDataLineTransformerTest {
   static final String BA_AVSC = "ba.avsc";
 
   static final String LOAD1_PROPERTIES = "load1.properties";
 
   public final static Logger log = LoggerFactory
-      .getLogger(AbstractMapStringStringToGenericRecordIBDataLineTransformerTest.class);
+      .getLogger(AbstractMapToGenericRecordIBDataLineTransformerTest.class);
 
   protected static final String DATE_PATTERN = "yyyy-MM-dd";
   protected static final String TIME_PATTERN = "HH:mm";
   protected static final String TS_PATTERN = DateTimeFormatter.ISO_INSTANT.toString();
 
-  private AbstractMapSSToGenericRecordIBDataLineTransformer test;
+  private AbstractMapToGenericRecordIBDataLineTransformer test;
   private Schema s;
   private Map<String, Object> testData = new HashMap<>();
   private TestingPathSupplier wps = new TestingPathSupplier();
@@ -72,7 +72,7 @@ public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
     try (InputStream in = getClass().getResourceAsStream("/" + LOAD1_PROPERTIES)) {
       p1.load(in);
     }
-    p1.setProperty(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaP.toAbsolutePath().toString());
+    p1.setProperty(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaP.toAbsolutePath().toString());
 
     try (InputStream ins = getClass().getResourceAsStream("/" + BA_AVSC)) {
       Parser p = new Schema.Parser();
@@ -81,7 +81,7 @@ public class AbstractMapStringStringToGenericRecordIBDataLineTransformerTest {
 
     workingPath = wps.get();
 
-    test = new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer(
+    test = new DefaultMapToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer(
         workingPath, new ConfigMap(p1), log);
   }
 

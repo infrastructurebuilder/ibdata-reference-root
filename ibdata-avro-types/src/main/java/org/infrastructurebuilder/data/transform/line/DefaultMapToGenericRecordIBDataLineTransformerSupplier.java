@@ -41,8 +41,8 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
-@Named(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.NAME)
-public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
+@Named(DefaultMapToGenericRecordIBDataLineTransformerSupplier.NAME)
+public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
     extends AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> {
   public final static String NAME = "map-to-generic-avro";
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Map.class.getCanonicalName());
@@ -58,12 +58,12 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
   public final static String LOCALE_REGION_PARAM = "locale.region";
 
   @Inject
-  public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+  public DefaultMapToGenericRecordIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       LoggerSupplier l) {
     this(wps, null, l);
   }
 
-  private DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms,
+  private DefaultMapToGenericRecordIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms,
       LoggerSupplier l) {
     super(wps, cms, l);
   }
@@ -74,8 +74,8 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
   }
 
   @Override
-  public DefaultMapSSToGenericRecordIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+  public DefaultMapToGenericRecordIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
+    return new DefaultMapToGenericRecordIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
   }
 
   @Override
@@ -85,7 +85,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplier
   }
 
   public static class DefaultMapSSToGenericRecordIBDataLineTransformer
-      extends AbstractMapSSToGenericRecordIBDataLineTransformer {
+      extends AbstractMapToGenericRecordIBDataLineTransformer {
 
     private final Schema schema;
 

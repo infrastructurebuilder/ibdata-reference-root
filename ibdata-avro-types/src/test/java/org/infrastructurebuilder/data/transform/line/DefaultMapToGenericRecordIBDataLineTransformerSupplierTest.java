@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer;
+import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -40,9 +40,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
+public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
   public final static Logger log = LoggerFactory
-      .getLogger(DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest.class);
+      .getLogger(DefaultMapToGenericRecordIBDataLineTransformerSupplierTest.class);
 
   public static final String BA = "ba";
   private final static TestingPathSupplier wps = new TestingPathSupplier();
@@ -57,7 +57,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
   }
 
   private Path wp;
-  private DefaultMapSSToGenericRecordIBDataLineTransformerSupplier s;
+  private DefaultMapToGenericRecordIBDataLineTransformerSupplier s;
   private ConfigMapSupplier cms;
   private ConfigMap cm;
   private Path schemaFile;
@@ -66,10 +66,10 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
   public void setUp() throws Exception {
     schemaFile = wps.getTestClasses().resolve(BA + ".avsc").toAbsolutePath();
     cm = new ConfigMap();
-    cm.put(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
+    cm.put(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
     wp = wps.get();
     cms = new DefaultConfigMapSupplier().addConfiguration(cm);
-    s = new DefaultMapSSToGenericRecordIBDataLineTransformerSupplier(wps, () -> log);
+    s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(wps, () -> log);
   }
 
   @After
@@ -78,7 +78,7 @@ public class DefaultMapSSToGenericRecordIBDataLineTransformerSupplierTest {
 
   @Test
   public void testGetHint() {
-    assertEquals(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.NAME, s.getHint());
+    assertEquals(DefaultMapToGenericRecordIBDataLineTransformerSupplier.NAME, s.getHint());
   }
 
   @Test

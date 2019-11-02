@@ -37,10 +37,10 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
-abstract public class AbstractMapSSToGenericRecordIBDataLineTransformer
+abstract public class AbstractMapToGenericRecordIBDataLineTransformer
     extends AbstractGenericIBDataLineTransformer<Map<String, Object>> {
 
-  protected AbstractMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
+  protected AbstractMapToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
     super(workingPath, config, l);
   }
 

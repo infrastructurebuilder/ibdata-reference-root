@@ -21,7 +21,7 @@ import static org.infrastructurebuilder.IBConstants.HTTPS_PREFIX;
 import static org.infrastructurebuilder.IBConstants.HTTP_PREFIX;
 import static org.infrastructurebuilder.IBConstants.ZIP_PREFIX;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.transform.line.DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM;
+import static org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM;
 
 import java.io.IOException;
 import java.io.InputStream;

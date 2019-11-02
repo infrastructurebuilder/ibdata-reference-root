@@ -55,7 +55,7 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
   public void setUp() throws Exception {
     cms = new DefaultConfigMapSupplier();
     String schemaString = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString();
-    cms.addValue(DefaultMapSSToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM,
+    cms.addValue(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM,
         schemaString );
     cms.addValue(IBDataStreamRecordFinalizer.NUMBER_OF_ROWS_TO_SKIP_PARAM, "1");
     g = new GenericAvroIBDataRecordFinalizerSupplier(wps);
