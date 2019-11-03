@@ -15,14 +15,14 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataAvroUtils.NO_SCHEMA_CONFIG_FOR_MAPPER;
-import static org.infrastructurebuilder.data.IBDataAvroUtils.getSchema;
+import static org.infrastructurebuilder.data.IBDataAvroUtils.avroSchemaFromString;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataConstants.LOCALE_LANGUAGE_PARAM;
+import static org.infrastructurebuilder.data.IBDataConstants.LOCALE_REGION_PARAM;
 
 import java.nio.file.Path;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +34,7 @@ import javax.inject.Named;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -46,16 +47,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
     extends AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> {
   public final static String NAME = "map-to-generic-avro";
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Map.class.getCanonicalName());
-  public final static DateTimeFormatter DEFAULT_TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_ZONED_DATE_TIME;
   public final static String SCHEMA_PARAM = "schema"; // Required **
-  public final static String TIMESTAMP_FORMATTER = "timestamp.formatter";
-  public final static String TIME_FORMATTER = "time.formatter";
-  public final static String DEFAULT_TIME_FORMATTER = "HH:MM";
-  public final static String DATE_FORMATTER = "date.formatter";
-  public final static String DEFAULT_DATE_FORMATTER = "mm-DD-yy";
-
-  public final static String LOCALE_LANGUAGE_PARAM = "locale.language";
-  public final static String LOCALE_REGION_PARAM = "locale.region";
 
   @Inject
   public DefaultMapToGenericRecordIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
@@ -88,6 +80,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
       extends AbstractMapToGenericRecordIBDataLineTransformer {
 
     private final Schema schema;
+    private final Formatters formatters;
 
     /**
      * @param workingPath
@@ -99,8 +92,14 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
       if (config != null && !config.keySet().contains(SCHEMA_PARAM))
         throw new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER);
       this.schema = config == null ? null
-          : getSchema.apply(ofNullable(getConfiguration(SCHEMA_PARAM))
+          : avroSchemaFromString.apply(ofNullable(getConfiguration(SCHEMA_PARAM))
               .orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER + " (invalid?)")));
+      this.formatters = new Formatters(Optional.ofNullable(getConfig()).orElse(new ConfigMap())) {
+        @Override
+        public boolean isBlankFieldNullInUnion() {
+          return true;
+        }
+      };
     }
 
     /**
@@ -111,24 +110,8 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
     }
 
     @Override
-    DateTimeFormatter getDateFormatter() {
-      return ofPattern(getConfiguration(DATE_FORMATTER, DEFAULT_DATE_FORMATTER));
-    }
-
-    @Override
-    DateTimeFormatter getTimeFormatter() {
-      return ofPattern(getConfiguration(TIME_FORMATTER, DEFAULT_TIME_FORMATTER));
-    }
-
-    @Override
-    DateTimeFormatter getTimestampFormatter() {
-      return ofNullable(getObjectConfiguration(TIMESTAMP_FORMATTER, null)).map(Object::toString)
-          .map(DateTimeFormatter::ofPattern).orElse(DEFAULT_TIMESTAMP_FORMATTER);
-    }
-
-    @Override
-    boolean isBlankFieldNullInUnion() {
-      return true;
+    Formatters getFormatters() {
+      return this.formatters;
     }
 
     @Override

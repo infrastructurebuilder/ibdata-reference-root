@@ -59,7 +59,7 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
         schemaString );
     cms.addValue(IBDataStreamRecordFinalizer.NUMBER_OF_ROWS_TO_SKIP_PARAM, "1");
     g = new GenericAvroIBDataRecordFinalizerSupplier(wps);
-    schema = IBDataAvroUtils.getSchema.apply(schemaString);
+    schema = IBDataAvroUtils.avroSchemaFromString.apply(schemaString);
     record = new Record(schema);
 
   }

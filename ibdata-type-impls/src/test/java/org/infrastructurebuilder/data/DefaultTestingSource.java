@@ -23,11 +23,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultTestingSource extends AbstractIBDataSource {
+  public final static Logger log = LoggerFactory.getLogger(DefaultTestingSource.class);
 
-  public DefaultTestingSource(URL source) {
-    super(UUID.randomUUID().toString(), source, empty(), empty(), empty(), empty());
+  public DefaultTestingSource(String source) {
+    super(log, UUID.randomUUID().toString(), source, empty(), empty(), empty(), empty(), empty(), empty());
   }
 
   @Override
@@ -43,26 +46,6 @@ public class DefaultTestingSource extends AbstractIBDataSource {
   @Override
   public Optional<String> getDescription() {
     return empty();
-  }
-
-  @Override
-  public IBDataSource withTargetPath(Path targetPath) {
-    return this;
-  }
-
-  @Override
-  public IBDataSource withName(String name) {
-    return this;
-  }
-
-  @Override
-  public IBDataSource withDescription(String description) {
-    return this;
-  }
-
-  @Override
-  public IBDataSource withDownloadCacheDirectory(Path cacheDir) {
-    return this;
   }
 
 }

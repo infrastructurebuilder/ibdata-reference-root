@@ -43,7 +43,7 @@ public class DefaultIBDataStreamIdentifierTest {
   private IBDataSource ibds;
   private DefaultIBDataStreamIdentifier i;
   private UUID id;
-  private Optional<URL> url;
+  private Optional<String> url;
   private Optional<String> name;
   private Optional<String> description;
   private Checksum checksum;
@@ -57,7 +57,7 @@ public class DefaultIBDataStreamIdentifierTest {
   public void setUp() throws Exception {
     ibds = null;
     id = UUID.randomUUID();
-    url = of(new URL("https://www.google.com"));
+    url = of("https://www.google.com");
     name = of("dsname");
     description = of("dsdescription");
     checksum = new Checksum("cdef");
@@ -71,7 +71,7 @@ public class DefaultIBDataStreamIdentifierTest {
 
   @Test
   public void testFromSource() throws Exception {
-    IBDataSource source = new DefaultTestingSource(getClass().getResource("/rick.jpg"));
+    IBDataSource source = new DefaultTestingSource(getClass().getResource("/rick.jpg").toExternalForm());
     DefaultIBDataStreamIdentifier i3 = new DefaultIBDataStreamIdentifier(source, new Date(), Optional.empty());
 
   }
@@ -168,8 +168,8 @@ public class DefaultIBDataStreamIdentifierTest {
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, doc, mimeType, path));
     assertNotEquals(i,
         new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, doc, mimeType, path));
-    assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, of(new URL("https://himomImhome.com")), name, description,
-        checksum, creationDate, doc, mimeType, path));
+    assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, of("https://himomImhome.com"), name, description, checksum,
+        creationDate, doc, mimeType, path));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, name, description, new Checksum("abcd"), creationDate,
         metadata, mimeType, path));
     assertNotEquals(i,

@@ -15,11 +15,8 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.util.function.Supplier;
+import org.infrastructurebuilder.util.IBLoggerEnabled;
+import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
-import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-
-public interface IBDataStreamFinalizerSupplier extends Supplier<IBDataStreamFinalizer> {
-
-  IBDataStreamFinalizerSupplier configure(ConfigMapSupplier cms);
+public interface IBDataStreamFinalizerSupplier extends CMSConfigurableSupplier<IBDataStreamFinalizer>, IBLoggerEnabled {
 }

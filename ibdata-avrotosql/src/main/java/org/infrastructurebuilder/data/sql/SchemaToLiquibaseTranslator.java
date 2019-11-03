@@ -75,7 +75,7 @@ public interface SchemaToLiquibaseTranslator extends BiFunction<Optional<Path>, 
       retVal = Files.createTempFile("liquibase-", ".xml");
     } catch (IOException e1) {
       throw new IBException(e1);
-      // TODO Auto-generated catch block
+      // FIXME Which exceptions should I actually deal with?
     }
     DatabaseChangeLog cl = l.map(m -> {
       XMLChangeLogSAXParser x = new XMLChangeLogSAXParser();
@@ -93,7 +93,6 @@ public interface SchemaToLiquibaseTranslator extends BiFunction<Optional<Path>, 
 //        liquibase.generateChangeLog(catalogAndSchema, diffToChangeLog, printStream, changeLogSerializer);
 
 
-    // TODO Write to retVal;
 
     return retVal;
   }

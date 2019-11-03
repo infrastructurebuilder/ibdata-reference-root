@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 public final class IBDataIngestMavenComponent extends AbstractIBDataMavenComponent {
 
   private final Map<String, IBDataIngesterSupplier> allIngesters;
+  private final IBDataSourceSupplierFactory dsSupplierFactory;
 
   /**
    * Injected constructor.
@@ -80,22 +81,12 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       @Named(IBDataLateBindingFinalizerConfigSupplier.NAME) IBDataLateBindingFinalizerConfigSupplier configSupplier,
       Map<String, IBDataIngesterSupplier> allIngesters,
       // All DataSetFinalizer suppliers
-      Map<String, IBDataSetFinalizerSupplier> allDSFinalizers, final IBStreamerFactory streamerFactory) {
+      Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers, final IBStreamerFactory streamerFactory,
+      IBDataSourceSupplierFactory ibdssf) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
         streamerFactory);
     this.allIngesters = requireNonNull(allIngesters);
-  }
-
-  public final static SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i, Logger log,
-      TypeToExtensionMapper mapper) {
-    List<DefaultIBDataSourceSupplier> k = i.getDataSet().getStreams().stream().map(v -> {
-      return new DefaultIBDataSourceSupplier(v.getTemporaryId(),
-          new DefaultIBDataSource(log,
-              v.getURL().orElseThrow(() -> new IBDataException("No url for " + v.getTemporaryId())),
-              ofNullable(v.getChecksum()), of(v.getMetadata()), ofNullable(v.getMimeType()), mapper));
-    }).collect(Collectors.toList());
-    return k.stream().collect(Collectors.toMap(DefaultIBDataSourceSupplier::getId, Function.identity(),
-        (prev, now) -> now, () -> new TreeMap<>()));
+    this.dsSupplierFactory = requireNonNull(ibdssf);
   }
 
   @SuppressWarnings("unchecked")
@@ -118,8 +109,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // Get the instance
         .get()
         // do the ingestion
-        .ingest(ingest, ingest.getDataSet(),
-            mapIngestionToSourceSuppliers(ingest, new SLF4JFromMavenLogger(getLog()), getTypeToExtensionMapper()));
+        .ingest(ingest, ingest.getDataSet(), dsSupplierFactory.mapIngestionToSourceSuppliers(ingest));
     try {
       return finalizer.finalize(null, ingest, suppliers);
     } catch (IOException e) {

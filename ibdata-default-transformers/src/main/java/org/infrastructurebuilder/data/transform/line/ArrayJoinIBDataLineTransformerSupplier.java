@@ -55,7 +55,6 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
 
   @Override
   protected IBDataRecordTransformer<Object[], String> getUnconfiguredTransformerInstance(Path workingPath) {
-    // TODO Auto-generated method stub
     return new ArrayJoinIBDataLineTransformer(workingPath, getLogger());
   }
 

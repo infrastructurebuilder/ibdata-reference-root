@@ -28,7 +28,7 @@
   <description>IBData types for avro-specific transformation</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>67</test.coverage.percentage.required>
+    <test.coverage.percentage.required>65</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -45,7 +45,7 @@
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
     </dependency>
-    <dependency>
+    <dependency><!--  Optional compression -->
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
     </dependency>

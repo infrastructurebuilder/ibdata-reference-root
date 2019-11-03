@@ -27,7 +27,6 @@ public class ExtendedLogging extends DefaultLog {
   @Inject
   public ExtendedLogging(Logger logger) {
     super(logger);
-    // TODO Auto-generated constructor stub
   }
 
 }

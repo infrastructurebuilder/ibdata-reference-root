@@ -32,6 +32,7 @@ import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataWorkingPathSupplier;
 import org.infrastructurebuilder.util.config.MavenConfigMapSupplier;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.config.WorkingPathSupplier;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,7 +44,7 @@ public class IBDataIngestMavenComponentTest {
 
   public final static Logger log = LoggerFactory.getLogger(IBDataIngestMavenComponentTest.class);
   private IBDataIngestMavenComponent dic;
-  private WorkingPathSupplier wps;
+  private TestingPathSupplier wps;
   private Properties properties;
   private MavenProject mp;
   private Path target;
@@ -55,15 +56,15 @@ public class IBDataIngestMavenComponentTest {
   private DefaultIBDataSetIdentifier ds, dsMulti;
   private ArrayList<DefaultIBDataStreamIdentifierConfigBean> streams;
   private DefaultIBDataStreamIdentifierConfigBean ds1;
-  private URL sourceURL;
+  private String sourceURL;
   private DefaultIBDataStreamIdentifierConfigBean ds2, ds3, ds4;
   private IBDataWorkingPathSupplier lbps;
 
   @Before
   public void setUp() throws Exception {
-    wps = new WorkingPathSupplier();
+    wps = new TestingPathSupplier();
     target = wps.getRoot();
-    sourceURL = target.resolve("test-classes").resolve("testfile.txt").toUri().toURL();
+    sourceURL = wps.getTestClasses().resolve("testfile.txt").toUri().toURL().toExternalForm();
     properties = new Properties();
     properties.setProperty("a", "b");
     properties.setProperty("c", "d");
@@ -108,7 +109,7 @@ public class IBDataIngestMavenComponentTest {
     ds2.setDescription("S2 desc");
     ds2.setName("somename");
     ds2.setMimeType("application/pdf");
-    ds2.setUrl(new URL("https://file-examples.com/wp-content/uploads/2017/02/file-sample_100kB.doc"));
+    ds2.setUrl("https://file-examples.com/wp-content/uploads/2017/02/file-sample_100kB.doc");
     ds3 = new DefaultIBDataStreamIdentifierConfigBean();
     ds3.setId("temp3");
     ds3.setSha512(
@@ -117,7 +118,7 @@ public class IBDataIngestMavenComponentTest {
     ds3.setDescription("S3 desc");
     ds3.setName("somename");
     ds3.setMimeType("application/pdf");
-    ds3.setUrl(new URL("https://file-examples.com/wp-content/uploads/2017/10/file-sample_150kB.pdf"));
+    ds3.setUrl("https://file-examples.com/wp-content/uploads/2017/10/file-sample_150kB.pdf");
     ds4 = new DefaultIBDataStreamIdentifierConfigBean();
     ds4.setId("temp4");
     ds4.setSha512(
@@ -126,7 +127,7 @@ public class IBDataIngestMavenComponentTest {
     ds4.setDescription("S4 desc");
     ds4.setName("somename");
     ds4.setMimeType("application/pdf");
-    ds4.setUrl(new URL("https://file-examples.com/wp-content/uploads/2017/02/file_example_XLSX_5000.xlsx"));
+    ds4.setUrl("https://file-examples.com/wp-content/uploads/2017/02/file_example_XLSX_5000.xlsx");
     config = new Ingestion();
   }
 
@@ -135,7 +136,7 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestFile() {
     ds.setStreams(streams);
     config.setDataSet(ds);
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
@@ -148,7 +149,7 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestDownload() {
     ds.setStreams(new ArrayList<>(Arrays.asList(ds3)));
     config.setDataSet(ds);
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
@@ -162,7 +163,7 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestMultiDownload() throws IOException {
     dsMulti.setStreams(Arrays.asList(ds4, ds3));
     config.setDataSet(dsMulti);
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, cms, () -> log);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();

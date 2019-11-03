@@ -31,7 +31,7 @@ import org.w3c.dom.Document;
 public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   private final UUID id;
-  private final Optional<URL> url;
+  private final Optional<String> url;
   private final Optional<String> name;
   private final Optional<String> description;
   private final Checksum checksum;
@@ -40,7 +40,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final String path;
   private final String mimeType;
 
-  public DefaultIBDataStreamIdentifier(UUID id, Optional<URL> url, Optional<String> name, Optional<String> description,
+  public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
       Checksum checksum, Date creationDate, Document metadata, String mimeType, Optional<String> path) {
     this.id = id;
     this.url = requireNonNull(url);
@@ -71,7 +71,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   @Override
-  public Optional<URL> getURL() {
+  public Optional<String> getURL() {
 
     return this.url;
   }

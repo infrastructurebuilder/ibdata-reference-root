@@ -15,7 +15,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
@@ -27,15 +29,15 @@
   <name>${project.artifactId}</name>
   <description>IBData ingesters for JDBC databases</description>
   <properties>
-    <jacoco.max.missed.classes>99</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>0</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>6</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>5</test.coverage.percentage.required>
     <surefire.failIfNoTests>false</surefire.failIfNoTests>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
-      <artifactId>ibdata-type-impls</artifactId>
+      <artifactId>ibdata-avro-types</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jooq</groupId>
@@ -50,8 +52,20 @@
       <groupId>org.jooq</groupId>
       <artifactId>jooq</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.200</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+        <filtering>false</filtering>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.infrastructurebuilder.maven</groupId>

@@ -20,7 +20,6 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.eclipse.sisu.Nullable;
+import org.eclipse.sisu.Typed;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
@@ -46,14 +46,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named("default-ingest")
-public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier
-    implements IBDataSetFinalizerSupplier {
+@Typed(IBDataSetFinalizerSupplier.class)
+public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier<Ingestion> {
 
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, @Nullable @Named("maven-log") LoggerSupplier l,
-      TypeToExtensionMapper t2e) {
+  public DefaultIBDataSetIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      @Nullable @Named("maven-log") LoggerSupplier l, TypeToExtensionMapper t2e) {
     this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
   }
 
@@ -63,17 +63,8 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   }
 
   @Override
-  public IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), wps, getConfig(), getTypeToExtensionMapper());
-  }
-
-  @Override
   public DefaultIBDataSetIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), getWps(),
-//        () -> Paths
-//            .get(requireNonNull(requireNonNull(cms, "Config Map Supplier").get().getString(IBDATA_WORKING_PATH_SUPPLIER),
-//                "Working Path Config '" + IBDATA_WORKING_PATH_SUPPLIER + "' not present")),
-        cms, getTypeToExtensionMapper());
+    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), getWps(), cms, getTypeToExtensionMapper());
   }
 
   @Override

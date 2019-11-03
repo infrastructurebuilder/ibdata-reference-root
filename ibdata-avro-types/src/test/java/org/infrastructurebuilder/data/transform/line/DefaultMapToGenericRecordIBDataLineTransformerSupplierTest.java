@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -88,12 +89,13 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
 
     DefaultMapSSToGenericRecordIBDataLineTransformer q = (DefaultMapSSToGenericRecordIBDataLineTransformer) v.get();
 
-    assertTrue(q.isBlankFieldNullInUnion());
+    Formatters f = q.getFormatters();
+    assertTrue(f.isBlankFieldNullInUnion());
     assertEquals(BA.toUpperCase(), q.getSchema().getName());
     assertEquals(Locale.getDefault(), q.getLocale());
-    assertNotNull(q.getTimeFormatter());
-    assertNotNull(q.getDateFormatter());
-    assertNotNull(q.getTimestampFormatter());
+    assertNotNull(f.getTimeFormatter());
+    assertNotNull(f.getDateFormatter());
+    assertNotNull(f.getTimestampFormatter());
 
     Map<String, Object> m = new HashMap<>();
     m.put("index", "7");
@@ -105,7 +107,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
 
     GenericRecord g = q.apply(m);
 
-    Object d = "13528";
+    Object d = "13801";
 
     assertEquals(d, g.get("date_of_birth").toString());
   }

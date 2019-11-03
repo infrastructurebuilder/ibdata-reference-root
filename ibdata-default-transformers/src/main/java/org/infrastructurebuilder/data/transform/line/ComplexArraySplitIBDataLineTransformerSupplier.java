@@ -54,7 +54,6 @@
 //
 //  @Override
 //  protected IBDataRecordTransformer<String, String[]> getUnconfiguredTransformerInstance(Path workingPath) {
-//    // TODO Auto-generated method stub
 //    return new ComplexArraySplitIBDataLineTransformer() {
 //
 //      @Override
@@ -76,7 +75,6 @@
 //     */
 //    public ComplexArraySplitIBDataLineTransformer(Path ps, Map<String, String> config) {
 //      super(ps, config);
-//      // TODO Auto-generated constructor stub
 //    }
 //
 //    /**
@@ -84,7 +82,6 @@
 //     */
 //    public ComplexArraySplitIBDataLineTransformer(Path ps) {
 //      super(ps);
-//      // TODO Auto-generated constructor stub
 //    }
 //
 //    @Override

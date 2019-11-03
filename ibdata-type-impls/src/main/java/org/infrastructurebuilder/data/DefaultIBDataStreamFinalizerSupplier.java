@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -31,34 +32,37 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 @Named
 public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFinalizerSupplier {
 
+  private static final String WP_MESSAGE = "Working Path Config";
+
   @Inject
-  public DefaultIBDataStreamFinalizerSupplier() {
-    this(null,null);
+  public DefaultIBDataStreamFinalizerSupplier(LoggerSupplier l) {
+    this(null, null, l);
   }
+
   /**
    * @param wps
    * @param cms
    */
-  protected DefaultIBDataStreamFinalizerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
-    super(wps, cms);
-    // TODO Auto-generated constructor stub
+  protected DefaultIBDataStreamFinalizerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
+    super(wps, cms, l);
   }
 
   @Override
   public IBDataStreamFinalizerSupplier configure(ConfigMapSupplier cms) {
     return new DefaultIBDataStreamFinalizerSupplier(
-        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(WORKING_PATH_CONFIG_ITEM), "Working Path Config")),
-        cms);
+        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(WORKING_PATH_CONFIG_ITEM), WP_MESSAGE)), cms,
+        () -> getLog());
   }
+
   @Override
   public IBDataStreamFinalizer get() {
-    // TODO Auto-generated method stub
     return new DefaultIBDataStreamFinalizer(getWps().get(), getCms().get());
   }
+
   private class DefaultIBDataStreamFinalizer extends AbstractIBDataStreamFinalizer {
 
     DefaultIBDataStreamFinalizer(Path path, ConfigMap map) {
-      super(path,map);
+      super(path, map);
     }
   }
 

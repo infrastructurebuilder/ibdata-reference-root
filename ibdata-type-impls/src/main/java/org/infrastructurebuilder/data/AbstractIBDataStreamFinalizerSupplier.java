@@ -15,22 +15,33 @@
  */
 package org.infrastructurebuilder.data;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 public abstract class AbstractIBDataStreamFinalizerSupplier implements IBDataStreamFinalizerSupplier {
 
   private final PathSupplier wps;
   private final ConfigMapSupplier cms;
+  private final Logger logger;
 
-  protected AbstractIBDataStreamFinalizerSupplier(PathSupplier wps, ConfigMapSupplier cms) {
+  protected AbstractIBDataStreamFinalizerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
     this.wps = wps;
-    this.cms  = cms;
+    this.cms = cms;
+    this.logger = l.get();
   }
+
   protected ConfigMapSupplier getCms() {
     return cms;
   }
+
   protected PathSupplier getWps() {
     return wps;
+  }
+
+  @Override
+  public Logger getLog() {
+    return this.logger;
   }
 }

@@ -90,7 +90,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     test2 = new DefaultTestingIBDataRecordTransformerSupplier(2, () -> thePath, () -> log);
     rs.put("test1", test1);
     rs.put("test2", test2);
-    HashMap<String,Object> hm = new HashMap<>();
+    HashMap<String, Object> hm = new HashMap<>();
     hm.put(TRANSFORMERSLIST, sj.toString());
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
@@ -113,17 +113,16 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformation.setName("some name");
     transformation.setDescription("some description");
 
-
     transformer = new Transformer().copy(transformation);
 
     suppliedStreams = new ArrayList<>();
 
-    suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg")));
-    suppliedStreams.add(getStreamFromURL(getClass().getResource("/lines.txt")));
+    suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg").toExternalForm()));
+    suppliedStreams.add(getStreamFromURL(getClass().getResource("/lines.txt").toExternalForm()));
 
   }
 
-  private IBDataStream getStreamFromURL(URL resource) throws Exception {
+  private IBDataStream getStreamFromURL(String resource) throws Exception {
     IBChecksumPathType c = readPathTypeFromFile(resource);
     Document metadata = IBMetadataUtils.emptyDocumentSupplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
@@ -131,8 +130,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
     return new DefaultIBDataStream(i, c);
   }
 
-  private IBChecksumPathType readPathTypeFromFile(URL resource) throws Exception {
-    try (InputStream in = resource.openStream()) {
+  private IBChecksumPathType readPathTypeFromFile(String resource) throws Exception {
+    try (InputStream in = new URL(resource).openStream()) {
       return copyToDeletedOnExitTempChecksumAndPath(of(thePath), "abc", "b", in);
     }
   }
@@ -150,8 +149,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
     // FIXME Test the actual output
   }
 
-  public class DefaultTestingIBDataRecordTransformerSupplier extends AbstractIBDataRecordTransformerSupplier<String,String>
-       {
+  public class DefaultTestingIBDataRecordTransformerSupplier
+      extends AbstractIBDataRecordTransformerSupplier<String, String> {
 
     private int type;
 
@@ -160,7 +159,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
       this.type = type;
     }
 
-    private DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l ) {
+    private DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, ConfigMapSupplier cms,
+        LoggerSupplier l) {
       super(wps, cms, l);
       this.type = type;
     }
@@ -171,12 +171,12 @@ public class DefaultIBDataRecordBasedTransformerTest {
     }
 
     @Override
-    public AbstractIBDataRecordTransformerSupplier<String,String> configure(ConfigMapSupplier cms) {
+    public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
       return new DefaultTestingIBDataRecordTransformerSupplier(type, getWps(), cms, () -> getLogger());
     }
 
     @Override
-    protected IBDataRecordTransformer<String,String> getUnconfiguredTransformerInstance(Path workingPath) {
+    protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
       switch (type) {
       case 1:
         return new Test1(getWps().get(), getConfigSupplier().get(), log);
@@ -191,7 +191,6 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
       protected Test1(Path ps, ConfigMap config, Logger l) {
         super(ps, config, l);
-        // TODO Auto-generated constructor stub
       }
 
       @Override

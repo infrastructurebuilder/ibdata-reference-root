@@ -86,7 +86,7 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
         List<IBDataStream> suppliedStreams, boolean failOnError) {
       Path targetPath = Paths.get(Optional.ofNullable(getConfig().getString(ADDED_PATH))
           .orElseThrow(() -> new IBDataException("No " + ADDED_PATH + " config")));
-      URL u = cet.withReturningTranslation(() -> targetPath.toUri().toURL());
+      String u = cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm());
 
       IBDataSet createdDataSet = new DefaultIBDataSet(ds);
       IBDataStreamIdentifier identifier = new DefaultIBDataStreamIdentifier(null, Optional.of(u), Optional.empty(),

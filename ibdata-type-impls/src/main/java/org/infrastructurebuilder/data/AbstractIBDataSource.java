@@ -23,19 +23,23 @@ import java.util.Optional;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
-abstract public class AbstractIBDataSource  implements IBDataSource{
+abstract public class AbstractIBDataSource implements IBDataSource {
 
   protected final String id;
-  protected final URL source;
+  protected final String source;
   protected final Optional<BasicCredentials> creds;
   protected final Optional<Checksum> checksum;
   protected final Optional<Document> metadata;
   protected final Optional<ConfigMap> additionalConfig;
+  protected final Optional<String> name;
+  protected final Optional<String> desc;
+  private final Logger logger;
 
-  public AbstractIBDataSource(String id, URL source, Optional<BasicCredentials> creds, Optional<Checksum> checksum,
-      Optional<Document> metadata, Optional<ConfigMap> config) {
+  public AbstractIBDataSource(Logger logger, String id, String source, Optional<String> name, Optional<String> desc, Optional<BasicCredentials> creds,
+      Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> config) {
     super();
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
@@ -44,11 +48,18 @@ abstract public class AbstractIBDataSource  implements IBDataSource{
     this.additionalConfig = requireNonNull(config);
 
     this.metadata = requireNonNull(metadata);
-
+    this.logger = requireNonNull(logger);
+    this.name = requireNonNull(name);
+    this.desc = requireNonNull(desc);
   }
 
   @Override
-  public URL getSourceURL() {
+  public Logger getLog() {
+    return this.logger;
+  }
+
+  @Override
+  public String getSourceURL() {
     return source;
   }
 
@@ -78,7 +89,20 @@ abstract public class AbstractIBDataSource  implements IBDataSource{
   }
 
   @Override
+  public Optional<String> getName() {
+    return this.name;
+  }
+
+  @Override
+  public Optional<String> getDescription() {
+    return this.desc;
+  }
+
+  /**
+   * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
+   */
+  @Override
   public IBDataSource withAdditionalConfig(ConfigMap config) {
-    return null;
+    return this;
   }
 }

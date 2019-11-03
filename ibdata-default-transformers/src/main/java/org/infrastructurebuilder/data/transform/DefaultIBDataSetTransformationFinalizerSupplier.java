@@ -49,13 +49,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named("default-transform")
-public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier {
+public class DefaultIBDataSetTransformationFinalizerSupplier
+    extends AbstractIBDataSetFinalizerSupplier<Transformation> {
 
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetTransformationFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, @Nullable @Named("maven-log") LoggerSupplier l,
-      TypeToExtensionMapper t2e) {
+  public DefaultIBDataSetTransformationFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      @Nullable @Named("maven-log") LoggerSupplier l, TypeToExtensionMapper t2e) {
     this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
   }
 
@@ -65,20 +66,12 @@ public class DefaultIBDataSetTransformationFinalizerSupplier extends AbstractIBD
   }
 
   @Override
-  public IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps) {
-    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), wps, getConfig(), getTypeToExtensionMapper());
-  }
-
-  @Override
   public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), getWps(),
-//        () -> Paths.get(
-//            requireNonNull(requireNonNull(cms).get().getString(IBDATA_WORKING_PATH_SUPPLIER), "Working Path Config")),
-        cms, getTypeToExtensionMapper());
+    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), getWps(), cms, getTypeToExtensionMapper());
   }
 
   @Override
-  protected IBDataSetFinalizer<Transformation> configuredType(ConfigMapSupplier config) {
+  protected TransformationIBDataSetFinalizer configuredType(ConfigMapSupplier config) {
     return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         getWps().get());
   }

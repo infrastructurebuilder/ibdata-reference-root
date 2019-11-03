@@ -94,9 +94,10 @@ public class DefaultIBDataStreamTest {
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);
-    cType = copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",  getClass().getResourceAsStream("/lines.txt"));
-    identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL()), of(NAME), of(DESC),
-        checksum, now, metadata, mimeType, of(path.toString()));
+    cType = copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",
+        getClass().getResourceAsStream("/lines.txt"));
+    identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL().toExternalForm()),
+        of(NAME), of(DESC), checksum, now, metadata, mimeType, of(path.toString()));
     ib1 = new DefaultIBDataStream(identifier, path);
     ib2 = new DefaultIBDataStream(identifier, new ThrowingIBChecksumType());
 
@@ -171,7 +172,7 @@ public class DefaultIBDataStreamTest {
 
   @Test
   public void testGetURL() throws MalformedURLException {
-    assertTrue(ib1.getURL().get().toExternalForm().startsWith(p1.toUri().toURL().toExternalForm()));
+    assertTrue(ib1.getURL().get().startsWith(p1.toUri().toURL().toExternalForm()));
   }
 
   @Test
@@ -215,6 +216,7 @@ public class DefaultIBDataStreamTest {
     DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
     assertFalse(dss.from(v).isPresent());
   }
+
   @Test
   public void testStringStreamAppropriateSupplier() throws IOException {
     DefaultIBDataStream v = DefaultIBDataStream.from(ds2, () -> path2);

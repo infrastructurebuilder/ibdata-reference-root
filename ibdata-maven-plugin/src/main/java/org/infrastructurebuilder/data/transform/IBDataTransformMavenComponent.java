@@ -115,7 +115,8 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       Map<String, IBDataTransformerSupplier> allTransformers,
       // All available IBDataDataStreamRecordFinalizerSupplier instances
       Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers,
-      Map<String, IBDataSetFinalizerSupplier> allDSFinalizers, IBStreamerFactory streamerFactory, IBDataEngine engine) {
+      Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers, IBStreamerFactory streamerFactory,
+      IBDataEngine engine) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
         streamerFactory);
     this.allTransformers = requireNonNull(allTransformers);
@@ -137,14 +138,6 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         .flatMap(s -> s.getStreamSuppliers().stream())
         // call the supplier
         .map(Supplier::get).collect(Collectors.toMap(k -> k.getId(), Function.identity()));
-
-    //    IBDataStream s = availableStreams.get(UUID.fromString("cf031c5a-3a34-3175-8140-26819803d395"));
-    //    try (InputStream ins = s.get(); BufferedReader bin = new BufferedReader(new InputStreamReader(ins))) {
-    //      bin.lines().forEach(content -> getLog().info(content));
-    //    } catch (IOException e1) {
-    //      // TODO Auto-generated catch block
-    //      e1.printStackTrace();
-    //    }
     MavenProject p = getProject().orElseThrow(() -> new IBDataException("No project available"));
     IBChecksumPathType retVal = null;
     // Every Transformation produces a single DataStream

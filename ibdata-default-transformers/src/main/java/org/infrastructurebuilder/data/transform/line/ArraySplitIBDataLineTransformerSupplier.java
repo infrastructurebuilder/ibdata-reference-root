@@ -49,13 +49,11 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
 
   @Override
   public ArraySplitIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    // TODO Auto-generated method stub
     return new ArraySplitIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
   }
 
   @Override
   protected IBDataRecordTransformer<String, String[]> getUnconfiguredTransformerInstance(Path workingPath) {
-    // TODO Auto-generated method stub
     return new ArraySplitIBDataLineTransformer(workingPath, getLogger());
   }
 

@@ -63,6 +63,7 @@ import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -87,7 +88,7 @@ public class WGetter {
     //    this.wps = requireNonNull(wps);
     this.wget = new WGet();
     // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then create a new LoggingMavenComponent from log
-//    Log l2 = new LoggingMavenComponent(log);
+    //    Log l2 = new LoggingMavenComponent(log);
     Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
     this.wget.setLog(l2);
     requireNonNull(creds).ifPresent(bc -> {
@@ -109,7 +110,6 @@ public class WGetter {
   synchronized public final Optional<IBChecksumPathType> collectCacheAndCopyToChecksumNamedFile(Path workingPath,
       URL source, Optional<Checksum> checksum, Path cacheDirectory, Optional<String> type, boolean interactiveMode,
       int retries, int readTimeOut, boolean skipCache) {
-
 
     wget.setOutputPath(workingPath);
     requireNonNull(checksum).ifPresent(c -> wget.setSha512(c.toString().toLowerCase()));
@@ -434,13 +434,9 @@ public class WGetter {
 
         Path newTarget = outputPath.resolve(finalFileName);
         try {
-          Files.move(outputFile.toPath(), newTarget, StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException nse) {
-          try {
-            cet.withTranslation(() -> Files.copy(outputFile.toPath(), newTarget));
-          } finally {
-            outputFile.delete();
-          }
+          IBUtils.moveAtomic(outputFile.toPath(), newTarget);
+        } finally {
+          outputFile.delete();
         }
 
         cache.install(this.uri, newTarget.toFile(), null /*this.md5*/, null /*this.sha1*/, this.sha512);

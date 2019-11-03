@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.infrastructurebuilder.data.ingest;
+
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -43,6 +44,7 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -52,9 +54,8 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   private Path cacheDirectory;
 
   @Inject
-  public DefaultIBDataIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier cms, LoggerSupplier log) {
-    this(wps, log, cms, null);
+  public DefaultIBDataIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log) {
+    this(wps, log, null, null);
   }
 
   private DefaultIBDataIngesterSupplier(PathSupplier wps, LoggerSupplier log, ConfigMapSupplier cms,
@@ -87,20 +88,16 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     }
 
     @Override
-    public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi, SortedMap<String, IBDataSourceSupplier> dssList) {
+    public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi,
+        SortedMap<String, IBDataSourceSupplier> dssList) {
       requireNonNull(dsi);
       Date now = new Date(); // Ok for "now"  (Get it?)
+      ConfigMap over = new ConfigMap();
+      over.put(IBDataSource.TARGET_PATH, getWorkingPath());
+      over.put(IBDataSource.CACHE_DIR, this.cacheDirectory);
+      ConfigMapSupplier cms = new DefaultConfigMapSupplier(getConfig()).overrideConfiguration(over);
       List<Supplier<IBDataStream>> ibdssList = requireNonNull(dssList).values().stream().map(dss -> {
-        IBDataSource source = dss.get()
-            // Set the working _path
-            .withTargetPath(getWorkingPath())
-            // Name or nothing
-            .withName(dsi.getName().orElse(null))
-            // description or nothing
-            .withDescription(dsi.getDescription().orElse(null))
-            // Supply the default cache location
-            .withDownloadCacheDirectory(this.cacheDirectory);
-
+        IBDataSource source = dss.get().withAdditionalConfig(cms.get());
         return source.get().map(thisOne -> {
 
           Path localPath = thisOne.getPath();

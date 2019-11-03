@@ -26,6 +26,5 @@ import org.infrastructurebuilder.util.config.PathSupplier;
  * @author mykel.alvis
  *
  */
-public interface IBDataSetFinalizerSupplier extends CMSConfigurableSupplier<IBDataSetFinalizer>, IBLoggerEnabled  {
-  IBDataSetFinalizerSupplier forceOverrideOfWorkingPath(PathSupplier wps);
+public interface IBDataSetFinalizerSupplier<T> extends CMSConfigurableSupplier<IBDataSetFinalizer<T>>, IBLoggerEnabled  {
 }
