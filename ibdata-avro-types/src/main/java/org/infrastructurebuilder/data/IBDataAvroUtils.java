@@ -135,28 +135,35 @@ public interface IBDataAvroUtils {
     case FLOAT:
       return Float.parseFloat(strValue);
     case LONG:
-      return lType.map(lT -> {
-        switch (lT) {
-        case "time-millis":
-          return new TimeConversions.TimeMillisConversion()
-              .toLong(LocalTime.parse(strValue, formatters.getTimeFormatter()), f, f.getLogicalType());
+      Long q;
+      if (!lType.isPresent())
+        q = Long.parseLong(strValue);
+      else {
+        switch (lType.get()) {
         case "time-micros":
-          return new TimeConversions.TimeMicrosConversion()
+          q = new TimeConversions.TimeMicrosConversion()
               .toLong(LocalTime.parse(strValue, formatters.getTimeFormatter()), f, f.getLogicalType());
+          break;
         case "timestamp-micros":
-          return new TimeConversions.TimestampMicrosConversion().toLong(Instant.parse(strValue), f, f.getLogicalType());
+          q = new TimeConversions.TimestampMicrosConversion().toLong(Instant.parse(strValue), f, f.getLogicalType());
+          break;
         case "timestamp-millis":
-          return new TimeConversions.TimestampMillisConversion().toLong(Instant.parse(strValue), f, f.getLogicalType());
+          q = new TimeConversions.TimestampMillisConversion().toLong(Instant.parse(strValue), f, f.getLogicalType());
+          break;
         default:
           throw new IBDataException();
         }
-      }).orElse(Long.parseLong(strValue));
+      }
+      return q;
     case INT:
       return lType.map(lT -> {
         switch (lT) {
         case "date":
           DateTimeFormatter dtf = formatters.getDateFormatter();
           return new TimeConversions.DateConversion().toInt(LocalDate.parse(strValue, dtf), f, f.getLogicalType());
+        case "time-millis":
+          return new TimeConversions.TimeMillisConversion()
+              .toInt(LocalTime.parse(strValue, formatters.getTimeFormatter()), f, f.getLogicalType());
         default:
           throw new IBDataException();
         }
@@ -167,11 +174,11 @@ public interface IBDataAvroUtils {
       return lType.map(lT -> {
         switch (lT) {
         case "decimal":
-          throw new IBDataException("Decimal not yet implemented");
+          //          throw new IBDataException("Decimal not yet implemented");
         default:
-          return strValue.getBytes();
+          throw new IBDataException("Type " + lT + " is not yet implemented");
         }
-      });
+      }).orElse(strValue.getBytes());
     case FIXED:
       return lType.map(lT -> {
         switch (lT) {
