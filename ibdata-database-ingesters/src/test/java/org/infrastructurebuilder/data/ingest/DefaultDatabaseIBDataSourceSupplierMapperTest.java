@@ -15,18 +15,36 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static org.infrastructurebuilder.data.DefaultAvroGenericRecordStreamSupplier.genericStreamFromInputStream;
 import static org.junit.Assert.*;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.avro.Conversion;
+import org.apache.avro.Conversions;
+import org.apache.avro.LogicalType;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.data.TimeConversions.DateConversion;
+import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.infrastructurebuilder.IBConstants;
+import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.data.IBDataConstants;
+import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.IBDataStream;
+import org.infrastructurebuilder.data.IBDataTypeImplsModelUtils;
 import org.infrastructurebuilder.data.ingest.DefaultDatabaseIBDataSourceSupplierMapper.DefaultDatabaseIBDataSource;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -98,12 +116,28 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   }
 
   @Test
-  public void test() {
+  public void test() throws MalformedURLException {
     assertTrue(d.respondsTo(b));
     s = d.getSupplierFor(b);
     ds = s.get().withAdditionalConfig(c);
     Optional<IBChecksumPathType> p = ds.get();
     assertTrue(p.isPresent());
+    Optional<Stream<GenericRecord>> x = genericStreamFromInputStream.apply(p.get().get());
+    assertTrue(x.isPresent());
+    Stream<GenericRecord> theStream = x.get();
+    assertEquals(1, theStream.count());
+    GenericRecord theRecord = genericStreamFromInputStream.apply(p.get().get()).get().collect(Collectors.toList())
+        .get(0);
+    assertEquals(1, theRecord.get("ID"));
+    Field f = theRecord.getSchema().getField("BIRTHDAY");
+    LogicalType t = f.schema().getLogicalType();
+    Object k = theRecord.get("BIRTHDAY");
+     LocalDate conv = new DateConversion().fromInt((Integer) k, f.schema(), t);
+    // 2019-10-22
+     Date d = new Date(new Integer((int) k).longValue());
+    assertEquals("2019-10-22", conv.toString());
+
+
   }
 
 }

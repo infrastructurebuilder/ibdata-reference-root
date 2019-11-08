@@ -16,14 +16,9 @@
 package org.infrastructurebuilder.data;
 
 import static org.infrastructurebuilder.data.IBDataAvroUtils.avroSchemaFromString;
-import static org.infrastructurebuilder.data.IBDataAvroUtils.managedValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,7 +32,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class IBDataAvroUtilsTest {
 
@@ -74,28 +68,28 @@ public class IBDataAvroUtilsTest {
   public void tearDown() throws Exception {
   }
 
-  @Test
-  public void testManagedValue() {
-
-    assertNull(managedValue(fields2.get("alive").schema(), null, null, formatters));
-    assertTrue((Boolean) managedValue(fields2.get("alive").schema(), null, "true", formatters));
-    assertEquals(new Double(7.3), (Double) managedValue(fields2.get("dub").schema(), null, "7.3", formatters));
-    assertEquals(new Long(7L), (Long) managedValue(fields2.get("l").schema(), null, "7", formatters));
-    assertEquals(new Float(7.3), (Float) managedValue(fields2.get("f").schema(), null, "7.3", formatters));
-    assertNull(managedValue(fields2.get("nullType").schema(), null, "7.3", formatters));
-    assertEquals(5, ((byte[]) managedValue(fields2.get("bytesType").schema(), null, "12345", formatters)).length);
-    assertEquals(new Integer(63120000), (Integer) managedValue(fields2.get("time1").schema(), null, "17:32", formatters));
-    assertEquals(new Long(1196676930000L), (Long) managedValue(fields2.get("time2").schema(), null, "2007-12-03T10:15:30.00Z", formatters));
-  }
-
-  @Test
-  public void testFromUnion() {
-  }
-
-  @Test
-  public void testFromTypeLogicalType() {
-    //    Optional<String> lType;
-    //    fromTypeLogicalType(schema, lType, in, formatters);
-  }
+//  @Test
+//  public void testManagedValue() {
+//
+//    assertNull(managedValue(fields2.get("alive").schema(), null, null, formatters));
+//    assertTrue((Boolean) managedValue(fields2.get("alive").schema(), null, "true", formatters));
+//    assertEquals(new Double(7.3), (Double) managedValue(fields2.get("dub").schema(), null, "7.3", formatters));
+//    assertEquals(new Long(7L), (Long) managedValue(fields2.get("l").schema(), null, "7", formatters));
+//    assertEquals(new Float(7.3), (Float) managedValue(fields2.get("f").schema(), null, "7.3", formatters));
+//    assertNull(managedValue(fields2.get("nullType").schema(), null, "7.3", formatters));
+//    assertEquals(5, ((byte[]) managedValue(fields2.get("bytesType").schema(), null, "12345", formatters)).length);
+//    assertEquals(new Integer(63120000), (Integer) managedValue(fields2.get("time1").schema(), null, "17:32", formatters));
+//    assertEquals(new Long(1196676930000L), (Long) managedValue(fields2.get("time2").schema(), null, "2007-12-03T10:15:30.00Z", formatters));
+//  }
+//
+//  @Test
+//  public void testFromUnion() {
+//  }
+//
+//  @Test
+//  public void testFromTypeLogicalType() {
+//    //    Optional<String> lType;
+//    //    fromTypeLogicalType(schema, lType, in, formatters);
+//  }
 
 }

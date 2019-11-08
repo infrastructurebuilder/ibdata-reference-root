@@ -20,12 +20,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileReader;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.file.SeekableByteArrayInput;
+import org.apache.avro.file.SeekableInput;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer;
@@ -83,13 +95,15 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
   }
 
   @Test
-  public void testConfigureConfigMapSupplier() {
+  public void testConfigureConfigMapSupplier() throws IOException {
     AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> v = s.configure(cms);
     assertFalse(v == s);
 
     DefaultMapSSToGenericRecordIBDataLineTransformer q = (DefaultMapSSToGenericRecordIBDataLineTransformer) v.get();
 
     Formatters f = q.getFormatters();
+    GenericData gd = new MapProxyGenericData(f);
+
     assertTrue(f.isBlankFieldNullInUnion());
     assertEquals(BA.toUpperCase(), q.getSchema().getName());
     assertEquals(Locale.getDefault(), q.getLocale());
@@ -98,18 +112,35 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
     assertNotNull(f.getTimestampFormatter());
 
     Map<String, Object> m = new HashMap<>();
-    m.put("index", "7");
+    m.put("index", 7);
     m.put("last_name", "alvis");
     m.put("first_name", "mkel");
     m.put("country", "USA");
     m.put("date_of_birth", "10-15-07");
     m.put("id", "3598");
+    m.put("gender", "F");
+    m.put("age", 34);
 
-    GenericRecord g = q.apply(m);
+    GenericRecord datum = q.apply(m);
 
-    Object d = "13801";
+    Integer d = 13801;
+    Schema schema = q.getSchema();
+    DataFileWriter<GenericRecord> w = new DataFileWriter<GenericRecord>(
+        new GenericDatumWriter<GenericRecord>(schema, gd));
+    ByteArrayOutputStream outs = new ByteArrayOutputStream(5000);
+    w.create(schema, outs);
+    w.append(datum);
+    w.close();
 
-    assertEquals(d, g.get("date_of_birth").toString());
+    SeekableInput sin = new SeekableByteArrayInput(outs.toByteArray());
+
+    DataFileReader<GenericRecord> r = new DataFileReader<>(sin, new GenericDatumReader<>(schema));
+
+    GenericRecord newDatum = r.next();  // We wrote one record
+    r.close();
+    LocalDate d2 = LocalDate.ofEpochDay(new Integer(d).longValue());
+    assertNotNull (d2);
+    assertEquals(d, newDatum.get("date_of_birth"));
   }
 
   @Test(expected = IBDataException.class)

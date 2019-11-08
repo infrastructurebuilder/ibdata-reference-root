@@ -15,34 +15,41 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
-import static org.infrastructurebuilder.data.IBDataAvroUtils.managedValue;
+import static java.util.Objects.requireNonNull;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.infrastructurebuilder.data.Formatters;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.infrastructurebuilder.data.IBDataException;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.slf4j.Logger;
 
-public class JooqRecordMapProxy implements Map<String, Object> {
+public class JooqRecordMapProxy implements Map<String, Object>, Supplier<GenericRecord> {
   private final Record record;
   private final List<String> names;
+  private final Schema s;
+  private final Logger log;
 
-  public JooqRecordMapProxy(Record record) {
-    this.record = Objects.requireNonNull(record);
+  public JooqRecordMapProxy(Record record, Schema s, Logger log) {
+    this.record = requireNonNull(record);
     this.names = Arrays.asList(this.record.fields()).stream().map(Field::getName).collect(Collectors.toList());
+    this.s = requireNonNull(s);
+    this.log = requireNonNull(log);
   }
 
   @Override
@@ -68,7 +75,14 @@ public class JooqRecordMapProxy implements Map<String, Object> {
   @Override
   public Object get(Object key) {
     int i = names.indexOf(key);
-    return record.get(i);
+    Object v = record.get(i);
+    if (v instanceof java.sql.Date) {
+      v = new Date(((java.sql.Date) v).getTime());
+    }
+    if (v instanceof java.util.Date) {
+      v = Instant.ofEpochMilli(((java.util.Date) v).getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+    return v;
   }
 
   @Override
@@ -110,20 +124,43 @@ public class JooqRecordMapProxy implements Map<String, Object> {
     return m.entrySet();
   }
 
-  public GenericRecord asGenericRecord(Logger log, Formatters formatters, Schema s) {
-      final HashSet<String> alreadyWarned = new HashSet<>();
-      final GenericRecord r = new GenericData.Record(s);
-      keySet().forEach(k -> {
-         org.apache.avro.Schema.Field v = s.getField(k);
-        if (v != null) {
-          r.put(k, managedValue(v.schema(), k, get(k), formatters));
-        } else {
-          if (alreadyWarned.add(k)) {
-            log.warn("*** Field '" + k + "' not known in schema!  ");
-            alreadyWarned.add(k);
-          }
+  public GenericRecord get() {
+    final HashSet<String> alreadyWarned = new HashSet<>();
+
+    List<String> fieldNames = s.getFields().stream().map(f -> f.name()).collect(Collectors.toList());
+    GenericRecordBuilder rb = new GenericRecordBuilder(s);
+    keySet().forEach(k -> {
+      if (fieldNames.contains(k)) {
+        Object v = get(k);
+        rb.set(k, get(k));
+        //        else {
+        //
+        //        }
+        //        Field v = s.getField(k);
+        //        if (v != null) {
+        //          r.put(k, managedValue(v.schema(), k, t.get(k), getFormatters()));
+      } else {
+        if (!alreadyWarned.contains(k)) {
+          log.warn("*** Field '" + k + "' not known in schema!  ");
+          alreadyWarned.add(k);
         }
-      }); // FIXME mebbe we need to catch some of the RuntimeException instances
-      return r;
+      }
+    }); // FIXME mebbe we need to catch some of the RuntimeException instances
+    return rb.build();
+
+    //      final GenericRecord r = new GenericData.Record(s);
+    //      keySet().forEach(k -> {
+    //         org.apache.avro.Schema.Field v = s.getField(k);
+    //        if (v != null) {
+    //          r.put(k, managedValue(v.schema(), k, get(k), formatters));
+    //        } else {
+    //          if (alreadyWarned.add(k)) {
+    //            log.warn("*** Field '" + k + "' not known in schema!  ");
+    //            alreadyWarned.add(k);
+    //          }
+    //        }
+    //      }); // FIXME mebbe we need to catch some of the RuntimeException instances
+    //      return r;
   }
+
 }

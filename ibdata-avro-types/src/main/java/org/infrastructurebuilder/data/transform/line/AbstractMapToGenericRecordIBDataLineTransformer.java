@@ -15,8 +15,6 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import static org.infrastructurebuilder.data.IBDataAvroUtils.managedValue;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +24,8 @@ import java.util.Objects;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
@@ -41,18 +39,22 @@ abstract public class AbstractMapToGenericRecordIBDataLineTransformer
     super(workingPath, config, l);
   }
 
-  abstract Formatters getFormatters();
-
   @Override
   public GenericRecord apply(Map<String, Object> t) {
     Objects.requireNonNull(t);
     Schema s = getSchema();
-
-    final GenericRecord r = new GenericData.Record(s);
+    GenericRecordBuilder rb = new GenericRecordBuilder(s);
+    //    final GenericRecord r = new GenericData.Record(s);
     t.keySet().forEach(k -> {
-      Field v = s.getField(k);
-      if (v != null) {
-        r.put(k, managedValue(v.schema(), k, t.get(k), getFormatters()));
+      Field f = s.getField(k);
+      if (f != null) {
+        rb.set(f, t.get(k));
+        //      else {
+        //
+        //      }
+        //      Field v = s.getField(k);
+        //      if (v != null) {
+        //        r.put(k, managedValue(v.schema(), k, t.get(k), getFormatters()));
       } else {
         if (!alreadyWarned.contains(k)) {
           getLogger().warn("*** Field '" + k + "' not known in schema!  ");
@@ -60,12 +62,13 @@ abstract public class AbstractMapToGenericRecordIBDataLineTransformer
         }
       }
     }); // FIXME mebbe we need to catch some of the RuntimeException instances
-    return r;
+    return rb.build();
   }
-
 
   abstract public Schema getSchema();
 
   abstract Locale getLocale();
+
+  abstract Formatters getFormatters();
 
 }

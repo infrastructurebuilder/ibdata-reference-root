@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.DataStream;
@@ -69,9 +70,9 @@ public class DefaultAvroGenericRecordStreamSupplierTest {
 
   @Test
   public void testFrom() {
-    Optional<Stream<? extends Object>> q = d.from(identifier);
+    Optional<Stream<GenericRecord>> q = d.from(identifier);
     assertTrue(q.isPresent());
-    List<? extends Object> w = q.get().collect(Collectors.toList());
+    List<GenericRecord> w = q.get().collect(Collectors.toList());
     assertEquals(5000L, w.size());
   }
 
