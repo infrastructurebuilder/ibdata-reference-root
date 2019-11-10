@@ -61,6 +61,11 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
     return new StringToNameMapIBDataLineTransformer(workingPath, getLogger());
   }
 
+  @Override
+  public String getHint() {
+    return STRING_TO_NAME_MAP;
+  }
+
   private class StringToNameMapIBDataLineTransformer
       extends AbstractIBDataRecordTransformer<String, Map<String, String>> {
 
@@ -123,11 +128,17 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
     public Optional<String> produces() {
       return Optional.of(Map.class.getCanonicalName());
     }
-  }
 
-  @Override
-  public String getHint() {
-    return STRING_TO_NAME_MAP;
+    @Override
+    public Class<String> getInboundClass() {
+      return String.class;
+    }
+
+    @Override
+    public Class<Map<String, String>> getOutboundClass() {
+      Map<String, String> c = new HashMap<>();
+      return (Class<Map<String, String>>) c.getClass();
+    }
   }
 
 }

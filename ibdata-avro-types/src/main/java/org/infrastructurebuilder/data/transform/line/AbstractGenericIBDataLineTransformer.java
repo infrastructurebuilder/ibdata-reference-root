@@ -17,11 +17,11 @@ package org.infrastructurebuilder.data.transform.line;
 
 import java.nio.file.Path;
 
-import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
-abstract public class AbstractGenericIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, GenericRecord> {
+abstract public class AbstractGenericIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, IndexedRecord> {
 
   public AbstractGenericIBDataLineTransformer(Path workingPath, Logger l) {
     this(workingPath, null, l);

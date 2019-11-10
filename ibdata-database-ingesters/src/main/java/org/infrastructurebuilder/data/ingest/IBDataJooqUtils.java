@@ -45,11 +45,17 @@ public final class IBDataJooqUtils {
     Field f1;
     DataType<?> dt = field.getDataType();
     Optional<String> comment = ofNullable(IBUtils.nullIfBlank.apply(field.getComment())); // FIXME Apply the comment?
+        if (dt.getCastTypeName().equals("boolean")) {
+      f1 = new Field(key, isNullable ? nullable().booleanType() : builder().booleanType());
+    } else if (dt.getCastTypeName().equals("long")) {
+      f1 = new Field(key, isNullable ? nullable().longType() : builder().longType());
+    } else if (dt.getCastTypeName().equals("integer")) {
+      f1 = new Field(key, isNullable ? nullable().intType() : builder().intType());
+    } else
+
     if (dt.isArray()) {
       // FIXME Make Arrays work
       throw new IBDataException("Array Type " + dt + " of field '" + field.getName() + "' cannot be processed");
-    } else if (dt.getCastTypeName().equals("boolean")) {
-      f1 = new Field(key, isNullable ? nullable().booleanType() : builder().booleanType());
     } else if (dt.isDate()) {
       logicalField = Schema.create(Schema.Type.INT);
       schema = LogicalTypes.date().addToSchema(logicalField);

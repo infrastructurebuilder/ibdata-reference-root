@@ -99,6 +99,15 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
     public Optional<String> produces() {
       return Optional.of(Array.class.getCanonicalName()); // Not a usable final type
     }
+    @Override
+    public Class<String> getInboundClass() {
+      return String.class;
+    }
+
+    @Override
+    public Class<String[]> getOutboundClass() {
+      return String[].class;
+    }
 
   }
 

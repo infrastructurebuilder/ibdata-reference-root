@@ -40,7 +40,8 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Array.class.getCanonicalName());
 
   @javax.inject.Inject
-  public ArrayJoinIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+  public ArrayJoinIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
     this(wps, null, l);
   }
 
@@ -56,6 +57,11 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
   @Override
   protected IBDataRecordTransformer<Object[], String> getUnconfiguredTransformerInstance(Path workingPath) {
     return new ArrayJoinIBDataLineTransformer(workingPath, getLogger());
+  }
+
+  @Override
+  public String getHint() {
+    return TOSTRING_ARRAY_JOIN;
   }
 
   private class ArrayJoinIBDataLineTransformer extends AbstractIBDataRecordTransformer<Object[], String> {
@@ -112,10 +118,16 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
       return Optional.of(String.class.getCanonicalName()); // Not a usable final type
     }
 
+    @Override
+    public Class<Object[]> getInboundClass() {
+      return Object[].class;
+    }
+
+    @Override
+    public Class<String> getOutboundClass() {
+      return String.class;
+    }
+
   }
 
-  @Override
-  public String getHint() {
-    return TOSTRING_ARRAY_JOIN;
-  }
 }

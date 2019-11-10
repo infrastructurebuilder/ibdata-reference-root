@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.infrastructurebuilder.data.transform.line;
+
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.lang.reflect.Array;
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
+import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -38,8 +40,8 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
   public static final String ARRAY_TO_NUMBERED_COL = "array-to-numbered-column";
 
   @javax.inject.Inject
-  public ArrayToNumberedColumIBDataLineTransformerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+  public ArrayToNumberedColumIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
     this(wps, null, l);
   }
 
@@ -56,6 +58,11 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
   protected IBDataRecordTransformer<String[], Map<String, String>> getUnconfiguredTransformerInstance(
       Path workingPath) {
     return new ArrayToNumberedColumIBDataLineTransformer(workingPath, getLogger());
+  }
+
+  @Override
+  public String getHint() {
+    return ARRAY_TO_NUMBERED_COL;
   }
 
   private class ArrayToNumberedColumIBDataLineTransformer
@@ -106,16 +113,23 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
     public Optional<List<String>> accepts() {
       return Optional.of(ACCEPTABLE_TYPES);
     }
+
     @Override
     public Optional<String> produces() {
       return Optional.of(Map.class.getCanonicalName());
     }
-  }
 
-  @Override
-  public String getHint() {
-    return ARRAY_TO_NUMBERED_COL;
-  }
+    @Override
+    public Class<String[]> getInboundClass() {
+      return String[].class;
+    }
 
+    @Override
+    public Class<Map<String, String>> getOutboundClass() {
+      Map<String, String> c = new HashMap<>();
+      return (Class<Map<String, String>>) c.getClass();
+    }
+
+  }
 
 }

@@ -50,6 +50,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 public class DefaultIBDataStreamTest {
+  public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
 
   private static final String JPG = "image/jpeg";
   private static final String DESC = "Rickrolled";
@@ -103,13 +104,13 @@ public class DefaultIBDataStreamTest {
 
     ds = new DataStream();
     ds.setPath(path.toString());
-    ds.setSha512("abcd");
+    ds.setSha512(CHECKSUM);
     ds.setUuid(UUID.randomUUID().toString());
     ds.setMimeType(JPG);
     ds.setCreationDate(now);
     ds2 = new DataStream();
     ds2.setPath(path.toString());
-    ds2.setSha512("defa");
+    ds2.setSha512(CHECKSUM);
     ds2.setUuid(UUID.randomUUID().toString());
     ds2.setMimeType(cType.getType());
     ds2.setCreationDate(now);

@@ -19,6 +19,7 @@ import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
 import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_TSV;
+import static org.infrastructurebuilder.util.IBUtils.readInputStreamAsStringStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,20 +30,18 @@ import java.util.stream.Stream;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.util.IBUtils;
-
 @Named
-public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory {
+public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory<String> {
   public final static List<String> TYPES = Arrays.asList(TEXT_CSV, TEXT_PSV, TEXT_TSV, TEXT_PLAIN);
 
   @Override
-  public Optional<Stream<? extends Object>> from(IBDataStream ds) {
+  public Optional<Stream<String>> from(IBDataStream ds) {
     if (ds == null || !getRespondTypes().contains(ds.getMimeType()))
       return Optional.empty();
     IBDataStream d = ds;
 
     try (InputStream ins = d.get()) {
-      Stream<Object> s = (Stream<Object>) IBUtils.readInputStreamAsStringStream(ins).map(o -> (Object) o);
+      Stream<String> s = readInputStreamAsStringStream(ins);
       return Optional.of(s);
     } catch (IOException e) {
       throw new IBDataException(e);

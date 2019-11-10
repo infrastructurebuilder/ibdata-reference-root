@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.DataStream;
@@ -36,6 +37,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DefaultAvroGenericRecordStreamSupplierTest {
+  public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
 
   private final static TestingPathSupplier wps = new TestingPathSupplier();
 
@@ -57,7 +59,7 @@ public class DefaultAvroGenericRecordStreamSupplierTest {
     id = new DataStream();
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
-    id.setSha512("aabbcc");
+    id.setSha512(CHECKSUM);
     id.setMetadata(new Xpp3Dom("metadata"));
     identifier = new DefaultIBDataStream(id, wps.getTestClasses().resolve("ba.avro"));
     d = new DefaultAvroGenericRecordStreamSupplier();
@@ -69,9 +71,9 @@ public class DefaultAvroGenericRecordStreamSupplierTest {
 
   @Test
   public void testFrom() {
-    Optional<Stream<? extends Object>> q = d.from(identifier);
+    Optional<Stream<GenericRecord>> q = d.from(identifier);
     assertTrue(q.isPresent());
-    List<? extends Object> w = q.get().collect(Collectors.toList());
+    List<GenericRecord> w = q.get().collect(Collectors.toList());
     assertEquals(5000L, w.size());
   }
 

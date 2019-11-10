@@ -30,6 +30,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
@@ -88,7 +90,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     private IBChecksumPathType read;
 
-    private final Formatters formatters;
+    private final GenericData jrmpGD;
 
     public DefaultDatabaseIBDataSource(Logger l, String id, String source, Optional<BasicCredentials> creds,
         Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath,
@@ -98,8 +100,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
       this.targetPath = targetPath;
       this.t2e = t2e;
       ConfigMap cfg = additionalConfig.orElse(new ConfigMap());
-      this.formatters = new Formatters(cfg) {
-      };
+      this.jrmpGD = new MapProxyGenericData(new Formatters(cfg));
 
     }
 
@@ -149,7 +150,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
                     getDescription().orElse(""), firstResult));
             result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the schema
             getLog().info("Reading data from dataset");
-            read = new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.formatters).writeRecords(result);
+            read = new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.jrmpGD).writeRecords(result);
           } else
             throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
         }

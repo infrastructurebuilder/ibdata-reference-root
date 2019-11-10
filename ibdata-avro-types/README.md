@@ -17,3 +17,19 @@ These tranformers (and finalizers) are for managing Avro types.
 
 
 ## Notes
+
+Currently, `ibdata-avro-types` supports the Avro logical types that the [Avro IDL supports](https://avro.apache.org/docs/current/idl.html#logical_types).
+
+This means that logical types supported by `ibdata-avro-types` are:
+
+*     decimal (logical type decimal)
+*     date (logical type date)
+*     time_ms (logical type time-millis)
+*     timestamp_ms (logical type timestamp-millis)
+
+`uuid` is has some support, but only from a `CharSequence` (like a `String`, for instance).
+
+Specifically, `time-micros` is not supported.
+
+Other logical types are not currently supported.
+This means that if you are using a JSON-formatted schema that uses other logical types, the behavior of ibdata in general is unspecified.

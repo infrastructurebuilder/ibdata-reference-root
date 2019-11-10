@@ -16,9 +16,13 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -60,12 +64,15 @@ abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRec
   protected Object getObjectConfiguration(String key, Object defaultValue) {
     return getConfig().getObjectOrDefault(key, defaultValue);
   }
+
   protected String getConfiguration(String key, String defaultValue) {
     return getConfig().getOrDefault(/* FIXME getHint() + "." + */ key, defaultValue);
   }
+
   protected Optional<String> getOptionalConfiguration(String key) {
     return ofNullable(getConfiguration(key, null));
   }
+
   protected Optional<Object> getOptionalObjectConfiguration(String key) {
     return ofNullable(getObjectConfiguration(key, null));
   }
@@ -77,6 +84,16 @@ abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRec
     } catch (ClassCastException e) {
       return Optional.empty();
     }
+  }
+
+  @Override
+  public Optional<String> produces() {
+    return Optional.of(getOutboundClass().toGenericString());
+  }
+
+  @Override
+  public Optional<List<String>> accepts() {
+    return of(Arrays.asList(getInboundClass().toGenericString()));
   }
 
   @Override

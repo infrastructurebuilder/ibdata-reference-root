@@ -27,8 +27,8 @@
   <name>${project.artifactId}</name>
   <description>Reference/Default ingesters for IBData</description>
   <properties>
-    <jacoco.max.missed.classes>99</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>0</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>4</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>17</test.coverage.percentage.required>
     <surefire.failIfNoTests>false</surefire.failIfNoTests>
   </properties>
 

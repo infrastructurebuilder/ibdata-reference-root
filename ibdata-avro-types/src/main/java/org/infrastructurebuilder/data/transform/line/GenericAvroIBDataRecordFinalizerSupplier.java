@@ -32,9 +32,11 @@ import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(GenericAvroIBDataRecordFinalizerSupplier.NAME)
 public class GenericAvroIBDataRecordFinalizerSupplier
@@ -44,24 +46,25 @@ public class GenericAvroIBDataRecordFinalizerSupplier
   private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(GenericRecord.class.getCanonicalName());
 
   @Inject
-  public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
+    this(wps, l, null);
   }
 
-  private GenericAvroIBDataRecordFinalizerSupplier(PathSupplier ps, ConfigMapSupplier cms) {
-    super(ps, cms);
+  private GenericAvroIBDataRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
+    super(ps, l, cms);
   }
 
   @Override
-  public IBDataDataStreamRecordFinalizerSupplier<GenericRecord> config(ConfigMapSupplier cms) {
-    return new GenericAvroIBDataRecordFinalizerSupplier(getWps(), cms);
+  public IBDataDataStreamRecordFinalizerSupplier<GenericRecord> configure(ConfigMapSupplier cms) {
+    return new GenericAvroIBDataRecordFinalizerSupplier(getWps(), () -> getLog(), cms);
   }
 
   @Override
   public IBDataStreamRecordFinalizer<GenericRecord> get() {
     // The working path needs to be stable and pre-existent
     return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
-        getCms().get());
+        getLog(), getCms().get());
   }
 
   private class GenericAvroIBDataStreamRecordFinalizer
@@ -69,8 +72,8 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
     private final int numberOfRowsToSkip;
 
-    public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
-      super(id, workingPath, map, Optional.of(IBDataAvroUtils.fromMapAndWP.apply(workingPath, map)));
+    public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map) {
+      super(id, workingPath, l, map, Optional.of(IBDataAvroUtils.fromMapAndWP.apply(workingPath, map)));
       this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
     }
 

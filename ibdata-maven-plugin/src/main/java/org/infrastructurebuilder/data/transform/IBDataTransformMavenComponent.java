@@ -186,7 +186,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
                     .orElseThrow(
                         () -> new IBDataException("Record finalizer  " + g.getRecordFinalizer() + " not found"))
                     // Then configure the supplier
-                    .config(g.getRecordFinalizerConfig(defaults))
+                    .configure(g.getRecordFinalizerConfig(defaults))
                     // Get the record finalizer
                     .get());
           }

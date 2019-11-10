@@ -24,6 +24,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.LOCALE_REGION_PARAM
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,6 +35,7 @@ import javax.inject.Named;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -44,7 +46,7 @@ import org.slf4j.Logger;
 
 @Named(DefaultMapToGenericRecordIBDataLineTransformerSupplier.NAME)
 public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
-    extends AbstractIBDataRecordTransformerSupplier<Map<String, Object>, GenericRecord> {
+    extends AbstractIBDataRecordTransformerSupplier<Map<String, Object>, IndexedRecord> {
   public final static String NAME = "map-to-generic-avro";
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Map.class.getCanonicalName());
   public final static String SCHEMA_PARAM = "schema"; // Required **
@@ -71,7 +73,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
   }
 
   @Override
-  protected IBDataRecordTransformer<Map<String, Object>, GenericRecord> getUnconfiguredTransformerInstance(
+  protected IBDataRecordTransformer<Map<String, Object>, IndexedRecord> getUnconfiguredTransformerInstance(
       Path workingPath) {
     return new DefaultMapSSToGenericRecordIBDataLineTransformer(workingPath, getLogger());
   }
@@ -94,12 +96,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
       this.schema = config == null ? null
           : avroSchemaFromString.apply(ofNullable(getConfiguration(SCHEMA_PARAM))
               .orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER + " (invalid?)")));
-      this.formatters = new Formatters(Optional.ofNullable(getConfig()).orElse(new ConfigMap())) {
-        @Override
-        public boolean isBlankFieldNullInUnion() {
-          return true;
-        }
-      };
+      this.formatters = new Formatters(Optional.ofNullable(getConfig()).orElse(new ConfigMap()));
     }
 
     /**
@@ -144,8 +141,19 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
     }
 
     @Override
-    public IBDataRecordTransformer<Map<String, Object>, GenericRecord> configure(ConfigMap cms) {
+    public IBDataRecordTransformer<Map<String, Object>, IndexedRecord> configure(ConfigMap cms) {
       return new DefaultMapSSToGenericRecordIBDataLineTransformer(getWorkingPath(), cms, getLogger());
+    }
+
+    @Override
+    public Class<Map<String, Object>> getInboundClass() {
+      Map<String, Object> c = new HashMap<>();
+      return (Class<Map<String, Object>>) c.getClass();
+    }
+
+    @Override
+    public Class<IndexedRecord> getOutboundClass() {
+      return IndexedRecord.class;
     }
 
   }
