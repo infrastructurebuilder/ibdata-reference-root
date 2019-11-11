@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package org.infrastructurebuilder.data;
+
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -24,11 +25,15 @@ import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSe
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -48,6 +53,8 @@ public class DefaultIBDataEngine implements IBDataEngine {
   private final Map<UUID, DefaultIBDataSet> cachedDataSets = new ConcurrentHashMap<>();
   private final Logger log;
 
+  private final List<URL> additionalURLS = new ArrayList<>();
+
   //  private final static Function<? super UUID, ? extends IBDataSet> mappingFunction = (uuid) -> {
   //    // FIXME We currently return null from mappingFunction because it doesn't get called
   //    return null;
@@ -58,34 +65,67 @@ public class DefaultIBDataEngine implements IBDataEngine {
     this.log = log.get();
   }
 
+  public List<URL> getAdditionalURLS() {
+    return additionalURLS;
+  }
+
+  public void setAdditionalURLS(List<URL> additionalURLS) {
+    this.additionalURLS.addAll(Optional.ofNullable(additionalURLS).orElse(Collections.emptyList()));
+  }
+
   @Override
   public synchronized int prepopulate() {
 
     if (cachedDataSets.size() == 0) {
       Optional<FileSystemProvider> fsp = IBDataTypeImplsModelUtils.getZipFSProvider();
       URLClassLoader c = (URLClassLoader) getClass().getClassLoader();
-      log.debug("CLasspath");
+      ArrayList<URL> urls = new ArrayList<>();
+      urls.addAll(getAdditionalURLS());
+      urls.addAll(Arrays.asList(c.getURLs()));
       for (URL u : c.getURLs()) {
-        log.debug("  " + u.toExternalForm());
+        log.info("  " + u.toExternalForm());
         ;
       }
-      List<URL> kv;
-//      kv = CPScanner.scanResources(new ResourceFilter().packageName("META-INF").resourceName("MANIFEST.MF"));
-//      log.info("Acquired " + kv.size() + " META-INF urls from classpath");
-      kv = CPScanner.scanResources(new ResourceFilter().packageName(IBDATA).resourceName(IBDATASET_XML));
-      log.debug("Acquired " + kv.size() + " urls from classpath");
-      //      Enumeration<URL> kv = cet.withReturningTranslation(() -> getClass().getClassLoader().getResources(IBDATA_IBDATASET_XML));
-      Map<UUID, ? extends DefaultIBDataSet> x = kv.stream()
-          //          enumerationAsStream(
-          //          // This [should] get all the XML files in the classpath.  I don't want to use a CP scanner....
-          //          kv, true)
-          // Convert supplier URL to Extended Dataset
-          .map(mapDataSetToDefaultIBDataSet)
-          // Only get them if they're here  Optional::stream in Java 11
-          .filter(Optional::isPresent).map(Optional::get)
-          //         Collection
-          .collect(toMap(k -> k.getId(), identity()));
-      cachedDataSets.putAll(x);
+      URLClassLoader newClassLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+      AtomicReference<Map<UUID, ? extends DefaultIBDataSet>> ref = new AtomicReference<>(null);
+      Runnable r = new Runnable() {
+
+        @Override
+        public void run() {
+          // TODO Auto-generated method stub
+          List<URL> kv;
+          //      kv = CPScanner.scanResources(new ResourceFilter().packageName("META-INF").resourceName("MANIFEST.MF"));
+          //      log.info("Acquired " + kv.size() + " META-INF urls from classpath");
+          kv = CPScanner.scanResources(new ResourceFilter().packageName(IBDATA).resourceName(IBDATASET_XML));
+          log.info("Acquired " + kv.size() + " urls from classpath");
+          //      Enumeration<URL> kv = cet.withReturningTranslation(() -> getClass().getClassLoader().getResources(IBDATA_IBDATASET_XML));
+          Map<UUID, ? extends DefaultIBDataSet> x = kv.stream()
+              //          enumerationAsStream(
+              //          // This [should] get all the XML files in the classpath.  I don't want to use a CP scanner....
+              //          kv, true)
+              // Convert supplier URL to Extended Dataset
+              .map(mapDataSetToDefaultIBDataSet)
+              // Only get them if they're here  Optional::stream in Java 11
+              .filter(Optional::isPresent).map(Optional::get)
+              //         Collection
+              .collect(toMap(k -> k.getId(), identity()));
+          if (!ref.compareAndSet(null,x)) {
+            throw new IBDataException("Failed to set ref values");
+          }
+        }
+
+      };
+      Thread t = new Thread(r);
+      t.setContextClassLoader(newClassLoader);
+      t.start();
+      while(t.isAlive()) {
+        try {
+          Thread.sleep(100L);
+        } catch (InterruptedException e) {
+          throw new IBDataException(e);
+        }
+      }
+      cachedDataSets.putAll(ref.get());
     }
     return cachedDataSets.size();
   }

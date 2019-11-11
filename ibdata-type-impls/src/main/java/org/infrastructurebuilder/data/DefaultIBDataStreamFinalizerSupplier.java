@@ -15,11 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Objects.requireNonNull;
-import static org.infrastructurebuilder.data.IBDataConstants.WORKING_PATH_CONFIG_ITEM;
-
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,8 +31,8 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
   private static final String WP_MESSAGE = "Working Path Config";
 
   @Inject
-  public DefaultIBDataStreamFinalizerSupplier(LoggerSupplier l) {
-    this(null, null, l);
+  public DefaultIBDataStreamFinalizerSupplier(PathSupplier wps, LoggerSupplier l) {
+    this(wps, null, l);
   }
 
   /**
@@ -49,9 +45,7 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
 
   @Override
   public IBDataStreamFinalizerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataStreamFinalizerSupplier(
-        () -> Paths.get(requireNonNull(requireNonNull(cms).get().getString(WORKING_PATH_CONFIG_ITEM), WP_MESSAGE)), cms,
-        () -> getLog());
+    return new DefaultIBDataStreamFinalizerSupplier(getWps(), cms, () -> getLog());
   }
 
   @Override

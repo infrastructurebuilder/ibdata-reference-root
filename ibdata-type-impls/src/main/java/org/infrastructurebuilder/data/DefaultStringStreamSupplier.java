@@ -23,16 +23,28 @@ import static org.infrastructurebuilder.util.IBUtils.readInputStreamAsStringStre
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.infrastructurebuilder.util.LoggerSupplier;
+import org.slf4j.Logger;
 
 @Named
 public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory<String> {
   public final static List<String> TYPES = Arrays.asList(TEXT_CSV, TEXT_PSV, TEXT_TSV, TEXT_PLAIN);
+  private final Logger log;
+  private final List<InputStream> insList = new ArrayList<>();
+
+  @Inject
+  public DefaultStringStreamSupplier(LoggerSupplier l) {
+    this.log = l.get();
+  }
 
   @Override
   public Optional<Stream<String>> from(IBDataStream ds) {
@@ -40,12 +52,16 @@ public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory<
       return Optional.empty();
     IBDataStream d = ds;
 
-    try (InputStream ins = d.get()) {
-      Stream<String> s = readInputStreamAsStringStream(ins);
-      return Optional.of(s);
-    } catch (IOException e) {
-      throw new IBDataException(e);
-    }
+    InputStream ins = d.get();
+    Stream<String> s = readInputStreamAsStringStream(ins);
+    return Optional.of(s);
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    super.finalize();
+    for (InputStream ins : insList)
+      ins.close();
   }
 
   @Override

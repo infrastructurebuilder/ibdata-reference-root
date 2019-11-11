@@ -15,7 +15,7 @@ You have been warned.
 
 | Hint | Effect | Parameters |
 | ---- | ------ | ---------- |
-| `jdbc` | Does nothing | none |
+| `jdbc` | Selects records from a query and allows the finalizer to write them as Avro| <ul><li>`dialect` [Jooq dialect](https://www.jooq.org/doc/3.12/manual/sql-building/dsl-context/sql-dialects/) </li><li>`query` SQL Query to execute</li> <li>`schema` Avro schema to write records as.  Optional.  If not provided, the system will attempt to infer.  If provided, must contain all fields in the `query` result</li></ul>|
 
 
 

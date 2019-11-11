@@ -34,7 +34,7 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 @Named
 public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
-  public final static List<String> HEADERS = Arrays.asList("http://", "https://", "file:", "zip:");
+  public final static List<String> HEADERS = Arrays.asList("http://", "https://", "file:", "zip:", "jar:");
 
   @Inject
   public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {

@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 import org.infrastructurebuilder.data.AbstractIBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataSource;
@@ -37,7 +38,7 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
 
   @Override
   public boolean respondsTo(DefaultIBDataStreamIdentifierConfigBean v) {
-    String u = v.getURL().orElse("");
+    String u = Optional.ofNullable(v).flatMap(DefaultIBDataStreamIdentifierConfigBean::getURL).orElse("");
     return getHeaders().stream().anyMatch(h -> u.startsWith(h));
   }
 

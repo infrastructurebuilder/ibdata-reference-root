@@ -47,9 +47,12 @@ import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.joor.Reflect;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 public class DefaultIBDataStreamTest {
+  public final static Logger log = LoggerFactory.getLogger(DefaultIBDataStreamTest.class);
   public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
 
   private static final String JPG = "image/jpeg";
@@ -214,7 +217,7 @@ public class DefaultIBDataStreamTest {
   @Test
   public void testStringStreamInappropriateSupplier() {
     DefaultIBDataStream v = DefaultIBDataStream.from(ds, () -> path);
-    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
+    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier(() -> log);
     assertFalse(dss.from(v).isPresent());
   }
 
@@ -225,7 +228,7 @@ public class DefaultIBDataStreamTest {
     i.close();
     i = v.get();
     i.close();
-    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
+    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier(() -> log);
     assertTrue(dss.from(v).isPresent());
   }
 

@@ -54,7 +54,7 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   @Inject
   public DefaultIBDataSetIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       @Nullable @Named("maven-log") LoggerSupplier l, TypeToExtensionMapper t2e) {
-    this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
+    this(l.get(), wps, null, t2e);
   }
 
   private DefaultIBDataSetIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms,

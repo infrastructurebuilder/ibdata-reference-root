@@ -26,16 +26,16 @@
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>Reference/Default ingesters for IBData</description>
-  <properties>
-    <jacoco.max.missed.classes>4</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>17</test.coverage.percentage.required>
-    <surefire.failIfNoTests>false</surefire.failIfNoTests>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
       <artifactId>ibdata-type-impls</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.infrastructurebuilder.data</groupId>
+      <artifactId>ibdata-type-impls</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jooq</groupId>
