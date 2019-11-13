@@ -24,7 +24,6 @@ import static org.infrastructurebuilder.data.IBDataConstants.LOCALE_REGION_PARAM
 
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -147,8 +146,8 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
 
     @Override
     public Class<Map<String, Object>> getInboundClass() {
-      Map<String, Object> c = new HashMap<>();
-      return (Class<Map<String, Object>>) c.getClass();
+      Class<?> clazz = Map.class;
+      return (Class<Map<String, Object>>) clazz;
     }
 
     @Override

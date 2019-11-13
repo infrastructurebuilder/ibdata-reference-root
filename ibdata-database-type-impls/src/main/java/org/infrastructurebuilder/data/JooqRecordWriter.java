@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data.ingest;
+package org.infrastructurebuilder.data;
 
 import static java.nio.file.Files.createTempFile;
 import static java.util.Objects.requireNonNull;
@@ -30,6 +30,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.ingest.IBDataAvroRecordWriter;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.PathSupplier;

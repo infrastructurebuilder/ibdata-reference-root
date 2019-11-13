@@ -32,13 +32,11 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.data.TimeConversions.DateConversion;
 import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.data.IBDataConstants;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
-import org.infrastructurebuilder.data.ingest.DefaultDatabaseIBDataSourceSupplierMapper.DefaultDatabaseIBDataSource;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -83,7 +81,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   @Before
   public void setUp() throws Exception {
     c = new ConfigMap();
-    c.put(DefaultDatabaseIBDataSource.DIALECT, "H2");
+    c.put(DefaultDatabaseIBDataSourceSupplierMapper.DIALECT, "H2");
     theUrl = "jdbc:h2:" + wps.getTestClasses().resolve("test").toAbsolutePath().toString();
     c.put("url", theUrl);
     c.put("query", "SELECT * FROM TEST ORDER BY ID;");

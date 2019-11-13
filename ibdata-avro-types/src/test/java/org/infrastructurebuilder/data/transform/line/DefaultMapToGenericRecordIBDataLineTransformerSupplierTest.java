@@ -102,6 +102,11 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
 
     DefaultMapSSToGenericRecordIBDataLineTransformer q = (DefaultMapSSToGenericRecordIBDataLineTransformer) v.get();
 
+    assertEquals(DefaultMapToGenericRecordIBDataLineTransformerSupplier.NAME, q.getHint());
+    assertTrue(q.accepts().get().contains(Map.class.getCanonicalName()));
+    assertEquals(GenericRecord.class.getCanonicalName(), q.produces().get());
+    assertEquals(IndexedRecord.class, q.getOutboundClass());
+    assertEquals(Map.class, q.getInboundClass());
     Formatters f = q.getFormatters();
     GenericData gd = new MapProxyGenericData(f);
 
@@ -137,10 +142,10 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
 
     DataFileReader<GenericRecord> r = new DataFileReader<>(sin, new GenericDatumReader<>(schema));
 
-    GenericRecord newDatum = r.next();  // We wrote one record
+    GenericRecord newDatum = r.next(); // We wrote one record
     r.close();
     LocalDate d2 = LocalDate.ofEpochDay(new Integer(d).longValue());
-    assertNotNull (d2);
+    assertNotNull(d2);
     assertEquals(d, newDatum.get("date_of_birth"));
   }
 

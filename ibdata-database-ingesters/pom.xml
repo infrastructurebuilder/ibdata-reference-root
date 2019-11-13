@@ -48,13 +48,12 @@
       <artifactId>ibcore-read-detect</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jooq</groupId>
-      <artifactId>jooq</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ibdata-database-type-impls</artifactId>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.200</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

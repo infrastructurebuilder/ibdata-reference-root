@@ -36,7 +36,9 @@ import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.JooqRecordWriter;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -55,6 +57,15 @@ import org.w3c.dom.Document;
 @Named("jdbc-jooq")
 public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
   public final static List<String> HEADERS = Arrays.asList("jdbc:");
+  public static final String DEFAULT_NAMESPACE = "org.infrastructurebuilder.data";
+
+  private static final String NO_QUERY_MSG = "No additional config available (query)";
+
+  public static final String QUERY = "query";
+  public static final String DIALECT = "dialect";
+  public static final String SCHEMA = "schema"; // "Optional" (sort of )
+
+  public static final String NAMESPACE = "namespace";
 
   @Inject
   public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
@@ -75,15 +86,6 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   }
 
   public class DefaultDatabaseIBDataSource extends AbstractIBDataSource implements AutoCloseable {
-    public static final String DEFAULT_NAMESPACE = "org.infrastructurebuilder.data";
-
-    private static final String NO_QUERY_MSG = "No additional config available (query)";
-
-    public static final String QUERY = "query";
-    public static final String DIALECT = "dialect";
-    public static final String SCHEMA = "schema"; // "Optional" (sort of )
-
-    public static final String NAMESPACE = "namespace";
 
     private final Path targetPath;
     private final TypeToExtensionMapper t2e;

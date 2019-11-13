@@ -16,10 +16,9 @@ You have been warned.
 
 ## Ingesters
 
-
 | Hint | Effect | Parameters |
-| ---- | ------ | ---------- |
-| `jdbc` | Selects records from a query and allows the finalizer to write them as Avro| <ul><li>`dialect` [org.jooq.SQLDialect](https://www.jooq.org/javadoc/3.12.x/org.jooq/org/jooq/SQLDialect.html) [Jooq dialect](https://www.jooq.org/doc/3.12/manual/sql-building/dsl-context/sql-dialects/) </li><li>`query` SQL Query to execute</li> <li>`schema` Avro schema to write records as.  Optional.  If not provided, the system will attempt to infer.  If provided, must contain all fields in the `query` result</li></ul>|
+| --- | ------ | ---------- |
+| `jdbc` | Selects records from a query and allows the finalizer to write them as Avro | <ul><li>`dialect` [org.jooq.SQLDialect](https://www.jooq.org/javadoc/3.12.x/org.jooq/org/jooq/SQLDialect.html) [Jooq dialect](https://www.jooq.org/doc/3.12/manual/sql-building/dsl-context/sql-dialects/) </li><li>`query` SQL Query to execute.  Not validated.</li> <li>`schema` Avro schema to write records as.  Optional.  If not provided, the system will attempt to infer.  If provided, must contain all fields in the `query` result</li><li>`namespace` Namespace if not schema is provided.  If not provided, the namespace is set to `org.infrastructurebuilder.data`</ul>|
 
 
 
@@ -27,4 +26,4 @@ You have been warned.
 
 | Hint | Accepts | Produces | Effect | Parameters |
 | ---- | ------- | -------- | ------ | ---------- |
-| `default-jdbc` | Database input | `binary/avro` | Writes an Avro stream of records mapped from a query | <ul><li>`numberOfRowsToSkip` Skip the supplied number of rows (Default: `0`) </li> <li>`query` : select statement to execute (not pre-validated)</li> <ul> |
+| `default-jdbc` | Database input | `binary/avro` | Writes an Avro stream of records mapped from a query | `numberOfRowsToSkip` Skip the supplied number of rows (Default: `0`)  |

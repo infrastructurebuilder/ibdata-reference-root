@@ -66,6 +66,7 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
     testData.put("date_of_birth", "11-10-99");
     testData.put("id", "1");
     testData.put("index", "1");
+    testData.put("A", "B");
     Object[] a = Arrays.asList("A", "B", 1, 2, 3).toArray(new Object[0]);
     Properties p1 = new Properties();
     try (InputStream in = getClass().getResourceAsStream("/" + LOAD1_PROPERTIES)) {
@@ -89,5 +90,6 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
     GenericRecord r = (GenericRecord) test.apply(testData);
     assertNotNull(r);
   }
+
 
 }

@@ -15,12 +15,17 @@
  */
 package org.apache.avro.generic;
 
+import static java.time.temporal.ChronoField.INSTANT_SECONDS;
+import static java.time.temporal.ChronoField.NANO_OF_SECOND;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalField;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.LogicalType;
@@ -29,6 +34,8 @@ import org.apache.avro.data.TimeConversions;
 import org.infrastructurebuilder.data.Formatters;
 
 public class MapProxyGenericData extends GenericData {
+  public final static long millisInAYear = 86400000L;
+
   public MapProxyGenericData(Formatters f) {
     super();
     requireNonNull(f, "Formatters for MapProxyGenericData");
@@ -108,7 +115,9 @@ public class MapProxyGenericData extends GenericData {
     }
 
     public Long toLong(String value, Schema schema, LogicalType type) {
-      return f.parse(value, Instant::from).toEpochMilli();
+      TemporalAccessor t = f.parse(value);
+      return (t.isSupported(ChronoField.INSTANT_SECONDS)) ? Instant.from(t).toEpochMilli()
+          : t.getLong(ChronoField.EPOCH_DAY) * millisInAYear + t.get(ChronoField.MILLI_OF_DAY);
     }
 
     @Override

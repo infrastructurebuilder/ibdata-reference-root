@@ -28,7 +28,7 @@
   <description>IBData ingesters for JDBC databases</description>
   <properties>
     <jacoco.max.missed.classes>4</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>15</test.coverage.percentage.required>
+    <test.coverage.percentage.required>06</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -59,6 +59,11 @@
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
       <artifactId>ibdata-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.dbunit</groupId>
+      <artifactId>dbunit</artifactId>
+      <version>2.6.0</version>
     </dependency>
   </dependencies>
   <build>

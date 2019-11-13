@@ -97,6 +97,17 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
+        <artifactId>ibdata-database-type-impls</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ibdata-database-type-impls</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
         <artifactId>ibdata-database-ingesters</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -164,6 +175,7 @@
   <modules>
     <module>ibdata-testing</module>
     <module>ibdata-type-impls</module>
+    <module>ibdata-database-type-impls</module>
     <module>ibdata-maven-plugin</module>
     <module>ibdata-default-transformers</module>
     <module>ibdata-default-ingesters</module>

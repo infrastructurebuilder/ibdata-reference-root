@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
+import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -81,6 +83,12 @@ public class DefaultAvroGenericRecordStreamSupplierTest {
   public void testGetRespondTypes() {
     assertTrue(d.getRespondTypes().contains(IBConstants.AVRO_BINARY));
     assertEquals(1, d.getRespondTypes().size());
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testThrownException() {
+    ThrowingInputStream ins = new ThrowingInputStream(IOException.class);
+    DefaultAvroGenericRecordStreamSupplier.genericStreamFromInputStream.apply(ins);
   }
 
 }

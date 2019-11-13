@@ -37,13 +37,12 @@ public class DefaultAvroGenericRecordStreamSupplier implements IBDataSpecificStr
   public final static List<String> TYPES = Arrays.asList(AVRO_BINARY);
 
   public final static Function<InputStream, Optional<Stream<GenericRecord>>> genericStreamFromInputStream = (ins) -> {
-    DataFileStream<GenericRecord> s = null;
+    List<GenericRecord> l = new Vector<>();
 
-    try {
-      s = new DataFileStream<GenericRecord>(ins, new GenericDatumReader<GenericRecord>());
+    try (DataFileStream<GenericRecord> s = new DataFileStream<GenericRecord>(ins,
+        new GenericDatumReader<GenericRecord>())) {
       // FIXME OBVIOUSLY NOT CORRECT!!!!  You WILL run out of memory
-      List<GenericRecord> l = new Vector<>();
-      s.forEach(a -> l.add(a));
+      s.forEach(l::add);
       return of(l.stream());
       //      stream(
       //          // From splterator
@@ -53,13 +52,9 @@ public class DefaultAvroGenericRecordStreamSupplier implements IBDataSpecificStr
     } catch (IOException e) {
       return empty();
     } finally {
-      if (s != null)
-        try {
-          s.close();
-          ins.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+      IBDataException.cet.withTranslation(() -> {
+        ins.close();
+      });
     }
   };
 
