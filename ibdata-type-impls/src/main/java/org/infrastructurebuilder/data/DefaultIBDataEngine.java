@@ -20,6 +20,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
+import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
 
 import java.net.URL;
@@ -109,21 +110,15 @@ public class DefaultIBDataEngine implements IBDataEngine {
               .filter(Optional::isPresent).map(Optional::get)
               //         Collection
               .collect(toMap(k -> k.getId(), identity()));
-          if (!ref.compareAndSet(null,x)) {
-            throw new IBDataException("Failed to set ref values");
-          }
+          ref.set(x);
         }
 
       };
       Thread t = new Thread(r);
       t.setContextClassLoader(newClassLoader);
       t.start();
-      while(t.isAlive()) {
-        try {
-          Thread.sleep(100L);
-        } catch (InterruptedException e) {
-          throw new IBDataException(e);
-        }
+      while (t.isAlive()) {
+        cet.withTranslation(() -> Thread.sleep(100L));
       }
       cachedDataSets.putAll(ref.get());
     }

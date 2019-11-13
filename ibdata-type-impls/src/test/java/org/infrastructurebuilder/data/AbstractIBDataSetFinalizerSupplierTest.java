@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
@@ -27,8 +28,10 @@ import java.util.function.Supplier;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -68,6 +71,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     dummyPath = wps.get();
     t2e = new DefaultTypeToExtensionMapper();
     cms = new DefaultConfigMapSupplier();
+    cms.addValue("path", dummyPath);
 
     d = new DataSet();
     d.setUuid(UUID.randomUUID().toString());
@@ -79,7 +83,13 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     d.setMetadata(new Xpp3Dom("metadata"));
     d.setVersion("1.0");
     dsi1 = new DefaultIBDataSet(d);
-    c = new AbstractIBDataSetFinalizerSupplier<Dummy>(log, wps, cms, t2e) {
+    c = getSupplier(log, wps, cms, t2e);
+
+  }
+
+  private AbstractIBDataSetFinalizerSupplier<Dummy> getSupplier(Logger log, TestingPathSupplier wps,
+      DefaultConfigMapSupplier cms, DefaultTypeToExtensionMapper t2e) {
+    return new AbstractIBDataSetFinalizerSupplier<Dummy>(log, wps, cms, t2e) {
 
       @Override
       public AbstractCMSConfigurableSupplier<IBDataSetFinalizer<Dummy>> getConfiguredSupplier(ConfigMapSupplier cms) {
@@ -88,7 +98,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
       @Override
       protected IBDataSetFinalizer<Dummy> configuredType(ConfigMapSupplier config) {
-        return new DummySupplier(dummyPath);
+        return new DummySupplier(getConfig().get(), getConfig().get().get("path"));
       }
 
     };
@@ -103,9 +113,23 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     assertEquals(t2e, c.getTypeToExtensionMapper());
   }
 
+  @Test(expected = IBDataException.class)
+  public void testGetWithExistingPathNotADir() throws IOException {
+    cms = new DefaultConfigMapSupplier();
+    dummyPath = dummyPath.resolve("X");
+    cms.addValue("path", dummyPath);
+    IBUtils.writeString(dummyPath, "ABC"); // Creates the file
+    c = getSupplier(log, wps, cms, t2e);
+    IBDataSetFinalizer<Dummy> v = c.configure(cms).get();
+
+  }
+
   @Test
   public void testGet() throws IOException {
-    IBChecksumPathType g = c.get().finalize(dsi1, new Dummy(), Collections.emptyList());
+    IBDataSetFinalizer<Dummy> v = c.configure(cms).get();
+    assertNotNull(v.getWorkingPath());
+    assertTrue(Files.isDirectory(v.getWorkingPath()));
+    IBChecksumPathType g = v.finalize(dsi1, new Dummy(), Collections.emptyList());
     assertEquals(dummyPath, g.getPath());
     assertEquals(new Checksum().toString(), g.getChecksum().toString());
   }
@@ -114,22 +138,17 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
   }
 
-  public final static class DummySupplier implements IBDataSetFinalizer<Dummy> {
-    private Path dummyPath;
+  public final static class DummySupplier extends AbstractIBDataSetFinalizer<Dummy> {
 
-    public DummySupplier(Path p) {
-      this.dummyPath = p;
+    public DummySupplier(ConfigMap map, Path p) {
+      super(map, p);
     }
 
     @Override
     public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<Supplier<IBDataStream>> suppliers)
         throws IOException {
-      return new BasicIBChecksumPathType(dummyPath, new Checksum());
-    }
-
-    @Override
-    public Path getWorkingPath() {
-      return dummyPath;
+      getConfig();
+      return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());
     }
 
   };

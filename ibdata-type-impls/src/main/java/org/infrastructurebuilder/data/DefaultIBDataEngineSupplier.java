@@ -21,18 +21,22 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-@Named
+import org.infrastructurebuilder.util.LoggerSupplier;
+
+@Named(DefaultIBDataEngineSupplier.NAME)
 @Singleton
 public class DefaultIBDataEngineSupplier extends AbstractIBDataEngineSupplier {
 
+  public static final String NAME = "default";
+
   @Inject
-  public DefaultIBDataEngineSupplier(Map<String, IBDataEngine> engineList) {
-    super(engineList);
+  public DefaultIBDataEngineSupplier(LoggerSupplier l, Map<String, IBDataEngine> engineList) {
+    super(l, engineList);
   }
 
   @Override
   public String getLocalId() {
-    return "default";
+    return NAME;
   }
 
 }
