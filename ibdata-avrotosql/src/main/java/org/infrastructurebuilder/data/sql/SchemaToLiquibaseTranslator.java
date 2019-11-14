@@ -64,8 +64,8 @@ public interface SchemaToLiquibaseTranslator extends BiFunction<Optional<Path>, 
 
 
   public static DatabaseConnection createDatabase(Connection c, ResourceAccessor resourceAccessor) {
-    // TODO Auto-generated method stub
-    return null;
+
+    return null;    // TODO Implement createDatabase(Connection,ResourceAccessor)
   }
 
   @Override

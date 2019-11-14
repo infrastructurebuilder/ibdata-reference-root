@@ -29,14 +29,20 @@
   <name>${project.artifactId}</name>
   <description>Maven plugin for IBData</description>
   <properties>
-    <jacoco.max.missed.classes>2</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>85</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>87</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
       <artifactId>ibdata-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.infrastructurebuilder.data</groupId>
+      <artifactId>ibdata-api</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.infrastructurebuilder</groupId>

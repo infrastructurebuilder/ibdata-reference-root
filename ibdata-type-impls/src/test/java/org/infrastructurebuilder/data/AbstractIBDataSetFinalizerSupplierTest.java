@@ -15,7 +15,9 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,12 +30,12 @@ import java.util.function.Supplier;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;

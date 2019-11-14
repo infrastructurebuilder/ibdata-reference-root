@@ -15,10 +15,12 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.sql.JDBCType.valueOf;
 import static java.util.Optional.ofNullable;
 import static org.apache.avro.SchemaBuilder.builder;
 import static org.apache.avro.SchemaBuilder.nullable;
 
+import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,65 +33,92 @@ import java.util.stream.Collectors;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.SchemaBuilder.ArrayBuilder;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.IBUtils;
+import org.jooq.Catalog;
 import org.jooq.DataType;
+import org.jooq.EnumType;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.UDTRecord;
+import org.jooq.tools.reflect.Reflect;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class IBDataJooqUtils {
+  private final static Logger log = LoggerFactory.getLogger(IBDataJooqUtils.class);
 
-  public static Field getFieldFromType(String key, org.jooq.Field<?> field, boolean isNullable) {
+  public static Field getFieldFromType(String key, org.jooq.Field<?> field, DataType<?> dt, boolean isNullable) {
+    log.trace("key = {}, field = {}, dt = {}, isNullable = {}", key, field, dt, isNullable);
     Schema schema, logicalField;
     Field f1;
-    DataType<?> dt = field.getDataType();
+    JDBCType jdbcType = valueOf(dt.getSQLType());
     Optional<String> comment = ofNullable(IBUtils.nullIfBlank.apply(field.getComment())); // FIXME Apply the comment?
-        if (dt.getCastTypeName().equals("boolean")) {
+    String castType = dt.getCastTypeName();
+    if (dt.getCastTypeName().equals("boolean")) {
       f1 = new Field(key, isNullable ? nullable().booleanType() : builder().booleanType());
-    } else if (dt.getCastTypeName().equals("long")) {
+    } else if (dt.getCastTypeName().equals("bigint")) {
+      f1 = new Field(key, isNullable ? nullable().longType() : builder().longType());
+    } else if (dt.getCastTypeName().equals("decimal_integer")) {
       f1 = new Field(key, isNullable ? nullable().longType() : builder().longType());
     } else if (dt.getCastTypeName().equals("integer")) {
       f1 = new Field(key, isNullable ? nullable().intType() : builder().intType());
+    } else if (dt.isString() || dt.isEnum() /* FIXME see isEnum() below in comments */) {
+      f1 = new Field(key, isNullable ? nullable().stringType() : builder().stringType());
     } else
-
+    // Non primitive-esqe types.
     if (dt.isArray()) {
-      // FIXME Make Arrays work
-      throw new IBDataException("Array Type " + dt + " of field '" + field.getName() + "' cannot be processed");
+      schema = SchemaBuilder.array()
+          .items(getFieldFromType(key, field, Reflect.on(dt).get("elementType"), false).schema());
+      if (isNullable) {
+        schema = SchemaBuilder.builder().unionOf().nullType().and().type(schema).endUnion();
+      }
+      f1 = new Field(key, schema);
     } else if (dt.isDate()) {
       logicalField = Schema.create(Schema.Type.INT);
       schema = LogicalTypes.date().addToSchema(logicalField);
       f1 = new Field(key, isNullable ? nullable().type(schema) : schema);
-    } else if (dt.isDateTime()) {
-      logicalField = Schema.create(Schema.Type.LONG);
+    } else if (dt.isDateTime() || dt.isTimestamp()) {
+      logicalField = Schema.create(Schema.Type.INT);
       schema = LogicalTypes.timeMillis().addToSchema(logicalField);
       f1 = new Field(key, isNullable ? nullable().type(schema) : schema);
-    } else if (dt.isEnum()) {
-      // FIXME Make Enums work
-      throw new IBDataException("Enum Type " + dt + " of field '" + field.getName() + "' cannot be processed");
     } else if (dt.isInterval()) {
-      // FIXME Make Intervals work
-      throw new IBDataException("Interval Type " + dt + " of field '" + field.getName() + "' cannot be processed");
+      // Representation as a Long (in ms, so you can map to Duration::ofMillis)
+      schema = Schema.create(Schema.Type.LONG);
+      f1 = new Field(key, isNullable ? nullable().type(schema) : schema);
+    } else if (dt.isTime()) {
+      logicalField = Schema.create(Schema.Type.INT);
+      schema = LogicalTypes.timeMillis().addToSchema(logicalField);
+      f1 = new Field(key, isNullable ? nullable().type(schema) : schema);
+    } else if (dt.isNumeric()) {
+      // We could acquire additional numeric types instead of just long,
+      // but AFAIK this code is unreachable
+      // because only int and long are Numerics
+      //      f1 = new Field(key, isNullable ? nullable().longType() : builder().longType());
+      throw new IBDataException(
+          "NUMERIC Type " + dt + "/" + castType + " of field '" + field.getName() + "' cannot be processed");
+    } else if (dt.isUDT()) {
+      UDTRecord<?> record = (UDTRecord<?>) dt;
+      // FIXME Make UDTs work.  Somehow it could become a record
+      throw new IBDataException("UDT Type " + dt + " of field '" + field.getName() + "' cannot be processed");
+
+      // All enumeration types will be strings in the generated avro
+      //    } else if (dt.isEnum()) {
+      // Force all enumerations to be strings
+      //      EnumType t = (EnumType) dt;
+      //      Catalog q = t.getCatalog();
+      //      Optional<org.jooq.Schema> s = Optional.ofNullable(t.getSchema());
+      //      List<String> symbols = new ArrayList<>();
+      //      schema = SchemaBuilder.enumeration(key).symbols(symbols.toArray(new String[0]));
+      //      f1 = new Field(key, isNullable ? nullable().type(schema) : schema);
+      // TODO If we can figure out how to get the symbols for the enumeration, this will work better
+      //      f1 = new Field(key, isNullable ? nullable().stringType() : builder().stringType());
     } else if (dt.isLob()) {
       // FIXME Make LOBs work
       throw new IBDataException("xLOB Type " + dt + " of field '" + field.getName() + "' cannot be processed");
-    } else if (dt.isNumeric()) {
-      // TODO Acquire additional numeric types instead of just long
-      f1 = new Field(key, isNullable ? nullable().longType() : builder().longType());
-    } else if (dt.isString()) {
-      f1 = new Field(key, isNullable ? nullable().stringType() : builder().stringType());
-    } else if (dt.isTemporal()) {
-      // FIXME Make Temporals work
-      throw new IBDataException("Temporal Type " + dt + " of field '" + field.getName() + "' cannot be processed");
-    } else if (dt.isTime()) {
-      // FIXME Make Times work
-      throw new IBDataException("Time Type " + dt + " of field '" + field.getName() + "' cannot be processed");
-    } else if (dt.isTimestamp()) {
-      // FIXME Make Timestamps work
-      throw new IBDataException("Timestamp Type " + dt + " of field '" + field.getName() + "' cannot be processed");
-    } else if (dt.isUDT()) {
-      // FIXME Make UDTs work
-      throw new IBDataException("UDT Type " + dt + " of field '" + field.getName() + "' cannot be processed");
     } else
       throw new IBDataException("Type " + dt + " of field '" + field.getName() + "' cannot be processed");
     return f1;
@@ -129,7 +158,7 @@ public final class IBDataJooqUtils {
       field = r.field(i);
       key = field.getName();
       names.add(key);
-      fields.put(key, getFieldFromType(key, field, nullFields.contains(key)));
+      fields.put(key, getFieldFromType(key, field, field.getDataType(), nullFields.contains(key)));
     }
 
     List<Field> l = names.stream().map(fields::get).collect(Collectors.toList());

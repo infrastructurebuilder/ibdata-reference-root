@@ -30,7 +30,7 @@
   <description>IBData ingesters for JDBC databases</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>65</test.coverage.percentage.required>
+    <test.coverage.percentage.required>77</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -54,7 +54,6 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.200</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

@@ -15,18 +15,14 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.junit.Assert.*;
+import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
-import static java.util.Optional.*;
-import static java.util.stream.Collectors.toList;
-
 import java.util.UUID;
 import java.util.stream.Stream;
 

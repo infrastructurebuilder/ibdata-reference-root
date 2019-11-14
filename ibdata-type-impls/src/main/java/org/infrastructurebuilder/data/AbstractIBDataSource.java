@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 
-import java.net.URL;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.BasicCredentials;

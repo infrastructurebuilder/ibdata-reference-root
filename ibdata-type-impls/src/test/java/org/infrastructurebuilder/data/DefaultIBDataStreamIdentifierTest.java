@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;

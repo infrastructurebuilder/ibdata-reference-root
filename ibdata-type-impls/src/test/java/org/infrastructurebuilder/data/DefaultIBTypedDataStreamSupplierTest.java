@@ -17,48 +17,41 @@ package org.infrastructurebuilder.data;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class DefaultIBDataEngineTest {
+public class DefaultIBTypedDataStreamSupplierTest {
 
-  public final static Logger log = LoggerFactory.getLogger(DefaultIBDataEngineTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
   }
 
-  private DefaultIBDataEngine de;
+  private IBTypedDataStreamSupplier<String> s;
+  private IBDataStream original;
+  private List<String> list;
 
   @Before
   public void setUp() throws Exception {
-    de = new DefaultIBDataEngine(() -> log);
-  }
-
-  @After
-  public void tearDown() throws Exception {
+    Path p = wps.getTestClasses().resolve("lines.txt");
+    original = new FakeIBDataStream(p, Optional.empty(), Optional.empty());
+    list = Arrays.asList("A", "B", "C");
+    s = new DefaultIBTypedDataStreamSupplier<>(original, list.iterator());
   }
 
   @Test
-  public void test() throws MalformedURLException {
-    assertEquals(0, de.getAvailableIds().size());
-    de.setAdditionalURLS(Arrays.asList(wps.getTestClasses().resolve("test.jar").toUri().toURL()));
-    assertEquals(1, de.prepopulate());
-    assertEquals(1, de.getAvailableIds().size());
+  public void testGet() {
+    List<String> k = s.get().collect(Collectors.toList());
+    assertEquals(list, k);
   }
 
 }

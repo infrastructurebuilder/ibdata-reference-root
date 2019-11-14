@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
+import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;

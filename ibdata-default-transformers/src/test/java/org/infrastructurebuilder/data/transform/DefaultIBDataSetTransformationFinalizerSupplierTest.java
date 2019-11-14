@@ -31,12 +31,12 @@ import java.util.UUID;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
-import org.infrastructurebuilder.data.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.data.IBDataConstants;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;

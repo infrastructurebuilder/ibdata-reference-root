@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
 
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 

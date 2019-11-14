@@ -93,7 +93,6 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
         @Override
         public void run() {
-          // TODO Auto-generated method stub
           List<URL> kv;
           //      kv = CPScanner.scanResources(new ResourceFilter().packageName("META-INF").resourceName("MANIFEST.MF"));
           //      log.info("Acquired " + kv.size() + " META-INF urls from classpath");

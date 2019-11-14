@@ -18,11 +18,15 @@ package org.infrastructurebuilder.data;
 import static org.infrastructurebuilder.data.IBDataJooqUtils.getFieldFromType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,6 +37,7 @@ import org.apache.avro.generic.MapProxyGenericData;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.ingest.DefaultIBDataStreamIdentifierConfigBean;
+import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -40,11 +45,15 @@ import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.jooq.DSLContext;
+import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultDataType;
+import org.jooq.impl.EnumConverter;
+import org.jooq.types.YearToMonth;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -146,25 +155,83 @@ public class IBDataJooqUtilsTest {
 
   @After
   public void tearDown() throws Exception {
+    if (conn != null)
+      conn.close();
   }
 
   @Test
   public void testGetFieldFromType() {
     Field<?>[] fList = firstRecord.fields();
     Field<?> f = fList[0];
-    org.apache.avro.Schema.Field k = getFieldFromType("ID", f, false);
+    org.apache.avro.Schema.Field k = getFieldFromType("ID", f, f.getDataType(), false);
     assertNotNull(k);
     assertEquals(k.schema().getType(), Type.INT);
 
-    k = getFieldFromType("NAME", fList[1], false);
+    k = getFieldFromType("NAME", fList[1], fList[1].getDataType(), false);
     assertEquals(k.schema().getType(), Type.STRING);
-    k = getFieldFromType("BIRTHDAY", fList[2], false);
+    k = getFieldFromType("BIRTHDAY", fList[2], fList[2].getDataType(), false);
     assertEquals(k.schema().getType(), Type.INT);
-    k = getFieldFromType("AGE", fList[3], false);
+    k = getFieldFromType("AGE", fList[3], fList[3].getDataType(), false);
     assertEquals(k.schema().getType(), Type.INT);
-    k = getFieldFromType("YES", fList[4], false);
+    k = getFieldFromType("YES", fList[4], fList[4].getDataType(), false);
     assertEquals(k.schema().getType(), Type.BOOLEAN);
 
+    assertNotNull(getFieldFromType("NAME", fList[1], fList[1].getDataType(), true));
+    assertNotNull(getFieldFromType("YES", fList[4], fList[4].getDataType(), true));
   }
+
+  @Test
+  public void testLongType() {
+    Field<Long> f = DSL.field("A", Long.class);
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+  @Test
+  public void testBigIntegerType() {
+    Field<BigInteger> f = DSL.field("A", BigInteger.class);
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+
+  @Test
+  public void testArrayType() {
+    Field<String[][]> f = DSL.array(DSL.array(DSL.field("A", String.class)));
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+
+  @Test
+  public void testDateType() {
+    Field<java.sql.Date> f = DSL.date(new Date());
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+  @Test
+  public void testDateTime() {
+    Field<LocalDateTime> f = DSL.localDateTime(LocalDateTime.now());
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+  @Test
+  public void testInterval() {
+    DataType<YearToMonth> dt = DefaultDataType.getDataType(SQLDialect.H2, YearToMonth.class);
+     Field<YearToMonth> f = DSL.field("A",  dt);
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+  @Test
+  public void testTime() {
+     Field<Time> f = DSL.currentTime();
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
+
 
 }

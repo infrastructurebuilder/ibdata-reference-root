@@ -40,7 +40,6 @@ import java.util.function.Supplier;
 
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultTestingSource;
-import org.infrastructurebuilder.data.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSet;
@@ -49,6 +48,7 @@ import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;

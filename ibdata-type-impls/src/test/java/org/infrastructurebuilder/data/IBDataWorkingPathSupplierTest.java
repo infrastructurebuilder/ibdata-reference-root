@@ -15,15 +15,15 @@
  */
 package org.infrastructurebuilder.data;
 
-import org.infrastructurebuilder.util.IBLoggerEnabled;
-import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
+import static org.junit.Assert.*;
 
-/**
- * The contract for finalization:
- *
- * 1. Finalization happens for a single DataSet
- * @author mykel.alvis
- *
- */
-public interface IBDataSetFinalizerSupplier<T> extends CMSConfigurableSupplier<IBDataSetFinalizer<T>>, IBLoggerEnabled  {
+import org.junit.Test;
+
+public class IBDataWorkingPathSupplierTest {
+
+  @Test
+  public void test() {
+    assertNotNull(new IBDataWorkingPathSupplier());
+  }
+
 }

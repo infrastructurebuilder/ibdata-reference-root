@@ -41,8 +41,7 @@ abstract public class AbstractIBDataEngineSupplier implements IBDataEngineSuppli
         .orElseThrow(() -> new IBDataException("Engine " + this.id + " not found"));
   }
 
-  // FIXME Add this to IBDataEngineSupplier
-  // @Override
+  @Override
   public final Logger getLog() {
     return this.logger.get();
   }
