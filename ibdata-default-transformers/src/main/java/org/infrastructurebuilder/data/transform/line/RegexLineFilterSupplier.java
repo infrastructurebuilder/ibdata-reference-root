@@ -103,7 +103,15 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
     public Optional<String> produces() {
       return Optional.of(String.class.getCanonicalName());
     }
+    @Override
+    public Class<String> getInboundClass() {
+      return String.class;
+    }
 
+    @Override
+    public Class<String> getOutboundClass() {
+      return String.class;
+    }
   }
 
   @Override

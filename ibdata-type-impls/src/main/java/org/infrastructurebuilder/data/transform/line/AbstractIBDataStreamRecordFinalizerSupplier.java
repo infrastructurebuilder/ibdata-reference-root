@@ -15,24 +15,32 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 abstract public class AbstractIBDataStreamRecordFinalizerSupplier<T> implements IBDataDataStreamRecordFinalizerSupplier<T> {
 
   private final ConfigMapSupplier cms;
   private final PathSupplier wps;
+  private final Logger log;
 
-  public AbstractIBDataStreamRecordFinalizerSupplier(PathSupplier ps) {
-    this(ps, null);
+  public AbstractIBDataStreamRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l) {
+    this(ps, l, null);
   }
 
-  protected AbstractIBDataStreamRecordFinalizerSupplier(PathSupplier ps, ConfigMapSupplier cms) {
-    this.wps = Objects.requireNonNull(ps);
+  protected AbstractIBDataStreamRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
+    this.wps = requireNonNull(ps);
+    this.log = requireNonNull(l).get();
     this.cms = cms;
+  }
+
+  public Logger getLog() {
+    return log;
   }
 
   protected PathSupplier getWps() {

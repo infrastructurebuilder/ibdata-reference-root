@@ -41,11 +41,12 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
   public static final String ARRAY_TO_NAME_MAP = "array-to-name-map";
 
   @javax.inject.Inject
-  public ArrayToNameMapIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+  public ArrayToNameMapIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
     this(wps, null, l);
   }
 
-  private ArrayToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l ) {
+  private ArrayToNameMapIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
     super(wps, cms, l);
   }
 
@@ -60,10 +61,15 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
     return new ArrayToNameMapIBDataLineTransformer(workingPath, getLogger());
   }
 
+  @Override
+  public String getHint() {
+    return ARRAY_TO_NAME_MAP;
+  }
+
   private class ArrayToNameMapIBDataLineTransformer
       extends AbstractIBDataRecordTransformer<String[], Map<String, String>> {
 
-    private final List<String> ACCEPTABLE_TYPES = Arrays.asList(Array.class.getCanonicalName());
+//    private final List<String> ACCEPTABLE_TYPES = Arrays.asList(getInboundClass().toGenericString());
     private List<String> format;
 
     /**
@@ -91,8 +97,10 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
 
     @Override
     public Map<String, String> apply(String[] a) {
+      if (format.size() > a.length)
+        throw new IBDataException("Invalid length");
       Map<String, String> m = new HashMap<>();
-      for (int i = 0; i < a.length; ++i) {
+      for (int i = 0; i < format.size(); ++i) {
         m.put(format.get(i), a[i]);
       }
       return m;
@@ -109,19 +117,16 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
     }
 
     @Override
-    public Optional<List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
+    public Class<String[]> getInboundClass() {
+      return String[].class;
     }
 
     @Override
-    public Optional<String> produces() {
-      return Optional.of(Map.class.getCanonicalName());
+    public Class<Map<String, String>> getOutboundClass() {
+      Map<String, String> c = new HashMap<>();
+      return (Class<Map<String, String>>) c.getClass();
     }
-  }
 
-  @Override
-  public String getHint() {
-    return ARRAY_TO_NAME_MAP;
   }
 
 }

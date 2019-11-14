@@ -27,9 +27,8 @@
   <name>${project.artifactId}</name>
   <description>Transformers for IBData</description>
   <properties>
-    <jacoco.max.missed.classes>99</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>0</test.coverage.percentage.required>
-    <surefire.failIfNoTests>false</surefire.failIfNoTests>
+    <jacoco.max.missed.classes>14</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>34</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -47,12 +46,22 @@
       <artifactId>avro</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.infrastructurebuilder.data</groupId>
+      <artifactId>ibdata-api</artifactId>
+      <scope>test</scope>
+      <type>test-jar</type>
+    </dependency>
+    <dependency>
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>   <!--  Only for StringToNameMapIBDataLineTransformerSupplier -->
     </dependency>
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.infrastructurebuilder.maven</groupId>
         <artifactId>ibversions-maven-plugin</artifactId>

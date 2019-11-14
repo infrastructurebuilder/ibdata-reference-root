@@ -30,11 +30,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.JooqRecordWriter;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -53,6 +57,15 @@ import org.w3c.dom.Document;
 @Named("jdbc-jooq")
 public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
   public final static List<String> HEADERS = Arrays.asList("jdbc:");
+  public static final String DEFAULT_NAMESPACE = "org.infrastructurebuilder.data";
+
+  private static final String NO_QUERY_MSG = "No additional config available (query)";
+
+  public static final String QUERY = "query";
+  public static final String DIALECT = "dialect";
+  public static final String SCHEMA = "schema"; // "Optional" (sort of )
+
+  public static final String NAMESPACE = "namespace";
 
   @Inject
   public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
@@ -73,22 +86,13 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   }
 
   public class DefaultDatabaseIBDataSource extends AbstractIBDataSource implements AutoCloseable {
-    public static final String DEFAULT_NAMESPACE = "org.infrastructurebuilder.data";
-
-    private static final String NO_QUERY_MSG = "No additional config available (query)";
-
-    public static final String QUERY = "query";
-    public static final String DIALECT = "dialect";
-    public static final String SCHEMA = "schema"; // "Optional" (sort of )
-
-    public static final String NAMESPACE = "namespace";
 
     private final Path targetPath;
     private final TypeToExtensionMapper t2e;
 
     private IBChecksumPathType read;
 
-    private final Formatters formatters;
+    private final GenericData jrmpGD;
 
     public DefaultDatabaseIBDataSource(Logger l, String id, String source, Optional<BasicCredentials> creds,
         Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath,
@@ -98,8 +102,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
       this.targetPath = targetPath;
       this.t2e = t2e;
       ConfigMap cfg = additionalConfig.orElse(new ConfigMap());
-      this.formatters = new Formatters(cfg) {
-      };
+      this.jrmpGD = new MapProxyGenericData(new Formatters(cfg));
 
     }
 
@@ -149,7 +152,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
                     getDescription().orElse(""), firstResult));
             result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the schema
             getLog().info("Reading data from dataset");
-            read = new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.formatters).writeRecords(result);
+            read = new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.jrmpGD).writeRecords(result);
           } else
             throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
         }

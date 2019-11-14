@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
+package org.infrastructurebuilder.data.util.files;
 
+import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_ACCESS;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORD;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORDX;
@@ -23,11 +24,27 @@ import static org.infrastructurebuilder.IBConstants.APPLICATION_XLS;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XLSX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XML;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_ZIP;
+import static org.infrastructurebuilder.IBConstants.AVRO;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
+import static org.infrastructurebuilder.IBConstants.CSV;
+import static org.infrastructurebuilder.IBConstants.DOC;
+import static org.infrastructurebuilder.IBConstants.DOCX;
+import static org.infrastructurebuilder.IBConstants.MDB;
+import static org.infrastructurebuilder.IBConstants.PDF;
+import static org.infrastructurebuilder.IBConstants.PSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
 import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_TSV;
+import static org.infrastructurebuilder.IBConstants.TSV;
+import static org.infrastructurebuilder.IBConstants.TXT;
+import static org.infrastructurebuilder.IBConstants.XLS;
+import static org.infrastructurebuilder.IBConstants.XLSX;
+import static org.infrastructurebuilder.IBConstants.XML;
+import static org.infrastructurebuilder.IBConstants.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,43 +53,36 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 @Named
 public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
+  private static final long serialVersionUID = -8394163203952496361L;
+
+  private final static Map<String, String> map = new HashMap<String, String>() {
+    {
+      put(APPLICATION_XML, XML);
+      put(TEXT_PLAIN, TXT);
+      put(APPLICATION_ZIP, ZIP);
+      put(TEXT_CSV, CSV);
+      put(TEXT_TSV, TSV);
+      put(APPLICATION_XLS, XLS);
+      put(APPLICATION_XLSX, XLSX);
+      put(APPLICATION_ACCESS, MDB);
+      put(APPLICATION_MSWORD, DOC);
+      put(APPLICATION_MSWORDX, DOCX);
+      put(TEXT_PSV, PSV);
+      put(APPLICATION_PDF, PDF);
+      put(AVRO_BINARY, AVRO);
+    }
+  };
+
+  private final String defaultExtension;
 
   @Inject
   public DefaultTypeToExtensionMapper() {
+    this.defaultExtension = DEFAULT_EXTENSION;
   }
 
   @Override
-  public String getExtensionForType(String type) {
-    switch (type) {
-    case APPLICATION_XML:
-      return ".xml";
-    case TEXT_PLAIN:
-      return ".txt";
-    case APPLICATION_ZIP:
-      return ".zip";
-    case TEXT_CSV:
-      return ".csv";
-    case TEXT_TSV:
-      return ".tsv";
-    case APPLICATION_XLS:
-      return ".xls";
-    case APPLICATION_XLSX:
-      return ".xlsx";
-    case APPLICATION_ACCESS:
-      return ".mdb";
-    case APPLICATION_MSWORD:
-      return ".doc";
-    case APPLICATION_MSWORDX:
-      return ".docx";
-    case TEXT_PSV:
-      return ".psv";
-    case APPLICATION_PDF:
-      return ".pdf";
-    case AVRO_BINARY:
-      return ".avro";
-    default:
-      return ".bin";
-    }
+  public String getExtensionForType(String key) {
+    return ofNullable(map.get(key)).orElse(this.defaultExtension);
   }
 
 }

@@ -48,16 +48,17 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Named("default-transform")
+@Named(DefaultIBDataSetTransformationFinalizerSupplier.NAME)
 public class DefaultIBDataSetTransformationFinalizerSupplier
     extends AbstractIBDataSetFinalizerSupplier<Transformation> {
 
+  static final String NAME = "default-transform";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplier.class);
 
   @Inject
   public DefaultIBDataSetTransformationFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       @Nullable @Named("maven-log") LoggerSupplier l, TypeToExtensionMapper t2e) {
-    this(Optional.ofNullable(l).orElse(() -> logger).get(), wps, null, t2e);
+    this(l.get(), wps, null, t2e);
   }
 
   private DefaultIBDataSetTransformationFinalizerSupplier(Logger logger, PathSupplier workingPath,

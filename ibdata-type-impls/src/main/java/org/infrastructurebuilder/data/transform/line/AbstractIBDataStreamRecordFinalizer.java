@@ -15,6 +15,9 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
@@ -26,7 +29,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -39,6 +41,7 @@ import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
 
 abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDataStreamRecordFinalizer<T> {
   private final ConfigMap config;
@@ -46,16 +49,22 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
   private final Path workingPath;
   private final Optional<O> writer;
   private boolean closed = false;
+  private Logger log;
 
-  public AbstractIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map,
+  public AbstractIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map,
       Optional<O> optionalWriter) {
+    this.log = requireNonNull(l);
     this.config = map;
-    this.workingPath = Objects.requireNonNull(workingPath);
+    this.workingPath = requireNonNull(workingPath);
     Path k = this.workingPath.getParent();
-    if (!Files.isDirectory(k) || !Files.exists(k))
-      cet.withTranslation(() -> Files.createDirectories(k));
+    if (!isDirectory(k) || !exists(k))
+      cet.withTranslation(() -> createDirectories(k));
     this.id = requireNonNull(id);
     this.writer = requireNonNull(optionalWriter);
+  }
+
+  public Logger getLog() {
+    return log;
   }
 
   protected ConfigMap getConfig() {

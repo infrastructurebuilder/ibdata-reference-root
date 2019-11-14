@@ -32,19 +32,19 @@ import javax.inject.Named;
  */
 @Named
 public class DefaultIBStreamerFactory implements IBStreamerFactory {
-
-  private List<IBDataSpecificStreamFactory> sortedSuppliers;
+  protected List<IBDataSpecificStreamFactory> sortedSuppliers;
 
   @Inject
   public DefaultIBStreamerFactory(
       // Type suppliers
-      List<IBDataSpecificStreamFactory> typedSuppliers) {
+      List<IBDataSpecificStreamFactory<?>> typedSuppliers) {
     // Sorted by weight
     this.sortedSuppliers = Objects.requireNonNull(typedSuppliers).stream()
         .sorted((f1, f2) -> Integer.compare(f2.getWeight(), f1.getWeight())).collect(Collectors.toList());
 
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Optional<Stream<? extends Object>> from(IBDataStream ds) {
     return sortedSuppliers.stream()

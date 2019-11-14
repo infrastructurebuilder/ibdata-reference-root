@@ -21,10 +21,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -55,7 +60,8 @@ public class GenericRecordMapProxyTest {
 
   @Before
   public void setUp() throws Exception {
-    schema = IBDataAvroUtils.avroSchemaFromString.apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
+    schema = IBDataAvroUtils.avroSchemaFromString
+        .apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     b = new GenericRecordBuilder(schema);
     r = new GenericData.Record(schema);
     p = new GenericRecordMapProxy(r);
@@ -71,8 +77,22 @@ public class GenericRecordMapProxyTest {
   }
 
   @Test
+  public void testEmptySchema() throws IOException {
+    Path p = wps.getTestClasses().resolve("baempty.avsc");
+
+    try (InputStream ins = Files.newInputStream(p)) {
+      Schema empty = new Schema.Parser().parse(ins);
+      GenericRecord eb = new GenericRecordBuilder(empty).build();
+      GenericRecordMapProxy e = new GenericRecordMapProxy(eb);
+      assertTrue(e.isEmpty());
+    }
+
+  }
+
+  @Test
   public void testGet() {
     assertEquals(r, p.get());
+    assertNull(p.get("NOPE!"));
   }
 
   @Test
@@ -106,6 +126,7 @@ public class GenericRecordMapProxyTest {
     p.put("country", null);
     p.put("age", 10);
     assertEquals(10, p.get("age"));
+    assertNull(p.put("NOSUCHFIELD", "anything"));
   }
 
   @Test
@@ -115,11 +136,11 @@ public class GenericRecordMapProxyTest {
 
   @Test
   public void testPutAll() {
-    Map<String,Object> a = new HashMap<>();
+    Map<String, Object> a = new HashMap<>();
     p.putAll(a);
     a.put("age", 10);
     p.putAll(a);
-    assertEquals(10,p.get("age"));
+    assertEquals(10, p.get("age"));
   }
 
   @Test
@@ -134,12 +155,12 @@ public class GenericRecordMapProxyTest {
 
   @Test
   public void testValues() {
-    assertEquals(8,p.values().size());
+    assertEquals(8, p.values().size());
   }
 
   @Test
   public void testEntrySet() {
-    assertEquals(8,p.entrySet().size());
+    assertEquals(8, p.entrySet().size());
   }
 
 }

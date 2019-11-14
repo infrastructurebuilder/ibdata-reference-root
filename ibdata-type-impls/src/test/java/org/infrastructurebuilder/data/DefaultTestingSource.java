@@ -17,8 +17,6 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Optional.empty;
 
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
 

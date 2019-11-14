@@ -70,6 +70,10 @@ public class DefaultIBDataTransformationResultTest {
     wps.finalize();
   }
 
+//  @Test(expected=IBDataException.class)
+//  public final void alwaysfailIfYouGetADataSetFrmDefaultIBDataSet() {
+//    createdDataSet.asDataSet();
+//  }
 
   @Test
   public void testGetErrors() {

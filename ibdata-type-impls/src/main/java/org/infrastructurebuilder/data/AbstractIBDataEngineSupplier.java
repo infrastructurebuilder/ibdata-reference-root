@@ -20,12 +20,17 @@ import static java.util.Optional.ofNullable;
 
 import java.util.Map;
 
+import org.infrastructurebuilder.util.LoggerSupplier;
+import org.slf4j.Logger;
+
 abstract public class AbstractIBDataEngineSupplier implements IBDataEngineSupplier {
 
   private final Map<String, IBDataEngine> engineList;
   private final String id;
+  private final LoggerSupplier logger;
 
-  public AbstractIBDataEngineSupplier(Map<String, IBDataEngine> engineList) {
+  public AbstractIBDataEngineSupplier(LoggerSupplier l, Map<String, IBDataEngine> engineList) {
+    this.logger = requireNonNull(l);
     this.engineList = requireNonNull(engineList);
     this.id = getLocalId();
   }
@@ -36,4 +41,8 @@ abstract public class AbstractIBDataEngineSupplier implements IBDataEngineSuppli
         .orElseThrow(() -> new IBDataException("Engine " + this.id + " not found"));
   }
 
+  @Override
+  public final Logger getLog() {
+    return this.logger.get();
+  }
 }

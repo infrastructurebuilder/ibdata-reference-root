@@ -15,7 +15,8 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.io.IOException;
+import static org.infrastructurebuilder.data.IBDataException.cet;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -25,16 +26,12 @@ import org.infrastructurebuilder.util.config.ConfigMap;
 abstract public class AbstractIBDataSetFinalizer<T> implements IBDataSetFinalizer<T> {
 
   private final ConfigMap config;
-  private final Path   workingPath;
+  private final Path workingPath;
 
   protected AbstractIBDataSetFinalizer(ConfigMap map, Path workingPath) {
     this.config = Objects.requireNonNull(map);
     this.workingPath = Objects.requireNonNull(workingPath);
-    try {
-      Files.createDirectories(this.workingPath);
-    } catch (IOException e) {
-      System.err.println(e.getMessage());
-    }
+    cet.withReturningTranslation(() -> Files.createDirectories(this.workingPath));
   }
 
   protected ConfigMap getConfig() {
@@ -45,6 +42,5 @@ abstract public class AbstractIBDataSetFinalizer<T> implements IBDataSetFinalize
   public Path getWorkingPath() {
     return workingPath;
   }
-
 
 }

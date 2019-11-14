@@ -32,9 +32,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenericAvroIBDataRecordFinalizerSupplierTest {
 
+  public final static Logger log = LoggerFactory.getLogger(GenericAvroIBDataRecordFinalizerSupplierTest.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @BeforeClass
@@ -55,10 +58,9 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
   public void setUp() throws Exception {
     cms = new DefaultConfigMapSupplier();
     String schemaString = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString();
-    cms.addValue(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM,
-        schemaString );
+    cms.addValue(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaString);
     cms.addValue(IBDataStreamRecordFinalizer.NUMBER_OF_ROWS_TO_SKIP_PARAM, "1");
-    g = new GenericAvroIBDataRecordFinalizerSupplier(wps);
+    g = new GenericAvroIBDataRecordFinalizerSupplier(wps, () -> log);
     schema = IBDataAvroUtils.avroSchemaFromString.apply(schemaString);
     record = new Record(schema);
 
@@ -70,13 +72,13 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
 
   @Test
   public void testConfigure() {
-    IBDataDataStreamRecordFinalizerSupplier<GenericRecord> h = g.config(cms);
+    IBDataDataStreamRecordFinalizerSupplier<GenericRecord> h = g.configure(cms);
     assertFalse(g == h);
   }
 
   @Test
   public void testGet() {
-    IBDataStreamRecordFinalizer<GenericRecord> q = g.config(cms).get();
+    IBDataStreamRecordFinalizer<GenericRecord> q = g.configure(cms).get();
     assertEquals(1, q.getNumberOfRowsToSkip());
     q.writeRecord(record);
 

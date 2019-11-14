@@ -58,6 +58,11 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
     return new RandomLineFilter(workingPath, getLogger());
   }
 
+  @Override
+  public String getHint() {
+    return RANDMOM_LINE_FILTER;
+  }
+
   private class RandomLineFilter extends AbstractIBDataRecordTransformer<Object, Object> {
 
     public static final String RANDOMVAL = "percentage";
@@ -103,17 +108,16 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
       return Optional.of(ACCEPTABLE_TYPES);
     }
 
-    // Default impl is pass-thru (i.e. produces Optional.empty() )
-    //    @Override
-    //    public Optional<String> produces() {
-    //      return Optional.empty();
-    //    }
+    @Override
+    public Class<Object> getInboundClass() {
+      return Object.class;
+    }
 
-  }
+    @Override
+    public Class<Object> getOutboundClass() {
+      return Object.class;
+    }
 
-  @Override
-  public String getHint() {
-    return RANDMOM_LINE_FILTER;
   }
 
 }

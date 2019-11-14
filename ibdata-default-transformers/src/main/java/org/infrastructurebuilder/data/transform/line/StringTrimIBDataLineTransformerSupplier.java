@@ -54,6 +54,11 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
     return new StringTrimIBDataLineTransformer(workingPath, getLogger());
   }
 
+  @Override
+  public String getHint() {
+    return STRING_TRIM;
+  }
+
   private class StringTrimIBDataLineTransformer extends AbstractIBDataRecordTransformer<String, String> {
 
     /**
@@ -90,10 +95,16 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
     public IBDataRecordTransformer<String, String> configure(ConfigMap cms) {
       return new StringTrimIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }
+
+    @Override
+    public Class<String> getInboundClass() {
+      return String.class;
+    }
+
+    @Override
+    public Class<String> getOutboundClass() {
+      return String.class;
+    }
   }
 
-  @Override
-  public String getHint() {
-    return STRING_TRIM;
-  }
 }

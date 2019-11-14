@@ -2,6 +2,16 @@
 
 // NOT THE SAME AS ba.avsc!
 protocol BAProtocol {
+  record BASub {
+    int id;
+    string name;
+  }
+  enum Shapes {
+    SQUARE,
+    TRIANGLE,
+    CIRCLE,
+    OVAL
+  }
   record BA {
     @order ( "ignore" ) int index;
     string first_name;
@@ -20,5 +30,7 @@ protocol BAProtocol {
     float f;
     null nullType;
     bytes bytesType;
+    Shapes shape;
+    union { null, array<array<array<BASub>>> } arrayOfArrays;
   }
 }

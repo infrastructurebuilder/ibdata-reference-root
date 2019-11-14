@@ -38,6 +38,7 @@ import java.util.function.Supplier;
 
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
+import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -47,9 +48,13 @@ import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.joor.Reflect;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 public class DefaultIBDataStreamTest {
+  public final static Logger log = LoggerFactory.getLogger(DefaultIBDataStreamTest.class);
+  public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
 
   private static final String JPG = "image/jpeg";
   private static final String DESC = "Rickrolled";
@@ -103,13 +108,13 @@ public class DefaultIBDataStreamTest {
 
     ds = new DataStream();
     ds.setPath(path.toString());
-    ds.setSha512("abcd");
+    ds.setSha512(CHECKSUM);
     ds.setUuid(UUID.randomUUID().toString());
     ds.setMimeType(JPG);
     ds.setCreationDate(now);
     ds2 = new DataStream();
     ds2.setPath(path.toString());
-    ds2.setSha512("defa");
+    ds2.setSha512(CHECKSUM);
     ds2.setUuid(UUID.randomUUID().toString());
     ds2.setMimeType(cType.getType());
     ds2.setCreationDate(now);
@@ -213,7 +218,7 @@ public class DefaultIBDataStreamTest {
   @Test
   public void testStringStreamInappropriateSupplier() {
     DefaultIBDataStream v = DefaultIBDataStream.from(ds, () -> path);
-    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
+    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier(() -> log);
     assertFalse(dss.from(v).isPresent());
   }
 
@@ -224,7 +229,7 @@ public class DefaultIBDataStreamTest {
     i.close();
     i = v.get();
     i.close();
-    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier();
+    DefaultStringStreamSupplier dss = new DefaultStringStreamSupplier(() -> log);
     assertTrue(dss.from(v).isPresent());
   }
 

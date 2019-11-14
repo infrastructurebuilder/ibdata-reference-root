@@ -95,7 +95,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
     //    s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
-    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> thePath).config(cms);
+    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> thePath, () -> log).configure(cms);
     t = new DefaultIBDataRecordBasedTransformer(thePath, log, rs, finalizerSupplier.get());
     DataSet d1 = new DataSet();
     d1.setUuid(UUID.randomUUID().toString());
@@ -170,6 +170,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
       return "test" + type;
     }
 
+
     @Override
     public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
       return new DefaultTestingIBDataRecordTransformerSupplier(type, getWps(), cms, () -> getLogger());
@@ -207,6 +208,15 @@ public class DefaultIBDataRecordBasedTransformerTest {
       public String apply(String t) {
         return t.trim();
       }
+      @Override
+      public Class<String> getInboundClass() {
+        return String.class;
+      }
+
+      @Override
+      public Class<String> getOutboundClass() {
+        return String.class;
+      }
 
     }
 
@@ -229,6 +239,15 @@ public class DefaultIBDataRecordBasedTransformerTest {
       @Override
       public String apply(String t) {
         return t.toUpperCase();
+      }
+      @Override
+      public Class<String> getInboundClass() {
+        return String.class;
+      }
+
+      @Override
+      public Class<String> getOutboundClass() {
+        return String.class;
       }
 
     }

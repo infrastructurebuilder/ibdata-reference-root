@@ -28,7 +28,7 @@
   <description>IBData types for avro-specific transformation</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>74</test.coverage.percentage.required>
+    <test.coverage.percentage.required>95</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

@@ -66,7 +66,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
 
   @Override
   final protected IBDataIngester configuredType(ConfigMapSupplier config) {
-    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get(), this.cacheDirectory);
+    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get(), this.cacheDirectory, false);
   }
 
   @Override
@@ -82,7 +82,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
 
     private final Path cacheDirectory;
 
-    public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config, Path cacheDirectory) {
+    public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config, Path cacheDirectory, boolean splitZipFiles) {
       super(workingPath, log, config);
       this.cacheDirectory = cacheDirectory;
     }

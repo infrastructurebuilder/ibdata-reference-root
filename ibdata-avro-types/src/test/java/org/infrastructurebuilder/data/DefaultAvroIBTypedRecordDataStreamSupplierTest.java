@@ -38,6 +38,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
+  public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
 
   private static final String LOAD1 = "ba.avro";
   public final static TestingPathSupplier wps = new TestingPathSupplier();
@@ -66,7 +67,7 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
     id = new DataStream();
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
-    id.setSha512("aabbcc");
+    id.setSha512(CHECKSUM);
     id.setMetadata(new Xpp3Dom("metadata"));
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     schema = IBDataAvroUtils.avroSchemaFromString.apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());

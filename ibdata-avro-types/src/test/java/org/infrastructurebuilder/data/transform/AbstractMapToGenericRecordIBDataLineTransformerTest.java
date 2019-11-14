@@ -32,9 +32,7 @@ import org.infrastructurebuilder.data.transform.line.AbstractMapToGenericRecordI
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.config.WorkingPathSupplier;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +65,8 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
     testData.put("age", "323");
     testData.put("date_of_birth", "11-10-99");
     testData.put("id", "1");
+    testData.put("index", "1");
+    testData.put("A", "B");
     Object[] a = Arrays.asList("A", "B", 1, 2, 3).toArray(new Object[0]);
     Properties p1 = new Properties();
     try (InputStream in = getClass().getResourceAsStream("/" + LOAD1_PROPERTIES)) {
@@ -87,8 +87,9 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
 
   @Test
   public void test() {
-    GenericRecord r = test.apply(testData);
+    GenericRecord r = (GenericRecord) test.apply(testData);
     assertNotNull(r);
   }
+
 
 }

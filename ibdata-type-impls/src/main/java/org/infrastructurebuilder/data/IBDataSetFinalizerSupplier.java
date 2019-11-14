@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data;
 
 import org.infrastructurebuilder.util.IBLoggerEnabled;
 import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
 
 /**
  * The contract for finalization:

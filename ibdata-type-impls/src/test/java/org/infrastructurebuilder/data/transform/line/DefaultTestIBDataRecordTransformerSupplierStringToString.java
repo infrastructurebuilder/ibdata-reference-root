@@ -70,6 +70,16 @@ public class DefaultTestIBDataRecordTransformerSupplierStringToString
       return t;
     }
 
+    @Override
+    public Class<String> getInboundClass() {
+      return String.class;
+    }
+
+    @Override
+    public Class<String> getOutboundClass() {
+      return String.class;
+    }
+
   }
 
 }

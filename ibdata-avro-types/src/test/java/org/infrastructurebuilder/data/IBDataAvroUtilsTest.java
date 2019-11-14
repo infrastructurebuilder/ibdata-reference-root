@@ -16,42 +16,32 @@
 package org.infrastructurebuilder.data;
 
 import static org.infrastructurebuilder.data.IBDataAvroUtils.avroSchemaFromString;
-import static org.infrastructurebuilder.data.IBDataAvroUtils.managedValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.transform.BA;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class IBDataAvroUtilsTest {
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
-
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  private Formatters formatters;
+  private final static TestingPathSupplier wps = new TestingPathSupplier();
   private Schema schema;
-  private TestingPathSupplier wps = new TestingPathSupplier();
   private Record r;
   private Map<String, Field> fields;
   private Schema schema2;
@@ -59,9 +49,6 @@ public class IBDataAvroUtilsTest {
 
   @Before
   public void setUp() throws Exception {
-    formatters = new Formatters() {
-
-    };
     Path p = wps.getTestClasses().resolve("ba.avsc");
     schema = avroSchemaFromString.apply(p.toAbsolutePath().toString());
     schema2 = BA.SCHEMA$;
@@ -70,32 +57,63 @@ public class IBDataAvroUtilsTest {
     fields2 = schema2.getFields().stream().collect(Collectors.toMap(Field::name, Function.identity()));
   }
 
-  @After
-  public void tearDown() throws Exception {
+  @AfterClass
+  public static void afterClass() {
+    wps.finalize();
   }
 
   @Test
-  public void testManagedValue() {
+  public void testFromSchemaAndPathAndTranslator() throws IOException {
 
-    assertNull(managedValue(fields2.get("alive").schema(), null, null, formatters));
-    assertTrue((Boolean) managedValue(fields2.get("alive").schema(), null, "true", formatters));
-    assertEquals(new Double(7.3), (Double) managedValue(fields2.get("dub").schema(), null, "7.3", formatters));
-    assertEquals(new Long(7L), (Long) managedValue(fields2.get("l").schema(), null, "7", formatters));
-    assertEquals(new Float(7.3), (Float) managedValue(fields2.get("f").schema(), null, "7.3", formatters));
-    assertNull(managedValue(fields2.get("nullType").schema(), null, "7.3", formatters));
-    assertEquals(5, ((byte[]) managedValue(fields2.get("bytesType").schema(), null, "12345", formatters)).length);
-    assertEquals(new Integer(63120000), (Integer) managedValue(fields2.get("time1").schema(), null, "17:32", formatters));
-    assertEquals(new Long(1196676930000L), (Long) managedValue(fields2.get("time2").schema(), null, "2007-12-03T10:15:30.00Z", formatters));
+    Path targetPath = wps.get();
+    DataFileWriter<GenericRecord> d = IBDataAvroUtils.fromSchemaAndPathAndTranslator(
+        targetPath.resolve(UUID.randomUUID().toString() + ".avro"), schema, Optional.empty());
+    assertNotNull(d);
+    d.close();
+    d = IBDataAvroUtils.fromSchemaAndPathAndTranslator(targetPath.resolve(UUID.randomUUID().toString() + ".avro"),
+        schema, Optional.of(new GenericData()));
+    assertNotNull(d);
+    d.close();
+
   }
 
-  @Test
-  public void testFromUnion() {
+  @Test(expected = IBDataException.class)
+  public void testNotObvioyslyBrokenURLZip() {
+    avroSchemaFromString.apply("zip:file:/nope.jar");
   }
 
-  @Test
-  public void testFromTypeLogicalType() {
-    //    Optional<String> lType;
-    //    fromTypeLogicalType(schema, lType, in, formatters);
+  @Test(expected = IBDataException.class)
+  public void testNotObvioyslyBrokenURLHttp() {
+    avroSchemaFromString.apply("http://www.example.com");
   }
 
+  @Test(expected = IBDataException.class)
+  public void testNotObvioyslyBrokenURLHttps() {
+    avroSchemaFromString.apply("https://www.example.com");
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testNotObvioyslyBrokenURLJar() {
+    avroSchemaFromString.apply("jar:file:/nope.zip");
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testNotObvioyslyBrokenURLFile() {
+    avroSchemaFromString.apply("file:/nopw.www.example.com");
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testNulled() {
+    avroSchemaFromString.apply(null);
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testBrokenURL() {
+    avroSchemaFromString.apply("noep:@3");
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testFromMapAndWpNulled() {
+    IBDataAvroUtils.fromMapAndWP.apply(wps.getTestClasses(), new ConfigMap());
+  }
 }

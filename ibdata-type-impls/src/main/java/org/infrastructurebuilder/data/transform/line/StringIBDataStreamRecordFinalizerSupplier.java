@@ -32,35 +32,37 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @Named(StringIBDataStreamRecordFinalizerSupplier.NAME)
 public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStreamRecordFinalizerSupplier<String> {
 
   public static final String NAME = "string";
-  public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
+  public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.toGenericString());
 
   @Inject
-  public StringIBDataStreamRecordFinalizerSupplier(
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps) {
-    this(wps, null);
+  public StringIBDataStreamRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
+      LoggerSupplier l) {
+    this(wps, l, null);
   }
 
-  private StringIBDataStreamRecordFinalizerSupplier(PathSupplier ps, ConfigMapSupplier cms) {
-    super(ps, cms);
+  private StringIBDataStreamRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
+    super(ps, l, cms);
   }
 
   @Override
-  public IBDataDataStreamRecordFinalizerSupplier<String> config(ConfigMapSupplier cms) {
-    return new StringIBDataStreamRecordFinalizerSupplier(getWps(), cms);
+  public IBDataDataStreamRecordFinalizerSupplier<String> configure(ConfigMapSupplier cms) {
+    return new StringIBDataStreamRecordFinalizerSupplier(getWps(), () -> getLog(), cms);
   }
 
   @Override
   public IBDataStreamRecordFinalizer<String> get() {
     // The working path needs to be stable and pre-existent
-    return new StringIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
+    return new StringIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()), getLog(),
         getCms().get());
   }
 
@@ -68,8 +70,8 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
 
     private final int numberOfRowsToSkip;
 
-    public StringIBDataStreamRecordFinalizer(String id, Path workingPath, ConfigMap map) {
-      super(id, workingPath, map,
+    public StringIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map) {
+      super(id, workingPath, l, map,
           Optional.of(cet.withReturningTranslation(() -> Files.newBufferedWriter(workingPath, CREATE_NEW))));
       this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
     }

@@ -39,8 +39,10 @@ import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
+import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
@@ -73,18 +75,27 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
   public static class AddStreamTransformer extends AbstractIBDataTransformer {
 
     public AddStreamTransformer(Path path, Logger l) {
-      super(path, l, null);
+      this(path, l, null);
+    }
+
+    private AddStreamTransformer(Path path, Logger l, ConfigMap cm) {
+      super(path, l, cm);
+    }
+
+    @Override
+    public AddStreamTransformer configure(ConfigMap map) {
+      return new AddStreamTransformer(getWorkingPath(), getLog(), map);
     }
 
     @Override
     public String getHint() {
-      return AddStreamTransformer.class.getCanonicalName();
+      return ADD_STREAM;
     }
 
     @Override
     public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds,
         List<IBDataStream> suppliedStreams, boolean failOnError) {
-      Path targetPath = Paths.get(Optional.ofNullable(getConfig().getString(ADDED_PATH))
+      Path targetPath = Paths.get(Optional.ofNullable(getConfig().getOrDefault(ADDED_PATH, null))
           .orElseThrow(() -> new IBDataException("No " + ADDED_PATH + " config")));
       String u = cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm());
 

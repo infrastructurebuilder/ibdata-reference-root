@@ -35,22 +35,21 @@ abstract public class AbstractIBDataSet implements IBDataSet {
   private Path underlyingPath = null;
 
   protected AbstractIBDataSet(IBDataSet set) {
-    this(requireNonNull(set).getId(), set.getCreationDate(), set.getMetadata(), set.getName(),
-        set.getDescription(), Optional.ofNullable(set.getPath()), set.getGroupId(), set.getArtifactId(),
-        set.getVersion());
+    this(requireNonNull(set).getId(), set.getCreationDate(), set.getMetadata(), set.getName(), set.getDescription(),
+        Optional.ofNullable(set.getPath()), set.getGroupId(), set.getArtifactId(), set.getVersion());
   }
 
   public AbstractIBDataSet(UUID id, Date date, Object metadata, Optional<String> name, Optional<String> description,
       Optional<String> path, String groupId, String artifactId, String version) {
-    this.id = requireNonNull(id);
-    this.creationDate = requireNonNull(date);
-    this.metadata = requireNonNull(metadata);
-    this.name = requireNonNull(name);
-    this.description = requireNonNull(description);
-    this.path = requireNonNull(path);
-    this.groupId = requireNonNull(groupId);
-    this.artifactId = requireNonNull(artifactId);
-    this.version = requireNonNull(version);
+    this.id = requireNonNull(id, getClass().getCanonicalName() + "." + "id");
+    this.creationDate = requireNonNull(date, getClass().getCanonicalName() + "." + "creationDate");
+    this.metadata = requireNonNull(metadata, getClass().getCanonicalName() + "." + "metadata");
+    this.name = requireNonNull(name, getClass().getCanonicalName() + "." + "name");
+    this.description = requireNonNull(description, getClass().getCanonicalName() + "." + "description");
+    this.path = requireNonNull(path, getClass().getCanonicalName() + "." + "path");
+    this.groupId = requireNonNull(groupId, getClass().getCanonicalName() + "." + "groupId");
+    this.artifactId = requireNonNull(artifactId, getClass().getCanonicalName() + "." + "artifactId");
+    this.version = requireNonNull(version, getClass().getCanonicalName() + "." + "version");
   }
 
   @Override

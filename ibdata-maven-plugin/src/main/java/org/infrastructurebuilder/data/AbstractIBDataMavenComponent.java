@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.util.Map;
 import java.util.Optional;
