@@ -17,6 +17,8 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Optional.empty;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,8 +34,8 @@ public class DefaultTestingSource extends AbstractIBDataSource {
   }
 
   @Override
-  public Optional<IBChecksumPathType> get() {
-    return empty();
+  public List<IBChecksumPathType> get() {
+    return Collections.emptyList();
   }
 
   @Override

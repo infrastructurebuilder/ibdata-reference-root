@@ -68,12 +68,6 @@ public class DefaultIBDataStreamIdentifierTest {
     i2 = new DefaultIBDataStreamIdentifier(i);
   }
 
-  @Test
-  public void testFromSource() throws Exception {
-    IBDataSource source = new DefaultTestingSource(getClass().getResource("/rick.jpg").toExternalForm());
-    DefaultIBDataStreamIdentifier i3 = new DefaultIBDataStreamIdentifier(source, new Date(), Optional.empty());
-
-  }
 
   @Test
   public void testHashCode() {

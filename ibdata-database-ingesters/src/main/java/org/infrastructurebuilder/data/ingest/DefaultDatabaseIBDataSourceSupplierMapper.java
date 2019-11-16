@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.JooqRecordWriter;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
@@ -77,11 +79,11 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   }
 
   @Override
-  public IBDataSourceSupplier getSupplierFor(DefaultIBDataStreamIdentifierConfigBean v) {
-    return new DefaultIBDataSourceSupplier(v.getTemporaryId(),
-        new DefaultDatabaseIBDataSource(getLog(), v.getTemporaryId(),
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + v.getTemporaryId())), Optional.empty(),
-            ofNullable(v.getChecksum()), of(v.getMetadata()), Optional.empty(), null, v.getName(), v.getDescription(),
+  public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+    return new DefaultIBDataSourceSupplier(temporaryId,
+        new DefaultDatabaseIBDataSource(getLog(), temporaryId,
+            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), Optional.empty(),
+            ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(), v.getDescription(),
             getMapper()));
   }
 
@@ -90,7 +92,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     private final Path targetPath;
     private final TypeToExtensionMapper t2e;
 
-    private IBChecksumPathType read;
+    private List<IBChecksumPathType> read;
 
     private final GenericData jrmpGD;
 
@@ -121,7 +123,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     }
 
     @Override
-    public Optional<IBChecksumPathType> get() {
+    public List<IBChecksumPathType> get() {
       if (conn == null) {
         String url = getSourceURL();
         BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", Optional.empty()));
@@ -152,17 +154,13 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
                     getDescription().orElse(""), firstResult));
             result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the schema
             getLog().info("Reading data from dataset");
-            read = new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.jrmpGD).writeRecords(result);
+            read = Arrays.asList(
+                new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.jrmpGD).writeRecords(result));
           } else
             throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
         }
         return read;
-      });
-    }
-
-    @Override
-    public Optional<String> getMimeType() {
-      return get().map(IBChecksumPathType::getType);
+      }).orElse(Collections.emptyList());
     }
 
   }

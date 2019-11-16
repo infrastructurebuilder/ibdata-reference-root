@@ -15,9 +15,6 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -55,7 +52,7 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
 
       IBDataSourceSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(v)).findFirst()
           .orElseThrow(() -> new IBDataException("No data sources are available for " + v.getTemporaryId()));
-      return first.getSupplierFor(v);
+      return first.getSupplierFor(v.getTemporaryId(), v);
 
     }).collect(Collectors.toList());
     return k.stream().collect(

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,7 @@ import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -115,12 +117,12 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssm = new AbstractIBDataSourceSupplierMapper(log, t2e) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(DefaultIBDataStreamIdentifierConfigBean v) {
+      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
-          public Optional<IBChecksumPathType> get() {
+          public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
               IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
-              return of(reference);
+              return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
@@ -138,16 +140,16 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(DefaultIBDataStreamIdentifierConfigBean v) {
+      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(new Checksum("ABCD"));
           };
 
-          public Optional<IBChecksumPathType> get() {
+          public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
               IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
-              return of(reference);
+              return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
@@ -165,16 +167,16 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(DefaultIBDataStreamIdentifierConfigBean v) {
+      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(filesDotTxtChecksum);
           };
 
-          public Optional<IBChecksumPathType> get() {
+          public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
               IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
-              return of(reference);
+              return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
@@ -189,7 +191,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    k = dssm.getSupplierFor(null); // Returning a dummy value no matter what
+    k = dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
     dss.put("X", k);
   }
 
@@ -212,10 +214,10 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
   @Test
   public void testGet() throws IOException {
-    IBDataSourceSupplier supplier = dssm.getSupplierFor(null);
+    IBDataSourceSupplier supplier = dssm.getSupplierFor(UUID.randomUUID().toString(), null);
     IBDataSource source = supplier.get();
 
-    IBChecksumPathType unfinalized = source.get().get();
+    IBChecksumPathType unfinalized = source.get().get(0);
     assertTrue(Files.isRegularFile(unfinalized.getPath()));
   }
 

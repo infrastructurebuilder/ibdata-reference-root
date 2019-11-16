@@ -22,13 +22,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.eclipse.sisu.Nullable;
 import org.eclipse.sisu.Typed;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
@@ -45,15 +43,16 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Named("default-ingest")
+@Named(DefaultIBDataSetIngestionFinalizerSupplier.DEFAULT_INGEST)
 @Typed(IBDataSetFinalizerSupplier.class)
 public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier<Ingestion> {
 
+  public static final String DEFAULT_INGEST = "default-ingest";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
 
   @Inject
   public DefaultIBDataSetIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      @Nullable @Named("maven-log") LoggerSupplier l, TypeToExtensionMapper t2e) {
+      LoggerSupplier l, TypeToExtensionMapper t2e) {
     this(l.get(), wps, null, t2e);
   }
 

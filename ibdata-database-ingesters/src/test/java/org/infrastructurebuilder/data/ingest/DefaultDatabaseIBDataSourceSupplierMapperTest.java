@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -108,25 +109,24 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   @Test
   public void test() throws MalformedURLException {
     assertTrue(d.respondsTo(b));
-    s = d.getSupplierFor(b);
+    s = d.getSupplierFor(b.getTemporaryId(), b);
     ds = s.get().withAdditionalConfig(c);
-    Optional<IBChecksumPathType> p = ds.get();
-    assertTrue(p.isPresent());
-    Optional<Stream<GenericRecord>> x = genericStreamFromInputStream.apply(p.get().get());
+    List<IBChecksumPathType> p = ds.get();
+    assertTrue(p.size() > 0);
+    Optional<Stream<GenericRecord>> x = genericStreamFromInputStream.apply(p.get(0).get());
     assertTrue(x.isPresent());
     Stream<GenericRecord> theStream = x.get();
     assertEquals(1, theStream.count());
-    GenericRecord theRecord = genericStreamFromInputStream.apply(p.get().get()).get().collect(Collectors.toList())
+    GenericRecord theRecord = genericStreamFromInputStream.apply(p.get(0).get()).get().collect(Collectors.toList())
         .get(0);
     assertEquals(1, theRecord.get("ID"));
     Field f = theRecord.getSchema().getField("BIRTHDAY");
     LogicalType t = f.schema().getLogicalType();
     Object k = theRecord.get("BIRTHDAY");
-     LocalDate conv = new DateConversion().fromInt((Integer) k, f.schema(), t);
+    LocalDate conv = new DateConversion().fromInt((Integer) k, f.schema(), t);
     // 2019-10-22
-     Date d = new Date(new Integer((int) k).longValue());
+    Date d = new Date(new Integer((int) k).longValue());
     assertEquals("2019-10-22", conv.toString());
-
 
   }
 
