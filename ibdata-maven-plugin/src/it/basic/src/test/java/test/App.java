@@ -16,9 +16,6 @@
 package test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.infrastructurebuilder.IBConstants;
-import org.infrastructurebuilder.data.IBDataSet;
-import org.infrastructurebuilder.data.IBDataStream;
 //import org.infrastructurebuilder.data.InjectIBData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,11 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class App
 {
 
-  private IBDataSet workingSet;
-
   @BeforeEach
   public void setUp() throws Exception {
-    this.workingSet = null;
   }
 
   @Test
