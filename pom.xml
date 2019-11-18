@@ -24,7 +24,7 @@
   </parent>
   <groupId>org.infrastructurebuilder.data</groupId>
   <artifactId>ibdata-reference-root</artifactId>
-  <version>0.3.2-SNAPSHOT</version>
+  <version>0.3.2</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <description>Reference Implementation for ibdata</description>
@@ -41,7 +41,7 @@
     <connection>scm:git:${git.url}</connection>
     <url>scm:git:${git.url}</url>
     <developerConnection>scm:git:${git.url}</developerConnection>
-    <tag>HEAD</tag>
+    <tag>ibdata-reference-root-0.3.2</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
