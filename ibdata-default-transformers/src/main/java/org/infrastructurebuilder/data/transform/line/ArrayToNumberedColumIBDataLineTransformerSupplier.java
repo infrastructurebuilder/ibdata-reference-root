@@ -70,7 +70,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
 
     public static final String FORMAT_KEY = "format";
     public final static String FORMAT = "COLUMN%00d";
-    private final List<String> ACCEPTABLE_TYPES = Arrays.asList(Array.class.getCanonicalName());
+    private final List<Class<?>> ACCEPTABLE_TYPES = Arrays.asList(Array.class);
     private final String format;
 
     /**
@@ -110,13 +110,13 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
     }
 
     @Override
-    public Optional<List<String>> accepts() {
+    public Optional<List<Class<?>>> accepts() {
       return Optional.of(ACCEPTABLE_TYPES);
     }
 
     @Override
-    public Optional<String> produces() {
-      return Optional.of(Map.class.getCanonicalName());
+    public Optional<Class<?>> produces() {
+      return Optional.of(Map.class);
     }
 
     @Override

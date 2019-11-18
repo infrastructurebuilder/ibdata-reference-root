@@ -28,6 +28,7 @@ import javax.inject.Named;
 
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
@@ -43,7 +44,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
     extends AbstractIBDataStreamRecordFinalizerSupplier<GenericRecord> {
 
   public static final String NAME = "avro-generic";
-  private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(GenericRecord.class.getCanonicalName());
+  private static final List<Class<?>> ACCEPTABLE_TYPES = Arrays.asList(IndexedRecord.class);
 
   @Inject
   public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
@@ -93,7 +94,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
     }
 
     @Override
-    public Optional<List<String>> accepts() {
+    public Optional<List<Class<?>>> accepts() {
       return Optional.of(ACCEPTABLE_TYPES);
     }
 

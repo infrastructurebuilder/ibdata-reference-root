@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStreamRecordFinalizerSupplier<String> {
 
   public static final String NAME = "string";
-  public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.toGenericString());
+  public static final List<Class<?>> ACCEPTABLE_TYPES = Arrays.asList(String.class);
 
   @Inject
   public StringIBDataStreamRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
@@ -88,7 +88,7 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
     }
 
     @Override
-    public Optional<List<String>> accepts() {
+    public Optional<List<Class<?>>> accepts() {
       return Optional.of(ACCEPTABLE_TYPES);
     }
   }

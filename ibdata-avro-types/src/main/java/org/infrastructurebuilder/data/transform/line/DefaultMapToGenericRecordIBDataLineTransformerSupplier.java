@@ -130,16 +130,6 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
     }
 
     @Override
-    public Optional<List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
-    }
-
-    @Override
-    public Optional<String> produces() {
-      return Optional.of(GenericRecord.class.getCanonicalName());
-    }
-
-    @Override
     public IBDataRecordTransformer<Map<String, Object>, IndexedRecord> configure(ConfigMap cms) {
       return new DefaultMapSSToGenericRecordIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }

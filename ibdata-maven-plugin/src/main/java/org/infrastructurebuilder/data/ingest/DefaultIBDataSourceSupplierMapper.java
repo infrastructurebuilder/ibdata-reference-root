@@ -146,6 +146,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
           default:
             throw new IBDataException("Default processor cannot handle protocol " + source);
           }
+          read = Arrays.asList(localRead);
         }
         return read;
       }).orElse(Collections.emptyList());

@@ -18,7 +18,11 @@ package org.infrastructurebuilder.data.ingest;
 import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,6 +31,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
+import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 @Mojo(name = "ingest", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
@@ -38,24 +43,25 @@ public class IBDataIngestMojo extends AbstractIBDataMojo {
   @Component
   IBDataIngestMavenComponent component;
 
-
   @Override
   protected IBDataIngestMavenComponent getComponent() {
     return component;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void _execute() throws MojoExecutionException, MojoFailureException {
     getLog().info("Attempting Data Ingestion");
     final Map pc = getPluginContext();
     if (pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoFailureException("Transformation and Ingestion cannot be performed in the same module build.");
-    IBChecksumPathType thePath = component.ingest(ingest);
-    writeMarker(INGESTION_TARGET, thePath);
-    pc.put(INGESTION_TARGET, thePath);
+    IBChecksumPathType theResult = component.ingest(ingest);
+    getLog().debug("Class of the results is " + theResult.getClass());
+    Path p = writeMarker(IBDataModelUtils.remodel(theResult));
+    getLog().debug("Marker written to " + p);
+    pc.put(INGESTION_TARGET, theResult);
     setPluginContext(pc);
-    getLog().info("Data ingestion is complete with " + thePath.getPath() + " as " + thePath.getChecksum());
+    getLog().info("Data ingestion is complete with " + theResult.getPath() + " as " + theResult.getChecksum());
   }
 
 }

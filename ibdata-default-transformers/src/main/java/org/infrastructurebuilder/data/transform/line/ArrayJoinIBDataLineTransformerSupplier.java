@@ -109,16 +109,6 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
     }
 
     @Override
-    public Optional<java.util.List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
-    }
-
-    @Override
-    public Optional<String> produces() {
-      return Optional.of(String.class.getCanonicalName()); // Not a usable final type
-    }
-
-    @Override
     public Class<Object[]> getInboundClass() {
       return Object[].class;
     }

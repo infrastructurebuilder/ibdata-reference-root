@@ -106,7 +106,6 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
         //
         , Optional.of(p));
 
-    //    DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(source, now, Optional.of(p));
     return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, ibPathChecksumType));
 
   };
@@ -115,26 +114,6 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
       IBDataSource source) {
     List<IBChecksumPathType> list = source.get();
     return list.stream().map(ibPathChecksumType -> xyz(workingPath, source, ibPathChecksumType, now));
-    /*
-    List<Supplier<IBDataStream>> ibdssList = dssList.values().stream().map(dss -> {
-      IBDataSource source = dss.get().withAdditionalConfig(cms);
-      List<IBChecksumPathType> list = source.get();
-      List<Supplier<IBDataStream>> v = list.stream().map(thisOne -> {
-        Path localPath = thisOne.getPath();
-        Optional<String> p = Optional.of(getWorkingPath().relativize(localPath).toString());
-
-        source.getChecksum().ifPresent(checksum -> {
-          if (!thisOne.getChecksum().equals(checksum))
-            throw new IBDataException("Read stream failed to match expected checksum " + checksum);
-        });
-        DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(source, now, p);
-        return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, thisOne));
-      }).collect(Collectors.toList());
-      return v;
-    })
-        .collect(toList());
-
-     */
   };
 
   public final class DefaultIBDataIngester extends AbstractIBDataIngester {

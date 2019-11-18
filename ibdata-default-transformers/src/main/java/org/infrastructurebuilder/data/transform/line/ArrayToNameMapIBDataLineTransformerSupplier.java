@@ -69,7 +69,6 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
   private class ArrayToNameMapIBDataLineTransformer
       extends AbstractIBDataRecordTransformer<String[], Map<String, String>> {
 
-//    private final List<String> ACCEPTABLE_TYPES = Arrays.asList(getInboundClass().toGenericString());
     private List<String> format;
 
     /**
@@ -98,7 +97,7 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
     @Override
     public Map<String, String> apply(String[] a) {
       if (format.size() > a.length)
-        throw new IBDataException("Invalid length");
+        throw new IBDataException("Invalid length " + format.size() + " of " + format + " is creater than length " + a.length + " of " + Arrays.asList(a));
       Map<String, String> m = new HashMap<>();
       for (int i = 0; i < format.size(); ++i) {
         m.put(format.get(i), a[i]);

@@ -22,6 +22,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
+import org.infrastructurebuilder.data.DefaultIBDataEngine;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
@@ -92,6 +94,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
   private final Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers;
   private final Map<String, IBDataTransformerSupplier> allTransformers;
   private final IBDataEngine engine;
+  private boolean injectProjectDependencies = false;
 
   /*
    * Injected constructor.
@@ -122,9 +125,14 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     this.allTransformers = requireNonNull(allTransformers);
     this.allRecordFinalizers = requireNonNull(allRecordFinalizers);
     this.engine = requireNonNull(engine);
+
+  }
+
+  public void setAdditionalURLS(List<URL> l) {
+    if (DefaultIBDataEngine.class.isAssignableFrom(this.engine.getClass())) {
+      ((DefaultIBDataEngine) this.engine).setAdditionalURLS(l);
+    }
     int q = this.engine.prepopulate();
-    //    if (q == 0)
-    //      throw new IBDataException("No archives");
   }
 
   @SuppressWarnings("unchecked")
@@ -222,4 +230,5 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       throw new MojoFailureException("Transformation failed to execute", e);
     }
   }
+
 }

@@ -86,13 +86,13 @@ abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRec
   }
 
   @Override
-  public Optional<String> produces() {
-    return Optional.of(getOutboundClass().toGenericString());
+  public Optional<Class<?>> produces() {
+    return Optional.of(getOutboundClass());
   }
 
   @Override
-  public Optional<List<String>> accepts() {
-    return of(Arrays.asList(getInboundClass().toGenericString()));
+  public Optional<List<Class<?>>> accepts() {
+    return of(Arrays.asList(getInboundClass()));
   }
 
   @Override

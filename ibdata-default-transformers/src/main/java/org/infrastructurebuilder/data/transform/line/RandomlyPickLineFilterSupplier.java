@@ -104,11 +104,6 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
     }
 
     @Override
-    public Optional<List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
-    }
-
-    @Override
     public Class<Object> getInboundClass() {
       return Object.class;
     }

@@ -14,11 +14,33 @@
  * limitations under the License.
  */
 package test;
+import static org.junit.jupiter.api.Assertions.*;
 
+import org.infrastructurebuilder.IBConstants;
+import org.infrastructurebuilder.data.IBDataSet;
+import org.infrastructurebuilder.data.IBDataStream;
+import org.infrastructurebuilder.data.InjectIBData;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+
+@ExtendWith(InjectIBData.class)
 public class App
 {
-    public static void main(String[] args )
-    {
-		
-    }
+
+  private IBDataSet workingSet;
+
+  @BeforeEach
+  public void setUp(IBDataSet ds) throws Exception {
+    this.workingSet = ds;
+  }
+
+  @Test
+  public void test() {
+    System.out.println("In the test!");
+    assertEquals(1, workingSet.asStreamsList().size());
+  }
+
+
 }

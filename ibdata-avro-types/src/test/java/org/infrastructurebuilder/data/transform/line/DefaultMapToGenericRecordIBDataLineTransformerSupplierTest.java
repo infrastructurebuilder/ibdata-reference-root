@@ -103,8 +103,8 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
     DefaultMapSSToGenericRecordIBDataLineTransformer q = (DefaultMapSSToGenericRecordIBDataLineTransformer) v.get();
 
     assertEquals(DefaultMapToGenericRecordIBDataLineTransformerSupplier.NAME, q.getHint());
-    assertTrue(q.accepts().get().contains(Map.class.getCanonicalName()));
-    assertEquals(GenericRecord.class.getCanonicalName(), q.produces().get());
+    assertTrue(q.accepts().get().contains(Map.class));
+    assertEquals(IndexedRecord.class, q.produces().get());
     assertEquals(IndexedRecord.class, q.getOutboundClass());
     assertEquals(Map.class, q.getInboundClass());
     Formatters f = q.getFormatters();

@@ -120,16 +120,6 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
     }
 
     @Override
-    public Optional<List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
-    }
-
-    @Override
-    public Optional<String> produces() {
-      return Optional.of(Map.class.getCanonicalName());
-    }
-
-    @Override
     public Class<String> getInboundClass() {
       return String.class;
     }

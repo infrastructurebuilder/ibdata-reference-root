@@ -87,11 +87,6 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
     }
 
     @Override
-    public Optional<List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
-    }
-
-    @Override
     public IBDataRecordTransformer<String, String> configure(ConfigMap cms) {
       return new StringTrimIBDataLineTransformer(getWorkingPath(), cms, getLogger());
     }

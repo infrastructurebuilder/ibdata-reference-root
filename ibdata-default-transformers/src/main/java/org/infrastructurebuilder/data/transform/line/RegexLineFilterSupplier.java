@@ -95,15 +95,6 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
     }
 
     @Override
-    public Optional<List<String>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
-    }
-
-    @Override
-    public Optional<String> produces() {
-      return Optional.of(String.class.getCanonicalName());
-    }
-    @Override
     public Class<String> getInboundClass() {
       return String.class;
     }

@@ -23,12 +23,14 @@ import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.data.IBDataModelUtils.getStructuredSupplyTypeClass;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -62,16 +64,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDataTransformer {
+  private static final String IMPOSSIBLECLASSNAME = "_impossibleclassname###";
   public final static Logger log = LoggerFactory.getLogger(AbstractIBDataRecordBasedTransformer.class);
   private final Map<String, IBDataRecordTransformerSupplier> dataLineSuppliers;
   private final List<IBDataRecordTransformer<?, ?>> configuredTranformers;
   private final IBDataStreamRecordFinalizer configuredFinalizer;
-  private final Optional<String> finalType;
-  private int countOfRowsSkippedSoFar = 0;;
+  private final Optional<Class<?>> finalType;
+  private int countOfRowsSkippedSoFar = 0;
+  private final List<String> firstType;
 
   protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, ConfigMap config,
       Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
     super(workingPath, log, config);
+    List<Class<?>> _fType = Collections.emptyList();
     this.dataLineSuppliers = dataRecTransformerSuppliers;
     this.configuredFinalizer = finalizer;
     if (config != null && config.containsKey(TRANSFORMERSLIST)
@@ -96,7 +101,8 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
           throw new IBDataException("Missing record transformers " + tList + "\n Available transformers are "
               + dataRecTransformerSuppliers.keySet());
         configuredTranformers = new ArrayList<>();
-        Optional<String> previousType = Optional.empty();
+        Optional<Class<?>> previousType = Optional.empty();
+        boolean first = true;
         for (String li : theList) {
           String[] s = li.split(Pattern.quote(MAP_SPLITTER));
           IBDataRecordTransformerSupplier<?, ?> s2 = map.get(s[1]).configure(lcfg);
@@ -105,7 +111,11 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
             previousType = transformer.produces();
           else
             throw new IBDataException("Transformer " + s[0] + "/" + transformer.getHint() + " only responds to "
-                + transformer.accepts().get() + " and it's predecessor produces " + previousType.orElse("unknown"));
+                + transformer.accepts().get() + " and it's predecessor produces " + previousType.orElse(null));
+          if (first) {
+            first = false;
+              _fType = transformer.accepts().orElse(Arrays.asList(Object.class));
+          }
           configuredTranformers.add(transformer);
         }
         this.finalType = previousType;
@@ -117,21 +127,37 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
       this.configuredTranformers = null;
       this.finalType = Optional.empty();
     }
+    this.firstType = _fType.stream().map(Class::getCanonicalName).collect(Collectors.toList());
   }
 
-  private boolean acceptable(Optional<String> previous, Optional<List<String>> optional) {
-    return (!previous.isPresent() || !optional.isPresent() || optional.get().contains(previous.get()));
+  @Override
+  public boolean respondsTo(IBDataStream i) {
+      return (!firstType.isEmpty() && firstType.contains(getStructuredSupplyTypeClass(i.getMimeType()).orElse(IMPOSSIBLECLASSNAME)));
+  }
+
+  private boolean acceptable(Optional<Class<?>> previous, Optional<List<Class<?>>> inbound) {
+    boolean retVal = (!previous.isPresent() || !inbound.isPresent());
+    if (!retVal) {
+      List<Class<?>> l = inbound.get();
+      Class<?> p = previous.get();
+      for (Class<?> c : l) {
+        if (c.isAssignableFrom(p))
+          return true;
+      }
+      //      inbound.get().stream().anyMatch(inboundClass -> inboundClass.isAssignableFrom(previous.get()));
+    }
+    return retVal;
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public IBDataTransformationResult transform(Transformer transformation, IBDataSet ds, List<IBDataStream> suppliedStreams,
-      boolean failOnError) {
+  public IBDataTransformationResult transform(Transformer transformation, IBDataSet ds,
+      List<IBDataStream> suppliedStreams, boolean failOnError) {
     IBDataStreamRecordFinalizer cf = getConfiguredFinalizer();
     if (!acceptable(finalType, cf.accepts()))
       throw new IBDataException(
           "Finalizer '" + cf.getId() + "' does not accept finally produced type '" + finalType.get() + "'");
-    return localTransform(transformation , ds, suppliedStreams, getConfiguredFinalizer(), failOnError);
+    return localTransform(transformation, ds, suppliedStreams, getConfiguredFinalizer(), failOnError);
   }
 
   public List<IBDataRecordTransformer<?, ?>> getConfiguredTransformers() {
@@ -147,7 +173,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     return configuredFinalizer;
   }
 
-/* TODO Make this a (non-parallel!) stream process
+  /* TODO Make this a (non-parallel!) stream process
   private Stream<String> streamFor(IBDataStreamSupplier ibds) {
     try (InputStream ins = Objects.requireNonNull(ibds).get().get()) {
       return IBUtils.readInputStreamAsStringStream(ins);
@@ -155,7 +181,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
       throw new IBDataException(e);
     }
   }
-*/
+  */
 
   // This is a LITTLE bit dangerous
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -163,10 +189,10 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
       Map<String, List<Long>> errors, List<IBDataTransformationError> errorList) {
     return cet.withReturningTranslation(() -> {
       int skipRows = finalizer.getNumberOfRowsToSkip();
-      String inbound;
+      Class<?> inbound;
       try (BufferedReader r = new BufferedReader(new InputStreamReader(stream.get()))) {
         String line;
-        inbound = String.class.getCanonicalName();
+        inbound = String.class;
         Optional<Object> inboundObject = empty(), s;
         long lineCount = 0;
         while ((line = cet.withReturningTranslation(() -> r.readLine())) != null) {
@@ -187,7 +213,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
               break;
             }
             s = inboundObject;
-            inbound = (String) t.produces().orElse(inbound);
+            inbound = (Class<?>) t.produces().orElse(inbound);
           }
 
           inboundObject.ifPresent(l -> {

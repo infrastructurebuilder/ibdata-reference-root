@@ -83,8 +83,9 @@ public class DefaultIBDataEngine implements IBDataEngine {
       ArrayList<URL> urls = new ArrayList<>();
       urls.addAll(getAdditionalURLS());
       urls.addAll(Arrays.asList(c.getURLs()));
+      log.debug("Class loader URLS");
       for (URL u : c.getURLs()) {
-        log.info("  " + u.toExternalForm());
+        log.debug("  " + u.toExternalForm());
         ;
       }
       URLClassLoader newClassLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));

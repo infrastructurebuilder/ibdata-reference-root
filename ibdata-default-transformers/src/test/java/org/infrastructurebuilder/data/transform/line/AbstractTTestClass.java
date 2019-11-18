@@ -85,12 +85,10 @@ abstract public class AbstractTTestClass<T extends AbstractIBDataRecordTransform
     assertEquals(s, tt);
     runSuccessTestOn(c);
     c.accepts().ifPresent(cons -> {
-      String f = getI().toGenericString();
-      assertTrue(cons.contains(f));
+      assertTrue(cons.contains(getI()));
     });
     c.produces().ifPresent(cons -> {
-      String f = getO().toGenericString();
-      assertEquals(cons, f);
+      assertEquals(cons, getO());
 
     });
   }

@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.function.Supplier;
 
@@ -34,6 +35,8 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
+
+import static org.infrastructurebuilder.IBConstants.*;
 
 public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implements IBDataStream {
 

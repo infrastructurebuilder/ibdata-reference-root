@@ -15,19 +15,27 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.*;
 import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataConstants.MARKER_FILE;
+import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -37,7 +45,11 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.io.xpp3.IBDataSourceModelXpp3Writer;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.model.IBChecksumPathTypeModel;
+import org.infrastructurebuilder.util.files.model.io.xpp3.IBChecksumPathTypeModelXpp3Writer;
 
 public abstract class AbstractIBDataMojo extends AbstractMojo {
 
@@ -125,9 +137,8 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
     IBDataException.cet.withTranslation(() -> Files.createDirectories(workingDirectory.toPath()));
     workingPathSupplier.setPath(workingDirectory.toPath()); // workingPathSupplier is a Singleton
     if (getSession() != null) {
-      getComponent().addConfig(CACHE_DIRECTORY_CONFIG_ITEM,
-          Paths.get(getSession().getLocalRepository().getBasedir()).resolve(".cache").resolve("download-maven-plugin")
-              .toAbsolutePath().toString());
+      getComponent().addConfig(CACHE_DIRECTORY_CONFIG_ITEM, Paths.get(getSession().getLocalRepository().getBasedir())
+          .resolve(".cache").resolve("download-maven-plugin").toAbsolutePath().toString());
     }
     getComponent().setMojoExecution(getMojo());
     getComponent().setProject(getProject());
@@ -135,12 +146,15 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
 
   }
 
-  protected final void writeMarker(String marker, IBChecksumPathType output) throws MojoFailureException {
-    try (PrintWriter w = new PrintWriter(
-        Files.newBufferedWriter(getWorkingDirectory().resolve(marker + ".json"), options))) {
-      w.print(output.asJSON().toString(2));
-    } catch (IOException e) {
-      throw new MojoFailureException("Failed to write marker file", e);
+  protected Path writeMarker(IBChecksumPathTypeModel ds) throws MojoFailureException {
+    Path p = Paths.get(getProject().getBuild().getDirectory()).resolve(MARKER_FILE).toAbsolutePath();
+    if (Files.exists(p))
+      getLog().warn("Existing marker file");
+    try (Writer writer = Files.newBufferedWriter(p, UTF_8, CREATE)) {
+      new IBChecksumPathTypeModelXpp3Writer().write(writer, ds);
+      return p;
+    } catch (Exception e) { // Catch anything and translate it to an IBDataException
+      throw new MojoFailureException("Failed to write marker to " + getWorkingDirectory(), e);
     }
   }
 
