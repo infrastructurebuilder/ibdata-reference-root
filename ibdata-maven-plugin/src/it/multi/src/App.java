@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.infrastructurebuilder.IBConstants;
@@ -24,15 +25,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-
 // Can't do this within the reactor
 //@ExtendWith(InjectIBData.class)
-public class App
-{
+public class App {
 
   private IBDataSet workingSet;
 
   @BeforeEach
+  //  public void setUp(IBDataSet ds) throws Exception {
   public void setUp() throws Exception {
     this.workingSet = null;
   }
@@ -40,7 +40,7 @@ public class App
   @Test
   public void test() {
     System.out.println("In the test!");
+//    assertEquals(1, workingSet.asStreamsList().size());
   }
-
 
 }

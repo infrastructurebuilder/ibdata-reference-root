@@ -33,12 +33,14 @@
     <surefire.failIfNoTests>false</surefire.failIfNoTests>
   </properties>
   <dependencies>
+  <!-- Unfortunately, this work within the release process with a dependency that was ALSO created during the reactor
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
       <artifactId>ibdata-testing</artifactId>
       <version>@project.version@</version>
       <scope>test</scope>
     </dependency>
+   -->
   </dependencies>
   <build>
 
