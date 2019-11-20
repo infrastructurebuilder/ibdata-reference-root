@@ -40,6 +40,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
 public interface IBDataAvroUtils {
@@ -66,7 +67,7 @@ public interface IBDataAvroUtils {
     Schema s = avroSchemaFromString
         .apply(schema.orElseThrow(() -> new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER + " 2")));
     // Get the DataFileWriter or die
-    DataFileWriter<GenericRecord> w = new DataFileWriter<GenericRecord>(new GenericDatumWriter<GenericRecord>(s));
+    DataFileWriter<GenericRecord> w = new DataFileWriter<GenericRecord>(new GenericDatumWriter<GenericRecord>(s, new MapProxyGenericData(new Formatters(map))));
     // create the working data file or die
     cet.withTranslation(() -> w.create(s, workingPath.toFile()));
     return w;
