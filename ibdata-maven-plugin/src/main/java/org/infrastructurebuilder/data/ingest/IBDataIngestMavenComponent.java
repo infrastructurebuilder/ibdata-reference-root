@@ -77,8 +77,6 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       TypeToExtensionMapper defaultTypeToExtensionMapper,
       // The configuration map. Does not include config from components
       @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier mavenConfigMapSupplier,
-      //
-      @Named(IBDataLateBindingFinalizerConfigSupplier.NAME) IBDataLateBindingFinalizerConfigSupplier configSupplier,
       Map<String, IBDataIngesterSupplier> allIngesters,
       // All DataSetFinalizer suppliers
       Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers, final IBStreamerFactory streamerFactory,

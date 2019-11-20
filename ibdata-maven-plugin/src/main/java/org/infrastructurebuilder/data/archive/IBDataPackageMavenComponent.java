@@ -53,8 +53,6 @@ public class IBDataPackageMavenComponent extends AbstractIBDataMavenComponent {
       @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier mavenConfigMapSupplier,
       //
       Map<String, IBDataIngesterSupplier> allIngesters,
-      // Dunno why we'd need this
-      @Named(IBDataLateBindingFinalizerConfigSupplier.NAME) IBDataLateBindingFinalizerConfigSupplier configSupplier,
       Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers,
       final IBStreamerFactory notUsed) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers, notUsed);
