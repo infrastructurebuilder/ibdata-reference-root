@@ -15,38 +15,106 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.infrastructurebuilder.data.IBDatabaseDialectMapper.H_2;
-import static org.infrastructurebuilder.data.IBDatabaseDialectMapper.LIQUIBASE_DATABASE_CORE_H2_DATABASE;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.infrastructurebuilder.data.IBDataConstants.H_2;
+import static org.infrastructurebuilder.data.IBDataConstants.LIQUIBASE_DATABASE_CORE_H2_DATABASE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.artifacts.GAV;
 import org.jooq.SQLDialect;
 import org.junit.Before;
 import org.junit.Test;
 
 public class DefaultIBDatabaseDialectMapperTest {
 
-
+  private static final String ORG_HIBERNATE_DIALECT_H2_DIALECT = "org.hibernate.dialect.H2Dialect";
   private DefaultIBDatabaseDialectMapper d;
 
   @Before
   public void setUp() throws Exception {
-    d = new DefaultIBDatabaseDialectMapper();
+
+    Map<String, IBDataDatabaseDriverSupplier> z = new HashMap<>();
+    IBDataDatabaseDriverSupplier i = new IBDataDatabaseDriverSupplier() {
+
+      @Override
+      public List<GAV> getRequiredArtifacts() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+      @Override
+      public String getHint() {
+        // TODO Auto-generated method stub
+        return "H2";
+      }
+
+      @Override
+      public Optional<IBDatabaseDialect> getDialect(String jdbcUrl) {
+        // TODO Auto-generated method stub
+        return of(new IBDatabaseDialect() {
+
+          @Override
+          public String get() {
+            return "H2";
+          }
+
+          @Override
+          public Optional<String> springDbName() {
+            return of(get());
+          }
+
+          @Override
+          public String liquibaseDatabaseClass() {
+            return LIQUIBASE_DATABASE_CORE_H2_DATABASE;
+          }
+
+          @Override
+          public Optional<String> hibernateDialectClass() {
+            return of(ORG_HIBERNATE_DIALECT_H2_DIALECT);
+          }
+        });
+      }
+
+      @Override
+      public Optional<String> getDatabaseDriverClassName(String jdbcUrl) {
+        return of("ABCDEFG");
+      }
+
+      @Override
+      public boolean respondsTo(String jdbcURL) {
+        return false;
+      }
+
+      @Override
+      public Optional<Supplier<Connection>> getConnectionSupplier(String jdbcURL, Optional<BasicCredentials> creds) {
+        return empty();
+      }
+    };
+    z.put(SQLDialect.H2.name(), i);
+    d = new DefaultIBDatabaseDialectMapper(z);
   }
 
   @Test
   public void testFrom() {
-    Optional<IBDatabaseDialect> q = d.from(SQLDialect.H2.name());
+    Optional<IBDatabaseDialect> q = d.getSupplier(SQLDialect.H2.name()).get().getDialect("jdbc:h2:");
     assertNotNull(q);
     assertTrue(q.isPresent());
     IBDatabaseDialect v = q.get();
-    assertEquals(H_2, v.jooqDialectEnum());
-    assertEquals(LIQUIBASE_DATABASE_CORE_H2_DATABASE, v.liquibaseDatabaseClass().get());
+    assertEquals(H_2, v.get());
+    assertEquals(LIQUIBASE_DATABASE_CORE_H2_DATABASE, v.liquibaseDatabaseClass());
     assertEquals(H_2, v.springDbName().get());
-    assertEquals("org.hibernate.dialect.H2Dialect", v.hibernateDialectClass().get());
+    assertEquals(ORG_HIBERNATE_DIALECT_H2_DIALECT, v.hibernateDialectClass().get());
   }
 
 }

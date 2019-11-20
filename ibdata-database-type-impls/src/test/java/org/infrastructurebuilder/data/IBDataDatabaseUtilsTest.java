@@ -18,34 +18,33 @@ package org.infrastructurebuilder.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.infrastructurebuilder.data.IBDatabaseDialectMapper.LBDDatabase;
-import org.jooq.SQLDialect;
 import org.junit.Test;
 
-public class IBDatabaseDialectMapperTest {
+public class IBDataDatabaseUtilsTest {
 
   @Test
   public void testAllDialects() {
-    assertEquals(11, IBDatabaseDialectMapper.allDialects().size());
+    assertEquals(52, IBDataDatabaseUtils.allDialects().size());
   }
 
-  @Test
-  public void testAllLBDialects() {
-    assertEquals(10, IBDatabaseDialectMapper.allLBDialects().size());
-  }
-
+//  @Test
+//  public void testAllLBDialects() {
+//    assertEquals(10, IBDataDatabaseUtils.allLBDialects().size());
+//  }
+//
   @Test
   public void testBySQLDialectName() {
-    assertNotNull(IBDatabaseDialectMapper.bySQLDialectName(IBDatabaseDialectMapper.H_2));
+    assertNotNull(IBDataDatabaseUtils.bySQLDialectName(IBDataConstants.H_2));
   }
 
-  @Test
-  public void testByLiquibaseDatabaseName() {
-    LBDDatabase l = IBDatabaseDialectMapper.byLiquibaseDatabaseName(SQLDialect.H2).get();
-    assertNotNull(l);
-    assertEquals("LBDDatabase [sqlDialect = Optional[H2], databaseClass = liquibase.database.core.H2Database", l.toString());
-    assertEquals(IBDatabaseDialectMapper.LIQUIBASE_DATABASE_CORE_H2_DATABASE, l.getDatabaseClass());
-    assertEquals(SQLDialect.H2, l.sqlDialect().get());
-  }
+//  @Test
+//  public void testByLiquibaseDatabaseName() {
+//    LBDDatabase l = IBDataDatabaseUtils.byLiquibaseDatabaseName(SQLDialect.H2).get();
+//    assertNotNull(l);
+//    assertEquals("LBDDatabase [sqlDialect = Optional[H2], databaseClass = liquibase.database.core.H2Database",
+//        l.toString());
+//    assertEquals(IBDataConstants.LIQUIBASE_DATABASE_CORE_H2_DATABASE, l.getDatabaseClass());
+//    assertEquals(SQLDialect.H2.getName(), l.sqlDialect().get());
+//  }
 
 }

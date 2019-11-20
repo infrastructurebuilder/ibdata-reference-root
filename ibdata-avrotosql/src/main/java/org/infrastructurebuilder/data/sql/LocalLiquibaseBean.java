@@ -92,7 +92,7 @@ import liquibase.resource.ResourceAccessor;
  * @author Rob Schoening
  */
 @Named(LocalLiquibaseBean.NAME)
-public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean, String, Integer> {
+public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,ConfigMapSupplier, String, Integer> {
 
   //public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 

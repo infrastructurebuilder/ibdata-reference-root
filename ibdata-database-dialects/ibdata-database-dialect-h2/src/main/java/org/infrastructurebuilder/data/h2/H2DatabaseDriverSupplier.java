@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
+package org.infrastructurebuilder.data.h2;
 
-import java.util.Optional;
+import javax.inject.Inject;
+import javax.inject.Named;
 
-/**
- * Translation mapping for various tools used within IBData
- *
- * @author mykel.alvis
- *
- */
-public interface IBDatabaseDialect {
-  String jooqDialectEnum();
-  Optional<String> hibernateDialectClass();
-  Optional<String> liquibaseDatabaseClass();
-  Optional<String> springDbName();
+import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
+import org.infrastructurebuilder.util.LoggerSupplier;
+
+import liquibase.database.core.H2Database;
+
+@Named(H2DatabaseDriverSupplier.H2)
+public class H2DatabaseDriverSupplier extends AbstractIBDatabaseDriverSupplier {
+  static final String H2 = "H2";
+
+  @Inject
+  public H2DatabaseDriverSupplier(LoggerSupplier l) {
+    super(l, org.jooq.SQLDialect.H2.name(), H2Database.class.getCanonicalName(), "org.h2database:h2:");
+  }
+
 }

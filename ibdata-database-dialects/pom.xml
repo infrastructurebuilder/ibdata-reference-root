@@ -24,29 +24,25 @@
     <artifactId>ibdata-reference-root</artifactId>
     <version>0.3.3-SNAPSHOT</version>
   </parent>
-  <artifactId>ibdata-database-type-impls</artifactId>
-  <packaging>jar</packaging>
+  <artifactId>ibdata-database-dialects</artifactId>
+  <packaging>pom</packaging>
   <name>${project.artifactId}</name>
-  <description>IBData ingesters for JDBC databases</description>
+  <description>IBData dialect suppliers for JDBC databases</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>70</test.coverage.percentage.required>
+    <test.coverage.percentage.required>77</test.coverage.percentage.required>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ibdata-database-dialect-base</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
-    <dependency>
-      <groupId>org.infrastructurebuilder.data</groupId>
-      <artifactId>ibdata-avro-types</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jooq</groupId>
-      <artifactId>joor-java-8</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.infrastructurebuilder</groupId>
-      <artifactId>ibcore-read-detect</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.jooq.trial</groupId>
       <artifactId>jooq</artifactId>
@@ -57,23 +53,16 @@
       <artifactId>liquibase-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
+      <groupId>org.infrastructurebuilder.data</groupId>
+      <artifactId>ibdata-api</artifactId>
     </dependency>
   </dependencies>
-  <build>
-    <testResources>
-      <testResource>
-        <directory>${basedir}/src/test/resources</directory>
-        <filtering>false</filtering>
-      </testResource>
-    </testResources>
-    <plugins>
-      <plugin>
-        <groupId>org.infrastructurebuilder.maven</groupId>
-        <artifactId>ibversions-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+  <modules>
+    <module>ibdata-database-dialect-base</module>
+    <module>ibdata-database-dialect-h2</module>
+    <module>ibdata-database-dialect-mariadb</module>
+    <module>ibdata-database-dialect-mssql-jtds</module>
+    <module>ibdata-database-dialect-mysql</module>
+    <module>ibdata-database-dialect-derby</module>
+  </modules>
 </project>

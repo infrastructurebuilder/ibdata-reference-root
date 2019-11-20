@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data.sql;
+package org.infrastructurebuilder.data.h2;
 
-import java.util.function.Supplier;
+import static org.junit.Assert.*;
 
-import javax.sql.DataSource;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface DataSourceSupplier extends Supplier<DataSource> {
+public class H2DatabaseDriverSupplierTest {
+  public final static Logger log = LoggerFactory.getLogger(H2DatabaseDriverSupplierTest.class);
+
+  @Test
+  public void testDatabaseDriverSupplier() {
+    H2DatabaseDriverSupplier q = new H2DatabaseDriverSupplier(() -> log);
+    assertNotNull(q);
+    assertEquals("H2", q.getHint());
+  }
 
 }

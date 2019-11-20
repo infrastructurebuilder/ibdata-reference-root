@@ -21,45 +21,22 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
-    <artifactId>ibdata-reference-root</artifactId>
+    <artifactId>ibdata-database-dialects</artifactId>
     <version>0.3.3-SNAPSHOT</version>
   </parent>
-  <artifactId>ibdata-database-type-impls</artifactId>
+  <artifactId>ibdata-database-dialect-base</artifactId>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
-  <description>IBData ingesters for JDBC databases</description>
+  <description>Abstractions, etc for IBData dialects</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>70</test.coverage.percentage.required>
+    <!-- TODO Fix the situation where the class throws an exception during config -->
+    <test.coverage.percentage.required>91</test.coverage.percentage.required>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
-      <artifactId>ibdata-avro-types</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jooq</groupId>
-      <artifactId>joor-java-8</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.infrastructurebuilder</groupId>
-      <artifactId>ibcore-read-detect</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.jooq.trial</groupId>
-      <artifactId>jooq</artifactId>
-      <version>${jooq.jooq.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
+      <artifactId>ibdata-database-type-impls</artifactId>
     </dependency>
   </dependencies>
   <build>
@@ -69,11 +46,5 @@
         <filtering>false</filtering>
       </testResource>
     </testResources>
-    <plugins>
-      <plugin>
-        <groupId>org.infrastructurebuilder.maven</groupId>
-        <artifactId>ibversions-maven-plugin</artifactId>
-      </plugin>
-    </plugins>
   </build>
 </project>
