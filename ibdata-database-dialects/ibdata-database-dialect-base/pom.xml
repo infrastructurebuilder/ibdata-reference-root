@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-database-dialects</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>ibdata-database-dialect-base</artifactId>
   <packaging>jar</packaging>
@@ -31,14 +31,20 @@
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
     <!-- TODO Fix the situation where the class throws an exception during config -->
-    <test.coverage.percentage.required>91</test.coverage.percentage.required>
+    <test.coverage.percentage.required>87</test.coverage.percentage.required>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.infrastructurebuilder.data</groupId>
       <artifactId>ibdata-database-type-impls</artifactId>
     </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
   <build>
     <testResources>
       <testResource>

@@ -21,7 +21,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.sql.Connection;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
@@ -94,13 +96,25 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   @Test(expected = IBDataException.class)
   public void testFailingConnection1() {
-    conf.getConnectionSupplier(JDBC_MYSQL, Optional.empty());
+    Optional<Supplier<Connection>> k = conf.getConnectionSupplier(JDBC_MYSQL, Optional.empty());
+    Supplier<Connection> l = k.get();
+    Connection m = l.get();
   }
 
   @Test(expected = IBDataException.class)
-  public void testFailingConnection2() {
+  public void testFailingConnection2a() {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.of("B"));
-    conf.getConnectionSupplier(JDBC_MYSQL, Optional.of(creds));
+    Optional<Supplier<Connection>> k = conf.getConnectionSupplier(JDBC_MYSQL, Optional.of(creds));
+    Supplier<Connection> l = k .get();
+    Connection m = l.get();
+  }
+
+  @Test(expected = IBDataException.class)
+  public void testFailingConnection2b() {
+    BasicCredentials creds = new DefaultBasicCredentials("A", Optional.empty());
+    Optional<Supplier<Connection>> k = conf.getConnectionSupplier(JDBC_MYSQL, Optional.of(creds));
+    Supplier<Connection> l = k.get();
+    Connection m = l.get();
   }
 
   @Test
