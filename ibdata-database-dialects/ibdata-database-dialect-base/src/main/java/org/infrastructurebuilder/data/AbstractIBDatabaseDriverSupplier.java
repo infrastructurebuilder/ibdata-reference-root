@@ -15,7 +15,6 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -24,10 +23,15 @@ import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import javax.sql.DataSource;
+
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.GAV;
@@ -45,16 +49,29 @@ abstract public class AbstractIBDatabaseDriverSupplier
   private final String hint;
   private final String databaseClass;
   private final List<DefaultGAV> gavs;
-  private final Database database;
+  private final Optional<Database> database;
   private final Logger log;
 
   protected AbstractIBDatabaseDriverSupplier(LoggerSupplier l, String hint, String liquibaseDatabaseClass,
       String... list) {
-    this.log = l.get();
-    this.hint = requireNonNull(hint);
-    this.databaseClass = requireNonNull(liquibaseDatabaseClass);
-    this.database = (Database) cet.withReturningTranslation(() -> Class.forName(databaseClass).newInstance());
-    this.gavs = requireNonNull(asList(list).stream().map(DefaultGAV::new).collect(toList()));
+    this.log = requireNonNull(l, "LoggerSupplier").get();
+    this.hint = requireNonNull(hint, "Driver hint");
+    this.databaseClass = requireNonNull(liquibaseDatabaseClass, "Liquibase Database Classname");
+    Database db;
+    try {
+      db = (Database) Class.forName(databaseClass).newInstance();
+    } catch (Exception e) {
+      db = null;
+    }
+    this.database = ofNullable(db);
+    this.gavs = ofNullable(list).map(Arrays::asList).orElse(Collections.emptyList())
+        // Map list to list of GAVs
+        .stream().map(DefaultGAV::new).collect(toList());
+  }
+
+  @Override
+  public Logger getLog() {
+    return this.log;
   }
 
   @Override
@@ -63,7 +80,7 @@ abstract public class AbstractIBDatabaseDriverSupplier
         .map(j -> new DefaultIBDatabaseDialect(j, this.databaseClass)));
   }
 
-  private final Database getDatabase() {
+  protected final Optional<Database> getDatabase() {
     return this.database;
   }
 
@@ -71,16 +88,16 @@ abstract public class AbstractIBDatabaseDriverSupplier
     return unmodifiableList(this.gavs);
   }
 
-  @Override
-  public Optional<Supplier<Connection>> getConnectionSupplier(String jdbcURL, Optional<BasicCredentials> creds) {
-    return getDatabaseDriverClassName(jdbcURL).map(driverClass -> {
-      cet.withTranslation(() -> Class.forName(driverClass));
-      return () -> creds.map(cr -> {
-        return cet.withReturningTranslation(
-            () -> DriverManager.getConnection(jdbcURL, cr.getKeyId(), cr.getSecret().orElse(null)));
-      }).orElse(cet.withReturningTranslation(() -> DriverManager.getConnection(jdbcURL)));
-    });
-  }
+//  @Override
+//  public Optional<Supplier<Connection>> getDataSourceSupplier(String jdbcURL, Optional<BasicCredentials> creds) {
+//    return getDatabaseDriverClassName(jdbcURL).map(driverClass -> {
+//      cet.withTranslation(() -> Class.forName(driverClass));
+//      return () -> creds.map(cr -> {
+//        return cet.withReturningTranslation(
+//            () -> DriverManager.getConnection(jdbcURL, cr.getKeyId(), cr.getSecret().orElse(null)));
+//      }).orElse(cet.withReturningTranslation(() -> DriverManager.getConnection(jdbcURL)));
+//    });
+//  }
 
   @Override
   public String getHint() {
@@ -89,13 +106,29 @@ abstract public class AbstractIBDatabaseDriverSupplier
 
   @Override
   public Optional<String> getDatabaseDriverClassName(String jdbcUrl) {
-    return ofNullable(jdbcUrl)
-        .flatMap(url -> ofNullable(ofNullable(getDatabase()).map(db -> db.getDefaultDriver(url)).orElse(null)));
+    return ofNullable(jdbcUrl).flatMap(url -> getDatabase().map(db -> db.getDefaultDriver(url)));
   }
 
   @Override
   public boolean respondsTo(String jdbcURL) {
     return getDatabaseDriverClassName(jdbcURL).isPresent();
+  }
+
+  @Override
+  public Optional<Supplier<DataSource>> getDataSourceSupplier2(String jdbcURL, Optional<BasicCredentials> creds) {
+    return getDatabaseDriverClassName(jdbcURL).map(driverClass -> {
+      //      cet.withTranslation(() -> Class.forName(driverClass));
+      final BasicDataSource d = new BasicDataSource();
+      d.setDriverClassName(driverClass);
+      d.setUrl(jdbcURL);
+      creds.ifPresent(cr -> {
+        d.setUsername(cr.getKeyId());
+        cr.getSecret().ifPresent(secret -> d.setPassword(secret));
+      });
+      return () -> d;
+      //        return cet.withReturningTranslation(
+      //            () -> DriverManager.getConnection(jdbcURL, cr.getKeyId(), cr.getSecret().orElse(null)));
+    });
   }
 
   private final class DefaultIBDatabaseDialect implements IBDatabaseDialect {

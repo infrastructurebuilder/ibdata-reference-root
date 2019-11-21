@@ -59,6 +59,7 @@
   </dependencies>
   <modules>
     <module>ibdata-database-dialect-base</module>
+    <module>ibdata-database-dialect-sqlite</module>
     <module>ibdata-database-dialect-h2</module>
     <module>ibdata-database-dialect-mariadb</module>
     <module>ibdata-database-dialect-mssql-jtds</module>

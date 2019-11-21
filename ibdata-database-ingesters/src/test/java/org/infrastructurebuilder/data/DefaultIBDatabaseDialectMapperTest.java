@@ -24,19 +24,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import javax.sql.DataSource;
+
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.GAV;
 import org.jooq.SQLDialect;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultIBDatabaseDialectMapperTest {
+  private static final Logger log = LoggerFactory.getLogger(DefaultIBDatabaseDialectMapperTest.class);
 
   private static final String ORG_HIBERNATE_DIALECT_H2_DIALECT = "org.hibernate.dialect.H2Dialect";
   private DefaultIBDatabaseDialectMapper d;
@@ -48,20 +54,22 @@ public class DefaultIBDatabaseDialectMapperTest {
     IBDataDatabaseDriverSupplier i = new IBDataDatabaseDriverSupplier() {
 
       @Override
+      public Logger getLog() {
+        return log;
+      }
+
+      @Override
       public List<GAV> getRequiredArtifacts() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.emptyList();
       }
 
       @Override
       public String getHint() {
-        // TODO Auto-generated method stub
         return "H2";
       }
 
       @Override
       public Optional<IBDatabaseDialect> getDialect(String jdbcUrl) {
-        // TODO Auto-generated method stub
         return of(new IBDatabaseDialect() {
 
           @Override
@@ -97,10 +105,11 @@ public class DefaultIBDatabaseDialectMapperTest {
       }
 
       @Override
-      public Optional<Supplier<Connection>> getConnectionSupplier(String jdbcURL, Optional<BasicCredentials> creds) {
+      public Optional<Supplier<DataSource>> getDataSourceSupplier2(String jdbcURL, Optional<BasicCredentials> creds) {
         return empty();
       }
     };
+    i.getLog().debug("Test Setup");
     z.put(SQLDialect.H2.name(), i);
     d = new DefaultIBDatabaseDialectMapper(z);
   }

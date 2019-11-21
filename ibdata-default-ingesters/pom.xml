@@ -46,13 +46,6 @@
       <groupId>org.infrastructurebuilder</groupId>
       <artifactId>ibcore-read-detect</artifactId>
     </dependency>
-        <!-- FIXME Remember to continue to update the WGet class in this module when the download plugin changes -->
-    <dependency>
-      <groupId>com.googlecode.maven-download-plugin</groupId>
-      <artifactId>download-maven-plugin</artifactId>
-      <version>${maven.download.plugin.version}</version>
-      <type>jar</type>
-    </dependency>
   </dependencies>
   <build>
     <plugins>

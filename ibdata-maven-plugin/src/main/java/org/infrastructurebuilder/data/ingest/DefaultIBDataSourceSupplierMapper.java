@@ -54,10 +54,12 @@ import org.w3c.dom.Document;
 @Named
 public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
   public final static List<String> HEADERS = Arrays.asList("http://", "https://", "file:", "zip:", "jar:");
+  private final WGetterSupplier wgs;
 
   @Inject
-  public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
-    super(requireNonNull(l).get(), requireNonNull(t2e));
+  public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e, WGetterSupplier wgs) {
+    super(requireNonNull(l).get(), requireNonNull(t2e), false);
+    this.wgs = requireNonNull(wgs);
   }
 
   public List<String> getHeaders() {
@@ -68,44 +70,42 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultIBDataSource(getLog(),
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.getName(),
+            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, v.getName(),
             v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), ofNullable(v.getMimeType()),
-            getMapper()));
+            wgs));
   }
-
 
   public class DefaultIBDataSource extends AbstractIBDataSource {
 
     private final Path targetPath;
-    private final Path cacheDirectory;
-    private final TypeToExtensionMapper t2e;
     private final Optional<String> mimeType;
+    private final WGetterSupplier wgs;
 
     private List<IBChecksumPathType> read;
 
-    private DefaultIBDataSource(Logger log, String id, String source, Optional<BasicCredentials> creds,
-        Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath,
-        Optional<String> name, Optional<String> description, Path cacheDir, Optional<String> mimeType,
-        TypeToExtensionMapper t2e) {
+    private DefaultIBDataSource(Logger log, String id, String source, boolean expandArchives,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
+        Optional<String> mimeType, WGetterSupplier wgs) {
 
-      super(log, id, source, name, description, creds, checksum, metadata, additionalConfig);
+      super(log, id, source, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
-      this.cacheDirectory = cacheDir;
-      this.t2e = t2e;
       this.mimeType = mimeType;
+      this.wgs = requireNonNull(wgs);
     }
 
-    public DefaultIBDataSource(Logger log, String source, Optional<String> name, Optional<String> description,
-        Optional<Checksum> checksum, Optional<Document> metadata, Optional<String> targetType,
-        TypeToExtensionMapper t2e) {
-      this(log, randomUUID().toString(), source, empty(), checksum, metadata, empty(), null, name, description, null,
-          targetType, t2e);
+    public DefaultIBDataSource(Logger log, String source, boolean expandArchives, Optional<String> name,
+        Optional<String> description, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<String> targetType, WGetterSupplier wgs) {
+      this(log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), null, name,
+          description, targetType, wgs);
     }
 
     @Override
     public IBDataSource withAdditionalConfig(ConfigMap config) {
-      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(),
-          of(config), config.get(TARGET_PATH), getName(), getDescription(), config.get(CACHE_DIR), getMimeType(), t2e);
+      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(),
+          ofNullable((Boolean) config.get(SPLIT_ZIPS_CONFIG)).orElse(false), getCredentials(), getChecksum(),
+          getMetadata(), of(config), config.get(TARGET_PATH), getName(), getDescription(), getMimeType(), this.wgs);
     }
 
     @Override
@@ -117,16 +117,14 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
           switch (src.getProtocol()) {
           case "http":
           case "https":
-            WGetter wget = new WGetter(getLog(), getCredentials(), this.t2e);
-            localRead = wget.collectCacheAndCopyToChecksumNamedFile(
+            WGetter wget = wgs.get();
+            localRead = wget.collectCacheAndCopyToChecksumNamedFile(getCredentials(),
                 // Target directory
                 targetPath,
                 // URL
-                src,
+                src.toExternalForm(),
                 // "Optional" checksum
                 checksum,
-                // Location of the cacheDirectory
-                cacheDirectory,
                 // Mime type from supplied value (not calculated value)
                 this.mimeType,
                 // Slightly insane defaults

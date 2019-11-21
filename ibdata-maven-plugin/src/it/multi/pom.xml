@@ -86,7 +86,7 @@
                       <name>one</name>
                       <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f1.zip?agree=yes</url>
-                      <sha512>43f5e5db70fca40b4ba2a99e792f750aeeae4b41a355e0732cb31a598cbe9bdd49e30c46b29dc1e965726aa891b8aa8611ae2284710be9aa7231dc02c67146cc</sha512>
+                      <sha512>a19fea88c433f698ee3634138075b9403fc4cf162f91b499ea5dd38a469753f14532d6ba59c8da9111b8394d3afb835cb4c12b2a3a4ef136b742742665c49f41</sha512>
                       <metadata>
                         <here>
                           <x>also</x>
@@ -99,7 +99,7 @@
                       <name>two</name>
                       <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f2.zip?agree=yes</url>
-                      <sha512>ed880bada870889331c0e1da0b0e9793985f081974fff0e25a7dd573ab3fdac0dcdc856811f7dc1a940574018c7639cc380f48b200242810d46193a6f9817124</sha512>
+                      <sha512>107ea19531d7e7939db4d90e528e3bb6dfc1c3c46693756334bed38e09f8f28ee166c8dd0b49ada5b9e2acf5f989c493c01ee368c186b39c899b204a91ac72b9</sha512>
                       <metadata>
                         <here>
                           <x>also</x>
@@ -112,7 +112,7 @@
                       <name>three</name>
                       <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f3.zip?agree=yes</url>
-                      <sha512>0358c4904b46e6433177a434b49fb82f404db519928df5b246e1d519bd1bf9ad68fcb2656654ee5cd3a1979924ffa934ab9555d33c85300cf1060ef55db11321</sha512>
+                      <sha512>733b4af862768bf0c58bb9402fba7a13b2512fe0806c67521d03a2212df5b47286525c55f8b6186513181b10127c09ce0bdc471fdcc2968d0202f26d9a2586c4</sha512>
                       <metadata>
                         <here>
                           <x>also</x>
@@ -125,7 +125,7 @@
                       <name>four</name>
                       <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f4.zip?agree=yes</url>
-                      <sha512>80ce593615ac46682f05a93f8c83a575226b20ff0244e079febeaae2960974ee1aed95f32d41af8f877f6fd68bee4fcd0fd4563adf1455842e4638b32afd604d</sha512>
+                      <sha512>425d9f23232761bb27164ee709fe5634ac916f480bd6bd3404ef7be41a5613a0c098b30616a7da7fe1c25a55278e5a51d0b6a0b68a3b444fe9f77f7b4ee27238</sha512>
                       <metadata>
                         <here>
                           <x>also</x>

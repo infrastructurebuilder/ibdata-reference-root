@@ -22,8 +22,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import javax.sql.DataSource;
 
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
@@ -75,7 +78,15 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   @Test
   public void testGetHint() {
+    s.getLog().debug("Testing getHint()");
     assertEquals(MYSQL, conf.getHint());
+  }
+
+  @Test
+  public void testNoSuchDriver() {
+    FakeAbstractIBDatabaseDriverSupplier abc = new FakeAbstractIBDatabaseDriverSupplier(() -> log, MYSQL,
+        "No.Such.Driver.Classfile", "X:Y:1.0.0");
+    assertFalse(abc.getDatabase().isPresent());
   }
 
   @Test
@@ -94,27 +105,27 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   }
 
-  @Test(expected = IBDataException.class)
-  public void testFailingConnection1() {
-    Optional<Supplier<Connection>> k = conf.getConnectionSupplier(JDBC_MYSQL, Optional.empty());
-    Supplier<Connection> l = k.get();
-    Connection m = l.get();
+  @Test(expected = SQLException.class)
+  public void testFailingConnection1() throws SQLException {
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier2(JDBC_MYSQL, Optional.empty());
+    Supplier<DataSource> l = k.get();
+    Connection m = l.get().getConnection();
   }
 
-  @Test(expected = IBDataException.class)
-  public void testFailingConnection2a() {
+  @Test(expected = SQLException.class)
+  public void testFailingConnection2a() throws SQLException {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.of("B"));
-    Optional<Supplier<Connection>> k = conf.getConnectionSupplier(JDBC_MYSQL, Optional.of(creds));
-    Supplier<Connection> l = k .get();
-    Connection m = l.get();
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier2(JDBC_MYSQL, Optional.of(creds));
+    Supplier<DataSource> l = k.get();
+    Connection m = l.get().getConnection();
   }
 
-  @Test(expected = IBDataException.class)
-  public void testFailingConnection2b() {
+  @Test(expected = SQLException.class)
+  public void testFailingConnection2b() throws SQLException {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.empty());
-    Optional<Supplier<Connection>> k = conf.getConnectionSupplier(JDBC_MYSQL, Optional.of(creds));
-    Supplier<Connection> l = k.get();
-    Connection m = l.get();
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier2(JDBC_MYSQL, Optional.of(creds));
+    Supplier<DataSource> l = k.get();
+    Connection m = l.get().getConnection();
   }
 
   @Test

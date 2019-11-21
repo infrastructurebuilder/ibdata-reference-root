@@ -18,8 +18,9 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
+import static org.infrastructurebuilder.data.IBDataConstants.*;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataSource.SPLIT_ZIPS_CONFIG;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,24 +62,26 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
 
   public static final String NAME = "default";
   public static final String UNZIP = "unarchive";
+  private final PathSupplier cds;
 
   @Inject
-  public DefaultIBDataIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log) {
-    this(wps, log, null);
+  public DefaultIBDataIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log, @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cds) {
+    this(wps, log, null, requireNonNull(cds));
   }
 
-  private DefaultIBDataIngesterSupplier(PathSupplier wps, LoggerSupplier log, ConfigMapSupplier cms) {
+  private DefaultIBDataIngesterSupplier(PathSupplier wps, LoggerSupplier log, ConfigMapSupplier cms, PathSupplier cds) {
     super(wps, log, cms);
+    this.cds = requireNonNull(cds);
   }
 
   @Override
   final protected IBDataIngester configuredType(ConfigMapSupplier config) {
-    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get());
+    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get(), cds.get());
   }
 
   @Override
   public DefaultIBDataIngesterSupplier getConfiguredSupplier(ConfigMapSupplier config) {
-    return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config);
+    return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config, this.cds);
   }
 
   final static DefaultIBDataStreamSupplier xyz(Path workingPath, IBDataSource source,
@@ -121,13 +124,14 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     private final Path cacheDirectory;
     private final boolean splitZips;
 
-    public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config) {
+    public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config, Path cacheDirectory) {
       super(workingPath, log, config);
-      this.cacheDirectory = ofNullable(
-          requireNonNull(config, "Config map not supplied").getString(CACHE_DIRECTORY_CONFIG_ITEM)).map(Paths::get)
-              .orElseThrow(() -> new IBDataException("No cache directory specified"));
+      this.cacheDirectory = requireNonNull(cacheDirectory);
+      //      ofNullable(
+      //          requireNonNull(config, "Config map not supplied").getString(CACHE_DIRECTORY_CONFIG_ITEM)).map(Paths::get)
+      //              .orElseThrow(() -> new IBDataException("No cache directory specified"));
       this.splitZips = ofNullable(
-          requireNonNull(config, "Config map not supplied").getString(CACHE_DIRECTORY_CONFIG_ITEM))
+          requireNonNull(config, "Config map not supplied").getString(SPLIT_ZIPS_CONFIG))
               .map(Boolean::parseBoolean).orElse(false);
     }
 
@@ -139,7 +143,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
       Date now = new Date(); // Ok for "now"  (Get it?)
       ConfigMap over = new ConfigMap();
       over.put(IBDataSource.TARGET_PATH, getWorkingPath());
-      over.put(IBDataSource.CACHE_DIR, this.cacheDirectory);
+      //      over.put(IBDataSource.CACHE_DIR, this.cacheDirectory);
       over.put(UNZIP, this.splitZips);
       ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).overrideConfiguration(over).get();
       return dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms))

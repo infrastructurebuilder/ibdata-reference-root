@@ -15,12 +15,14 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.infrastructurebuilder</groupId>
     <artifactId>ibparent</artifactId>
-    <version>21-SNAPSHOT</version>
+    <version>25-SNAPSHOT</version>
   </parent>
   <groupId>org.infrastructurebuilder.data</groupId>
   <artifactId>ibdata-reference-root</artifactId>
@@ -32,8 +34,6 @@
   <properties>
     <test.coverage.percentage.required>99</test.coverage.percentage.required> <!--100 actually -->
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <!--  FIXME Move version in newer parent release -->
-    <ib.versioning.support.plugin.version>0.12.0</ib.versioning.support.plugin.version>
     <ibcore.bom.version>0.14.1.0-SNAPSHOT</ibcore.bom.version>
   </properties>
   <url>${github.url.base}/${project.artifactId}</url>
@@ -109,6 +109,17 @@
         <artifactId>ibdata-database-ingesters</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ibdata-wgetter-component</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ibdata-wgetter-component</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
 
     </dependencies>
   </dependencyManagement>
@@ -175,6 +186,7 @@
     <module>ibdata-type-impls</module>
     <module>ibdata-database-type-impls</module>
     <module>ibdata-database-dialects</module>
+    <module>ibdata-wgetter-component</module>
     <module>ibdata-maven-plugin</module>
     <module>ibdata-default-transformers</module>
     <module>ibdata-default-ingesters</module>

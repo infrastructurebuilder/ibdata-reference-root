@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.sql.DataSource;
 
 import org.infrastructurebuilder.data.IBDataDatabaseDriverSupplier;
 import org.infrastructurebuilder.data.IBDataException;
@@ -95,13 +96,13 @@ public class DefaultLiquibaseSupplier extends AbstractConfigurableSupplier<Liqui
     IBDataDatabaseDriverSupplier ds = getDialectMappper().getSupplierForURL(url)
         .orElseThrow(() -> new IBDataException("Failed to acquire IBDatabaseDialect for " + url));
     Optional<BasicCredentials> creds = Optional.empty(); // FIXME Where are the creds coming from?
-    Supplier<Connection> connSupplier = ds.getConnectionSupplier(url, creds)
+    Supplier<DataSource> dataSource = ds.getDataSourceSupplier2(url, creds)
         .orElseThrow(() -> new IBDataException("Failed to acquire connection for " + url));
     Path physicalFile = getWps().get().resolve(UUID.randomUUID().toString() + ".xml").toAbsolutePath();
     DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalFile.toString());
     List<ResourceAccessor> resourceAccessors = Arrays.asList(new ClassLoaderResourceAccessor()); // TODO get Resource accessors
     ResourceAccessor resourceAccessor = new CompositeResourceAccessor(resourceAccessors);
-    Connection connection = connSupplier.get();
+    Connection connection = cet.withReturningTranslation(() -> dataSource.get().getConnection());
     Database database = cet.withReturningTranslation(
         () -> DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection)));
     return new Liquibase(changeLog, resourceAccessor, database);

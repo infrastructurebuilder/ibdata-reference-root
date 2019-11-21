@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.IBUtils.nullSafeObjectToString;
@@ -35,8 +36,6 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-
-import static org.infrastructurebuilder.IBConstants.*;
 
 public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implements IBDataStream {
 
@@ -117,4 +116,8 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
     return new DefaultIBDataStream(this, cet.withReturningTranslation(() -> newCpt.moveTo(target)));
   }
 
+  @Override
+  public Optional<IBDataStructuredDataMetadata> getIBDataStructuredDataMetadata() {
+    return empty();
+  }
 }

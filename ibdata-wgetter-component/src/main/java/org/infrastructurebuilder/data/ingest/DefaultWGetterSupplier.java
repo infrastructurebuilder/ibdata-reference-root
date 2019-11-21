@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_OCTET_STREAM;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.io.File;
@@ -31,6 +32,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -62,7 +66,9 @@ import org.codehaus.plexus.util.StringUtils;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.IBUtils;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -74,54 +80,70 @@ import com.googlecode.download.maven.plugin.internal.SignatureUtils;
 import com.googlecode.download.maven.plugin.internal.SilentProgressReport;
 import com.googlecode.download.maven.plugin.internal.cache.DownloadCache;
 
-/*
- *
- * Encapsulates code from download-maven-plugin
- */
-public class WGetter {
+@Named
+public class DefaultWGetterSupplier implements WGetterSupplier {
 
-  private final WGet wget;
+  private final Logger log;
+  private final TypeToExtensionMapper t2e;
+  private final Path cacheDirectory;
 
-  public WGetter(Logger log, Optional<BasicCredentials> creds, TypeToExtensionMapper t2e) {
-    //    this.wps = requireNonNull(wps);
-    this.wget = new WGet();
-    // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then create a new LoggingMavenComponent from log
-    //    Log l2 = new LoggingMavenComponent(log);
-    Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
-    this.wget.setLog(l2);
-    requireNonNull(creds).ifPresent(bc -> {
-      wget.setUsername(bc.getKeyId());
-      wget.setPassword(bc.getSecret().orElse(null));
-    });
-    this.wget.setT2EMapper(Objects.requireNonNull(t2e));
+  @Inject
+  public DefaultWGetterSupplier(LoggerSupplier log, TypeToExtensionMapper t2e,
+      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier) {
+    this.log = requireNonNull(log).get();
+    this.t2e = requireNonNull(t2e);
+    this.cacheDirectory = requireNonNull(cacheDirSupplier).get();
+  }
+
+  @Override
+  public WGetter get() {
+    return new WGetterImpl(log, t2e, cacheDirectory);
   }
 
   /*
-   * Code for getting the cacheDirectory
-  //        if (this.cacheDirectory == null) {
-  /            this.cacheDirectory = new File(this.session.getLocalRepository()
-  //                .getBasedir(), ".cache/download-maven-plugin");
-  //        }
+  *
+  * Encapsulates code from download-maven-plugin
+  */
+  private class WGetterImpl implements WGetter {
 
-   */
+    private final WGet wget;
 
-  synchronized public final Optional<IBChecksumPathType> collectCacheAndCopyToChecksumNamedFile(Path workingPath,
-      URL source, Optional<Checksum> checksum, Path cacheDirectory, Optional<String> type, boolean interactiveMode,
-      int retries, int readTimeOut, boolean skipCache) {
+    public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDirSupplier) {
+      //    this.wps = requireNonNull(wps);
+      this.wget = new WGet();
+      // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then create a new LoggingMavenComponent from log
+      //    Log l2 = new LoggingMavenComponent(log);
+      Logger localLogger = requireNonNull(log); // FIXME (See above)
+      Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
+      this.wget.setLog(l2);
+      this.wget.setT2EMapper(Objects.requireNonNull(t2e));
+      this.wget.setCacheDirectory(requireNonNull(cacheDirSupplier).toFile());
+    }
 
-    wget.setOutputPath(workingPath);
-    requireNonNull(checksum).ifPresent(c -> wget.setSha512(c.toString().toLowerCase()));
-    wget.setUri(cet.withReturningTranslation(() -> requireNonNull(source).toURI()));
-    wget.setFailOnError(false);
-    wget.setOverwrite(false);
-    wget.setCacheDirectory(requireNonNull(cacheDirectory).toAbsolutePath().toFile());
-    wget.setInteractiveMode(interactiveMode);
-    wget.setRetries(retries);
-    wget.setReadTimeOut(readTimeOut);
-    wget.setSkipCache(skipCache);
-    wget.setCheckSignature(checksum.isPresent());
-    wget.setMimeType(type.orElse(APPLICATION_OCTET_STREAM));
-    return cet.withReturningTranslation(() -> this.wget.downloadIt());
+    @Override
+    synchronized public final Optional<IBChecksumPathType> collectCacheAndCopyToChecksumNamedFile(
+        Optional<BasicCredentials> creds, Path outputPath, String sourceString, Optional<Checksum> checksum,
+        Optional<String> type, boolean interactiveMode, int retries, int readTimeOut, boolean skipCache) {
+
+      requireNonNull(creds).ifPresent(bc -> {
+        wget.setUsername(bc.getKeyId());
+        wget.setPassword(bc.getSecret().orElse(null));
+      });
+
+      wget.setOutputPath(outputPath);
+      requireNonNull(checksum).ifPresent(c -> wget.setSha512(c.toString().toLowerCase()));
+      wget.setUri(cet.withReturningTranslation(() -> new URL(requireNonNull(sourceString)).toURI()));
+      wget.setFailOnError(false);
+      wget.setOverwrite(false);
+      wget.setInteractiveMode(interactiveMode);
+      wget.setRetries(retries);
+      wget.setReadTimeOut(readTimeOut);
+      wget.setSkipCache(skipCache);
+      wget.setCheckSignature(checksum.isPresent());
+      wget.setMimeType(type.orElse(APPLICATION_OCTET_STREAM));
+      return cet.withReturningTranslation(() -> this.wget.downloadIt());
+    }
+
   }
 
   /**

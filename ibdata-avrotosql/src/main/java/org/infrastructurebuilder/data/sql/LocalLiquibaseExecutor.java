@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data.sql;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.IBUtils.nullIfBlank;
@@ -40,6 +41,7 @@ import javax.sql.DataSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.ExecutionEnabled;
 import org.infrastructurebuilder.util.ExecutionResponse;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -57,58 +59,21 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.integration.spring.SpringLiquibase;
-import liquibase.logging.LogService;
-import liquibase.logging.LogType;
-import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
-/**
- * A Spring-ified wrapper for Liquibase.
- * <p/>
- * Example Configuration:
- * <p/>
- * <p/>
- * This Spring configuration example will cause liquibase to run automatically when the Spring context is
- * initialized. It will load <code>db-changelog.xml</code> from the classpath and apply it against
- * <code>myDataSource</code>.
- * <p/>
- * <p/>
- *
- * <pre>
- * &lt;bean id=&quot;myLiquibase&quot;
- *          class=&quot;liquibase.spring.SpringLiquibase&quot;
- *          &gt;
- *
- *      &lt;property name=&quot;dataSource&quot; ref=&quot;myDataSource&quot; /&gt;
- *
- *      &lt;property name=&quot;changeLog&quot; value=&quot;classpath:db-changelog.xml&quot; /&gt;
- *
- * &lt;/bean&gt;
- *
- * </pre>
- *
- * @author Rob Schoening
- */
-@Named(LocalLiquibaseBean.NAME)
-public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,ConfigMapSupplier, String, Integer> {
-
-  //public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
+@Named(LocalLiquibaseExecutor.NAME)
+public class LocalLiquibaseExecutor
+    implements ExecutionEnabled<LocalLiquibaseExecutor, ConfigMapSupplier, String, Integer> {
 
   public static final String NAME = "local-liquibase";
 
-  protected final Logger log = LogService.getLog(LocalLiquibaseBean.class);
-  //    protected String beanName;
-
-  //    protected ResourceLoader resourceLoader;
-
-  protected final DataSource dataSource;
+  protected final DataSourceSupplier dataSourceSupplier;
   protected final String changeLog;
-  protected final String contexts;
-  protected final String labels;
+  protected final Contexts contexts;
+  protected final LabelExpression labels;
   protected final String tag;
-  protected final ConfigMap parameters;
+  protected final ConfigMapSupplier parametersSupplier;
   protected final Optional<String> defaultSchema;
   protected final String liquibaseSchema;
   protected final String databaseChangeLogTable;
@@ -117,49 +82,26 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
   protected final boolean dropFirst;
   protected final boolean clearCheckSums;
   protected final boolean shouldRun;
-  protected final Path rollbackFile;
+  protected final PathSupplier rollbackFileSupplier;
 
   private final List<String> errors = new ArrayList<>();
-
-  /**
-   * Ignores classpath prefix during changeset comparison.
-   * This is particularly useful if Liquibase is run in different ways.
-   *
-   * For instance, if Maven plugin is used to run changesets, as in:
-   * <code>
-   *      &lt;configuration&gt;
-   *          ...
-   *          &lt;changeLogFile&gt;path/to/changelog&lt;/changeLogFile&gt;
-   *      &lt;/configuration&gt;
-   * </code>
-   *
-   * And {@link SpringLiquibase} is configured like:
-   * <code>
-   *     SpringLiquibase springLiquibase = new SpringLiquibase();
-   *     springLiquibase.setChangeLog("classpath:path/to/changelog");
-   * </code>
-   *
-   * or, in equivalent XML configuration:
-   * <code>
-   *     &lt;bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase"&gt;
-   *         &lt;property name="changeLog" value="path/to/changelog" /&gt;
-   *      &lt;/bean&gt;
-   * </code>
-   *
-   * {@link Liquibase#listUnrunChangeSets(Contexts, )} will
-   * always, by default, return changesets, regardless of their
-   * execution by Maven.
-   * Maven-executed changeset path name are not be prepended by
-   * "classpath:" whereas the ones parsed via SpringLiquibase are.
-   *
-   * To avoid this issue, just set ignoreClasspathPrefix to true.
-   */
   private final boolean ignoreClasspathPrefix = true;
+  private final String encoding;
 
   protected final boolean testRollbackOnUpdate;
 
+  private org.slf4j.Logger log;
+
+  public LocalLiquibaseExecutor(LoggerSupplier ls, PathSupplier rollbackPathSupplier, DataSourceSupplier dsp,
+      String encoding) {
+    this(ls, rollbackPathSupplier, dsp, encoding, null, null, null, null, null, Optional.empty(), null, null, null,
+        null, false, false, false, false);
+  }
+
   /**
    * Executed automatically when the bean is initialized.
+   * @param ls LoggerSupplier
+   * @param rollback Rollback file
    * @param dsp
    * @param cl
    * @param ctxs
@@ -176,16 +118,18 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
    * @param isShouldRun
    * @param isTestRollbackOnUpdate
    */
-  public LocalLiquibaseBean(PathSupplier rollback, DataSourceSupplier dsp, String cl, String ctxs, String labelsx,
-      String tagsx, ConfigMapSupplier paramsx, Optional<String> optDefaultSchema, String lschemaX, String dbCLTable,
-      String dbLockTbl, String tablespace, boolean isDropFirst, boolean isClearChecksums, boolean isShouldRun,
-      Optional<Boolean> isTestRollbackOnUpdate) {
-    this.dataSource = dsp.get();
+  private LocalLiquibaseExecutor(LoggerSupplier ls, PathSupplier rollback, DataSourceSupplier dsp, String encoding,
+      String cl, Contexts ctxs, LabelExpression labelsx, String tagsx, ConfigMapSupplier paramsx,
+      Optional<String> optDefaultSchema, String lschemaX, String dbCLTable, String dbLockTbl, String tablespace,
+      boolean isDropFirst, boolean isClearChecksums, boolean isShouldRun, boolean isTestRollbackOnUpdate) {
+    this.log = requireNonNull(ls).get();
+    this.dataSourceSupplier = requireNonNull(dsp);
+    this.encoding = requireNonNull(encoding);
     this.changeLog = cl;
     this.contexts = ctxs;
     this.labels = labelsx;
     this.tag = tagsx;
-    this.parameters = paramsx.get();
+    this.parametersSupplier = paramsx;
     this.defaultSchema = optDefaultSchema;
     this.liquibaseSchema = lschemaX;
     this.databaseChangeLogTable = dbCLTable;
@@ -194,22 +138,43 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
     this.dropFirst = isDropFirst;
     this.clearCheckSums = isClearChecksums;
     this.shouldRun = isShouldRun;
-    this.testRollbackOnUpdate = isTestRollbackOnUpdate.orElse(false);
-    this.rollbackFile = rollback.get();
+    this.testRollbackOnUpdate = isTestRollbackOnUpdate;
+    this.rollbackFileSupplier = rollback;
 
   }
 
   @Override
-  public LocalLiquibaseBean configure(ConfigMapSupplier cms) {
-    return this;
+  public LocalLiquibaseExecutor configure(ConfigMapSupplier cms) {
+    ConfigMap cfg = requireNonNull(cms, "ConfigMapSupplier for LocalLiquibaseExecutor").get();
+    return new LocalLiquibaseExecutor(
+        // Must already exist in the previous bean
+        () -> this.log, this.rollbackFileSupplier, this.dataSourceSupplier, this.encoding
+        // prev? changelog
+        , cfg.getString("changelog")
+        // Ctxs
+        , new Contexts(cfg.getString("contexts"))
+        // labels
+        , new LabelExpression(cfg.getString("labels"))
+        // tags
+        , cfg.getString("tags")
+        // TODO Get a copy of the parameters supplied here!
+        , cms
+        // optDefaultSchema
+        , ofNullable(cfg.getString("defaultSchema"))
+        // lb schema
+        , cfg.getString("liquibaseSchema")
+        // table and locktable
+        , cfg.getString("liquibaseDatabaseChangeLogTable"), cfg.getString("liquibaseDatabaseChangeLogLockTable")
+        // lb table space
+        , cfg.getString("liquibaseTablespace")
+        // flags
+        , cfg.getParsedBoolean("dropFirst", false), cfg.getParsedBoolean("clearChecksums", false)
+        // more flags
+        , cfg.getParsedBoolean("shouldRun", true), cfg.getParsedBoolean("testRollbackOnUpdate", false));
   }
 
-  public boolean isDropFirst() {
-    return dropFirst;
-  }
-
-  public boolean isClearCheckSums() {
-    return clearCheckSums;
+  public ConfigMap getParameters() {
+    return parametersSupplier.get();
   }
 
   public String getDatabaseProductName() throws DatabaseException {
@@ -217,7 +182,8 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
     Database database = null;
     String name = "unknown";
     try {
-      connection = getDataSource().getConnection();
+      DataSource dss = this.dataSourceSupplier.get();
+      connection = dss.getConnection();
       database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
       name = database.getDatabaseProductName();
     } catch (SQLException e) {
@@ -232,78 +198,12 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
           }
           connection.close();
         } catch (SQLException e) {
-          log.warning(LogType.LOG, "problem closing connection", e);
+          log.warn("problem closing connection", e);
         }
       }
     }
     return name;
   }
-
-  /**
-   * The DataSource that liquibase will use to perform the migration.
-   */
-  public DataSource getDataSource() {
-    return dataSource;
-  }
-
-  /**
-   * Returns a Resource that is able to resolve to a file or classpath resource.
-   */
-  public String getChangeLog() {
-    return changeLog;
-  }
-
-  /**
-   * Sets a Spring Resource that is able to resolve to a file or classpath resource.
-   * An example might be <code>classpath:db-changelog.xml</code>.
-   */
-  public String getContexts() {
-    return contexts;
-  }
-
-  public String getLabels() {
-    return labels;
-  }
-
-  public String getTag() {
-    return tag;
-  }
-
-  public Optional<String> getDefaultSchema() {
-    return defaultSchema;
-  }
-
-  public String getLiquibaseTablespace() {
-    return liquibaseTablespace;
-  }
-
-  public String getLiquibaseSchema() {
-    return liquibaseSchema;
-  }
-
-  public String getDatabaseChangeLogTable() {
-    return databaseChangeLogTable;
-  }
-
-  public String getDatabaseChangeLogLockTable() {
-    return databaseChangeLogLockTable;
-  }
-
-  /**
-   * Returns whether a rollback should be tested at update time or not.
-   */
-  public boolean isTestRollbackOnUpdate() {
-    return testRollbackOnUpdate;
-  }
-
-  //    /**
-  //     * If testRollbackOnUpdate is set to true a rollback will be tested at tupdate time.
-  //     * For doing so when the update is performed
-  //     * @param testRollbackOnUpdate
-  //     */
-  //    public void setTestRollbackOnUpdate(boolean testRollbackOnUpdate) {
-  //        this.testRollbackOnUpdate = testRollbackOnUpdate;
-  //    }
 
   public ExecutionResponse<String, Integer> execute() {
     ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance()
@@ -320,7 +220,7 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
 
     Liquibase liquibase = null;
     try {
-      liquibase = createLiquibase(getDataSource().getConnection());
+      liquibase = createLiquibase(this.dataSourceSupplier.get().getConnection());
       generateRollbackFile(liquibase);
       performUpdate(liquibase);
     } catch (SQLException | LiquibaseException e) {
@@ -344,61 +244,58 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
   }
 
   private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
-    if (rollbackFile != null) {
+    Path rollbackFile = this.rollbackFileSupplier.get();
 
-      try (
-          OutputStream fileOutputStream = Files.newOutputStream(rollbackFile, StandardOpenOption.CREATE,
-              StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-          Writer output = new OutputStreamWriter(fileOutputStream,
-              LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding())
+    try (
+        OutputStream fileOutputStream = Files.newOutputStream(rollbackFile, StandardOpenOption.CREATE,
+            StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+        Writer output = new OutputStreamWriter(fileOutputStream, this.encoding)
 
-      ) {
+    ) {
 
-        if (tag != null) {
-          liquibase.futureRollbackSQL(tag, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
-        } else {
-          liquibase.futureRollbackSQL(new Contexts(getContexts()), new LabelExpression(getLabels()), output);
-        }
-      } catch (IOException e) {
-        throw new LiquibaseException("Unable to generate rollback file.", e);
+      if (tag != null) {
+        liquibase.futureRollbackSQL(tag, this.contexts, this.labels, output);
+      } else {
+        liquibase.futureRollbackSQL(this.contexts, this.labels, output);
       }
+    } catch (IOException e) {
+      throw new LiquibaseException("Unable to generate rollback file.", e);
     }
   }
 
   protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-    if (isClearCheckSums()) {
+    if (this.clearCheckSums) {
       liquibase.clearCheckSums();
     }
 
-    if (isTestRollbackOnUpdate()) {
+    if (this.testRollbackOnUpdate) {
       if (tag != null) {
-        liquibase.updateTestingRollback(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+        liquibase.updateTestingRollback(this.tag, this.contexts, this.labels);
       } else {
-        liquibase.updateTestingRollback(new Contexts(getContexts()), new LabelExpression(getLabels()));
+        liquibase.updateTestingRollback(this.contexts, this.labels);
       }
     } else {
       if (tag != null) {
-        liquibase.update(tag, new Contexts(getContexts()), new LabelExpression(getLabels()));
+        liquibase.update(this.tag, this.contexts, this.labels);
       } else {
-        liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
+        liquibase.update(this.contexts, this.labels);
       }
     }
   }
 
   protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
     ResourceAccessor resourceAccessor = createResourceOpener();
-    Liquibase liquibase = new Liquibase(getChangeLog(), resourceAccessor, createDatabase(c, resourceAccessor));
-    liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
+    Liquibase liquibase = new Liquibase(this.changeLog, resourceAccessor, createDatabase(c, resourceAccessor));
+    liquibase.setIgnoreClasspathPrefix(this.ignoreClasspathPrefix);
+    ConfigMap parameters = getParameters();
     if (parameters != null) {
       for (String entry : parameters.keySet()) {
         liquibase.setChangeLogParameter(entry, parameters.get(entry));
       }
     }
-
-    if (isDropFirst()) {
+    if (this.dropFirst) {
       liquibase.dropAll();
     }
-
     return liquibase;
   }
 
@@ -417,7 +314,7 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
     DatabaseConnection liquibaseConnection;
     if (c == null) {
       String str = "Null connection returned by liquibase datasource. Using offline unknown database";
-      log.warning(LogType.LOG, str);
+      log.warn(str);
       this.errors.add(str);
       liquibaseConnection = new OfflineConnection("offline:unknown", resourceAccessor);
 
@@ -426,7 +323,7 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
     }
 
     Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(liquibaseConnection);
-    getDefaultSchema().ifPresent(s -> {
+    this.defaultSchema.ifPresent(s -> {
       if (database.supportsSchemas()) {
         cet.withTranslation(() -> database.setDefaultSchemaName(s));
       } else if (database.supportsCatalogs()) {
@@ -460,12 +357,6 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
    */
   protected ResourceAccessor createResourceOpener() {
     return new ClassLoaderResourceAccessor(getClass().getClassLoader());
-
-    //        return new SpringResourceOpener(getChangeLog());
-  }
-
-  public boolean isIgnoreClasspathPrefix() {
-    return ignoreClasspathPrefix;
   }
 
   private final class LocalLiquibaseBeanExectionResponse implements ExecutionResponse<String, Integer> {
@@ -489,4 +380,5 @@ public class LocalLiquibaseBean implements ExecutionEnabled<LocalLiquibaseBean,C
     }
 
   }
+
 }

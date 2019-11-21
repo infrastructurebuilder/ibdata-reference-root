@@ -29,10 +29,12 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
 
   private final Logger log;
   private final TypeToExtensionMapper mapper;
+  private final boolean unzip;
 
-  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper) {
+  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, boolean unzipArchives) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
+    this.unzip = unzipArchives;
   }
 
   @Override

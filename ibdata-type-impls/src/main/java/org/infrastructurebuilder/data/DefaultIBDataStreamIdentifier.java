@@ -109,6 +109,11 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   @Override
+  public String getSha512() {
+    return getChecksum().toString();
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

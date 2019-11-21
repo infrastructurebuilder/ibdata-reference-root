@@ -15,7 +15,9 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
@@ -32,13 +34,14 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>sqlite-jdbc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.infrastructurebuilder</groupId>
-      <artifactId>ibcore</artifactId>
+  <dependency>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>ibdata-database-dialect-sqlite</artifactId>
+    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ibdata-avro-types</artifactId>
     </dependency>
     <dependency>
       <groupId>org.liquibase</groupId>

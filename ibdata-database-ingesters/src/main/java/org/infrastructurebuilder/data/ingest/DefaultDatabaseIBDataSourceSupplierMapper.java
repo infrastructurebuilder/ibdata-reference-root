@@ -71,7 +71,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
   @Inject
   public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
-    super(requireNonNull(l).get(), requireNonNull(t2e));
+    super(requireNonNull(l).get(), requireNonNull(t2e), false);
   }
 
   public List<String> getHeaders() {
@@ -82,9 +82,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultDatabaseIBDataSource(getLog(), temporaryId,
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), Optional.empty(),
-            ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(), v.getDescription(),
-            getMapper()));
+            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, Optional.empty(),
+            ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(),
+            v.getDescription(), getMapper()));
   }
 
   public class DefaultDatabaseIBDataSource extends AbstractIBDataSource implements AutoCloseable {
@@ -96,11 +96,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     private final GenericData jrmpGD;
 
-    public DefaultDatabaseIBDataSource(Logger l, String id, String source, Optional<BasicCredentials> creds,
-        Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath,
-        Optional<String> name, Optional<String> description, TypeToExtensionMapper t2e) {
+    public DefaultDatabaseIBDataSource(Logger l, String id, String source, boolean expand,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
+        TypeToExtensionMapper t2e) {
 
-      super(l, id, source, name, description, creds, checksum, metadata, additionalConfig);
+      super(l, id, source, expand, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
       this.t2e = t2e;
       ConfigMap cfg = additionalConfig.orElse(new ConfigMap());
@@ -118,8 +119,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     @Override
     public DefaultDatabaseIBDataSource withAdditionalConfig(ConfigMap config) {
-      return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), getCredentials(), getChecksum(),
-          getMetadata(), of(config), config.get(TARGET_PATH), getName(), getDescription(), t2e);
+      return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), false,
+          getCredentials(), getChecksum(), getMetadata(), of(config), config.get(TARGET_PATH), getName(),
+          getDescription(), t2e);
     }
 
     @Override

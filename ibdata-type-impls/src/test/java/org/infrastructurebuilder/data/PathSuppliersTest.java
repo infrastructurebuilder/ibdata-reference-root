@@ -19,7 +19,12 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class IBDataWorkingPathSupplierTest {
+public class PathSuppliersTest {
+
+  @Test
+  public void test0() {
+    assertNotNull(new IBDataCacheDirectoryPathSupplier());
+  }
 
   @Test
   public void test() {
