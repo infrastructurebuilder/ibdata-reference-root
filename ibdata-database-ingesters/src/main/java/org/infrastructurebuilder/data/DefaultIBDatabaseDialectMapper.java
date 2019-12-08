@@ -24,9 +24,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jooq.SQLDialect;
-import org.jooq.SQLDialect.ThirdParty;
-
 @Named
 public class DefaultIBDatabaseDialectMapper implements IBDatabaseDialectMapper {
 
@@ -38,6 +35,7 @@ public class DefaultIBDatabaseDialectMapper implements IBDatabaseDialectMapper {
   }
 
   @Override
+  @Deprecated
   public final Optional<IBDataDatabaseDriverSupplier> getSupplier(String key) {
     return ofNullable(suppliers.get(requireNonNull(key,"Supplier key")));
   }

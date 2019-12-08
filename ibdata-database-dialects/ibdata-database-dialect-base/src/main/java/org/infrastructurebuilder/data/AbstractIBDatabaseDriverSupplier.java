@@ -115,7 +115,7 @@ abstract public class AbstractIBDatabaseDriverSupplier
   }
 
   @Override
-  public Optional<Supplier<DataSource>> getDataSourceSupplier2(String jdbcURL, Optional<BasicCredentials> creds) {
+  public Optional<Supplier<DataSource>> getDataSourceSupplier(String jdbcURL, Optional<BasicCredentials> creds) {
     return getDatabaseDriverClassName(jdbcURL).map(driverClass -> {
       //      cet.withTranslation(() -> Class.forName(driverClass));
       final BasicDataSource d = new BasicDataSource();

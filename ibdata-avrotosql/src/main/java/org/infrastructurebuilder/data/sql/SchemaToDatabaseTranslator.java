@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.sql;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import org.apache.avro.Schema;
 
@@ -33,6 +34,6 @@ public interface SchemaToDatabaseTranslator {
    * @param u
    * @return
    */
-  Path apply(Schema u);
+  Path apply(List<Schema> u);
 
 }

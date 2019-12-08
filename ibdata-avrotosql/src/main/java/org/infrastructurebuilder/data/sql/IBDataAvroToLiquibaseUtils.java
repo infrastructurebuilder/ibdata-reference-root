@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.avro.Schema.Type.NULL;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.LogicalTypes.Decimal;
@@ -39,10 +38,10 @@ public interface IBDataAvroToLiquibaseUtils {
       throw new IBDataException("Subrecord processing should not happen here");
     case ENUM:
       return "varchar(255)";
-    //    case ARRAY:
-    //      throw new IBDataException("Array processing not completed");
-    //    case MAP:
-    //      throw new IBDataException("Map processing not completed");
+    // case ARRAY:
+    // throw new IBDataException("Array processing not completed");
+    // case MAP:
+    // throw new IBDataException("Map processing not completed");
     case UNION:
       //
       List<Schema> l = schema.getTypes();
@@ -53,49 +52,59 @@ public interface IBDataAvroToLiquibaseUtils {
       return "boolean";
     case BYTES:
     case FIXED:
-      switch (schema.getLogicalType().getName()) {
-      case "decimal":
-        LogicalTypes.Decimal _dt = (Decimal) schema.getLogicalType();
-        return String.format("DECIMAL(%d,%d)", _dt.getPrecision(), _dt.getScale());
-      default:
-        return "blob";
-      }
+      if (schema.getLogicalType() != null)
+        switch (schema.getLogicalType().getName()) {
+        case "decimal":
+          LogicalTypes.Decimal _dt = (Decimal) schema.getLogicalType();
+          return String.format("DECIMAL(%d,%d)", _dt.getPrecision(), _dt.getScale());
+        default:
+          throw new IBDataException("Unknown logical type " + schema.getLogicalType().getName());
+        }
+      return "blob";
     case DOUBLE:
       return "double";
     case FLOAT:
       return "float";
     case INT:
-      switch (schema.getLogicalType().getName()) {
-      case "date":
-        return "date";
-      case "time-millis":
-        return "time";
-      default:
-        return "int";
-      }
+      if (schema.getLogicalType() != null)
+        switch (schema.getLogicalType().getName()) {
+        case "date":
+          return "date";
+        case "time-millis":
+          return "time";
+        default:
+          throw new IBDataException("Unknown logical type " + schema.getLogicalType().getName());
+
+        }
+      return "int";
     case LONG:
-      switch (schema.getLogicalType().getName()) {
-      case "timestamp-millis":
-        return "timestamp";
-      default:
-        return "bigint";
-      }
-      //    case NULL:
-      //      return null;
+      if (schema.getLogicalType() != null)
+        switch (schema.getLogicalType().getName()) {
+        case "timestamp-millis":
+          return "timestamp";
+        default:
+          throw new IBDataException("Unknown logical type " + schema.getLogicalType().getName());
+
+        }
+      return "bigint";
+    // case NULL:
+    // return null;
     case STRING:
-      switch (schema.getLogicalType().getName()) {
-      case "uuid":
-        return "uuid";
-      default:
-        return "varchar(255)";
-      }
+      if (schema.getLogicalType() != null)
+        switch (schema.getLogicalType().getName()) {
+        case "uuid":
+          return "uuid";
+        default:
+          throw new IBDataException("Unknown logical type " + schema.getLogicalType().getName());
+        }
+      return "varchar(255)";
     default:
       throw new IBDataException("Cannot process type" + schema.getType().name());
     }
   }
 
   public static Xpp3Dom addField(Field field) {
-    Objects.requireNonNull(field, "field for IBDataAvroToLiquibcaseUtils.addField");
+    requireNonNull(field, "field for IBDataAvroToLiquibcaseUtils.addField");
     Xpp3Dom d = new Xpp3Dom(COLUMN);
     d.setAttribute(NAME, field.name());
     d.setAttribute(TYPE, getLBTypeFromAvroSchemaType(field, field.name(), field.schema()));

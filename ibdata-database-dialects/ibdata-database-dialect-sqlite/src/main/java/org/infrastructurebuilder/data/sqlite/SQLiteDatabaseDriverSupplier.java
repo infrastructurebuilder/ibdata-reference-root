@@ -21,7 +21,6 @@ import javax.inject.Named;
 import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 
-import liquibase.database.core.H2Database;
 import liquibase.database.core.SQLiteDatabase;
 
 @Named(SQLiteDatabaseDriverSupplier.SQLITE)

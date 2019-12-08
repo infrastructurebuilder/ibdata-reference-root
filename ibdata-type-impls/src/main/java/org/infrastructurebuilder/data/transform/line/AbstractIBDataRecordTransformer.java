@@ -61,7 +61,7 @@ abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRec
   }
 
   protected Object getObjectConfiguration(String key, Object defaultValue) {
-    return getConfig().getObjectOrDefault(key, defaultValue);
+    return getConfig().getOrDefault(key, defaultValue);
   }
 
   protected String getConfiguration(String key, String defaultValue) {

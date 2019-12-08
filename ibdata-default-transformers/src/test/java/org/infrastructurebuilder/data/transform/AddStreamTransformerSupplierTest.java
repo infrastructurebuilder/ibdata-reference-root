@@ -26,12 +26,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
@@ -117,7 +119,17 @@ public class AddStreamTransformerSupplierTest {
   }
 
   @Test
+  public void testSkipRows() {
+  }
+
+  @Test
+  public void testAccepts() {
+  }
+
+  @Test
   public void testConfigureConfigMapSupplier() throws IOException {
+    assertEquals(0, finalizer.getNumberOfRowsToSkip());
+    assertEquals(Arrays.asList(String.class), finalizer.accepts().get());
     Path p44 = wps.get().resolve("ABCD.txt");
     IBUtils.writeString(p44, "String");
     cms.addValue(AddStreamTransformerSupplier.ADDED_PATH, p44.toAbsolutePath().toString());
@@ -129,7 +141,7 @@ public class AddStreamTransformerSupplierTest {
     assertTrue(q.get().isPresent());
   }
 
-  @Test(expected = IBDataException.class)
+  @Test(expected = IBException.class)
   public void testUncnfiguredConfigureConfigMapSupplier() throws IOException {
     p = (AddStreamTransformerSupplier) p.withFinalizer(finalizer).configure(cms);
     IBDataTransformer t = p.get();

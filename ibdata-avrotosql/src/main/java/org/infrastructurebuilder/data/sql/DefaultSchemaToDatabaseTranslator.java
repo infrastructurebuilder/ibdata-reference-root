@@ -16,77 +16,52 @@
 package org.infrastructurebuilder.data.sql;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.avro.Schema.Type.*;
+import static org.apache.avro.Schema.Type.RECORD;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.sql.IBDataAvroToLiquibaseUtils.getLBTypeFromAvroSchemaType;
+import static org.infrastructurebuilder.util.IBUtils.writeString;
 
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.util.IBUtils;
+import org.infrastructurebuilder.util.config.IdentifierSupplier;
+import org.infrastructurebuilder.util.config.IncrementingDatedStringSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.dag.DAG;
-import org.infrastructurebuilder.util.dag.DAGBuilder;
 
 public class DefaultSchemaToDatabaseTranslator implements SchemaToDatabaseTranslator {
-  public static final String DEFAULT_DATE_FORMAT = "yyyyMMddHHmm";
   public static final String NAME = "name";
   public static final String CREATE_TABLE = "createTable";
 
-  private Path wp;
-  private Supplier<String> df;
-  private AtomicInteger i = new AtomicInteger(0);
-  private final AtomicReference<String> date = new AtomicReference<>();
+  private final Path workingPath;
+  private final IdentifierSupplier idSupplier = new IncrementingDatedStringSupplier();
+  private final Path targetFile;
 
   public DefaultSchemaToDatabaseTranslator(PathSupplier wps) {
-    this.df = () -> String.format("%s-%03d", date.get(), i.addAndGet(1));
-    this.wp = wps.get();
+    this.workingPath = wps.get();
+    this.targetFile = workingPath.resolve("LB-" + UUID.randomUUID().toString() + ".xml");
   }
 
   @Override
-  public synchronized Path apply(Schema u) {
-    if (!date.compareAndSet(null, new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(new Date())))
-      throw new IBDataException("Could not set id value properly");
-
-    if (requireNonNull(u, "DefaultSchemaToDatabaseTranslator schema").getType() != RECORD)
-      throw new IBDataException("The converted schema named " + u.getFullName() + " must be of type " + RECORD);
-
-    Xpp3Dom changeLog = new ChangeLog().asXML();
-    //    List<LocalChangeSet> cs = schemaAsChangeSet(u);
-    //    cs.forEach(c -> changeLog.addChild(c.asXML()));
-    return cet.withReturningTranslation(() -> IBUtils
-        .writeString(this.wp.resolve("LB-" + UUID.randomUUID().toString() + ".xml"), changeLog.toString()));
+  public synchronized Path apply(List<Schema> u) {
+    final ChangeLog changeLog = new ChangeLog(idSupplier);
+    requireNonNull(u).stream().forEach(schema -> changeLog.addSchema(schema));
+    return cet.withReturningTranslation(() -> writeString(this.targetFile, changeLog.get()));
   }
 
-  //  private List<LocalChangeSet> schemaAsChangeSet(Schema u) {
-  //    List<LocalChangeSet> l = new ArrayList<>();
-  //    if (u.getType() == RECORD) {
-  //      LocalChangeSet cs = new LocalChangeSet(u);
-  //      l.addAll(cs.getMeAndChildren());
-  //    }
-  //    return l;
 }
 
 abstract class LocalChangeSet {
 
   private final Xpp3Dom dom;
+  private final IdentifierSupplier idSupplier;
 
-  public LocalChangeSet(Xpp3Dom u) {
-
+  public LocalChangeSet(Xpp3Dom u, IdentifierSupplier idSupplier) {
     this.dom = requireNonNull(u);
+    this.idSupplier = requireNonNull(idSupplier);
 
   }
 
@@ -103,13 +78,21 @@ abstract class LocalChangeSet {
   public Xpp3Dom asXML() {
     return this.dom;
   }
+
+  public IdentifierSupplier getIdSupplier() {
+    return idSupplier;
+  }
+
+  public String getId() {
+    return idSupplier.get();
+  }
 }
 
-class ChangeLog extends LocalChangeSet {
+class ChangeLog extends LocalChangeSet implements Supplier<String> {
   private static final String LB_CHANGELOG_NS = "http://www.liquibase.org/xml/ns/dbchangelog";
 
-  public ChangeLog() {
-    super(new Xpp3Dom("databaseChangeLog"));
+  public ChangeLog(IdentifierSupplier idSupplier) {
+    super(new Xpp3Dom("databaseChangeLog"), idSupplier);
     this
         //
         .setAttribute("xmlns", LB_CHANGELOG_NS)
@@ -121,6 +104,18 @@ class ChangeLog extends LocalChangeSet {
                 + "http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd");
 
   }
+
+  public ChangeLog addSchema(Schema u) {
+    if (requireNonNull(u, "DefaultSchemaToDatabaseTranslator schema").getType() != RECORD)
+      throw new IBDataException("The converted schema named " + u.getFullName() + " must be of type " + RECORD);
+    this.addChildField(new CreateTableChangeSet(u, getIdSupplier()).asXML());
+    return this;
+  }
+
+  @Override
+  public String get() {
+    return asXML().toString();
+  }
 }
 
 class CreateTableChangeSet extends LocalChangeSet {
@@ -129,14 +124,14 @@ class CreateTableChangeSet extends LocalChangeSet {
   public static final String IBDATA_FROM_AVRO = "ibdata-from-avro";
   public static final String ID = "id";
 
-  public CreateTableChangeSet(Schema u, Supplier<String> df) {
-    super(new Xpp3Dom(CHANGE_SET));
-    this.setAttribute(AUTHOR, IBDATA_FROM_AVRO).setAttribute(ID, df.get());
+  public CreateTableChangeSet(Schema u, IdentifierSupplier idSupplier) {
+    super(new Xpp3Dom(CHANGE_SET), idSupplier);
+    this.setAttribute(AUTHOR, IBDATA_FROM_AVRO).setAttribute(ID, getId());
     u.getFields().stream().map(IBDataAvroToLiquibaseUtils::addField).forEach(this::addChildField);
     // Now the hard parts
-    //  Indexes
-    //  Constraints
-    //  Subrecord tables
+    // Indexes
+    // Constraints
+    // Subrecord tables
   }
 
 }

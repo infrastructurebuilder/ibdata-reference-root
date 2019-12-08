@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
@@ -47,13 +49,13 @@ public class DefaultSchemaToDatabaseTranslatorTest {
   }
 
   private SchemaToDatabaseTranslator s2d;
-  private Schema s;
+  private List<Schema> s;
 
   @Before
   public void setUp() throws Exception {
     s2d = new DefaultSchemaToDatabaseTranslator(wps);
     URL v = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toUri().toURL();
-    s = IBDataAvroUtils.avroSchemaFromString.apply(v.toExternalForm());
+    s = Arrays.asList(IBDataAvroUtils.avroSchemaFromString.apply(v.toExternalForm()));
   }
 
   @After

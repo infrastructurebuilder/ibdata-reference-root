@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -53,7 +52,6 @@ import liquibase.resource.ResourceAccessor;
 public class DefaultLiquibaseSupplier extends AbstractConfigurableSupplier<Liquibase, ConfigMapSupplier>
     implements LiquibaseSupplier {
 
-  public static final String SOURCE_URL = "sourceURL";
   private final PathSupplier wps;
   private final List<DataSourceSupplier> suppliers;
   private final IBDatabaseDialectMapper dialectMappper;
@@ -92,17 +90,18 @@ public class DefaultLiquibaseSupplier extends AbstractConfigurableSupplier<Liqui
   @Override
   protected Liquibase configuredType(ConfigMapSupplier config) {
     ConfigMap c = config.get();
-    String url = c.getOrDefault(SOURCE_URL, null);
+    String url = c.getString(SOURCE_URL);
+    Optional<BasicCredentials> creds = Optional.ofNullable(c.getOrDefault(CREDS, null));
     IBDataDatabaseDriverSupplier ds = getDialectMappper().getSupplierForURL(url)
         .orElseThrow(() -> new IBDataException("Failed to acquire IBDatabaseDialect for " + url));
-    Optional<BasicCredentials> creds = Optional.empty(); // FIXME Where are the creds coming from?
-    Supplier<DataSource> dataSource = ds.getDataSourceSupplier2(url, creds)
-        .orElseThrow(() -> new IBDataException("Failed to acquire connection for " + url));
+    DataSource dataSource = ds.getDataSourceSupplier(url, creds)
+        .orElseThrow(() -> new IBDataException("Failed to acquire DataSource for " + url)).get();
     Path physicalFile = getWps().get().resolve(UUID.randomUUID().toString() + ".xml").toAbsolutePath();
+
     DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalFile.toString());
-    List<ResourceAccessor> resourceAccessors = Arrays.asList(new ClassLoaderResourceAccessor()); // TODO get Resource accessors
-    ResourceAccessor resourceAccessor = new CompositeResourceAccessor(resourceAccessors);
-    Connection connection = cet.withReturningTranslation(() -> dataSource.get().getConnection());
+    // TODO get Resource accessors
+    ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Arrays.asList(new ClassLoaderResourceAccessor()));
+    Connection connection = cet.withReturningTranslation(() -> dataSource.getConnection());
     Database database = cet.withReturningTranslation(
         () -> DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection)));
     return new Liquibase(changeLog, resourceAccessor, database);

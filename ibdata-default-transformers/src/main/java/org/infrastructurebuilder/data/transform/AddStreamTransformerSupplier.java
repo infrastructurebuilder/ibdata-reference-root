@@ -15,10 +15,10 @@
  */
 package org.infrastructurebuilder.data.transform;
 
+import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -28,7 +28,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
@@ -39,7 +38,6 @@ import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
-import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -95,8 +93,7 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
     @Override
     public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds,
         List<IBDataStream> suppliedStreams, boolean failOnError) {
-      Path targetPath = Paths.get(Optional.ofNullable(getConfig().getOrDefault(ADDED_PATH, null))
-          .orElseThrow(() -> new IBDataException("No " + ADDED_PATH + " config")));
+      Path targetPath = Paths.get((String) getConfig().getRequired(ADDED_PATH));
       String u = cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm());
 
       IBDataSet createdDataSet = new DefaultIBDataSet(ds);

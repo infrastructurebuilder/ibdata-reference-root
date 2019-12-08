@@ -107,7 +107,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   @Test(expected = SQLException.class)
   public void testFailingConnection1() throws SQLException {
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier2(JDBC_MYSQL, Optional.empty());
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(JDBC_MYSQL, Optional.empty());
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
@@ -115,7 +115,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
   @Test(expected = SQLException.class)
   public void testFailingConnection2a() throws SQLException {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.of("B"));
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier2(JDBC_MYSQL, Optional.of(creds));
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(JDBC_MYSQL, Optional.of(creds));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
@@ -123,7 +123,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
   @Test(expected = SQLException.class)
   public void testFailingConnection2b() throws SQLException {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.empty());
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier2(JDBC_MYSQL, Optional.of(creds));
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(JDBC_MYSQL, Optional.of(creds));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
