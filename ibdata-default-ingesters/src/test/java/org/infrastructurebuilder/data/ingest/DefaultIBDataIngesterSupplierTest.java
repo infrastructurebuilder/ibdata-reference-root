@@ -141,36 +141,6 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    // dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e) {
-    //
-    // @Override
-    // public IBDataSourceSupplier getSupplierFor(String temporaryId,
-    // IBDataStreamIdentifier v) {
-    // IBDataSource ibds = new DefaultTestingSource("fail:source") {
-    // public Optional<org.infrastructurebuilder.util.artifacts.Checksum>
-    // getChecksum() {
-    // return of(new Checksum("ABCD"));
-    // };
-    //
-    // public List<IBChecksumPathType> get() {
-    // try (InputStream source = newInputStream(f)) {
-    // IBChecksumPathType reference =
-    // copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
-    // return Arrays.asList(reference);
-    // } catch (IOException e) {
-    // throw new IBDataException("Test failed", e);
-    // }
-    // }
-    // };
-    // return new DefaultIBDataSourceSupplier("X", ibds);
-    // }
-    //
-    // @Override
-    // public List<String> getHeaders() {
-    // return asList("failure:");
-    // }
-    //
-    // };
     dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, false) {
 
       @Override
