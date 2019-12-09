@@ -70,6 +70,7 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       put(APPLICATION_MSWORDX, DOCX);
       put(TEXT_PSV, PSV);
       put(APPLICATION_PDF, PDF);
+      put(APPLICATION_PPTX, PPT);
       put(AVRO_BINARY, AVRO);
       put("application/x-tika-msoffice", DEFAULT_EXTENSION);
       put(APPLICATION_VND_OASIS_SPREADSHEET, ODS);

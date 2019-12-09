@@ -109,13 +109,10 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     }
 
     @Override
-    public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi,
-        SortedMap<String, IBDataSourceSupplier> dssList) {
-      requireNonNull(dsi, "IBDataSetIdentifier for ingestion");
+    public List<Supplier<IBDataStream>> ingest(SortedMap<String, IBDataSourceSupplier> dssList) {
+//      requireNonNull(dsi, "IBDataSetIdentifier for ingestion");
       requireNonNull(dssList, "List of IBDataSourceSupplier instances");
       Date now = new Date(); // Ok for "now" (Get it?)
-//      ConfigMap over = new ConfigMap();
-//      over.put(IBDataSource.TARGET_PATH, getWorkingPath());
       ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).get();
       return dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms))
           // flatmap the

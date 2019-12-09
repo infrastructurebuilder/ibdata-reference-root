@@ -30,7 +30,7 @@
   <description>Maven plugin for IBData</description>
   <properties>
     <jacoco.max.missed.classes>17</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>01</test.coverage.percentage.required>
+    <test.coverage.percentage.required>0</test.coverage.percentage.required>
 
   </properties>
 

@@ -102,7 +102,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // Get the instance
         .get()
         // do the ingestion
-        .ingest(ingest, ingest.getDataSet(), dsSupplierFactory.mapIngestionToSourceSuppliers(ingest));
+        .ingest(dsSupplierFactory.mapIngestionToSourceSuppliers(ingest));
     try {
       return finalizer.finalize(null, ingest, suppliers);
     } catch (IOException e) {

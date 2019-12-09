@@ -62,8 +62,8 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
 
   public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier {
 
-    public DefaultIBDataSourceSupplier(String id, IBDataSource src, Path workingPath) {
-      super(id, src, workingPath);
+    public DefaultIBDataSourceSupplier(String temporaryId, IBDataSource src, Path workingPath) {
+      super(temporaryId, src, workingPath);
     }
 
   }

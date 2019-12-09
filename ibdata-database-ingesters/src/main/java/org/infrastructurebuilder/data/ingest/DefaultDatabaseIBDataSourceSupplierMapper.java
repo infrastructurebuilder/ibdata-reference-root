@@ -102,12 +102,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     private final GenericData jrmpGD;
 
-    public DefaultDatabaseIBDataSource(Logger l, String id, String source, boolean expand,
+    public DefaultDatabaseIBDataSource(Logger l, String tempId, String source, boolean expand,
         Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         TypeToExtensionMapper t2e) {
 
-      super(l, id, source, false /* Databases y'all */, name, description, creds, checksum, metadata, additionalConfig);
+      super(l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
       this.t2e = t2e;
       ConfigMap cfg = additionalConfig.orElse(new ConfigMap());

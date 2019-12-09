@@ -189,7 +189,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
     c = dis.get().configure(configMap);// configure() call default returns itself
-    List<Supplier<IBDataStream>> val = c.ingest(i, dsi, dss);
+    List<Supplier<IBDataStream>> val = c.ingest( dss);
 
     IBChecksumPathType finalized = finalizer.finalize(ibdataset, i, val);
     assertTrue(Files.isDirectory(finalized.getPath()));
@@ -216,7 +216,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
     c = dis.get().configure(configMap);// configure() call default returns itself
-    List<Supplier<IBDataStream>> val = c.ingest(i, dsi, dssPass);
+    List<Supplier<IBDataStream>> val = c.ingest(dssPass);
     assertNotNull(val);
   }
 
