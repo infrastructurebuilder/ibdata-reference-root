@@ -26,7 +26,7 @@ import org.apache.avro.specific.SpecificDatumReader;
 
 public final class DefaultAvroIBTypedRecordDataStreamSupplier<T> extends DefaultIBTypedDataStreamSupplier<T> {
 
-  public DefaultAvroIBTypedRecordDataStreamSupplier(Optional<Path> targetPath, IBDataStream stream, SpecificData c,
+  public DefaultAvroIBTypedRecordDataStreamSupplier(Path targetPath, IBDataStream stream, SpecificData c,
       boolean parallel) {
     super(stream,
         cet.withReturningTranslation(

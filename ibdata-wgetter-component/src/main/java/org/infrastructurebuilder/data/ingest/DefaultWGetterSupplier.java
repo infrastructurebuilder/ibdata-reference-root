@@ -22,9 +22,9 @@ import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_OCTET_STREAM;
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SUFFIX;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataConstants.*;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.*;
 
 import java.io.File;
 import java.net.ProxySelector;
@@ -102,21 +102,24 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 
   private final Logger log;
   private final TypeToExtensionMapper t2e;
-  private final Path cacheDirectory;
+  private final PathSupplier cacheDirectory;
   private final ArchiverManager archiverManager;
+  private final PathSupplier workingDirectory;
 
   @Inject
   public DefaultWGetterSupplier(LoggerSupplier log, TypeToExtensionMapper t2e,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier, ArchiverManager archiverManager) {
     this.log = requireNonNull(log).get();
     this.t2e = requireNonNull(t2e);
-    this.cacheDirectory = requireNonNull(cacheDirSupplier).get();
+    this.cacheDirectory = requireNonNull(cacheDirSupplier);
     this.archiverManager = requireNonNull(archiverManager);
+    this.workingDirectory = requireNonNull(workingPathSupplier);
   }
 
   @Override
   public WGetter get() {
-    return new WGetterImpl(log, t2e, cacheDirectory, this.archiverManager);
+    return new WGetterImpl(log, t2e, cacheDirectory.get(), workingDirectory.get(), this.archiverManager);
   }
 
   /*
@@ -128,8 +131,10 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     private final WGet wget;
     private final Log log;
     private final ArchiverManager am;
+    private final Path workingDir;
 
-    public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDirSupplier, ArchiverManager archiverManager) {
+    public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDir, Path workignDir,
+        ArchiverManager archiverManager) {
       // this.wps = requireNonNull(wps);
       this.wget = new WGet();
       // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then
@@ -139,9 +144,10 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
       this.wget.setLog(l2);
       this.wget.setT2EMapper(Objects.requireNonNull(t2e));
-      this.wget.setCacheDirectory(requireNonNull(cacheDirSupplier).toFile());
+      this.wget.setCacheDirectory(requireNonNull(cacheDir).toFile());
       this.log = l2;
       this.am = requireNonNull(archiverManager);
+      this.workingDir = requireNonNull(workignDir);
     }
 
     @Override
@@ -170,7 +176,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       Optional<List<IBChecksumPathType>> o = cet.withReturningTranslation(() -> this.wget.downloadIt());
       if (expandArchives) {
         o.ifPresent(c -> {
-          List<IBChecksumPathType> l = expand(empty(), c.get(0).getPath());
+          List<IBChecksumPathType> l = expand(workingDir, c.get(0).getPath());
           c.addAll(l);
         });
       }
@@ -178,7 +184,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     }
 
     @Override
-    public List<IBChecksumPathType> expand(Optional<Path> tempPath, Path source) {
+    public List<IBChecksumPathType> expand(Path tempPath, Path source) {
       List<IBChecksumPathType> l = new ArrayList<>();
       Path targetDir = cet.withReturningTranslation(() -> Files.createTempDirectory(IBDATA_PREFIX));
       File outputFile = source.toFile();
@@ -194,9 +200,12 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
           unarchiver.setDestDirectory(outputDirectory);
         }
         unarchiver.extract();
-        SortedSet<Path> ll = IBUtils.allFilesInTree(targetDir);
-        ll.forEach(p -> l.add(cet.withReturningTranslation(
-            () -> copyToDeletedOnExitTempChecksumAndPath(tempPath, IBDATA_PREFIX, IBDATA_SUFFIX, p))));
+        for (Path p : IBUtils.allFilesInTree(targetDir)) {
+          IBChecksumPathType q = cet.withReturningTranslation(
+              () -> copyToTempChecksumAndPath(tempPath, p));
+          l.add(q);
+        }
+
         IBUtils.deletePath(targetDir);
       } catch (NoSuchArchiverException e) {
         // File has no archiver because reasons, but that's OK

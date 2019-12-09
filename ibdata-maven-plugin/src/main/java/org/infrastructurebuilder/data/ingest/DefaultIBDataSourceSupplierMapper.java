@@ -75,9 +75,9 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultIBDataSource(getLog(),
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, v.getName(),
-            v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), ofNullable(v.getMimeType()),
-            wgs, this.archiverManager, getMapper()));
+            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.isExpandArchives(),
+            v.getName(), v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()),
+            ofNullable(v.getMimeType()), wgs, this.archiverManager, getMapper()));
   }
 
   public class DefaultIBDataSource extends AbstractIBDataSource {
@@ -89,12 +89,12 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     private final TypeToExtensionMapper mapper;
     private List<IBChecksumPathType> read;
 
-    private DefaultIBDataSource(Logger log, String id, String source, boolean expandArchives,
+    private DefaultIBDataSource(Logger log, String id, String sourceUrl, boolean expandArchives,
         Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
-      super(log, id, source, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
+      super(log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
       this.mimeType = mimeType;
       this.wgs = requireNonNull(wgs);
@@ -111,10 +111,14 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
 
     @Override
     public IBDataSource withAdditionalConfig(ConfigMap config) {
-      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(),
-          ofNullable((Boolean) config.get(SPLIT_ZIPS_CONFIG)).orElse(false), getCredentials(), getChecksum(),
-          getMetadata(), of(config), config.get(TARGET_PATH), getName(), getDescription(), getMimeType(), this.wgs,
-          this.am, this.mapper);
+      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), isExpandArchives(), getCredentials(),
+          getChecksum(), getMetadata(), of(config), config.get(TARGET_PATH), getName(), getDescription(), getMimeType(),
+          this.wgs, this.am, this.mapper);
+    }
+
+    @Override
+    public Optional<String> getMimeType() {
+      return this.mimeType;
     }
 
     @Override
@@ -143,13 +147,12 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
           case "zip":
             try (InputStream ins = src.openStream()) {
               localRead = new ArrayList<>();
-              IBChecksumPathType val = cet
-                  .withReturningTranslation(() -> copyToDeletedOnExitTempChecksumAndPath(ofNullable(targetPath),
-                      IBDATA_PREFIX, IBDATA_SUFFIX, ins));
+              IBChecksumPathType val = cet.withReturningTranslation(
+                  () -> copyToDeletedOnExitTempChecksumAndPath(targetPath, IBDATA_PREFIX, IBDATA_SUFFIX, ins));
               localRead.add(val);
 
               if (isExpandArchives()) {
-                localRead.addAll(wget.expand(ofNullable(targetPath), val.getPath()));
+                localRead.addAll(wget.expand(targetPath, val.getPath()));
               }
 
             } catch (IOException e) {

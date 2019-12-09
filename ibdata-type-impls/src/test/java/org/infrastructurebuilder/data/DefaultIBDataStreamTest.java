@@ -99,7 +99,7 @@ public class DefaultIBDataStreamTest {
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);
-    cType = copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",
+    cType = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "a", "b",
         getClass().getResourceAsStream("/lines.txt"));
     identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL().toExternalForm()),
         of(NAME), of(DESC), checksum, now, metadata, mimeType, of(path.toString()));

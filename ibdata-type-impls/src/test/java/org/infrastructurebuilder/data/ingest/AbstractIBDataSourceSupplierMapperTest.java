@@ -120,7 +120,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
@@ -147,7 +147,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
@@ -174,7 +174,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);

@@ -19,8 +19,9 @@ import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -38,7 +39,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultTestingSource;
 import org.infrastructurebuilder.data.IBDataException;
@@ -125,7 +125,7 @@ public class DefaultIBDataIngesterSupplierTest {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
             try {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", f);
+              IBChecksumPathType reference = copyToTempChecksumAndPath(wps.get(),  f);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
@@ -155,7 +155,7 @@ public class DefaultIBDataIngesterSupplierTest {
     // public List<IBChecksumPathType> get() {
     // try (InputStream source = newInputStream(f)) {
     // IBChecksumPathType reference =
-    // copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+    // copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
     // return Arrays.asList(reference);
     // } catch (IOException e) {
     // throw new IBDataException("Test failed", e);
@@ -182,7 +182,7 @@ public class DefaultIBDataIngesterSupplierTest {
 
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
@@ -209,7 +209,7 @@ public class DefaultIBDataIngesterSupplierTest {
   @Test
   public void testType() {
     IBDataSource ibds = new DefaultTestingSource("dummy:source");
-    assertEquals(IBConstants.APPLICATION_OCTET_STREAM, ibds.getMimeType().get());
+    assertFalse(ibds.getMimeType().isPresent());
   }
 
   @Test

@@ -84,7 +84,6 @@
                     <stream>
                       <temporaryId>temp1</temporaryId>
                       <name>one</name>
-                      <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f1.zip?agree=yes</url>
                       <sha512>a19fea88c433f698ee3634138075b9403fc4cf162f91b499ea5dd38a469753f14532d6ba59c8da9111b8394d3afb835cb4c12b2a3a4ef136b742742665c49f41</sha512>
                       <metadata>
@@ -97,7 +96,6 @@
                     <stream>
                       <temporaryId>temp2</temporaryId>
                       <name>two</name>
-                      <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f2.zip?agree=yes</url>
                       <sha512>107ea19531d7e7939db4d90e528e3bb6dfc1c3c46693756334bed38e09f8f28ee166c8dd0b49ada5b9e2acf5f989c493c01ee368c186b39c899b204a91ac72b9</sha512>
                       <metadata>
@@ -110,7 +108,6 @@
                     <stream>
                       <temporaryId>temp3</temporaryId>
                       <name>three</name>
-                      <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f3.zip?agree=yes</url>
                       <sha512>733b4af862768bf0c58bb9402fba7a13b2512fe0806c67521d03a2212df5b47286525c55f8b6186513181b10127c09ce0bdc471fdcc2968d0202f26d9a2586c4</sha512>
                       <metadata>
@@ -123,7 +120,6 @@
                     <stream>
                       <temporaryId>temp4</temporaryId>
                       <name>four</name>
-                      <mimeType>application/zip</mimeType>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f4.zip?agree=yes</url>
                       <sha512>425d9f23232761bb27164ee709fe5634ac916f480bd6bd3404ef7be41a5613a0c098b30616a7da7fe1c25a55278e5a51d0b6a0b68a3b444fe9f77f7b4ee27238</sha512>
                       <metadata>
@@ -132,6 +128,19 @@
                         </here>
                         <abc />
                       </metadata>
+                    </stream>
+                    <stream>
+                      <temporaryId>five5</temporaryId>
+                      <name>five</name>
+                      <url>https://file-examples.com/wp-content/uploads/2017/02/zip_2MB.zip</url>
+                      <sha512>f545eeb9c46e29f5d8e29639840457de5d1bdbc34e16cbe5c1ca4b7efcbf294da0a3df41485c041cee1a25d8f0afec246cd02be1298dee9ab770a7cfed73dc71</sha512>
+                      <metadata>
+                        <here>
+                          <x>also</x>
+                        </here>
+                        <abc />
+                      </metadata>
+                      <expandArchives>true</expandArchives>
                     </stream>
                   </streams>
                 </dataSet>

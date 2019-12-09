@@ -68,7 +68,7 @@ public class DefaultWGetterSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    this.ws = new DefaultWGetterSupplier(() -> log, new DefaultTypeToExtensionMapper(), wps,
+    this.ws = new DefaultWGetterSupplier(() -> log, new DefaultTypeToExtensionMapper(), wps, wps,
         new FakeArchiverManager());
   }
 
@@ -147,7 +147,7 @@ public class DefaultWGetterSupplierTest {
     assertTrue(v.isPresent());
     List<IBChecksumPathType> l = v.get();
     assertEquals(IBConstants.APPLICATION_ZIP, l.get(0).getType());
-    assertEquals("application/x-tika-msoffice", l.get(1).getType());
+    assertEquals(IBConstants.APPLICATION_MSWORD, l.get(1).getType());
     assertEquals(1027072, Files.size(l.get(1).getPath()));
   }
 

@@ -27,7 +27,7 @@ import static org.infrastructurebuilder.IBConstants.APPLICATION_ZIP;
 import static org.infrastructurebuilder.IBConstants.AVRO;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.IBConstants.CSV;
-import static org.infrastructurebuilder.IBConstants.DOC;
+import static org.infrastructurebuilder.IBConstants.*;
 import static org.infrastructurebuilder.IBConstants.DOCX;
 import static org.infrastructurebuilder.IBConstants.MDB;
 import static org.infrastructurebuilder.IBConstants.PDF;
@@ -53,6 +53,7 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 @Named
 public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
+
   private static final long serialVersionUID = -8394163203952496361L;
 
   private final static Map<String, String> map = new HashMap<String, String>() {
@@ -70,6 +71,8 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       put(TEXT_PSV, PSV);
       put(APPLICATION_PDF, PDF);
       put(AVRO_BINARY, AVRO);
+      put("application/x-tika-msoffice", DEFAULT_EXTENSION);
+      put(APPLICATION_VND_OASIS_SPREADSHEET, ODS);
     }
   };
 

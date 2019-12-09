@@ -53,7 +53,7 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
   }
 
   private DefaultAvroIBTypedRecordDataStreamSupplier<BA> q;
-  private Optional<Path> targetPath;
+  private Path targetPath;
   private IBDataStream stream;
   private boolean parallel;
   private Schema schema;
@@ -62,7 +62,7 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    targetPath = Optional.of(wps.get());
+    targetPath = wps.get();
     ins = getClass().getResourceAsStream(LOAD1);
     id = new DataStream();
     id.setUuid(UUID.randomUUID().toString());

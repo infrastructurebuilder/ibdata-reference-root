@@ -61,7 +61,7 @@ public class DefaultSeekableInputFromInputStreamTest {
   public void test() throws IOException {
     DefaultSeekableInputFromInputStream q = null;
     try (InputStream ins = Files.newInputStream(p)) {
-      q = new DefaultSeekableInputFromInputStream(Optional.empty(), ins);
+      q = new DefaultSeekableInputFromInputStream(wps.get(), ins);
       assertEquals(284042, q.length());
       q.seek(0L);
       assertEquals(CHECKSUM, q.asChecksum().toString());

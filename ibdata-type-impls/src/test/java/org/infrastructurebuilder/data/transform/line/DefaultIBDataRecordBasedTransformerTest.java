@@ -132,7 +132,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   private IBChecksumPathType readPathTypeFromFile(String resource) throws Exception {
     try (InputStream in = new URL(resource).openStream()) {
-      return copyToDeletedOnExitTempChecksumAndPath(of(thePath), "abc", "b", in);
+      return copyToDeletedOnExitTempChecksumAndPath(thePath, "abc", "b", in);
     }
   }
 

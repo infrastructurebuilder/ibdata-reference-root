@@ -28,7 +28,7 @@ import org.apache.avro.generic.GenericRecord;
 public final class DefaultAvroIBGenericRecordDataStreamSupplier
     extends DefaultIBTypedDataStreamSupplier<GenericRecord> {
 
-  public DefaultAvroIBGenericRecordDataStreamSupplier(Optional<Path> targetPath, IBDataStream stream, boolean parallel,
+  public DefaultAvroIBGenericRecordDataStreamSupplier(Path targetPath, IBDataStream stream, boolean parallel,
       Schema schema) {
     super(stream,
         cet.withReturningTranslation(

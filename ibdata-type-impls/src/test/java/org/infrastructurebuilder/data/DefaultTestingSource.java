@@ -48,4 +48,9 @@ public class DefaultTestingSource extends AbstractIBDataSource {
     return empty();
   }
 
+  @Override
+  public Optional<String> getMimeType() {
+    return empty();
+  }
+
 }
