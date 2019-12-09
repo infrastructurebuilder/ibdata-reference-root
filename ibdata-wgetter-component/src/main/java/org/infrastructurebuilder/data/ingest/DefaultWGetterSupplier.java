@@ -16,10 +16,15 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_OCTET_STREAM;
+import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
+import static org.infrastructurebuilder.IBConstants.IBDATA_SUFFIX;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 
 import java.io.File;
 import java.net.ProxySelector;
@@ -28,8 +33,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.SortedSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +70,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.codehaus.plexus.archiver.UnArchiver;
+import org.codehaus.plexus.archiver.bzip2.BZip2UnArchiver;
+import org.codehaus.plexus.archiver.gzip.GZipUnArchiver;
+import org.codehaus.plexus.archiver.manager.ArchiverManager;
+import org.codehaus.plexus.archiver.manager.NoSuchArchiverException;
+import org.codehaus.plexus.archiver.snappy.SnappyUnArchiver;
+import org.codehaus.plexus.archiver.xz.XZUnArchiver;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
 import org.infrastructurebuilder.data.IBDataException;
@@ -70,6 +86,7 @@ import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -86,18 +103,20 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
   private final Logger log;
   private final TypeToExtensionMapper t2e;
   private final Path cacheDirectory;
+  private final ArchiverManager archiverManager;
 
   @Inject
   public DefaultWGetterSupplier(LoggerSupplier log, TypeToExtensionMapper t2e,
-      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier) {
+      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier, ArchiverManager archiverManager) {
     this.log = requireNonNull(log).get();
     this.t2e = requireNonNull(t2e);
     this.cacheDirectory = requireNonNull(cacheDirSupplier).get();
+    this.archiverManager = requireNonNull(archiverManager);
   }
 
   @Override
   public WGetter get() {
-    return new WGetterImpl(log, t2e, cacheDirectory);
+    return new WGetterImpl(log, t2e, cacheDirectory, this.archiverManager);
   }
 
   /*
@@ -107,25 +126,29 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
   private class WGetterImpl implements WGetter {
 
     private final WGet wget;
+    private final Log log;
+    private final ArchiverManager am;
 
-    public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDirSupplier) {
+    public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDirSupplier, ArchiverManager archiverManager) {
       // this.wps = requireNonNull(wps);
       this.wget = new WGet();
       // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then
       // create a new LoggingMavenComponent from log
       // Log l2 = new LoggingMavenComponent(log);
-      Logger localLogger = requireNonNull(log); // FIXME (See above)
+//      Logger localLogger = requireNonNull(log); // FIXME (See above)
       Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
       this.wget.setLog(l2);
       this.wget.setT2EMapper(Objects.requireNonNull(t2e));
       this.wget.setCacheDirectory(requireNonNull(cacheDirSupplier).toFile());
+      this.log = l2;
+      this.am = requireNonNull(archiverManager);
     }
 
     @Override
-    synchronized public final Optional<IBChecksumPathType> collectCacheAndCopyToChecksumNamedFile(
+    synchronized public final Optional<List<IBChecksumPathType>> collectCacheAndCopyToChecksumNamedFile(
         boolean deleteExistingCacheIfPresent, Optional<BasicCredentials> creds, Path outputPath, String sourceString,
-        Optional<Checksum> checksum, Optional<String> type, boolean interactiveMode, int retries, int readTimeOut,
-        boolean skipCache) {
+        Optional<Checksum> checksum, Optional<String> type, int retries, int readTimeOut, boolean skipCache,
+        boolean expandArchives) {
 
       wget.setDeleteIfPresent(deleteExistingCacheIfPresent);
       requireNonNull(creds).ifPresent(bc -> {
@@ -143,8 +166,48 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       wget.setReadTimeOut(readTimeOut);
       wget.setSkipCache(skipCache);
       wget.setCheckSignature(checksum.isPresent());
-      wget.setMimeType(type.orElse(APPLICATION_OCTET_STREAM));
-      return cet.withReturningTranslation(() -> this.wget.downloadIt());
+      wget.setMimeType(type.orElse(null));
+      Optional<List<IBChecksumPathType>> o = cet.withReturningTranslation(() -> this.wget.downloadIt());
+      if (expandArchives) {
+        o.ifPresent(c -> {
+          List<IBChecksumPathType> l = expand(empty(), c.get(0).getPath());
+          c.addAll(l);
+        });
+      }
+      return o;
+    }
+
+    @Override
+    public List<IBChecksumPathType> expand(Optional<Path> tempPath, Path source) {
+      List<IBChecksumPathType> l = new ArrayList<>();
+      Path targetDir = cet.withReturningTranslation(() -> Files.createTempDirectory(IBDATA_PREFIX));
+      File outputFile = source.toFile();
+      File outputDirectory = targetDir.toFile();
+      String outputFileName = source.toAbsolutePath().toString();
+      try {
+        UnArchiver unarchiver = this.am.getUnArchiver(outputFile);
+        unarchiver.setSourceFile(outputFile);
+        if (isFileUnArchiver(unarchiver)) {
+          unarchiver
+              .setDestFile(new File(outputDirectory, outputFileName.substring(0, outputFileName.lastIndexOf('.'))));
+        } else {
+          unarchiver.setDestDirectory(outputDirectory);
+        }
+        unarchiver.extract();
+        SortedSet<Path> ll = IBUtils.allFilesInTree(targetDir);
+        ll.forEach(p -> l.add(cet.withReturningTranslation(
+            () -> copyToDeletedOnExitTempChecksumAndPath(tempPath, IBDATA_PREFIX, IBDATA_SUFFIX, p))));
+        IBUtils.deletePath(targetDir);
+      } catch (NoSuchArchiverException e) {
+        // File has no archiver because reasons, but that's OK
+        log.debug("File " + outputFile + " has no available archiver");
+      }
+      return l;
+    }
+
+    private boolean isFileUnArchiver(final UnArchiver unarchiver) {
+      return unarchiver instanceof BZip2UnArchiver || unarchiver instanceof GZipUnArchiver
+          || unarchiver instanceof SnappyUnArchiver || unarchiver instanceof XZUnArchiver;
     }
 
   }
@@ -338,7 +401,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     // return;
     // }
 
-    public Optional<IBChecksumPathType> downloadIt() throws MojoExecutionException, MojoFailureException {
+    public Optional<List<IBChecksumPathType>> downloadIt() throws MojoExecutionException, MojoFailureException {
 //      if (/*StringUtils.isNotBlank(serverId) && */ (StringUtils.isNotBlank(username)
 //          || StringUtils.isNotBlank(password))) {
 //        throw new MojoExecutionException("Specify either serverId or username/password, not both");
@@ -442,12 +505,16 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
             } else {
               getLog().warn("Not failing download despite download failure.");
               // return;
-              return Optional.empty();
+              return empty();
             }
           }
         }
 //        }
         finalChecksum = (this.sha512 == null ? new Checksum(outputFile.toPath()) : new Checksum(this.sha512));
+        DefaultIBChecksumPathType pVal = new DefaultIBChecksumPathType(outputFile.toPath(), finalChecksum, empty());
+        String computedType = pVal.getType();
+        if (this.mimeType == null)
+          this.mimeType = computedType;
         cache.install(this.uri, outputFile, null /* this.md5 */, null /* this.sha1 */, finalChecksum.toString());
         /* Get the "final name" */
         String finalFileName = finalChecksum.asUUID().get().toString() + t2e.getExtensionForType(this.mimeType);
@@ -466,9 +533,10 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         //// buildContext.refresh(outputFile);
         Path outPath = newTarget;
 
-        IBChecksumPathType retVal = new BasicIBChecksumPathType(outPath, finalChecksum,
-            ofNullable(this.mimeType).orElse(APPLICATION_OCTET_STREAM));
-        return Optional.of(retVal);
+        IBChecksumPathType retVal = new DefaultIBChecksumPathType(outPath, finalChecksum, ofNullable(this.mimeType));
+        List<IBChecksumPathType> retVall = new ArrayList<>();
+        retVall.add(retVal);
+        return Optional.of((retVall));
         // }
       } catch (Exception ex) {
         throw new MojoExecutionException("IO Error", ex);
@@ -654,7 +722,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 
     private ProxyInfo proxyInfo;
 
-    private String mimeType = APPLICATION_OCTET_STREAM;
+    private String mimeType = null;
 
     public void setMimeType(String mimeType) {
       this.mimeType = mimeType;

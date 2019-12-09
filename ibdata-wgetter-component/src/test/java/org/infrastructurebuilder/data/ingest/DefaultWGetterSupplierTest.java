@@ -21,7 +21,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.infrastructurebuilder.IBConstants;
@@ -45,6 +47,8 @@ public class DefaultWGetterSupplierTest {
 
   private static final String HTTP_WWW_EXAMPLE_COM_INDEX_HTML = "http://www.example.com/index.html";
   private static final String WWW_IANA_ORG = "/www.iana.org/";
+  private static final Optional<Checksum> ZIP_CHECKSUM = Optional.of(new Checksum(
+      "f545eeb9c46e29f5d8e29639840457de5d1bdbc34e16cbe5c1ca4b7efcbf294da0a3df41485c041cee1a25d8f0afec246cd02be1298dee9ab770a7cfed73dc71"));
   private static final Optional<Checksum> CHECKSUM = Optional.of(new Checksum(
       "d06b93c883f8126a04589937a884032df031b05518eed9d433efb6447834df2596aebd500d69b8283e5702d988ed49655ae654c1683c7a4ae58bfa6b92f2b73a"));
   private final static Logger log = LoggerFactory.getLogger(DefaultWGetterSupplierTest.class);
@@ -64,7 +68,8 @@ public class DefaultWGetterSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    this.ws = new DefaultWGetterSupplier(() -> log, new DefaultTypeToExtensionMapper(), wps);
+    this.ws = new DefaultWGetterSupplier(() -> log, new DefaultTypeToExtensionMapper(), wps,
+        new FakeArchiverManager());
   }
 
   @After
@@ -73,12 +78,8 @@ public class DefaultWGetterSupplierTest {
 
   @Test(expected = IBDataException.class)
   public void testRetries() throws IOException {
-    WGetter w = this.ws.get();
-    Path outputPath = wps.get();
-
-    String src = HTTP_WWW_EXAMPLE_COM_INDEX_HTML; // wps.getTestClasses().resolve("rick.jpg").toUri().toURL().toExternalForm();
-    Optional<IBChecksumPathType> q = w.collectCacheAndCopyToChecksumNamedFile(true, empty(), outputPath, src, CHECKSUM,
-        empty(), false, 0, 1000, true);
+    this.ws.get().collectCacheAndCopyToChecksumNamedFile(true, empty(), wps.get(), HTTP_WWW_EXAMPLE_COM_INDEX_HTML,
+        CHECKSUM, empty(), 0, 1000, true, false);
   }
 
   @Test
@@ -87,20 +88,21 @@ public class DefaultWGetterSupplierTest {
     Path outputPath = wps.get();
 
     String src = HTTP_WWW_EXAMPLE_COM_INDEX_HTML; // wps.getTestClasses().resolve("rick.jpg").toUri().toURL().toExternalForm();
-    Optional<IBChecksumPathType> q = w.collectCacheAndCopyToChecksumNamedFile(true, empty(), outputPath, src, CHECKSUM,
-        empty(), false, 5, 1000, true);
+    Optional<IBChecksumPathType> q = w
+        .collectCacheAndCopyToChecksumNamedFile(true, empty(), outputPath, src, CHECKSUM, empty(), 5, 1000, true, false)
+        .map(l -> l.get(0));
     assertTrue(q.isPresent());
     assertEquals(CHECKSUM.get().toString(), q.get().getChecksum().toString());
-    assertEquals(IBConstants.APPLICATION_OCTET_STREAM, q.get().getType());
+    assertEquals(IBConstants.TEXT_HTML, q.get().getType());
     String v = IBUtils.readToString(q.get().get());
     assertTrue(v.contains(WWW_IANA_ORG));
 
     // Do it again
-    q = w.collectCacheAndCopyToChecksumNamedFile(false, empty(), outputPath, src, CHECKSUM, empty(), false, 5, 1000,
-        false);
+    q = w.collectCacheAndCopyToChecksumNamedFile(false, empty(), outputPath, src, CHECKSUM, empty(), 5, 1000, false,
+        false).map(l -> l.get(0));
     assertTrue(q.isPresent());
     assertEquals(CHECKSUM.get().toString(), q.get().getChecksum().toString());
-    assertEquals(IBConstants.APPLICATION_OCTET_STREAM, q.get().getType());
+    assertEquals(IBConstants.TEXT_HTML, q.get().getType());
     v = IBUtils.readToString(q.get().get());
     assertTrue(v.contains(WWW_IANA_ORG));
 
@@ -114,23 +116,39 @@ public class DefaultWGetterSupplierTest {
     String src = HTTP_WWW_EXAMPLE_COM_INDEX_HTML; // wps.getTestClasses().resolve("rick.jpg").toUri().toURL().toExternalForm();
     BasicCredentials creds = new DefaultBasicCredentials("A", of("B"));
     Optional<IBChecksumPathType> q;
-    q = w.collectCacheAndCopyToChecksumNamedFile(false, of(creds), outputPath, src, CHECKSUM, empty(), false, 5, 0,
-        true);
+    q = w
+        .collectCacheAndCopyToChecksumNamedFile(false, of(creds), outputPath, src, CHECKSUM, empty(), 5, 0, true, false)
+        .map(l -> l.get(0));
     assertTrue(q.isPresent());
     assertEquals(CHECKSUM.get().toString(), q.get().getChecksum().toString());
-    assertEquals(IBConstants.APPLICATION_OCTET_STREAM, q.get().getType());
+    assertEquals(IBConstants.TEXT_HTML, q.get().getType());
     String v = IBUtils.readToString(q.get().get());
     assertTrue(v.contains(WWW_IANA_ORG));
 
     // Do it again
-    q = w.collectCacheAndCopyToChecksumNamedFile(true, empty(), outputPath, src, CHECKSUM, empty(), false, 5, 1000,
-        false);
+    q = w.collectCacheAndCopyToChecksumNamedFile(true, empty(), outputPath, src, CHECKSUM, empty(), 5, 1000, false,
+        false).map(l -> l.get(0));
     assertTrue(q.isPresent());
     assertEquals(CHECKSUM.get().toString(), q.get().getChecksum().toString());
-    assertEquals(IBConstants.APPLICATION_OCTET_STREAM, q.get().getType());
+    assertEquals(IBConstants.TEXT_HTML, q.get().getType());
     v = IBUtils.readToString(q.get().get());
     assertTrue(v.contains(WWW_IANA_ORG));
 
+  }
+
+  @Test
+  public void testZip() throws IOException {
+    WGetter w = this.ws.get();
+    Path outputPath = wps.get();
+    String src = "https://file-examples.com/wp-content/uploads/2017/02/zip_2MB.zip";
+//    String src = wps.getTestClasses().resolve("test.zip").toUri().toURL().toExternalForm();
+    Optional<List<IBChecksumPathType>> v = w.collectCacheAndCopyToChecksumNamedFile(false, empty(), outputPath, src,
+        ZIP_CHECKSUM, empty(), 5, 0, true, true);
+    assertTrue(v.isPresent());
+    List<IBChecksumPathType> l = v.get();
+    assertEquals(IBConstants.APPLICATION_ZIP, l.get(0).getType());
+    assertEquals("application/x-tika-msoffice", l.get(1).getType());
+    assertEquals(1027072, Files.size(l.get(1).getPath()));
   }
 
 }

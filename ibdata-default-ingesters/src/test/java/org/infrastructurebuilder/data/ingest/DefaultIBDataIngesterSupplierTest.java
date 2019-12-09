@@ -99,7 +99,7 @@ public class DefaultIBDataIngesterSupplierTest {
     filesDotTxtChecksum = new Checksum(f);
     PathSupplier cache = wps;
     configMap = new ConfigMap();
-    //    configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
+    // configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
     cms = new DefaultConfigMapSupplier(configMap);
     ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(wps, () -> log, t2e);
     ibdfs = (DefaultIBDataSetIngestionFinalizerSupplier) ibdfs.configure(cms);
@@ -124,8 +124,8 @@ public class DefaultIBDataIngesterSupplierTest {
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
-            try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+            try {
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", f);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
@@ -141,33 +141,36 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    //    dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e) {
+    // dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e) {
     //
-    //      @Override
-    //      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-    //        IBDataSource ibds = new DefaultTestingSource("fail:source") {
-    //          public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
-    //            return of(new Checksum("ABCD"));
-    //          };
+    // @Override
+    // public IBDataSourceSupplier getSupplierFor(String temporaryId,
+    // IBDataStreamIdentifier v) {
+    // IBDataSource ibds = new DefaultTestingSource("fail:source") {
+    // public Optional<org.infrastructurebuilder.util.artifacts.Checksum>
+    // getChecksum() {
+    // return of(new Checksum("ABCD"));
+    // };
     //
-    //          public List<IBChecksumPathType> get() {
-    //            try (InputStream source = newInputStream(f)) {
-    //              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
-    //              return Arrays.asList(reference);
-    //            } catch (IOException e) {
-    //              throw new IBDataException("Test failed", e);
-    //            }
-    //          }
-    //        };
-    //        return new DefaultIBDataSourceSupplier("X", ibds);
-    //      }
+    // public List<IBChecksumPathType> get() {
+    // try (InputStream source = newInputStream(f)) {
+    // IBChecksumPathType reference =
+    // copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+    // return Arrays.asList(reference);
+    // } catch (IOException e) {
+    // throw new IBDataException("Test failed", e);
+    // }
+    // }
+    // };
+    // return new DefaultIBDataSourceSupplier("X", ibds);
+    // }
     //
-    //      @Override
-    //      public List<String> getHeaders() {
-    //        return asList("failure:");
-    //      }
+    // @Override
+    // public List<String> getHeaders() {
+    // return asList("failure:");
+    // }
     //
-    //    };
+    // };
     dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, false) {
 
       @Override
@@ -225,15 +228,16 @@ public class DefaultIBDataIngesterSupplierTest {
     assertEquals(TEXT_PLAIN, q.getMimeType());
   }
 
-  //  @Test(expected = IBDataException.class)
-  //  public void testFail() throws IOException {
-  //    dssFail.put("FAILME", dssmFail.getSupplierFor(UUID.randomUUID().toString(),null));
-  //    dis = dis.getConfiguredSupplier(cms);
-  //    assertNotNull(dis);
-  //    c = dis.get().configure(configMap);// configure() call default returns itself
-  //    List<Supplier<IBDataStream>> val = c.ingest(i, dsi, dssFail);
-  //    assertNotNull(val);
-  //  }
+  // @Test(expected = IBDataException.class)
+  // public void testFail() throws IOException {
+  // dssFail.put("FAILME",
+  // dssmFail.getSupplierFor(UUID.randomUUID().toString(),null));
+  // dis = dis.getConfiguredSupplier(cms);
+  // assertNotNull(dis);
+  // c = dis.get().configure(configMap);// configure() call default returns itself
+  // List<Supplier<IBDataStream>> val = c.ingest(i, dsi, dssFail);
+  // assertNotNull(val);
+  // }
   //
   @Test
   public void testPassChecksum() throws IOException {
