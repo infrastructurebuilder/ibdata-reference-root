@@ -30,7 +30,7 @@
   <description>Component based on download-maven-plugin wget</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>60</test.coverage.percentage.required>
+    <test.coverage.percentage.required>81</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

@@ -101,18 +101,19 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
   }
 
   /*
-  *
-  * Encapsulates code from download-maven-plugin
-  */
+   *
+   * Encapsulates code from download-maven-plugin
+   */
   private class WGetterImpl implements WGetter {
 
     private final WGet wget;
 
     public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDirSupplier) {
-      //    this.wps = requireNonNull(wps);
+      // this.wps = requireNonNull(wps);
       this.wget = new WGet();
-      // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then create a new LoggingMavenComponent from log
-      //    Log l2 = new LoggingMavenComponent(log);
+      // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then
+      // create a new LoggingMavenComponent from log
+      // Log l2 = new LoggingMavenComponent(log);
       Logger localLogger = requireNonNull(log); // FIXME (See above)
       Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
       this.wget.setLog(l2);
@@ -122,9 +123,11 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 
     @Override
     synchronized public final Optional<IBChecksumPathType> collectCacheAndCopyToChecksumNamedFile(
-        Optional<BasicCredentials> creds, Path outputPath, String sourceString, Optional<Checksum> checksum,
-        Optional<String> type, boolean interactiveMode, int retries, int readTimeOut, boolean skipCache) {
+        boolean deleteExistingCacheIfPresent, Optional<BasicCredentials> creds, Path outputPath, String sourceString,
+        Optional<Checksum> checksum, Optional<String> type, boolean interactiveMode, int retries, int readTimeOut,
+        boolean skipCache) {
 
+      wget.setDeleteIfPresent(deleteExistingCacheIfPresent);
       requireNonNull(creds).ifPresent(bc -> {
         wget.setUsername(bc.getKeyId());
         wget.setPassword(bc.getSecret().orElse(null));
@@ -135,7 +138,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       wget.setUri(cet.withReturningTranslation(() -> new URL(requireNonNull(sourceString)).toURI()));
       wget.setFailOnError(false);
       wget.setOverwrite(false);
-      wget.setInteractiveMode(interactiveMode);
+//      wget.setInteractiveMode(interactiveMode);   // Never
       wget.setRetries(retries);
       wget.setReadTimeOut(readTimeOut);
       wget.setSkipCache(skipCache);
@@ -171,287 +174,283 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     /**
      * Represent the URL to fetch information from.
      */
-    //    @Parameter(alias = "url", property = "download.url", required = true)
+    // @Parameter(alias = "url", property = "download.url", required = true)
     private URI uri;
 
     /**
      * Flag to overwrite the file by redownloading it
      */
-    //    @Parameter(property = "download.overwrite")
+    // @Parameter(property = "download.overwrite")
     private boolean overwrite;
 
     /**
      * Represent the file name to use as output value. If not set, will use last
      * segment of "url"
      */
-    //    @Parameter(property = "download.outputFileName")
-    //    private String outputFileName;
+    // @Parameter(property = "download.outputFileName")
+    // private String outputFileName;
 
     /**
      * Represent the directory where the file should be downloaded.
      */
-    //    @Parameter(property = "download.outputDirectory", defaultValue = "${project.build.directory}", required = true)
-    //    private Path outputDirectory;
+    // @Parameter(property = "download.outputDirectory", defaultValue =
+    // "${project.build.directory}", required = true)
+    // private Path outputDirectory;
     private Path outputPath;
 
     /**
      * The md5 of the file. If set, file signature will be compared to this
      * signature and plugin will fail.
      */
-    //    @Parameter
-    //    private String md5;
+    // @Parameter
+    // private String md5;
 
     /**
      * The sha1 of the file. If set, file signature will be compared to this
      * signature and plugin will fail.
      */
-    //    @Parameter
-    //    private String sha1;
+    // @Parameter
+    // private String sha1;
 
     /**
      * The sha512 of the file. If set, file signature will be compared to this
      * signature and plugin will fail.
      */
-    //    @Parameter
+    // @Parameter
     private String sha512;
 
-    //    /**
-    //     * Whether to unpack the file in case it is an archive (.zip)
-    //     */
-    ////    @Parameter(property = "download.unpack", defaultValue = "false")
-    //    private boolean unpack;
+    // /**
+    // * Whether to unpack the file in case it is an archive (.zip)
+    // */
+    //// @Parameter(property = "download.unpack", defaultValue = "false")
+    // private boolean unpack;
 
     /**
-     * Server Id from settings file to use for authentication
-     * Only one of serverId or (username/password) may be supplied
+     * Server Id from settings file to use for authentication Only one of serverId
+     * or (username/password) may be supplied
      */
-    //    @Parameter
-    //    private String serverId;
+    // @Parameter
+    // private String serverId;
 
     /**
      * Custom username for the download
      */
-    //    @Parameter
+    // @Parameter
     private String username;
 
     /**
      * Custom password for the download
      */
-    //    @Parameter
+    // @Parameter
     private String password;
 
     /**
      * How many retries for a download
      */
-    //    @Parameter(defaultValue = "2")
+    // @Parameter(defaultValue = "2")
     private int retries;
 
     /**
      * Read timeout for a download in milliseconds
      */
-    //    @Parameter(defaultValue = "0")
+    // @Parameter(defaultValue = "0")
     private int readTimeOut;
 
     /**
      * Download file without polling cache
      */
-    //    @Parameter(property = "download.cache.skip", defaultValue = "false")
+    // @Parameter(property = "download.cache.skip", defaultValue = "false")
     private boolean skipCache;
 
     /**
      * The directory to use as a cache. Default is
      * ${local-repo}/.cache/maven-download-plugin
      */
-    //    @Parameter(property = "download.cache.directory")
+    // @Parameter(property = "download.cache.directory")
     private File cacheDirectory;
 
     /**
      * Flag to determine whether to fail on an unsuccessful download.
      */
-    //    @Parameter(defaultValue = "true")
+    // @Parameter(defaultValue = "true")
     private boolean failOnError;
 
     /**
      * Whether to skip execution of Mojo
      */
-    //    @Parameter(property = "download.plugin.skip", defaultValue = "false")
-    //    private boolean skip;
+    // @Parameter(property = "download.plugin.skip", defaultValue = "false")
+    // private boolean skip;
 
     /**
      * Whether to check the signature of existing files
      */
-    //    @Parameter(property = "checkSignature", defaultValue = "false")
+    // @Parameter(property = "checkSignature", defaultValue = "false")
     private boolean checkSignature;
 
-    //    @Parameter(property = "session")
-    //    private MavenSession session;
+    // @Parameter(property = "session")
+    // private MavenSession session;
 
-    //    @Component
-    //    private ArchiverManager archiverManager;
+    // @Component
+    // private ArchiverManager archiverManager;
 
     /**
      * For transfers
      */
-    //    @Component
-    //    private WagonManager wagonManager;
+    // @Component
+    // private WagonManager wagonManager;
 
-    //    @Component
-    //    private BuildContext buildContext;
+    // @Component
+    // private BuildContext buildContext;
 
-    //    @Parameter(defaultValue = "${settings}", readonly = true, required = true)
-    //    private Settings settings;
+    // @Parameter(defaultValue = "${settings}", readonly = true, required = true)
+    // private Settings settings;
 
-    //    /**
-    //     * Maven Security Dispatcher
-    //     */
-    //    @Component( hint = "mng-4384" )
-    //    private SecDispatcher securityDispatcher;
+    // /**
+    // * Maven Security Dispatcher
+    // */
+    // @Component( hint = "mng-4384" )
+    // private SecDispatcher securityDispatcher;
 
     /** Instance logger */
-    //    @Component
+    // @Component
     private Log log;
+
+    private boolean deleteIfPresent = false;
 
     public Log getLog() {
       return log;
     }
 
+    public void setDeleteIfPresent(boolean deleteExistingCacheIfPresent) {
+      this.deleteIfPresent = deleteExistingCacheIfPresent;
+    }
+
     /**
      * Method call whent he mojo is executed for the first time.
+     *
      * @throws MojoExecutionException if an error is occuring in this mojo.
-     * @throws MojoFailureException if an error is occuring in this mojo.
+     * @throws MojoFailureException   if an error is occuring in this mojo.
      */
-    //    @Override
-    //    public void execute() throws MojoExecutionException, MojoFailureException {
-    //        if (this.skip) {
-    //            getLog().info("maven-download-plugin:wget skipped");
-    //            return;
-    //        }
+    // @Override
+    // public void execute() throws MojoExecutionException, MojoFailureException {
+    // if (this.skip) {
+    // getLog().info("maven-download-plugin:wget skipped");
+    // return;
+    // }
 
     public Optional<IBChecksumPathType> downloadIt() throws MojoExecutionException, MojoFailureException {
-      if (/*StringUtils.isNotBlank(serverId) && */ (StringUtils.isNotBlank(username)
-          || StringUtils.isNotBlank(password))) {
-        throw new MojoExecutionException("Specify either serverId or username/password, not both");
-      }
+//      if (/*StringUtils.isNotBlank(serverId) && */ (StringUtils.isNotBlank(username)
+//          || StringUtils.isNotBlank(password))) {
+//        throw new MojoExecutionException("Specify either serverId or username/password, not both");
+//      }
 
-      //        if (settings == null) {
-      //            getLog().warn("settings is null");
-      //        }
-      //      getLog().debug("Got settings");
+      // if (settings == null) {
+      // getLog().warn("settings is null");
+      // }
+      // getLog().debug("Got settings");
       if (retries < 1) {
         throw new MojoFailureException("retries must be at least 1");
       }
 
       // PREPARE
-      //      if (this.outputFileName == null) {
-      //        try {
-      //          this.outputFileName = new File(this.uri.toURL().getFile()).getName();
-      //        } catch (Exception ex) {
-      //          throw new MojoExecutionException("Invalid URL", ex);
-      //        }
-      //      }
-      //        if (this.cacheDirectory == null) {
-      //            this.cacheDirectory = new File(this.session.getLocalRepository()
-      //                .getBasedir(), ".cache/download-maven-plugin");
-      //        }
+      // if (this.outputFileName == null) {
+      // try {
+      // this.outputFileName = new File(this.uri.toURL().getFile()).getName();
+      // } catch (Exception ex) {
+      // throw new MojoExecutionException("Invalid URL", ex);
+      // }
+      // }
+      // if (this.cacheDirectory == null) {
+      // this.cacheDirectory = new File(this.session.getLocalRepository()
+      // .getBasedir(), ".cache/download-maven-plugin");
+      // }
       getLog().debug("Cache is: " + this.cacheDirectory.getAbsolutePath());
       DownloadCache cache = new DownloadCache(this.cacheDirectory);
       Path outputDirectory = outputPath;
       String outputFileName = UUID.randomUUID().toString();
       IBDataException.cet.withTranslation(() -> Files.createDirectories(outputDirectory));
-      //      this.outputDirectory.mkdirs();
+      // this.outputDirectory.mkdirs();
       File outputFile = outputDirectory.resolve(outputFileName).toFile();
-      //      File outputFile = new File(this.outputDirectory, this.outputFileName);
+      // File outputFile = new File(this.outputDirectory, this.outputFileName);
 
       // DO
       try {
-        boolean haveFile = outputFile.exists();
-        if (haveFile) {
-          boolean signatureMatch = true;
-          if (this.checkSignature) {
-            String expectedDigest = null, algorithm = null;
-            //            if (this.md5 != null) {
-            //              expectedDigest = this.md5;
-            //              algorithm = "MD5";
-            //            }
-            //
-            //            if (this.sha1 != null) {
-            //              expectedDigest = this.sha1;
-            //              algorithm = "SHA1";
-            //            }
 
-            if (this.sha512 != null) {
-              expectedDigest = this.sha512;
-              algorithm = "SHA-512";
-            }
-
-            if (expectedDigest != null) {
-              try {
-                SignatureUtils.verifySignature(outputFile, expectedDigest, MessageDigest.getInstance(algorithm));
-              } catch (MojoFailureException e) {
-                getLog().warn(
-                    "The local version of file " + outputFile.getName() + " doesn't match the expected signature. "
-                        + "You should consider checking the specified signature is correctly set.");
-                signatureMatch = false;
-              }
-            }
-          }
-
-          // TODO verify last modification date
-          if (!signatureMatch) {
-            outputFile.delete();
-            haveFile = false;
-          } else if (!overwrite) {
-            getLog().info("File already exist, skipping");
-          } else {
-            // If no signature provided and owerwriting requested we
-            // will treat the fact as if there is no file in the cache.
-            haveFile = false;
-          }
+        boolean haveFile = false;
+        /*
+         * boolean haveFile = outputFile.exists(); // Literally never happens if
+         * (haveFile) { boolean signatureMatch = true; if (this.checkSignature) { String
+         * expectedDigest = null, algorithm = null; // if (this.md5 != null) { //
+         * expectedDigest = this.md5; // algorithm = "MD5"; // } // // if (this.sha1 !=
+         * null) { // expectedDigest = this.sha1; // algorithm = "SHA1"; // }
+         *
+         * if (this.sha512 != null) { expectedDigest = this.sha512; algorithm =
+         * "SHA-512"; }
+         *
+         * if (expectedDigest != null) { try {
+         * SignatureUtils.verifySignature(outputFile, expectedDigest,
+         * MessageDigest.getInstance(algorithm)); } catch (MojoFailureException e) {
+         * getLog().warn( "The local version of file " + outputFile.getName() +
+         * " doesn't match the expected signature. " +
+         * "You should consider checking the specified signature is correctly set.");
+         * signatureMatch = false; } } }
+         *
+         * // TODO verify last modification date if (!signatureMatch) {
+         * outputFile.delete(); haveFile = false; } else if (!overwrite) {
+         * getLog().info("File already exist, skipping"); } else { // If no signature
+         * provided and owerwriting requested we // will treat the fact as if there is
+         * no file in the cache. haveFile = false; } }
+         */
+        Checksum finalChecksum;
+//        if (!haveFile) {
+        File cached = cache.getArtifact(this.uri, null /* this.md5 */, null /* this.sha1 */, this.sha512);
+        if (this.deleteIfPresent && cached != null && cached.exists()) {
+          getLog().warn("Deleting cached file " + cached);
+          cached.delete();
         }
-
-        if (!haveFile) {
-          File cached = cache.getArtifact(this.uri, null /*this.md5*/, null /*this.sha1*/, this.sha512);
-          if (!this.skipCache && cached != null && cached.exists()) {
-            getLog().info("Got from cache: " + cached.getAbsolutePath());
-            Files.copy(cached.toPath(), outputFile.toPath());
-          } else {
-            boolean done = false;
-            while (!done && this.retries > 0) {
-              try {
-                doGet(outputFile);
-                //                if (this.md5 != null) {
-                //                  SignatureUtils.verifySignature(outputFile, this.md5, MessageDigest.getInstance("MD5"));
-                //                }
-                //                if (this.sha1 != null) {
-                //                  SignatureUtils.verifySignature(outputFile, this.sha1, MessageDigest.getInstance("SHA1"));
-                //                }
-                if (this.sha512 != null) {
-                  SignatureUtils.verifySignature(outputFile, this.sha512, MessageDigest.getInstance("SHA-512"));
-                }
-                done = true;
-              } catch (Exception ex) {
-                getLog().warn("Could not get content", ex);
-                this.retries--;
-                if (this.retries > 0) {
-                  getLog().warn("Retrying (" + this.retries + " more)");
-                }
+        if (!this.skipCache && cached != null && cached.exists()) {
+          getLog().info("Got from cache: " + cached.getAbsolutePath());
+          Files.copy(cached.toPath(), outputFile.toPath());
+        } else {
+          boolean done = false;
+          while (!done && this.retries > 0) {
+            try {
+              doGet(outputFile);
+              // if (this.md5 != null) {
+              // SignatureUtils.verifySignature(outputFile, this.md5,
+              // MessageDigest.getInstance("MD5"));
+              // }
+              // if (this.sha1 != null) {
+              // SignatureUtils.verifySignature(outputFile, this.sha1,
+              // MessageDigest.getInstance("SHA1"));
+              // }
+              if (this.sha512 != null) {
+                SignatureUtils.verifySignature(outputFile, this.sha512, MessageDigest.getInstance("SHA-512"));
+              }
+              done = true;
+            } catch (Exception ex) {
+              getLog().warn("Could not get content", ex);
+              this.retries--;
+              if (this.retries > 0) {
+                getLog().warn("Retrying (" + this.retries + " more)");
               }
             }
-            if (!done) {
-              if (failOnError) {
-                throw new MojoFailureException("Could not get content");
-              } else {
-                getLog().warn("Not failing download despite download failure.");
-                //                            return;
-                return Optional.empty();
-              }
+          }
+          if (!done) {
+            if (failOnError) {
+              throw new MojoFailureException("Could not get content");
+            } else {
+              getLog().warn("Not failing download despite download failure.");
+              // return;
+              return Optional.empty();
             }
           }
         }
+//        }
+        finalChecksum = (this.sha512 == null ? new Checksum(outputFile.toPath()) : new Checksum(this.sha512));
+        cache.install(this.uri, outputFile, null /* this.md5 */, null /* this.sha1 */, finalChecksum.toString());
         /* Get the "final name" */
-        Checksum finalChecksum = (this.sha512 == null ? new Checksum(outputFile.toPath()) : new Checksum(this.sha512));
         String finalFileName = finalChecksum.asUUID().get().toString() + t2e.getExtensionForType(this.mimeType);
-
         Path newTarget = outputPath.resolve(finalFileName);
         try {
           IBUtils.moveAtomic(outputFile.toPath(), newTarget);
@@ -459,42 +458,42 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
           outputFile.delete();
         }
 
-        cache.install(this.uri, newTarget.toFile(), null /*this.md5*/, null /*this.sha1*/, this.sha512);
-        //            if (this.unpack) {
-        //                unpack(outputFile);
-        ////                buildContext.refresh(outputDirectory);
-        //                return Optional.of(outputDirectory.toPath());
-        //            } else {
-        ////                buildContext.refresh(outputFile);
+        // if (this.unpack) {
+        // unpack(outputFile);
+        //// buildContext.refresh(outputDirectory);
+        // return Optional.of(outputDirectory.toPath());
+        // } else {
+        //// buildContext.refresh(outputFile);
         Path outPath = newTarget;
 
         IBChecksumPathType retVal = new BasicIBChecksumPathType(outPath, finalChecksum,
             ofNullable(this.mimeType).orElse(APPLICATION_OCTET_STREAM));
         return Optional.of(retVal);
-        //            }
+        // }
       } catch (Exception ex) {
         throw new MojoExecutionException("IO Error", ex);
       }
     }
 
-    //    private void unpack(File outputFile) throws NoSuchArchiverException {
-    //        UnArchiver unarchiver = this.archiverManager.getUnArchiver(outputFile);
-    //        unarchiver.setSourceFile(outputFile);
-    //        if (isFileUnArchiver(unarchiver)) {
-    //            unarchiver.setDestFile(new File(this.outputDirectory, outputFileName.substring(0, outputFileName.lastIndexOf('.'))));
-    //        } else {
-    //            unarchiver.setDestDirectory(this.outputDirectory);
-    //        }
-    //        unarchiver.extract();
-    //        outputFile.delete();
-    //    }
+    // private void unpack(File outputFile) throws NoSuchArchiverException {
+    // UnArchiver unarchiver = this.archiverManager.getUnArchiver(outputFile);
+    // unarchiver.setSourceFile(outputFile);
+    // if (isFileUnArchiver(unarchiver)) {
+    // unarchiver.setDestFile(new File(this.outputDirectory,
+    // outputFileName.substring(0, outputFileName.lastIndexOf('.'))));
+    // } else {
+    // unarchiver.setDestDirectory(this.outputDirectory);
+    // }
+    // unarchiver.extract();
+    // outputFile.delete();
+    // }
     //
-    //    private boolean isFileUnArchiver(final UnArchiver unarchiver) {
-    //        return unarchiver instanceof  BZip2UnArchiver ||
-    //                unarchiver instanceof GZipUnArchiver ||
-    //                unarchiver instanceof SnappyUnArchiver ||
-    //                unarchiver instanceof XZUnArchiver;
-    //    }
+    // private boolean isFileUnArchiver(final UnArchiver unarchiver) {
+    // return unarchiver instanceof BZip2UnArchiver ||
+    // unarchiver instanceof GZipUnArchiver ||
+    // unarchiver instanceof SnappyUnArchiver ||
+    // unarchiver instanceof XZUnArchiver;
+    // }
     //
 
     private void doGet(final File outputFile) throws Exception {
@@ -516,24 +515,27 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         credentialsProvider.setCredentials(new AuthScope(this.uri.getHost(), this.uri.getPort()),
             new UsernamePasswordCredentials(username, password));
 
-        //        } else if (StringUtils.isNotBlank(serverId)) {
-        //            getLog().debug("providing custom authentication for " + serverId);
-        //            Server server = settings.getServer(serverId);
-        //            if (server == null) {
-        //                throw new MojoExecutionException(String.format("Server %s not found", serverId));
-        //            }
-        //            getLog().debug(String.format("serverId %s supplies username: %s and password: ***",  serverId, server.getUsername() ));
+        // } else if (StringUtils.isNotBlank(serverId)) {
+        // getLog().debug("providing custom authentication for " + serverId);
+        // Server server = settings.getServer(serverId);
+        // if (server == null) {
+        // throw new MojoExecutionException(String.format("Server %s not found",
+        // serverId));
+        // }
+        // getLog().debug(String.format("serverId %s supplies username: %s and password:
+        // ***", serverId, server.getUsername() ));
         //
-        //            credentialsProvider = new BasicCredentialsProvider();
-        //            credentialsProvider.setCredentials(
-        //                    new AuthScope(this.uri.getHost(), this.uri.getPort()),
-        //                    new UsernamePasswordCredentials(server.getUsername(), decrypt(server.getPassword(), serverId)));
+        // credentialsProvider = new BasicCredentialsProvider();
+        // credentialsProvider.setCredentials(
+        // new AuthScope(this.uri.getHost(), this.uri.getPort()),
+        // new UsernamePasswordCredentials(server.getUsername(),
+        // decrypt(server.getPassword(), serverId)));
 
       }
 
       final HttpRoutePlanner routePlanner;
-      //      ProxyInfo proxyInfo = this.wagonManager.getProxy(this.uri.getScheme());
-      //      ProxyInfo proxyInfo = (ProxyInfo) this.proxyInfoSupplier.get();
+      // ProxyInfo proxyInfo = this.wagonManager.getProxy(this.uri.getScheme());
+      // ProxyInfo proxyInfo = (ProxyInfo) this.proxyInfoSupplier.get();
       if (proxyInfo != null && proxyInfo.getHost() != null && ProxyInfo.PROXY_HTTP.equals(proxyInfo.getType())) {
         routePlanner = new DefaultProxyRoutePlanner(new HttpHost(proxyInfo.getHost(), proxyInfo.getPort()));
         if (proxyInfo.getUserName() != null) {
@@ -558,8 +560,11 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
           .setConnectionManagerShared(true).setRoutePlanner(routePlanner).build();
 
       final HttpFileRequester fileRequester = new HttpFileRequester(httpClient,
-          /*this.session.getSettings().isInteractiveMode()*/ this.interactiveMode ? new LoggingProgressReport(getLog())
-              : new SilentProgressReport(getLog()));
+          /* this.session.getSettings().isInteractiveMode() */
+
+          /*
+           * this.interactiveMode ? new LoggingProgressReport(getLog()) :
+           */new SilentProgressReport(getLog()));
 
       final HttpClientContext clientContext = HttpClientContext.create();
       clientContext.setRequestConfig(requestConfig);
@@ -570,17 +575,19 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       fileRequester.download(this.uri, outputFile, clientContext);
     }
 
-    //    private String decrypt(String str, String server) {
-    //        try  {
-    //            return securityDispatcher.decrypt(str);
-    //        }
-    //        catch(SecDispatcherException e) {
-    //            getLog().warn(String.format("Failed to decrypt password/passphrase for server %s, using auth token as is", server), e);
-    //            return str;
-    //        }
-    //    }
+    // private String decrypt(String str, String server) {
+    // try {
+    // return securityDispatcher.decrypt(str);
+    // }
+    // catch(SecDispatcherException e) {
+    // getLog().warn(String.format("Failed to decrypt password/passphrase for server
+    // %s, using auth token as is", server), e);
+    // return str;
+    // }
+    // }
 
-    // ************************  Adding Constructor and setters for private params so that this is a component
+    // ************************ Adding Constructor and setters for private params so
+    // that this is a component
 
     public void setUri(URI uri) {
       this.uri = uri;
@@ -590,9 +597,9 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       this.overwrite = overwrite;
     }
 
-    //    public void setOutputFileName(String outputFileName) {
-    //      this.outputFileName = outputFileName;
-    //    }
+    // public void setOutputFileName(String outputFileName) {
+    // this.outputFileName = outputFileName;
+    // }
 
     public void setOutputPath(Path outputPath) {
       this.outputPath = outputPath;
@@ -602,9 +609,9 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       this.sha512 = sha512;
     }
 
-    //    public void setUnpack(boolean unpack) {
-    //      this.unpack = unpack;
-    //    }
+    // public void setUnpack(boolean unpack) {
+    // this.unpack = unpack;
+    // }
     //
 
     public void setUsername(String username) {
@@ -641,9 +648,9 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 
     private boolean interactiveMode = false;
 
-    public void setInteractiveMode(boolean interactiveMode) {
-      this.interactiveMode = interactiveMode;
-    }
+//    public void setInteractiveMode(boolean interactiveMode) {
+//      this.interactiveMode = interactiveMode;
+//    }
 
     private ProxyInfo proxyInfo;
 
@@ -666,13 +673,15 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
      * log, proxyInfoSupplier are required!!!
      */
 
-    //    public void setLog(LoggerSupplier log) {
-    //      this.log = cet.withReturningTranslation(() -> ((Log) requireNonNull(log).get()));
-    //    }
+    // public void setLog(LoggerSupplier log) {
+    // this.log = cet.withReturningTranslation(() -> ((Log)
+    // requireNonNull(log).get()));
+    // }
     //
-    //    public void setProxySupplier(ProxyInfoSupplier pi) {
-    //      this.proxyInfo = cet.withReturningTranslation(() -> ((ProxyInfo) requireNonNull(pi).get()));
-    //    }
+    // public void setProxySupplier(ProxyInfoSupplier pi) {
+    // this.proxyInfo = cet.withReturningTranslation(() -> ((ProxyInfo)
+    // requireNonNull(pi).get()));
+    // }
   }
 
 }
