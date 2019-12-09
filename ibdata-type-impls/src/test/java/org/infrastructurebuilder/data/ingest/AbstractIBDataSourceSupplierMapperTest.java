@@ -113,7 +113,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dset.setCreationDate(now);
     dset.setUuid(UUID.randomUUID().toString());
     ibdataset = new DefaultIBDataSet(dset);
-    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, true) {
+    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -127,7 +127,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override
@@ -136,7 +136,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e, true) {
+    dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -154,7 +154,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override
@@ -163,7 +163,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, true) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -181,7 +181,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override

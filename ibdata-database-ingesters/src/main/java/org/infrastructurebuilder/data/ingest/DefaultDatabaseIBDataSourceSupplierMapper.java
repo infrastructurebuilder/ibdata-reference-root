@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -48,6 +49,7 @@ import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.jooq.DSLContext;
@@ -72,8 +74,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public static final String NAMESPACE = "namespace";
 
   @Inject
-  public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
-    super(requireNonNull(l).get(), requireNonNull(t2e), false);
+  public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
+    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
   }
 
   public List<String> getHeaders() {
@@ -86,7 +89,8 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
         new DefaultDatabaseIBDataSource(getLog(), temporaryId,
             v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, Optional.empty(),
             ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(),
-            v.getDescription(), getMapper()));
+            v.getDescription(), getMapper()),
+        getWorkingPath());
   }
 
   public class DefaultDatabaseIBDataSource extends AbstractIBDataSource implements AutoCloseable {
@@ -103,7 +107,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         TypeToExtensionMapper t2e) {
 
-      super(l, id, source, false /*Databases y'all */, name, description, creds, checksum, metadata, additionalConfig);
+      super(l, id, source, false /* Databases y'all */, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
       this.t2e = t2e;
       ConfigMap cfg = additionalConfig.orElse(new ConfigMap());
@@ -122,7 +126,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     @Override
     public DefaultDatabaseIBDataSource withAdditionalConfig(ConfigMap config) {
       return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), false, getCredentials(), getChecksum(),
-          getMetadata(), of(config), config.get(TARGET_PATH), getName(), getDescription(), t2e);
+          getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), t2e);
     }
 
     @Override

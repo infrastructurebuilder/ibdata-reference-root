@@ -119,21 +119,21 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 
   @Override
   public WGetter get() {
-    return new WGetterImpl(log, t2e, cacheDirectory.get(), workingDirectory.get(), this.archiverManager);
+    return new DefaultWGetter(log, t2e, cacheDirectory.get(), workingDirectory.get(), this.archiverManager);
   }
 
   /*
    *
    * Encapsulates code from download-maven-plugin
    */
-  private class WGetterImpl implements WGetter {
+  private class DefaultWGetter implements WGetter {
 
     private final WGet wget;
     private final Log log;
     private final ArchiverManager am;
     private final Path workingDir;
 
-    public WGetterImpl(Logger log, TypeToExtensionMapper t2e, Path cacheDir, Path workignDir,
+    public DefaultWGetter(Logger log, TypeToExtensionMapper t2e, Path cacheDir, Path workingDir,
         ArchiverManager archiverManager) {
       // this.wps = requireNonNull(wps);
       this.wget = new WGet();
@@ -147,7 +147,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       this.wget.setCacheDirectory(requireNonNull(cacheDir).toFile());
       this.log = l2;
       this.am = requireNonNull(archiverManager);
-      this.workingDir = requireNonNull(workignDir);
+      this.workingDir = requireNonNull(workingDir);
     }
 
     @Override

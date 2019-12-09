@@ -17,11 +17,13 @@ package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 import org.infrastructurebuilder.data.AbstractIBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataSource;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
@@ -29,12 +31,12 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
 
   private final Logger log;
   private final TypeToExtensionMapper mapper;
-  private final boolean unzip;
+  private final PathSupplier wps;
 
-  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, boolean unzipArchives) {
+  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
-    this.unzip = unzipArchives;
+    this.wps = requireNonNull(wps);
   }
 
   @Override
@@ -53,10 +55,15 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
     return mapper;
   }
 
+  @Override
+  public Path getWorkingPath() {
+    return wps.get();
+  }
+
   public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier {
 
-    public DefaultIBDataSourceSupplier(String string, IBDataSource src) {
-      super(string, src);
+    public DefaultIBDataSourceSupplier(String id, IBDataSource src, Path workingPath) {
+      super(id, src, workingPath);
     }
 
   }

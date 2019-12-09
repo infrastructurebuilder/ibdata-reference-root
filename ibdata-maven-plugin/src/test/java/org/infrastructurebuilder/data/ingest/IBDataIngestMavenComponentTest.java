@@ -133,7 +133,7 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestFile() {
     ds.setStreams(streams);
     config.setDataSet(ds);
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log, wps);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
@@ -146,13 +146,9 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestDownload() {
     ds.setStreams(new ArrayList<>(Arrays.asList(ds3)));
     config.setDataSet(ds);
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log, wps);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
-    //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
-
-    //    IBChecksumPathType qq = dic.ingest(config, ingester);
-    //    assertNotNull(qq);
   }
 
   @Ignore
@@ -160,7 +156,7 @@ public class IBDataIngestMavenComponentTest {
   public void testIngestMultiDownload() throws IOException {
     dsMulti.setStreams(Arrays.asList(ds4, ds3));
     config.setDataSet(dsMulti);
-    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log, wps);
+    DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();

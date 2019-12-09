@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -86,10 +87,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
     theUrl = "jdbc:h2:" + wps.getTestClasses().resolve("test").toAbsolutePath().toString();
     c.put("url", theUrl);
     c.put("query", "SELECT * FROM TEST ORDER BY ID;");
-    c.put(IBDataSource.TARGET_PATH, wps.get());
     c.put(IBDataConstants.DATE_FORMATTER, "yyyy-MM-dd");
     t2e = new DefaultTypeToExtensionMapper();
-    d = new DefaultDatabaseIBDataSourceSupplierMapper(() -> log, t2e);
+    d = new DefaultDatabaseIBDataSourceSupplierMapper(() -> log, t2e, wps);
     b = new DefaultIBDataStreamIdentifierConfigBean();
     b.setDescription("desc");
     b.setId(UUID.randomUUID().toString());

@@ -19,7 +19,8 @@ import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.*;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -103,7 +104,7 @@ public class DefaultIBDataIngesterSupplierTest {
     cms = new DefaultConfigMapSupplier(configMap);
     ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(wps, () -> log, t2e);
     ibdfs = (DefaultIBDataSetIngestionFinalizerSupplier) ibdfs.configure(cms);
-    dis = new DefaultIBDataIngesterSupplier(wps, () -> log, wps);
+    dis = new DefaultIBDataIngesterSupplier(wps, () -> log);
     dsi = new DefaultIBDataSetIdentifier();
     dsi.setDescription("desc");
     dsi.setName("name");
@@ -118,7 +119,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dset.setCreationDate(now);
     dset.setUuid(UUID.randomUUID().toString());
     ibdataset = new DefaultIBDataSet(dset);
-    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, true) {
+    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -132,7 +133,7 @@ public class DefaultIBDataIngesterSupplierTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override
@@ -141,7 +142,7 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, false) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -159,7 +160,7 @@ public class DefaultIBDataIngesterSupplierTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override
