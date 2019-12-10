@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static org.infrastructurebuilder.data.IBMetadataUtils.w3cDocumentEqualser;
 
 import java.util.Date;
@@ -37,6 +38,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final Document metadata;
   private final String path;
   private final String mimeType;
+  private IBDataStructuredDataMetadata structuredDataMetadata = null;
 
   public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
       Checksum checksum, Date creationDate, Document metadata, String mimeType, Optional<String> path) {
@@ -165,4 +167,12 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     return true;
   }
 
+  @Override
+  public Optional<IBDataStructuredDataMetadata> getStructuredDataMetadata() {
+    return Optional.ofNullable(this.structuredDataMetadata );
+  }
+
+  public void setStructuredDataMetadata(IBDataStructuredDataMetadata structuredDataMetadata) {
+    this.structuredDataMetadata = structuredDataMetadata;
+  }
 }

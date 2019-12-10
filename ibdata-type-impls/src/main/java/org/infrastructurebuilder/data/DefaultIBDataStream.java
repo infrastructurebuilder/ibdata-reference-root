@@ -45,11 +45,13 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   private final IBChecksumPathType cpt;
   private Checksum calculatedChecksum = null;
 
-  //  public DefaultIBDataStream(IBDataStreamIdentifier ds, UUID id,  Date now, Supplier<InputStream> ins) {
-  //    super(id, ds.getURL(), ds.getName(), ds.getDescription(), ds.getChecksum(), now, ds.getMetadataAsDocument(),
-  //        ds.getMimeType(), Optional.ofNullable(ds.getPath()));
-  //    this.ss = requireNonNull(ins);
-  //  }
+  // public DefaultIBDataStream(IBDataStreamIdentifier ds, UUID id, Date now,
+  // Supplier<InputStream> ins) {
+  // super(id, ds.getURL(), ds.getName(), ds.getDescription(), ds.getChecksum(),
+  // now, ds.getMetadataAsDocument(),
+  // ds.getMimeType(), Optional.ofNullable(ds.getPath()));
+  // this.ss = requireNonNull(ins);
+  // }
 
   public final static DefaultIBDataStream from(DataStream ds, Supplier<Path> pathToRoot) {
     return new DefaultIBDataStream(ds,
@@ -119,5 +121,11 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   @Override
   public Optional<IBDataStructuredDataMetadata> getIBDataStructuredDataMetadata() {
     return empty();
+  }
+
+  @Override
+  public Optional<Path> getPathIfAvailable() {
+    return Optional.ofNullable(this.cpt).map(IBChecksumPathType::getPath);
+
   }
 }

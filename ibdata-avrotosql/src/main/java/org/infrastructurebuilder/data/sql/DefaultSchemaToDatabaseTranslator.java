@@ -129,8 +129,11 @@ class CreateTableChangeSet extends LocalChangeSet {
     this.setAttribute(AUTHOR, IBDATA_FROM_AVRO).setAttribute(ID, getId());
     u.getFields().stream().map(IBDataAvroToLiquibaseUtils::addField).forEach(this::addChildField);
     // Now the hard parts
+
     // Indexes
+
     // Constraints
+
     // Subrecord tables
   }
 

@@ -66,6 +66,33 @@ import liquibase.resource.ResourceAccessor;
 public class LocalLiquibaseExecutor
     implements ExecutionEnabled<LocalLiquibaseExecutor, ConfigMapSupplier, String, Integer> {
 
+
+  private static final String TEST_ROLLBACK_ON_UPDATE = "testRollbackOnUpdate";
+
+  private static final String SHOULD_RUN = "shouldRun";
+
+  private static final String CLEAR_CHECKSUMS = "clearChecksums";
+
+  private static final String DROP_FIRST = "dropFirst";
+
+  private static final String LB_CHANGE_LOG_LOCK_TABLE = "liquibaseDatabaseChangeLogLockTable";
+
+  private static final String LB_TABLESPACE = "liquibaseTablespace";
+
+  private static final String LB_CHANGE_LOG_TABLE = "liquibaseDatabaseChangeLogTable";
+
+  private static final String LIQUIBASE_SCHEMA = "liquibaseSchema";
+
+  private static final String DEFAULT_SCHEMA = "defaultSchema";
+
+  private static final String TAGS = "tags";
+
+  private static final String LABELS = "labels";
+
+  private static final String CONTEXTS = "contexts";
+
+  private static final String CHANGELOG = "changelog";
+
   public static final String NAME = "local-liquibase";
 
   protected final DataSourceSupplier dataSourceSupplier;
@@ -150,27 +177,31 @@ public class LocalLiquibaseExecutor
         // Must already exist in the previous bean
         () -> this.log, this.rollbackFileSupplier, this.dataSourceSupplier, this.encoding
         // prev? changelog
-        , cfg.getString("changelog")
+        , cfg.getString(CHANGELOG)
         // Ctxs
-        , new Contexts(cfg.getString("contexts"))
+        , new Contexts(cfg.getString(CONTEXTS))
         // labels
-        , new LabelExpression(cfg.getString("labels"))
+        , new LabelExpression(cfg.getString(LABELS))
         // tags
-        , cfg.getString("tags")
+        , cfg.getString(TAGS)
         // TODO Get a copy of the parameters supplied here!
         , cms
         // optDefaultSchema
-        , ofNullable(cfg.getString("defaultSchema"))
+        , ofNullable(cfg.getString(DEFAULT_SCHEMA))
         // lb schema
-        , cfg.getString("liquibaseSchema")
+        , cfg.getString(LIQUIBASE_SCHEMA)
         // table and locktable
-        , cfg.getString("liquibaseDatabaseChangeLogTable"), cfg.getString("liquibaseDatabaseChangeLogLockTable")
+        , cfg.getString(LB_CHANGE_LOG_TABLE), cfg.getString(LB_CHANGE_LOG_LOCK_TABLE)
         // lb table space
-        , cfg.getString("liquibaseTablespace")
+        , cfg.getString(LB_TABLESPACE)
         // flags
-        , cfg.getParsedBoolean("dropFirst", false), cfg.getParsedBoolean("clearChecksums", false)
+        , cfg.getParsedBoolean(DROP_FIRST, false)
+        // Clear checksums
+        , cfg.getParsedBoolean(CLEAR_CHECKSUMS, false)
         // more flags
-        , cfg.getParsedBoolean("shouldRun", true), cfg.getParsedBoolean("testRollbackOnUpdate", false));
+        , cfg.getParsedBoolean(SHOULD_RUN, true)
+        // Test rollback on update
+        , cfg.getParsedBoolean(TEST_ROLLBACK_ON_UPDATE, false));
   }
 
   public ConfigMap getParameters() {
