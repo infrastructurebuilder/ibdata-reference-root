@@ -32,6 +32,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
+import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.transform.BA;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -77,7 +78,7 @@ public class IBDataAvroUtilsTest {
 
   }
 
-  @Test(expected = IBDataException.class)
+  @Test(expected = IBException.class)
   public void testNotObvioyslyBrokenURLZip() {
     avroSchemaFromString.apply("zip:file:/nope.jar");
   }
@@ -92,7 +93,7 @@ public class IBDataAvroUtilsTest {
     avroSchemaFromString.apply("https://www.example.com");
   }
 
-  @Test(expected = IBDataException.class)
+  @Test(expected = IBException.class)
   public void testNotObvioyslyBrokenURLJar() {
     avroSchemaFromString.apply("jar:file:/nope.zip");
   }

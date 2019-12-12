@@ -16,17 +16,21 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 //import static org.infrastructurebuilder.data.IBDataSource.SPLIT_ZIPS_CONFIG;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyDocumentSupplier;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,11 +39,9 @@ import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataIngester;
-import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -75,14 +77,16 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
 
   final static DefaultIBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource source,
       IBChecksumPathType ibPathChecksumType, Date now) {
+    String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
     Path localPath = ibPathChecksumType.getPath();
+    String size = ibPathChecksumType.size().toString();
     String p = requireNonNull(workingPath).relativize(localPath).toString();
     Checksum c = ibPathChecksumType.getChecksum();
     UUID id = c.asUUID().get();
 
     DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(id
     // Created URL
-        , Optional.of(source.getSourceURL())
+        , of(src)
         // Name
         , source.getName()
         //
@@ -92,11 +96,15 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
         //
         , now
         //
-        , source.getMetadata().orElse(IBMetadataUtils.emptyDocumentSupplier.get())
+        , source.getMetadata().orElse(emptyDocumentSupplier.get())
         //
         , ibPathChecksumType.getType()
         //
-        , Optional.of(p));
+        , of(p)
+        // Size
+        , of(size)
+        // rows
+        , empty());
 
     return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, ibPathChecksumType));
 
@@ -114,10 +122,15 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
       requireNonNull(dssList, "List of IBDataSourceSupplier instances");
       Date now = new Date(); // Ok for "now" (Get it?)
       ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).get();
-      return dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms))
-          // flatmap the
-          .flatMap(source -> source.get().stream()
-              .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now)))
+      Stream<IBDataSource> q = dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms));
+      // flatmap the data source
+      return q.flatMap(source -> {
+        List<IBChecksumPathType> l = source.get();
+        return l.stream().map(ibPathChecksumType -> {
+          DefaultIBDataStreamSupplier dss = toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now);
+          return dss;
+        });
+      })
           // to a list
           .collect(toList());
     }

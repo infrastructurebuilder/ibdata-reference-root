@@ -15,15 +15,16 @@
  */
 package org.infrastructurebuilder.data.transform;
 
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -33,7 +34,6 @@ import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationResult;
-import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
@@ -94,12 +94,13 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
     public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds,
         List<IBDataStream> suppliedStreams, boolean failOnError) {
       Path targetPath = Paths.get((String) getConfig().getRequired(ADDED_PATH));
+      String len = cet.withReturningTranslation(() -> Files.size(targetPath)).toString();
       String u = cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm());
 
       IBDataSet createdDataSet = new DefaultIBDataSet(ds);
-      IBDataStreamIdentifier identifier = new DefaultIBDataStreamIdentifier(null, Optional.of(u), Optional.empty(),
-          Optional.empty(), new Checksum(targetPath), new Date(), transformer.getTargetStreamMetadataAsDocument(),
-          transformer.getTargetMimeType(), Optional.of(targetPath.toAbsolutePath().toString()));
+      IBDataStreamIdentifier identifier = new DefaultIBDataStreamIdentifier(null, of(u), empty(),
+          empty(), new Checksum(targetPath), new Date(), transformer.getTargetStreamMetadataAsDocument(),
+          transformer.getTargetMimeType(), of(targetPath.toAbsolutePath().toString()), of(len), empty());
       createdDataSet.getStreamSuppliers()
           .add(new DefaultIBDataStreamSupplier(new DefaultIBDataStream(identifier, targetPath)));
       return new DefaultIBDataTransformationResult(createdDataSet, getWorkingPath());

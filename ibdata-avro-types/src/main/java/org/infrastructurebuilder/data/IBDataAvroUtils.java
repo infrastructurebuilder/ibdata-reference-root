@@ -41,6 +41,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.MapProxyGenericData;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
 public interface IBDataAvroUtils {
@@ -52,9 +53,9 @@ public interface IBDataAvroUtils {
     String s = IBDataException.cet.withReturningTranslation(
         () -> ((Files.exists(Paths.get(schema))) ? Paths.get(schema).toUri().toURL().toExternalForm() : q));
 
-    boolean isURL = s.startsWith(HTTP_PREFIX) || s.startsWith(HTTPS_PREFIX) || s.startsWith(FILE_PREFIX)
-        || s.startsWith(ZIP_PREFIX);
-    try (InputStream in = isURL ? new URL(s).openStream() : IBDataAvroUtils.class.getResourceAsStream(s)) {
+    boolean isURL = s.startsWith(JAR_PREFIX) ||s.startsWith(HTTP_PREFIX) || s.startsWith(HTTPS_PREFIX) || s.startsWith(FILE_PREFIX)
+        || s.startsWith(ZIP_PREFIX) ;
+    try (InputStream in = isURL ? IBUtils.translateToWorkableArchiveURL(s).openStream() : IBDataAvroUtils.class.getResourceAsStream(s)) {
       return cet.withReturningTranslation(() -> new Schema.Parser().parse(in));
     } catch (IOException e) {
       throw new IBDataException(e); // Handles the clos() of try-with-resources

@@ -62,7 +62,7 @@ public class DefaultIBStreamerFactoryTest {
     ins = wps.getTestClasses().resolve("lines.txt");
     checksum = new Checksum(ins);
     identifier = new DefaultIBDataStreamIdentifier(UUID.randomUUID(), empty(), empty(), empty(), checksum, new Date(),
-        IBMetadataUtils.emptyDocumentSupplier.get(), IBConstants.TEXT_PLAIN, empty());
+        IBMetadataUtils.emptyDocumentSupplier.get(), IBConstants.TEXT_PLAIN, empty(),empty(), empty());
     stringSupplier = new DefaultStringStreamSupplier(() -> log);
     typedSuppliers = Arrays.asList(stringSupplier, new DefaultStringStreamSupplier(() -> log), new DefaultStringStreamSupplier(() -> log) {
       @Override

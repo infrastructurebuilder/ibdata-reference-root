@@ -61,7 +61,8 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins) {
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
-        identifier.getMimeType(), ofNullable(identifier.getPath()));
+        identifier.getMimeType(), ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
+        ofNullable(identifier.getOriginalRowCount()));
     this.cpt = new BasicIBChecksumPathType(Objects.requireNonNull(ins), identifier.getChecksum(),
         identifier.getMimeType());
     this.ss = this.cpt;
@@ -71,7 +72,8 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         requireNonNull(ins).getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
         requireNonNull(ins).getType(),
-        nullSafeObjectToString.apply(ofNullable(ins.getPath()).map(Path::getFileName).orElse(null)));
+        nullSafeObjectToString.apply(ofNullable(ins.getPath()).map(Path::getFileName).orElse(null)),
+        ofNullable(identifier.getOriginalLength()), ofNullable(identifier.getOriginalRowCount()));
     this.cpt = ins;
     this.calculatedChecksum = this.cpt.getChecksum();
     this.ss = requireNonNull(ins);

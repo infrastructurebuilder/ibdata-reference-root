@@ -164,7 +164,8 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 
       wget.setOutputPath(outputPath);
       requireNonNull(checksum).ifPresent(c -> wget.setSha512(c.toString().toLowerCase()));
-      wget.setUri(cet.withReturningTranslation(() -> new URL(requireNonNull(sourceString)).toURI()));
+      wget.setUri(cet
+          .withReturningTranslation(() -> IBUtils.translateToWorkableArchiveURL(requireNonNull(sourceString)).toURI()));
       wget.setFailOnError(false);
       wget.setOverwrite(false);
 //      wget.setInteractiveMode(interactiveMode);   // Never
@@ -176,7 +177,9 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       Optional<List<IBChecksumPathType>> o = cet.withReturningTranslation(() -> this.wget.downloadIt());
       if (expandArchives) {
         o.ifPresent(c -> {
-          List<IBChecksumPathType> l = expand(workingDir, c.get(0).getPath());
+          IBChecksumPathType src = c.get(0);
+          List<IBChecksumPathType> l = expand(workingDir, src,
+              src.getSourceURL().map(URL::toExternalForm).map(n -> "zip:" + n));
           c.addAll(l);
         });
       }
@@ -184,9 +187,11 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     }
 
     @Override
-    public List<IBChecksumPathType> expand(Path tempPath, Path source) {
+    public List<IBChecksumPathType> expand(Path tempPath, IBChecksumPathType src, Optional<String> oSource) {
+
+      Path source = requireNonNull(src).getPath();
       List<IBChecksumPathType> l = new ArrayList<>();
-      Path targetDir = cet.withReturningTranslation(() -> Files.createTempDirectory(IBDATA_PREFIX));
+      Path targetDir = cet.withReturningTranslation(() -> Files.createTempDirectory(IBDATA_PREFIX)).toAbsolutePath();
       File outputFile = source.toFile();
       File outputDirectory = targetDir.toFile();
       String outputFileName = source.toAbsolutePath().toString();
@@ -200,9 +205,12 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
           unarchiver.setDestDirectory(outputDirectory);
         }
         unarchiver.extract();
+        String rPath = cet.withReturningTranslation(() -> targetDir.toUri().toURL().toExternalForm());
         for (Path p : IBUtils.allFilesInTree(targetDir)) {
-          IBChecksumPathType q = cet.withReturningTranslation(
-              () -> copyToTempChecksumAndPath(tempPath, p));
+          String tPath = cet.withReturningTranslation(() -> p.toUri().toURL().toExternalForm())
+              .substring(rPath.length());
+          IBChecksumPathType q = cet
+              .withReturningTranslation(() -> copyToTempChecksumAndPath(tempPath, p, oSource, tPath));
           l.add(q);
         }
 
@@ -409,7 +417,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     // getLog().info("maven-download-plugin:wget skipped");
     // return;
     // }
-
+    // NOTE FYI: Always returns a list of size() == 1 or empty()
     public Optional<List<IBChecksumPathType>> downloadIt() throws MojoExecutionException, MojoFailureException {
 //      if (/*StringUtils.isNotBlank(serverId) && */ (StringUtils.isNotBlank(username)
 //          || StringUtils.isNotBlank(password))) {
@@ -542,7 +550,9 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         //// buildContext.refresh(outputFile);
         Path outPath = newTarget;
 
-        IBChecksumPathType retVal = new DefaultIBChecksumPathType(outPath, finalChecksum, ofNullable(this.mimeType));
+        DefaultIBChecksumPathType retVal = new DefaultIBChecksumPathType(outPath, finalChecksum,
+            ofNullable(this.mimeType));
+        retVal.setSource(this.uri.toURL().toExternalForm());
         List<IBChecksumPathType> retVall = new ArrayList<>();
         retVall.add(retVal);
         return Optional.of((retVall));

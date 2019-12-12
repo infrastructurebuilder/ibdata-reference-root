@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.util.IBUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,35 +77,36 @@ public interface IBDataTypeImplsModelUtils {
         log.info("Reading from archive " + uset[0]);
         uset[0] += "!/"; // FIXME somehow we need to make this work without "/" althought that's correct
 
-        left = cet.withReturningTranslation(() -> new URL(uset[0])); // URL of the "root"
+        left = IBUtils.translateToWorkableArchiveURL(uset[0]); // URL of the "root"
 
         FileSystem optFs = ofNullable(left)
-            //      // Map to URI
+            // // Map to URI
             .map(u -> cet.withReturningTranslation(() -> u.toURI()))
             .map(uri -> cet.withReturningTranslation(() -> FileSystems.newFileSystem(uri, Collections.emptyMap())))
             .orElseThrow(() -> new IBDataException("No filesystem for " + uset[0]));
         datasetRoot = optFs.getPath(optFs.getSeparator());
         pathToIBDataXml = optFs.getPath(uset[1]);
       } else if (uset[0].startsWith("file")) {
-        log.info("Reading from file location " + uset[0] );
+        log.info("Reading from file location " + uset[0]);
         pathToIBDataXml = cet.withReturningTranslation(() -> Paths.get(url.toURI()));
         datasetRoot = pathToIBDataXml.getParent().getParent();
         left = cet.withReturningTranslation(() -> datasetRoot.toUri().toURL());
       } else
         throw new IBDataException("Unrecognized URL for mapping to data set " + uset[0]);
 
-      log.info("Dataset root is " + datasetRoot + " [" + left.toExternalForm()+ "]");
+      log.info("Dataset root is " + datasetRoot + " [" + left.toExternalForm() + "]");
 
       Optional<? extends DataSet> optDataSet = Optional.of(pathToIBDataXml)
-          //      // To Stream
+          // // To Stream
           .map(u -> cet.withReturningTranslation(() -> Files.newInputStream(u)))
-          //          // to ExtendedDataSet
+          // // to ExtendedDataSet
           .map(mapInputStreamToDataSet).map(ds -> {
             ds.setPath(left.toExternalForm());
             return ds;
           });
 
-      // optDataSet contains the DataSet instance that was read from the source XML WITH ITs ROOT SET!
+      // optDataSet contains the DataSet instance that was read from the source XML
+      // WITH ITs ROOT SET!
 
       return optDataSet
           .map(ds -> DefaultIBDataSet.readWithSuppliers(ds, () -> datasetRoot).setUnderlyingPath(datasetRoot));

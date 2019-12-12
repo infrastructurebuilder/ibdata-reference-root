@@ -46,6 +46,7 @@ import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -129,7 +130,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {
           List<IBChecksumPathType> localRead;
-          URL src = cet.withReturningTranslation(() -> new URL(source));
+          URL src = IBUtils.translateToWorkableArchiveURL(source);
           WGetter wget = wgs.get();
           switch (src.getProtocol()) {
           case "http":
@@ -148,14 +149,14 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
             break;
           case "file":
           case "zip":
+          case "jar":
             try (InputStream ins = src.openStream()) {
               localRead = new ArrayList<>();
               IBChecksumPathType val = cet.withReturningTranslation(
                   () -> copyToDeletedOnExitTempChecksumAndPath(targetPath, IBDATA_PREFIX, IBDATA_SUFFIX, ins));
               localRead.add(val);
-
               if (isExpandArchives()) {
-                localRead.addAll(wget.expand(targetPath, val.getPath()));
+                localRead.addAll(wget.expand(targetPath, val, of(src.toExternalForm())));
               }
 
             } catch (IOException e) {

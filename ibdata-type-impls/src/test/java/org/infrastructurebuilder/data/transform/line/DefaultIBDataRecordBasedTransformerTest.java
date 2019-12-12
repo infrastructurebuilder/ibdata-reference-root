@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
@@ -48,6 +49,7 @@ import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -94,7 +96,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     hm.put(TRANSFORMERSLIST, sj.toString());
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
-    //    s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
+    // s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
     finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> thePath, () -> log).configure(cms);
     t = new DefaultIBDataRecordBasedTransformer(thePath, log, rs, finalizerSupplier.get());
     DataSet d1 = new DataSet();
@@ -126,12 +128,13 @@ public class DefaultIBDataRecordBasedTransformerTest {
     IBChecksumPathType c = readPathTypeFromFile(resource);
     Document metadata = IBMetadataUtils.emptyDocumentSupplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
-        c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()));
+        c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()), empty(),
+        empty());
     return new DefaultIBDataStream(i, c);
   }
 
   private IBChecksumPathType readPathTypeFromFile(String resource) throws Exception {
-    try (InputStream in = new URL(resource).openStream()) {
+    try (InputStream in = IBUtils.translateToWorkableArchiveURL(resource).openStream()) {
       return copyToDeletedOnExitTempChecksumAndPath(thePath, "abc", "b", in);
     }
   }
@@ -170,7 +173,6 @@ public class DefaultIBDataRecordBasedTransformerTest {
       return "test" + type;
     }
 
-
     @Override
     public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
       return new DefaultTestingIBDataRecordTransformerSupplier(type, getWps(), cms, () -> getLogger());
@@ -208,6 +210,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
       public String apply(String t) {
         return t.trim();
       }
+
       @Override
       public Class<String> getInboundClass() {
         return String.class;
@@ -240,6 +243,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
       public String apply(String t) {
         return t.toUpperCase();
       }
+
       @Override
       public Class<String> getInboundClass() {
         return String.class;

@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -61,7 +62,8 @@ public class IBDataTypeImplsModelUtilsTest {
 
   @Test
   public void testMapDataSetToDefaultIBDataSetFromJar() throws MalformedURLException {
-    URL url = new URL("jar:" + testJar.toUri().toURL().toExternalForm() + "!" + IBDATA_IBDATASET_XML);
+    URL url = IBUtils
+        .translateToWorkableArchiveURL("jar:" + testJar.toUri().toURL().toExternalForm() + "!" + IBDATA_IBDATASET_XML);
     Optional<DefaultIBDataSet> q = mapDataSetToDefaultIBDataSet.apply(url);
     assertTrue(q.isPresent());
     assertEquals("99139ebc-4c01-3c93-89c1-2219c7e4ebf6", q.get().getId().toString());
