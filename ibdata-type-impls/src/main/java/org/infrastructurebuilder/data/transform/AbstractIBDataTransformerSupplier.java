@@ -23,6 +23,7 @@ import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.util.LoggerEnabled;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
@@ -55,6 +56,10 @@ abstract public class AbstractIBDataTransformerSupplier implements IBDataTransfo
     return this.logger.get();
   }
 
+  public ConfigMap getConfig() {
+    return config.get();
+  }
+
   @Override
   public abstract IBDataTransformerSupplier configure(ConfigMapSupplier cms);
 
@@ -65,7 +70,7 @@ abstract public class AbstractIBDataTransformerSupplier implements IBDataTransfo
 
   @Override
   public IBDataTransformer get() {
-    return getUnconfiguredTransformerInstance(this.wps.get()).configure(this.config.get());
+    return getConfiguredTransformerInstance(this.wps.get());
   }
 
   /**
@@ -73,6 +78,6 @@ abstract public class AbstractIBDataTransformerSupplier implements IBDataTransfo
    * @param workingPath
    * @return
    */
-  protected abstract IBDataTransformer getUnconfiguredTransformerInstance(Path workingPath);
+  protected abstract IBDataTransformer getConfiguredTransformerInstance(Path workingPath);
 
 }

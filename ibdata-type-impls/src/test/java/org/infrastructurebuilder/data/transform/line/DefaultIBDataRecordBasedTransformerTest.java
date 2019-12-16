@@ -70,7 +70,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
   private IBDataDataStreamRecordFinalizerSupplier<String> finalizerSupplier;
   private Map<String, IBDataRecordTransformerSupplier> rs;
   private Path p;
-  private DefaultIBDataRecordBasedTransformer t;
+  private DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer t;
   private Path thePath;
   private ConfigMap cfg;
   private ConfigMapSupplier cms;
@@ -98,7 +98,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
     // s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
     finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> thePath, () -> log).configure(cms);
-    t = new DefaultIBDataRecordBasedTransformer(thePath, log, rs, finalizerSupplier.get());
+    t = new DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer(thePath, log, cms.get(), rs,
+        finalizerSupplier.get());
     DataSet d1 = new DataSet();
     d1.setUuid(UUID.randomUUID().toString());
     d1.setGroupId("x");
@@ -146,7 +147,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   @Test
   public void testTransform() {
-    IBDataTransformationResult q = t.configure(cfg).transform(transformer, ds, suppliedStreams, true);
+    IBDataTransformationResult q = t.transform(transformer, ds, suppliedStreams, true);
     assertEquals(0, q.getErrors().size());
 
     // FIXME Test the actual output

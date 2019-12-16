@@ -67,8 +67,9 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   }
 
   @Override
-  protected IngestionIBDataSetFinalizer configuredType(ConfigMapSupplier config) {
-    return new IngestionIBDataSetFinalizer(requireNonNull(config, "Config supplier is null").get(), getWps().get());
+  protected IngestionIBDataSetFinalizer getInstance() {
+    return new IngestionIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
+        getWps().get());
   }
 
   private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<Ingestion> {
@@ -80,7 +81,8 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
     @Override
     public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList)
         throws IOException {
-      // dsi2 is always null (currently).  There is no "previous dataset" to contend with in ingestion
+      // dsi2 is always null (currently). There is no "previous dataset" to contend
+      // with in ingestion
       return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,
           getTypeToExtensionMapper());
     }

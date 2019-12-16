@@ -99,7 +99,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
       }
 
       @Override
-      protected IBDataSetFinalizer<Dummy> configuredType(ConfigMapSupplier config) {
+      protected IBDataSetFinalizer<Dummy> getInstance() {
         return new DummySupplier(getConfig().get(), getConfig().get().get("path"));
       }
 

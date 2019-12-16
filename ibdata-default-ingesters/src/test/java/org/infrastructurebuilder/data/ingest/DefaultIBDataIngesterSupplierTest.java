@@ -126,7 +126,7 @@ public class DefaultIBDataIngesterSupplierTest {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
             try {
-              IBChecksumPathType reference = copyToTempChecksumAndPath(wps.get(),  f);
+              IBChecksumPathType reference = copyToTempChecksumAndPath(wps.get(), f);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
@@ -188,8 +188,8 @@ public class DefaultIBDataIngesterSupplierTest {
     IBDataSetFinalizer<Ingestion> finalizer = ibdfs.get();
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
-    c = dis.get().configure(configMap);// configure() call default returns itself
-    List<Supplier<IBDataStream>> val = c.ingest( dss);
+    c = dis.get();// configure() call default returns itself
+    List<Supplier<IBDataStream>> val = c.ingest(dss);
 
     IBChecksumPathType finalized = finalizer.finalize(ibdataset, i, val);
     assertTrue(Files.isDirectory(finalized.getPath()));
@@ -199,23 +199,12 @@ public class DefaultIBDataIngesterSupplierTest {
     assertEquals(TEXT_PLAIN, q.getMimeType());
   }
 
-  // @Test(expected = IBDataException.class)
-  // public void testFail() throws IOException {
-  // dssFail.put("FAILME",
-  // dssmFail.getSupplierFor(UUID.randomUUID().toString(),null));
-  // dis = dis.getConfiguredSupplier(cms);
-  // assertNotNull(dis);
-  // c = dis.get().configure(configMap);// configure() call default returns itself
-  // List<Supplier<IBDataStream>> val = c.ingest(i, dsi, dssFail);
-  // assertNotNull(val);
-  // }
-  //
   @Test
   public void testPassChecksum() throws IOException {
     dssPass.put("X", dssmPass.getSupplierFor(UUID.randomUUID().toString(), null));
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
-    c = dis.get().configure(configMap);// configure() call default returns itself
+    c = dis.get();// configure() call default returns itself
     List<Supplier<IBDataStream>> val = c.ingest(dssPass);
     assertNotNull(val);
   }

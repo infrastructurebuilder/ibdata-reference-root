@@ -106,7 +106,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
         for (String li : theList) {
           String[] s = li.split(Pattern.quote(MAP_SPLITTER));
           IBDataRecordTransformerSupplier<?, ?> s2 = map.get(s[1]).configure(lcfg);
-          IBDataRecordTransformer<?, ?> transformer = s2.get().configure(lcfg.get());
+          IBDataRecordTransformer<?, ?> transformer = s2.get()/*.configure(lcfg.get())*/;
           if (acceptable(previousType, transformer.accepts()))
             previousType = transformer.produces();
           else

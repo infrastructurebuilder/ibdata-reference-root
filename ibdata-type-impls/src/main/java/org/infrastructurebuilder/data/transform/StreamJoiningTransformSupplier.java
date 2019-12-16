@@ -54,7 +54,7 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
   }
 
   @Override
-  protected IBDataTransformer getUnconfiguredTransformerInstance(Path workingPath) {
+  protected IBDataTransformer getConfiguredTransformerInstance(Path workingPath) {
     return new StreamJoiningTransformer(workingPath, getLog());
   }
 

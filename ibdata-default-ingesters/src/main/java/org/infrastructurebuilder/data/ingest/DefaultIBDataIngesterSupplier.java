@@ -66,8 +66,8 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   }
 
   @Override
-  final protected IBDataIngester configuredType(ConfigMapSupplier config) {
-    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get());
+  final protected IBDataIngester getInstance() {
+    return new DefaultIBDataIngester(getWps().get(), getLog(), getConfig().get());
   }
 
   @Override

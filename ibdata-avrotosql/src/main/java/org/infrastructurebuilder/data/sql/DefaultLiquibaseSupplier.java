@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.sql;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.nio.file.Path;
@@ -35,7 +36,6 @@ import org.infrastructurebuilder.data.IBDatabaseDialectMapper;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
-import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
@@ -53,51 +53,52 @@ public class DefaultLiquibaseSupplier extends AbstractConfigurableSupplier<Liqui
     implements LiquibaseSupplier {
 
   private final PathSupplier wps;
-  private final List<DataSourceSupplier> suppliers;
+  private final List<IBDataDatabaseDriverSupplier> suppliers;
   private final IBDatabaseDialectMapper dialectMappper;
+  private final Optional<BasicCredentials> creds;
+  private final String url;
 
   @Inject
-  public DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<DataSourceSupplier> suppliers,
+  public DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<IBDataDatabaseDriverSupplier> suppliers,
       IBDatabaseDialectMapper dMapper) {
-    this(wps, l, suppliers, null, dMapper);
+    this(wps, l, suppliers, null, dMapper, null, Optional.empty());
   }
 
-  private DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<DataSourceSupplier> suppliers,
-      ConfigMapSupplier config, IBDatabaseDialectMapper dMapper) {
+  private DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<IBDataDatabaseDriverSupplier> suppliers,
+      ConfigMapSupplier config, IBDatabaseDialectMapper dMapper, String url, Optional<BasicCredentials> creds) {
     super(config, l);
     this.wps = requireNonNull(wps);
     this.suppliers = requireNonNull(suppliers);
     this.dialectMappper = requireNonNull(dMapper);
+    this.url = url;
+    this.creds = creds;
   }
 
-  public PathSupplier getWps() {
-    return wps;
+  public Path getWorkingPath() {
+    return wps.get();
   }
 
-  public List<DataSourceSupplier> getSuppliers() {
+  public List<IBDataDatabaseDriverSupplier> getSuppliers() {
     return suppliers;
   }
 
-  public IBDatabaseDialectMapper getDialectMappper() {
+  public IBDatabaseDialectMapper getDialectMapper() {
     return dialectMappper;
   }
 
   @Override
   public DefaultLiquibaseSupplier configure(ConfigMapSupplier config) {
-    return new DefaultLiquibaseSupplier(getWps(), () -> getLog(), getSuppliers(), config, getDialectMappper());
+    return new DefaultLiquibaseSupplier(() -> getWorkingPath(), () -> getLog(), getSuppliers(), config,
+        getDialectMapper(), config.get().getString(SOURCE_URL), ofNullable(config.get().getOrDefault(CREDS, null)));
   }
 
   @Override
-  protected Liquibase configuredType(ConfigMapSupplier config) {
-    ConfigMap c = config.get();
-    String url = c.getString(SOURCE_URL);
-    Optional<BasicCredentials> creds = Optional.ofNullable(c.getOrDefault(CREDS, null));
-    IBDataDatabaseDriverSupplier ds = getDialectMappper().getSupplierForURL(url)
+  protected Liquibase getInstance() {
+    IBDataDatabaseDriverSupplier ds = getDialectMapper().getSupplierForURL(url)
         .orElseThrow(() -> new IBDataException("Failed to acquire IBDatabaseDialect for " + url));
     DataSource dataSource = ds.getDataSourceSupplier(url, creds)
         .orElseThrow(() -> new IBDataException("Failed to acquire DataSource for " + url)).get();
-    Path physicalFile = getWps().get().resolve(UUID.randomUUID().toString() + ".xml").toAbsolutePath();
-
+    Path physicalFile = getWorkingPath().resolve(UUID.randomUUID().toString() + ".xml").toAbsolutePath();
     DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalFile.toString());
     // TODO get Resource accessors
     ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Arrays.asList(new ClassLoaderResourceAccessor()));

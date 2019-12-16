@@ -72,7 +72,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
   }
 
   @Override
-  protected TransformationIBDataSetFinalizer configuredType(ConfigMapSupplier config) {
+  protected TransformationIBDataSetFinalizer getInstance() {
     return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         getWps().get());
   }
