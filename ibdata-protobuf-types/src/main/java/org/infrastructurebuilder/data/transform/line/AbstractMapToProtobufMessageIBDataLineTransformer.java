@@ -1,4 +1,3 @@
-package org.infrastructurebuilder.data.transform.line;
 /**
  * Copyright © 2019 admin (admin@infrastructurebuilder.org)
  *
@@ -14,38 +13,35 @@ package org.infrastructurebuilder.data.transform.line;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//package org.infrastructurebuilder.data.transform.line;
-//
-//import java.nio.file.Path;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.Locale;
-//import java.util.Map;
-//import java.util.Objects;
-//
-//import org.apache.avro.Schema;
-//import org.apache.avro.Schema.Field;
-//import org.apache.avro.generic.GenericRecordBuilder;
-//import org.apache.avro.generic.IndexedRecord;
-//import org.infrastructurebuilder.data.Formatters;
-//import org.infrastructurebuilder.util.config.ConfigMap;
-//import org.slf4j.Logger;
-//
-//abstract public class AbstractMapToGenericRecordIBDataLineTransformer
-//    extends AbstractProtobufIBDataLineTransformer<Map<String, Object>> {
-//
-//  private final List<String> alreadyWarned = new ArrayList<>();
-//
-//  protected AbstractMapToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
-//    super(workingPath, config, l);
-//  }
-//
-//  @Override
-//  public IndexedRecord apply(Map<String, Object> t) {
-//    Objects.requireNonNull(t);
+
+package org.infrastructurebuilder.data.transform.line;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+
+import org.infrastructurebuilder.data.Formatters;
+import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
+
+abstract public class AbstractMapToProtobufMessageIBDataLineTransformer
+    extends AbstractProtobufIBDataLineTransformer<Map<String, Object>> {
+
+  private final List<String> alreadyWarned = new ArrayList<>();
+
+  protected AbstractMapToProtobufMessageIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
+    super(workingPath, config, l);
+  }
+
+  @Override
+  public com.google.protobuf.GeneratedMessageV3 apply(Map<String, Object> t) {
+    Objects.requireNonNull(t);
 //    Schema s = getSchema();
 //    GenericRecordBuilder rb = new GenericRecordBuilder(s);
-//    //    final GenericRecord r = new GenericData.Record(s);
+    // final GenericRecord r = new GenericData.Record(s);
 //    t.keySet().forEach(k -> {
 //      Field f = s.getField(k);
 //      if (f != null) {
@@ -64,12 +60,13 @@ package org.infrastructurebuilder.data.transform.line;
 //      }
 //    }); // FIXME mebbe we need to catch some of the RuntimeException instances
 //    return rb.build();
-//  }
-//
+    return null;
+  }
+
 //  abstract public Schema getSchema();
-//
-//  abstract Locale getLocale();
-//
-//  abstract Formatters getFormatters();
-//
-//}
+
+  abstract Locale getLocale();
+
+  abstract Formatters getFormatters();
+
+}

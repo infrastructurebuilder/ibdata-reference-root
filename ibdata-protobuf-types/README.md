@@ -1,6 +1,6 @@
-# ibdata-avro-types
+# ibdata-protobuf-types
 
-These tranformers (and finalizers) are for managing Avro types.
+These tranformers (and finalizers) are for managing Protocol Buffer (protobuf3) types.
 
 ## Record Transformers
 

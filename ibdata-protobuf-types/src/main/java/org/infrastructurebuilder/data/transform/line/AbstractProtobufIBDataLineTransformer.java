@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//package org.infrastructurebuilder.data.transform.line;
+package org.infrastructurebuilder.data.transform.line;
+import java.nio.file.Path;
 
-//import java.nio.file.Path;
-//
-//import org.apache.avro.generic.IndexedRecord;
-//import org.infrastructurebuilder.util.config.ConfigMap;
-//import org.slf4j.Logger;
-//
-//abstract public class AbstractProtobufIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, IndexedRecord> {
-//
-//  public AbstractProtobufIBDataLineTransformer(Path workingPath, Logger l) {
-//    this(workingPath, null, l);
-//  }
-//
-//  protected AbstractProtobufIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
-//    super(workingPath, config, l);
-//  }
-//
-//
-//}
+import org.infrastructurebuilder.util.config.ConfigMap;
+import org.slf4j.Logger;
+
+abstract public class AbstractProtobufIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, com.google.protobuf.GeneratedMessageV3> {
+
+  public AbstractProtobufIBDataLineTransformer(Path workingPath, Logger l) {
+    this(workingPath, null, l);
+  }
+
+  protected AbstractProtobufIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
+    super(workingPath, config, l);
+  }
+
+
+}

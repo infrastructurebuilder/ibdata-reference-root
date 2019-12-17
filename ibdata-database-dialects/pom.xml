@@ -63,7 +63,8 @@
     <module>ibdata-database-dialect-sqlite</module>
     <module>ibdata-database-dialect-h2</module>
     <module>ibdata-database-dialect-mariadb</module>
-    <module>ibdata-database-dialect-mssql-jtds</module>
+   <!-- Requires Jooq pro.  Enable the trial type in parents to make this work -->
+   <!-- <module>ibdata-database-dialect-mssql-jtds</module> -->
     <module>ibdata-database-dialect-mysql</module>
     <module>ibdata-database-dialect-derby</module>
   </modules>

@@ -13,76 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//package org.infrastructurebuilder.data;
-//
-//import static org.junit.Assert.assertEquals;
-//
-//import java.io.InputStream;
-//import java.nio.file.Path;
-//import java.util.Date;
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.UUID;
-//import java.util.stream.Collectors;
-//import java.util.stream.Stream;
-//
-//import org.apache.avro.Schema;
-//import org.codehaus.plexus.util.xml.Xpp3Dom;
-//import org.infrastructurebuilder.data.model.DataStream;
-//import org.infrastructurebuilder.data.transform.BA;
-//import org.infrastructurebuilder.util.config.TestingPathSupplier;
-//import org.junit.After;
-//import org.junit.AfterClass;
-//import org.junit.Before;
-//import org.junit.BeforeClass;
-//import org.junit.Test;
-//
-//public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
-//  public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
-//
-//  private static final String LOAD1 = "ba.avro";
-//  public final static TestingPathSupplier wps = new TestingPathSupplier();
-//
-//  @BeforeClass
-//  public static void setUpBeforeClass() throws Exception {
-//  }
-//
-//  @AfterClass
-//  public static void tearDownAfterClass() throws Exception {
-//    wps.finalize();
-//  }
-//
-//  private DefaultAvroIBTypedRecordDataStreamSupplier<BA> q;
-//  private Path targetPath;
-//  private IBDataStream stream;
-//  private boolean parallel;
-//  private Schema schema;
-//  private InputStream ins;
-//  private DataStream id;
-//
-//  @Before
-//  public void setUp() throws Exception {
-//    targetPath = wps.get();
-//    ins = getClass().getResourceAsStream(LOAD1);
-//    id = new DataStream();
-//    id.setUuid(UUID.randomUUID().toString());
-//    id.setCreationDate(new Date());
-//    id.setSha512(CHECKSUM);
-//    id.setMetadata(new Xpp3Dom("metadata"));
-//    stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
-//    schema = IBDataProtobufUtils.avroSchemaFromString.apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
-//    q = new DefaultAvroIBTypedRecordDataStreamSupplier<BA>(targetPath, stream, new BA().getSpecificData(), parallel);
-//  }
-//
-//  @After
-//  public void tearDown() throws Exception {
-//  }
-//
-//  @Test
-//  public void testGet() {
-//    Stream<BA> p = q.get();
-//    List<BA> l2 = p.collect(Collectors.toList());
-//    assertEquals(5000, l2.size());
-//  }
-//
-//}
+package org.infrastructurebuilder.data;
+
+import static org.junit.Assert.assertEquals;
+
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.avro.Schema;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.infrastructurebuilder.data.model.DataStream;
+import org.infrastructurebuilder.data.transform.BA;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
+  public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
+
+  private static final String LOAD1 = "ba.avro";
+  public final static TestingPathSupplier wps = new TestingPathSupplier();
+
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    wps.finalize();
+  }
+
+  private DefaultAvroIBTypedRecordDataStreamSupplier<BA> q;
+  private Path targetPath;
+  private IBDataStream stream;
+  private boolean parallel;
+  private Schema schema;
+  private InputStream ins;
+  private DataStream id;
+
+  @Before
+  public void setUp() throws Exception {
+    targetPath = wps.get();
+    ins = getClass().getResourceAsStream(LOAD1);
+    id = new DataStream();
+    id.setUuid(UUID.randomUUID().toString());
+    id.setCreationDate(new Date());
+    id.setSha512(CHECKSUM);
+    id.setMetadata(new Xpp3Dom("metadata"));
+    stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
+    schema = IBDataProtobufUtils.avroSchemaFromString.apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
+    q = new DefaultAvroIBTypedRecordDataStreamSupplier<BA>(targetPath, stream, new BA().getSpecificData(), parallel);
+  }
+
+  @After
+  public void tearDown() throws Exception {
+  }
+
+  @Test
+  public void testGet() {
+    Stream<BA> p = q.get();
+    List<BA> l2 = p.collect(Collectors.toList());
+    assertEquals(5000, l2.size());
+  }
+
+}
