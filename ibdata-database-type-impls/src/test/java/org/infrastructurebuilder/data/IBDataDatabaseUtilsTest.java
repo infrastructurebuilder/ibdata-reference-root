@@ -24,7 +24,8 @@ public class IBDataDatabaseUtilsTest {
 
   @Test
   public void testAllDialects() {
-    assertEquals(52, IBDataDatabaseUtils.allDialects().size());
+//    assertEquals(52, IBDataDatabaseUtils.allDialects().size());  // Jooq pro
+    assertEquals(11, IBDataDatabaseUtils.allDialects().size());
   }
 
 //  @Test
