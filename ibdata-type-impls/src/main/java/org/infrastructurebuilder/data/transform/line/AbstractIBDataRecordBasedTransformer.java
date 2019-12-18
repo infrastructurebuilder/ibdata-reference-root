@@ -80,14 +80,16 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     this.dataLineSuppliers = dataRecTransformerSuppliers;
     this.configuredFinalizer = finalizer;
     if (config != null && config.containsKey(TRANSFORMERSLIST)
-    /*&& config.containsKey(UNCONFIGURABLEKEY_FINALIZER_KEY)*/) {
+    /* && config.containsKey(UNCONFIGURABLEKEY_FINALIZER_KEY) */) {
       Map<String, IBDataRecordTransformerSupplier<?, ?>> map = new HashMap<>();
       this.dataLineSuppliers.forEach((k, v) -> {
         map.put(k, v);
       });
-      //      this.failOnError = ofNullable(config.get(FAIL_ON_ERROR_KEY)).map(Boolean::parseBoolean).orElse(false);
+      // this.failOnError =
+      // ofNullable(config.get(FAIL_ON_ERROR_KEY)).map(Boolean::parseBoolean).orElse(false);
       ConfigMapSupplier lcfg = new DefaultConfigMapSupplier().addConfiguration(config);
-      // If the map contains the key, then the suppliers MUST contain all indicated line transformers
+      // If the map contains the key, then the suppliers MUST contain all indicated
+      // line transformers
       Optional<String> transformersList = ofNullable(config.getString(TRANSFORMERSLIST));
       Optional<String> theListString = transformersList.map(IBUtils.nullIfBlank);
       List<String> theList = theListString.map(str -> Arrays.asList(str.split(Pattern.quote(RECORD_SPLITTER))))
@@ -106,7 +108,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
         for (String li : theList) {
           String[] s = li.split(Pattern.quote(MAP_SPLITTER));
           IBDataRecordTransformerSupplier<?, ?> s2 = map.get(s[1]).configure(lcfg);
-          IBDataRecordTransformer<?, ?> transformer = s2.get()/*.configure(lcfg.get())*/;
+          IBDataRecordTransformer<?, ?> transformer = s2.get()/* .configure(lcfg.get()) */;
           if (acceptable(previousType, transformer.accepts()))
             previousType = transformer.produces();
           else
@@ -114,7 +116,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
                 + transformer.accepts().get() + " and it's predecessor produces " + previousType.orElse(null));
           if (first) {
             first = false;
-              _fType = transformer.accepts().orElse(Arrays.asList(Object.class));
+            _fType = transformer.accepts().orElse(Arrays.asList(Object.class));
           }
           configuredTranformers.add(transformer);
         }
@@ -132,7 +134,8 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
 
   @Override
   public boolean respondsTo(IBDataStream i) {
-      return (!firstType.isEmpty() && firstType.contains(getStructuredSupplyTypeClass(i.getMimeType()).orElse(IMPOSSIBLECLASSNAME)));
+    return (!firstType.isEmpty()
+        && getStructuredSupplyTypeClass(i.getMimeType()).map(firstType::contains).orElse(false));
   }
 
   private boolean acceptable(Optional<Class<?>> previous, Optional<List<Class<?>>> inbound) {
@@ -144,7 +147,8 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
         if (c.isAssignableFrom(p))
           return true;
       }
-      //      inbound.get().stream().anyMatch(inboundClass -> inboundClass.isAssignableFrom(previous.get()));
+      // inbound.get().stream().anyMatch(inboundClass ->
+      // inboundClass.isAssignableFrom(previous.get()));
     }
     return retVal;
   }
@@ -173,15 +177,13 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     return configuredFinalizer;
   }
 
-  /* TODO Make this a (non-parallel!) stream process
-  private Stream<String> streamFor(IBDataStreamSupplier ibds) {
-    try (InputStream ins = Objects.requireNonNull(ibds).get().get()) {
-      return IBUtils.readInputStreamAsStringStream(ins);
-    } catch (IOException e) {
-      throw new IBDataException(e);
-    }
-  }
-  */
+  /*
+   * TODO Make this a (non-parallel!) stream process private Stream<String>
+   * streamFor(IBDataStreamSupplier ibds) { try (InputStream ins =
+   * Objects.requireNonNull(ibds).get().get()) { return
+   * IBUtils.readInputStreamAsStringStream(ins); } catch (IOException e) { throw
+   * new IBDataException(e); } }
+   */
 
   // This is a LITTLE bit dangerous
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -202,12 +204,12 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
             getLog().debug("Skipping row " + lineCount);
             continue;
           }
-          //              log.info(String.format("Line %05d '%s'", lineCount, line));
+          // log.info(String.format("Line %05d '%s'", lineCount, line));
           s = of(line);
           for (IBDataRecordTransformer t : getConfiguredTransformers()) {
 
             inboundObject = ofNullable(t.apply(s.get()));
-            //                log.info(String.format("           '%s'",  line));
+            // log.info(String.format(" '%s'", line));
             if (!inboundObject.isPresent()) {
               errors.computeIfAbsent(t.getHint(), k -> new ArrayList<Long>()).add(lineCount);
               break;
@@ -217,7 +219,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
           }
 
           inboundObject.ifPresent(l -> {
-            //                log.info(String.format("        as '%s'", l));
+            // log.info(String.format(" as '%s'", l));
             finalizer.writeRecord(l).ifPresent(e -> errorList.add((IBDataTransformationError) e));
           });
 

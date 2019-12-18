@@ -42,7 +42,7 @@ abstract public class AbstractIBDataTransformer implements IBDataTransformer {
     return config;
   }
 
-  protected Path getWorkingPath() {
+  public Path getWorkingPath() {
     return workingPath;
   }
 

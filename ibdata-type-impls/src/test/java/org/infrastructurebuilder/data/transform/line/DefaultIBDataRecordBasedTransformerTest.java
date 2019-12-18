@@ -22,6 +22,8 @@ import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -32,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -94,6 +97,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     rs.put("test2", test2);
     HashMap<String, Object> hm = new HashMap<>();
     hm.put(TRANSFORMERSLIST, sj.toString());
+    hm.put("A", "A");
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
     // s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
@@ -117,9 +121,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformation.setDescription("some description");
 
     transformer = new Transformer().copy(transformation);
-
     suppliedStreams = new ArrayList<>();
-
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg").toExternalForm()));
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/lines.txt").toExternalForm()));
 
@@ -149,8 +151,12 @@ public class DefaultIBDataRecordBasedTransformerTest {
   public void testTransform() {
     IBDataTransformationResult q = t.transform(transformer, ds, suppliedStreams, true);
     assertEquals(0, q.getErrors().size());
-
     // FIXME Test the actual output
+  }
+
+  @Test
+  public void testGetLogger() {
+    assertEquals(log, t.getLog());
   }
 
   public class DefaultTestingIBDataRecordTransformerSupplier
@@ -228,6 +234,15 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
       protected Test2(Path ps, ConfigMap config, Logger l) {
         super(ps, config, l);
+        assertEquals(log, getLogger());
+        assertEquals(thePath, getWorkingPath());
+        assertEquals("A", getConfiguration("A"));
+        assertEquals("A", getObjectConfiguration("A", null));
+        assertEquals("B", getObjectConfiguration("B", "B"));
+        assertFalse(getOptionalObjectConfiguration("B").isPresent());
+        Optional<String> a = getTypedObject("A");
+        assertTrue(respondsTo("A"));
+        assertFalse(respondsTo(null));
       }
 
       @Override
