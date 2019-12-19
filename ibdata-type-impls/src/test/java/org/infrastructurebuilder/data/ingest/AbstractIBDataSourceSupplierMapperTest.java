@@ -18,7 +18,6 @@ package org.infrastructurebuilder.data.ingest;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
-import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
 import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -95,7 +94,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     filesDotTxtChecksum = new Checksum(f);
     Path cache = wps.get().toAbsolutePath();
     configMap = new ConfigMap();
-    configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
+    //    configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
     cms = new DefaultConfigMapSupplier(configMap);
     //    ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(wps, () -> log, t2e);
     //    ibdfs = (DefaultIBDataSetIngestionFinalizerSupplier) ibdfs.configure(cms);
@@ -114,21 +113,21 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dset.setCreationDate(now);
     dset.setUuid(UUID.randomUUID().toString());
     ibdataset = new DefaultIBDataSet(dset);
-    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e) {
+    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override
@@ -137,7 +136,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e) {
+    dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -148,14 +147,14 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override
@@ -164,7 +163,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
       public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
@@ -175,14 +174,14 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(of(wps.get()), "X", "Y", source);
+              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds);
+        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
       }
 
       @Override

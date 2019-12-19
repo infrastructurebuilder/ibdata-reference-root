@@ -44,6 +44,7 @@ import org.infrastructurebuilder.data.archiver.DefaultIBDataMavenArchiveFinalize
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
+
 /**
  * This is a transplant from the existing jar plugin for packaging.
  * Many of the same javadoc comments have been left  in place
@@ -153,7 +154,6 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
     lbconfig.setT(context);
     theArchiver.addArchiveFinalizer(
         new DefaultIBDataMavenArchiveFinalizer(() -> new SLF4JFromMavenLogger(getLog()), lbconfig));
-    //    theArchiver.addArchiveFinalizer(new DefaultIBDataMavenStreamFinalizer(l, lbconfig));
 
     archiver.setArchiver(theArchiver);
     archiver.setOutputFile(jarFile);

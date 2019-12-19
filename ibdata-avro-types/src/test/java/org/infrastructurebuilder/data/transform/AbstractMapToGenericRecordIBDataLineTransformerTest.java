@@ -28,7 +28,7 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
 import org.apache.avro.generic.GenericRecord;
-import org.infrastructurebuilder.data.transform.line.AbstractMapToGenericRecordIBDataLineTransformer;
+import org.infrastructurebuilder.data.transform.line.AbstractMapToAvroGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -49,7 +49,7 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
   protected static final String TIME_PATTERN = "HH:mm";
   protected static final String TS_PATTERN = DateTimeFormatter.ISO_INSTANT.toString();
 
-  private AbstractMapToGenericRecordIBDataLineTransformer test;
+  private AbstractMapToAvroGenericRecordIBDataLineTransformer test;
   private Schema s;
   private Map<String, Object> testData = new HashMap<>();
   private TestingPathSupplier wps = new TestingPathSupplier();

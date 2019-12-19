@@ -78,7 +78,7 @@ public class StreamJoiningTransformSupplierTest {
     IBDataTransformer t = s.withFinalizer(ts2).configure(cms).get();
     assertEquals(StreamJoiningTransformSupplier.STREAM_JOIN, t.getHint());
     assertNotNull(t);
-    IBDataTransformationResult q = t.configure(cms.get()).transform(p, ds, suppliedStreams , true);
+    IBDataTransformationResult q = t/* .configure(cms.get()) */.transform(p, ds, suppliedStreams, true);
     IBDataSet i = q.get().get();
   }
 

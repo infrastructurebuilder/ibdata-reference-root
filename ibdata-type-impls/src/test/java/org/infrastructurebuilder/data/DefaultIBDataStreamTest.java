@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
@@ -99,10 +100,10 @@ public class DefaultIBDataStreamTest {
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);
-    cType = copyToDeletedOnExitTempChecksumAndPath(Optional.empty(), "a", "b",
+    cType = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "a", "b",
         getClass().getResourceAsStream("/lines.txt"));
     identifier = new DefaultIBDataStreamIdentifier(checksum.asUUID().get(), of(p1.toUri().toURL().toExternalForm()),
-        of(NAME), of(DESC), checksum, now, metadata, mimeType, of(path.toString()));
+        of(NAME), of(DESC), checksum, now, metadata, mimeType, of(path.toString()),empty(), empty());
     ib1 = new DefaultIBDataStream(identifier, path);
     ib2 = new DefaultIBDataStream(identifier, new ThrowingIBChecksumType());
 

@@ -58,7 +58,6 @@ import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.data.IBDataTypeImplsModelUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -221,7 +220,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
             // supplies Optional dataset
             .get()
             // Map the dataset to the finalized dataset
-            .map(r -> cet.withReturningTranslation(() -> finalizer.finalize(r, transformation, r.getStreamSuppliers())))
+            .map(r -> cet.withReturningTranslation(() -> finalizer.finalize(r, transformation, r.getStreamSuppliers(), getBaseDir())))
             // Or throw exception if no such dataset exists
             .orElseThrow(() -> new IBDataException("Failed to finalize.  IBDataSet unavailable from processing"));
       }

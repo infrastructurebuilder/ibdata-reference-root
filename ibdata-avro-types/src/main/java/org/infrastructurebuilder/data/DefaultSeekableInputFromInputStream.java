@@ -36,7 +36,7 @@ public final class DefaultSeekableInputFromInputStream implements SeekableInput,
   private final SeekableFileInput proxy;
   private final IBChecksumPathType cset;
 
-  public DefaultSeekableInputFromInputStream(Optional<Path> targetPath, InputStream stream) throws IOException {
+  public DefaultSeekableInputFromInputStream(Path targetPath, InputStream stream) throws IOException {
     cset = copyToDeletedOnExitTempChecksumAndPath(targetPath, IBDATA_PREFIX, IBDATA_SUFFIX, stream);
     proxy = new SeekableFileInput(cset.getPath().toFile());
   }

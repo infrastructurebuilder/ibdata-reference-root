@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Optional.empty;
 import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
 import static org.infrastructurebuilder.IBConstants.TEXT_PSV;
@@ -48,12 +49,8 @@ public class DefaultStringStreamSupplier implements IBDataSpecificStreamFactory<
   @Override
   public Optional<Stream<String>> from(IBDataStream ds) {
     if (ds == null || !getRespondTypes().contains(ds.getMimeType()))
-      return Optional.empty();
-    IBDataStream d = ds;
-
-    InputStream ins = d.get();
-    Stream<String> s = readInputStreamAsStringStream(ins);
-    return Optional.of(s);
+      return empty();
+    return Optional.of(readInputStreamAsStringStream(ds.get()));
   }
 
   @Override

@@ -16,30 +16,32 @@
 package org.infrastructurebuilder.data.sql;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.sql.DataSource;
 
+import org.infrastructurebuilder.data.IBDataDatabaseDriverSupplier;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.IBDatabaseDialectMapper;
+import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
-import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.slf4j.Logger;
-import org.sqlite.jdbc4.JDBC4Connection;
 
 import liquibase.Liquibase;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -51,49 +53,58 @@ public class DefaultLiquibaseSupplier extends AbstractConfigurableSupplier<Liqui
     implements LiquibaseSupplier {
 
   private final PathSupplier wps;
-  private final Logger log;
-  private final List<DataSourceSupplier> suppliers;
+  private final List<IBDataDatabaseDriverSupplier> suppliers;
+  private final IBDatabaseDialectMapper dialectMappper;
+  private final Optional<BasicCredentials> creds;
+  private final String url;
 
   @Inject
-  public DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<DataSourceSupplier> suppliers) {
-    this(wps, l, suppliers, null);
+  public DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<IBDataDatabaseDriverSupplier> suppliers,
+      IBDatabaseDialectMapper dMapper) {
+    this(wps, l, suppliers, null, dMapper, null, Optional.empty());
   }
 
-  private DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<DataSourceSupplier> suppliers,
-      ConfigMapSupplier config) {
-    super(config);
+  private DefaultLiquibaseSupplier(PathSupplier wps, LoggerSupplier l, List<IBDataDatabaseDriverSupplier> suppliers,
+      ConfigMapSupplier config, IBDatabaseDialectMapper dMapper, String url, Optional<BasicCredentials> creds) {
+    super(config, l);
     this.wps = requireNonNull(wps);
-    this.log = requireNonNull(l).get();
     this.suppliers = requireNonNull(suppliers);
+    this.dialectMappper = requireNonNull(dMapper);
+    this.url = url;
+    this.creds = creds;
   }
 
-  public PathSupplier getWps() {
-    return wps;
+  public Path getWorkingPath() {
+    return wps.get();
   }
 
-  public Logger getLog() {
-    return log;
-  }
-
-  public List<DataSourceSupplier> getSuppliers() {
+  public List<IBDataDatabaseDriverSupplier> getSuppliers() {
     return suppliers;
+  }
+
+  public IBDatabaseDialectMapper getDialectMapper() {
+    return dialectMappper;
   }
 
   @Override
   public DefaultLiquibaseSupplier configure(ConfigMapSupplier config) {
-    return new DefaultLiquibaseSupplier(getWps(), () -> getLog(), getSuppliers(), config);
+    return new DefaultLiquibaseSupplier(() -> getWorkingPath(), () -> getLog(), getSuppliers(), config,
+        getDialectMapper(), config.get().getString(SOURCE_URL), ofNullable(config.get().getOrDefault(CREDS, null)));
   }
 
   @Override
-  protected Liquibase configuredType(ConfigMapSupplier config) {
-    ConfigMap c = config.get();
-    String url = c.getOrDefault("sourceURL", null);
-    Path physicalFile = getWps().get().resolve(UUID.randomUUID().toString() + ".xml").toAbsolutePath();
+  protected Liquibase getInstance() {
+    IBDataDatabaseDriverSupplier ds = getDialectMapper().getSupplierForURL(url)
+        .orElseThrow(() -> new IBDataException("Failed to acquire IBDatabaseDialect for " + url));
+    DataSource dataSource = ds.getDataSourceSupplier(url, creds)
+        .orElseThrow(() -> new IBDataException("Failed to acquire DataSource for " + url)).get();
+    Path physicalFile = getWorkingPath().resolve(UUID.randomUUID().toString() + ".xml").toAbsolutePath();
     DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalFile.toString());
-    List<ResourceAccessor> resourceAccessors = new ArrayList<>(); // TODO get Resource accessors
-    ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();// new CompositeResourceAccessor(resourceAccessors);
-    Connection connection  = null;
-    Database database = IBDataException.cet.withReturningTranslation(() -> DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection)));
+    // TODO get Resource accessors
+    ResourceAccessor resourceAccessor = new CompositeResourceAccessor(Arrays.asList(new ClassLoaderResourceAccessor()));
+    Connection connection = cet.withReturningTranslation(() -> dataSource.getConnection());
+    Database database = cet.withReturningTranslation(
+        () -> DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection)));
     return new Liquibase(changeLog, resourceAccessor, database);
   }
 

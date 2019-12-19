@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -33,9 +34,11 @@ import javax.inject.Named;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.MapProxyGenericData;
+import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
+import org.infrastructurebuilder.data.IBDataConstants;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
@@ -46,6 +49,7 @@ import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.jooq.DSLContext;
@@ -70,8 +74,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public static final String NAMESPACE = "namespace";
 
   @Inject
-  public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
-    super(requireNonNull(l).get(), requireNonNull(t2e));
+  public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
+    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
   }
 
   public List<String> getHeaders() {
@@ -82,9 +87,10 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultDatabaseIBDataSource(getLog(), temporaryId,
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), Optional.empty(),
-            ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(), v.getDescription(),
-            getMapper()));
+            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, Optional.empty(),
+            ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(),
+            v.getDescription(), getMapper()),
+        getWorkingPath());
   }
 
   public class DefaultDatabaseIBDataSource extends AbstractIBDataSource implements AutoCloseable {
@@ -96,11 +102,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     private final GenericData jrmpGD;
 
-    public DefaultDatabaseIBDataSource(Logger l, String id, String source, Optional<BasicCredentials> creds,
-        Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath,
-        Optional<String> name, Optional<String> description, TypeToExtensionMapper t2e) {
+    public DefaultDatabaseIBDataSource(Logger l, String tempId, String source, boolean expand,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
+        TypeToExtensionMapper t2e) {
 
-      super(l, id, source, name, description, creds, checksum, metadata, additionalConfig);
+      super(l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
       this.t2e = t2e;
       ConfigMap cfg = additionalConfig.orElse(new ConfigMap());
@@ -118,8 +125,8 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     @Override
     public DefaultDatabaseIBDataSource withAdditionalConfig(ConfigMap config) {
-      return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), getCredentials(), getChecksum(),
-          getMetadata(), of(config), config.get(TARGET_PATH), getName(), getDescription(), t2e);
+      return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), false, getCredentials(), getChecksum(),
+          getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), t2e);
     }
 
     @Override
@@ -152,7 +159,8 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
                 // Or we have to produce one
                 .orElse(IBDataJooqUtils.schemaFromRecordResults(getLog(), namespace, recordName,
                     getDescription().orElse(""), firstResult));
-            result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the schema
+            result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the
+                                                                               // schema
             getLog().info("Reading data from dataset");
             read = Arrays.asList(
                 new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.jrmpGD).writeRecords(result));
@@ -161,6 +169,11 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
         }
         return read;
       }).orElse(Collections.emptyList());
+    }
+
+    @Override
+    public Optional<String> getMimeType() {
+      return of(IBConstants.AVRO_BINARY);
     }
 
   }

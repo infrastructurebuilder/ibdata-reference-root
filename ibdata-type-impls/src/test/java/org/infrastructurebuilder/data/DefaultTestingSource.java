@@ -30,7 +30,7 @@ public class DefaultTestingSource extends AbstractIBDataSource {
   public final static Logger log = LoggerFactory.getLogger(DefaultTestingSource.class);
 
   public DefaultTestingSource(String source) {
-    super(log, UUID.randomUUID().toString(), source, empty(), empty(), empty(), empty(), empty(), empty());
+    super(log, UUID.randomUUID().toString(), source, true, empty(), empty(), empty(), empty(), empty(), empty());
   }
 
   @Override
@@ -45,6 +45,11 @@ public class DefaultTestingSource extends AbstractIBDataSource {
 
   @Override
   public Optional<String> getDescription() {
+    return empty();
+  }
+
+  @Override
+  public Optional<String> getMimeType() {
     return empty();
   }
 

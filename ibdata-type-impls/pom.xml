@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-reference-root</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>ibdata-type-impls</artifactId>
   <packaging>jar</packaging>
@@ -28,7 +28,7 @@
   <description>Maven plugin for IBData</description>
   <properties>
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>87</test.coverage.percentage.required>
+    <test.coverage.percentage.required>88</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

@@ -18,49 +18,32 @@ package org.infrastructurebuilder.data;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 
+import java.util.Map;
 import java.util.Optional;
 
-import org.jooq.SQLDialect;
-import org.jooq.SQLDialect.ThirdParty;
+import javax.inject.Inject;
+import javax.inject.Named;
 
+@Named
 public class DefaultIBDatabaseDialectMapper implements IBDatabaseDialectMapper {
 
-  public final Optional<IBDatabaseDialect> from(String jooqDialect) {
-    return IBDatabaseDialectMapper.bySQLDialectName(jooqDialect).map(DefaultIBDatabaseDialect::new);
+  private final Map<String, IBDataDatabaseDriverSupplier> suppliers;
+
+  @Inject
+  public DefaultIBDatabaseDialectMapper(Map<String, IBDataDatabaseDriverSupplier> suppliers) {
+    this.suppliers = requireNonNull(suppliers);
   }
 
-  private final class DefaultIBDatabaseDialect implements IBDatabaseDialect {
-
-    private final SQLDialect jd;
-    private final Optional<LBDDatabase> liquibase;
-    private final Optional<ThirdParty> thirdParty;
-
-    public DefaultIBDatabaseDialect(SQLDialect d) {
-      this.jd = requireNonNull(d);
-      this.thirdParty = ofNullable(jd.thirdParty());
-      this.liquibase = IBDatabaseDialectMapper.byLiquibaseDatabaseName(jd);
-    }
-
-    @Override
-    public String jooqDialectEnum() {
-      return this.jd.getName();
-    }
-
-    @Override
-    public Optional<String> hibernateDialectClass() {
-      return this.thirdParty.map(ThirdParty::hibernateDialect);
-    }
-
-    @Override
-    public Optional<String> liquibaseDatabaseClass() {
-      return this.liquibase.map(LBDDatabase::getDatabaseClass);
-    }
-
-    @Override
-    public Optional<String> springDbName() {
-      return this.thirdParty.map(ThirdParty::springDbName);
-    }
-
+  @Override
+  @Deprecated
+  public final Optional<IBDataDatabaseDriverSupplier> getSupplier(String key) {
+    return ofNullable(suppliers.get(requireNonNull(key,"Supplier key")));
   }
+
+  @Override
+  public final Optional<IBDataDatabaseDriverSupplier> getSupplierForURL(String jdbcURL) {
+    return suppliers.values().stream().filter(s -> s.respondsTo(jdbcURL)).findAny();
+  }
+
 
 }

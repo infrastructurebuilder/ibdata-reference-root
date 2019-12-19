@@ -27,7 +27,6 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataWorkingPathSupplier;
@@ -42,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public class IBDataIngestMavenComponentTest {
 
   public final static Logger log = LoggerFactory.getLogger(IBDataIngestMavenComponentTest.class);
-  private IBDataIngestMavenComponent dic;
   private TestingPathSupplier wps;
   private Properties properties;
   private MavenProject mp;
@@ -150,11 +148,7 @@ public class IBDataIngestMavenComponentTest {
     config.setDataSet(ds);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
-    //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
-
-    //    IBChecksumPathType qq = dic.ingest(config, ingester);
-    //    assertNotNull(qq);
   }
 
   @Ignore

@@ -78,7 +78,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
   }
 
   public static class DefaultMapSSToGenericRecordIBDataLineTransformer
-      extends AbstractMapToGenericRecordIBDataLineTransformer {
+      extends AbstractMapToAvroGenericRecordIBDataLineTransformer {
 
     private final Schema schema;
     private final Formatters formatters;

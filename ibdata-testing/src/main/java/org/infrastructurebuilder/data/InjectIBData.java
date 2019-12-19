@@ -15,37 +15,24 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
-import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
-import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
+import static org.infrastructurebuilder.data.IBDataConstants.MARKER_FILE;
 import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.DataSetInputSource;
-import org.infrastructurebuilder.data.model.io.xpp3.IBDataSourceModelXpp3ReaderEx;
-import org.infrastructurebuilder.util.IBUtils;
-import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.model.IBCPTInputSource;
 import org.infrastructurebuilder.util.files.model.io.xpp3.IBChecksumPathTypeModelXpp3ReaderEx;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -54,16 +41,17 @@ import org.junit.platform.commons.logging.Logger;
 import org.junit.platform.commons.logging.LoggerFactory;
 
 public class InjectIBData implements ParameterResolver {
-  public final static Function<? super InputStream, ? extends IBChecksumPathType> readIBCPT = (in) -> {
-    IBChecksumPathTypeModelXpp3ReaderEx reader;
-    IBCPTInputSource dsis;
+  private final static Logger log = LoggerFactory.getLogger(InjectIBData.class);
+  private final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBChecksumPathTypeModelXpp3ReaderEx reader = new IBChecksumPathTypeModelXpp3ReaderEx();
+  public final static Function<Path, ? extends IBChecksumPathType> readIBCPT = (marker) -> {
+    try (InputStream in = Files.newInputStream(marker, NOFOLLOW_LINKS)) {
+      return cet.withReturningTranslation(() -> reader.read(in, true, new IBCPTInputSource()));
+    } catch (IOException e) {
+      throw new IBDataException("Marker file " + marker.toString() + " invalid", e);
+    }
 
-    reader = new IBChecksumPathTypeModelXpp3ReaderEx();
-    dsis = new IBCPTInputSource();
-    return cet.withReturningTranslation(() -> reader.read(in, true, dsis));
   };
-
-  public final static Logger log = LoggerFactory.getLogger(InjectIBData.class);
 
   @Override
   public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
@@ -74,28 +62,12 @@ public class InjectIBData implements ParameterResolver {
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
-    // FIXME Dunno how else to get WP other than set a system property and write a marker file
-    IBChecksumPathType v = getMarkerFile();
+    // FIXME how else to get WP other than set system property+write marker file
+    IBChecksumPathType v = readIBCPT.apply(wps.getRoot().resolve(MARKER_FILE).toAbsolutePath());
     URL u = cet.withReturningTranslation(() -> v.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL());
-    log.info(() -> "About to read " + u.toExternalForm());
-
-    return IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet.apply(u)
+    log.debug(() -> "About to read " + u.toExternalForm());
+    return mapDataSetToDefaultIBDataSet.apply(u)
         .orElseThrow(() -> new IBDataException("No ingestion or transformation available for " + v.getPath()));
-  }
-
-  private IBChecksumPathType getMarkerFile() {
-    Path marker = Paths
-        .get(Optional.ofNullable(System.getProperties().getProperty("target_dir"))
-            .orElseThrow(() -> new IBDataException("Cannot locate marker file")))
-        .resolve(IBDataConstants.MARKER_FILE).toAbsolutePath();
-    LinkOption[] options = { LinkOption.NOFOLLOW_LINKS };
-    try (InputStream ins = Files.newInputStream(marker, options)) {
-      IBChecksumPathType v;
-      v = readIBCPT.apply(ins);
-      return v;
-    } catch (IOException e) {
-      throw new IBDataException("Marker file " + marker.toString() + " invalid", e);
-    }
   }
 
 }

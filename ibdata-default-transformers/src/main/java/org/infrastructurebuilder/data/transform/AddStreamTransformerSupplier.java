@@ -15,31 +15,29 @@
  */
 package org.infrastructurebuilder.data.transform;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
-import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataTransformationResult;
-import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
-import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -68,23 +66,14 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
   }
 
   @Override
-  protected AddStreamTransformer getUnconfiguredTransformerInstance(Path workingPath) {
-    return new AddStreamTransformer(getWps().get(), getLog());
+  protected AddStreamTransformer getConfiguredTransformerInstance(Path workingPath) {
+    return new AddStreamTransformer(getWps().get(), getLog(), getConfig());
   }
 
   public static class AddStreamTransformer extends AbstractIBDataTransformer {
 
-    public AddStreamTransformer(Path path, Logger l) {
-      this(path, l, null);
-    }
-
     private AddStreamTransformer(Path path, Logger l, ConfigMap cm) {
       super(path, l, cm);
-    }
-
-    @Override
-    public AddStreamTransformer configure(ConfigMap map) {
-      return new AddStreamTransformer(getWorkingPath(), getLog(), map);
     }
 
     @Override
@@ -95,14 +84,14 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
     @Override
     public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds,
         List<IBDataStream> suppliedStreams, boolean failOnError) {
-      Path targetPath = Paths.get(Optional.ofNullable(getConfig().getOrDefault(ADDED_PATH, null))
-          .orElseThrow(() -> new IBDataException("No " + ADDED_PATH + " config")));
+      Path targetPath = Paths.get((String) getConfig().getRequired(ADDED_PATH));
+      String len = cet.withReturningTranslation(() -> Files.size(targetPath)).toString();
       String u = cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm());
 
       IBDataSet createdDataSet = new DefaultIBDataSet(ds);
-      IBDataStreamIdentifier identifier = new DefaultIBDataStreamIdentifier(null, Optional.of(u), Optional.empty(),
-          Optional.empty(), new Checksum(targetPath), new Date(), transformer.getTargetStreamMetadataAsDocument(),
-          transformer.getTargetMimeType(), Optional.of(targetPath.toAbsolutePath().toString()));
+      IBDataStreamIdentifier identifier = new DefaultIBDataStreamIdentifier(null, of(u), empty(), empty(),
+          new Checksum(targetPath), new Date(), transformer.getTargetStreamMetadataAsDocument(),
+          transformer.getTargetMimeType(), of(targetPath.toAbsolutePath().toString()), of(len), empty());
       createdDataSet.getStreamSuppliers()
           .add(new DefaultIBDataStreamSupplier(new DefaultIBDataStream(identifier, targetPath)));
       return new DefaultIBDataTransformationResult(createdDataSet, getWorkingPath());

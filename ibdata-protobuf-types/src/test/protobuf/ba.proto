@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.infrastructurebuilder.data.transform";
+
+
+package ba.messages;
+
+message BASub {
+    string name = 1;
+    int64 id = 2;
+  }
+
+  enum Shapes {
+    SQUARE = 0;
+    TRIANGLE = 1;
+    CIRCLE = 2;
+    OVAL = 3;
+  }
+
+
+message BA {
+    string first_name = 1;
+    string last_name = 2;
+    string id = 3;
+    string gender= 20;
+    string country = 21;
+    int32 age = 22;
+    int64 date_of_birth = 23; // Dates?
+    bool alive = 24;
+    int64 time1 = 25;  // Times?
+    int64  time2 = 26;
+    double dec = 27;    // decimals?
+    double dub = 28;
+    int64 l = 29;
+    float f = 30;
+//    null nullType = 31;
+    bytes bytesType = 32;
+
+
+    Shapes shape  = 33;
+//    union { null, array<array<array<BASub>>> } arrayOfArrays = 34;
+
+}

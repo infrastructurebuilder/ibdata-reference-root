@@ -1,7 +1,7 @@
 {
   "type" : "record",
-  "name" : "aisbillaroundschema",
-  "namespace" : "com.cccis.casualty.data.aisbillaround",
+  "name" : "test",
+  "namespace" : "test",
   "fields" : [ {
     "name" : "index",
     "type" : {

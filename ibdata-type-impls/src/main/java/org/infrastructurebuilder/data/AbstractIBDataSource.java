@@ -36,8 +36,9 @@ abstract public class AbstractIBDataSource implements IBDataSource {
   protected final Optional<String> name;
   protected final Optional<String> desc;
   private final Logger logger;
+  private final boolean expandArchives;
 
-  public AbstractIBDataSource(Logger logger, String id, String source, Optional<String> name, Optional<String> desc, Optional<BasicCredentials> creds,
+  public AbstractIBDataSource(Logger logger, String id, String source, boolean expand, Optional<String> name, Optional<String> desc, Optional<BasicCredentials> creds,
       Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> config) {
     super();
     this.id = requireNonNull(id);
@@ -50,6 +51,7 @@ abstract public class AbstractIBDataSource implements IBDataSource {
     this.logger = requireNonNull(logger);
     this.name = requireNonNull(name);
     this.desc = requireNonNull(desc);
+    this.expandArchives = expand;
   }
 
   @Override
@@ -95,6 +97,11 @@ abstract public class AbstractIBDataSource implements IBDataSource {
   @Override
   public Optional<String> getDescription() {
     return this.desc;
+  }
+
+  @Override
+  public boolean isExpandArchives() {
+    return this.expandArchives;
   }
 
   /**

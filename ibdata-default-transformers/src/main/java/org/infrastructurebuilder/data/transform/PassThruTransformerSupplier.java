@@ -54,7 +54,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
   }
 
   @Override
-  protected IBDataTransformer getUnconfiguredTransformerInstance(Path wps2) {
+  protected IBDataTransformer getConfiguredTransformerInstance(Path wps2) {
     return new PassThruTransformer(wps2, getLog());
   }
 

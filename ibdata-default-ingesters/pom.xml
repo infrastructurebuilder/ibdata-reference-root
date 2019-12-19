@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-reference-root</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.4.0-SNAPSHOT</version>
   </parent>
   <artifactId>ibdata-default-ingesters</artifactId>
   <packaging>jar</packaging>
@@ -45,13 +45,6 @@
     <dependency>
       <groupId>org.infrastructurebuilder</groupId>
       <artifactId>ibcore-read-detect</artifactId>
-    </dependency>
-        <!-- FIXME Remember to continue to update the WGet class in this module when the download plugin changes -->
-    <dependency>
-      <groupId>com.googlecode.maven-download-plugin</groupId>
-      <artifactId>download-maven-plugin</artifactId>
-      <version>${maven.download.plugin.version}</version>
-      <type>jar</type>
     </dependency>
   </dependencies>
   <build>

@@ -27,8 +27,10 @@ import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
+import org.slf4j.Logger;
 
 @SuppressWarnings("rawtypes")
 @Named(DefaultIBDataRecordBasedTransformerSupplier.RECORD_BASED_TRANSFORMER_SUPPLIER)
@@ -58,8 +60,9 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
   }
 
   @Override
-  protected IBDataTransformer getUnconfiguredTransformerInstance(Path workingPath) {
-    return new DefaultIBDataRecordBasedTransformer(workingPath, getLog(), this.dataLineSuppliers, this.finalizer);
+  protected IBDataTransformer getConfiguredTransformerInstance(Path workingPath) {
+    return new DefaultIBDataRecordBasedTransformer(workingPath, getLog(), getConfig(), this.dataLineSuppliers,
+        this.finalizer);
   }
 
   @Override
@@ -72,6 +75,22 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
   public DefaultIBDataRecordBasedTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
     return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), null, dataLineSuppliers,
         finalizer);
+  }
+
+  public static class DefaultIBDataRecordBasedTransformer extends AbstractIBDataRecordBasedTransformer {
+
+    protected DefaultIBDataRecordBasedTransformer(Path workingPath, Logger l, ConfigMap config,
+        Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers,
+        // finalizer
+        IBDataStreamRecordFinalizer finalizer) {
+      super(workingPath, l, config, dataRecTransformerSuppliers, finalizer);
+    }
+
+    @Override
+    public String getHint() {
+      return RECORD_BASED_TRANSFORMER_SUPPLIER;
+    }
+
   }
 
 }

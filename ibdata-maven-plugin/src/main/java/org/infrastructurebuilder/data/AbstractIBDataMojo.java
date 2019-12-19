@@ -16,18 +16,13 @@
 package org.infrastructurebuilder.data;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.nio.file.StandardOpenOption.*;
-import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static org.infrastructurebuilder.data.IBDataConstants.*;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataConstants.MARKER_FILE;
-import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -35,7 +30,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -45,9 +39,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.io.xpp3.IBDataSourceModelXpp3Writer;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.model.IBChecksumPathTypeModel;
 import org.infrastructurebuilder.util.files.model.io.xpp3.IBChecksumPathTypeModelXpp3Writer;
 
@@ -58,6 +49,9 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
    */
   @Component(hint = IBDATA_WORKING_PATH_SUPPLIER)
   private IBDataWorkingPathSupplier workingPathSupplier;
+
+  @Component(hint = IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER)
+  private IBDataCacheDirectoryPathSupplier cacheDirSupplier;
 
   @Parameter(defaultValue = "${mojoExecution}", readonly = true)
   private MojoExecution mojo;
@@ -73,6 +67,9 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
 
   @Parameter(required = false, defaultValue = "false")
   private boolean skip;
+
+  @Parameter(required = true, defaultValue = "${basedir}", readonly = true)
+  private File basedir;
 
   @Parameter(property = IBDATA_WORKING_DIRECTORY, defaultValue = "${project.build.directory}/ibdata")
   private File workingDirectory;
@@ -132,13 +129,11 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
   protected abstract void _execute() throws MojoExecutionException, MojoFailureException;
 
   protected void _setup() throws MojoFailureException {
-    //    int x = getEngine().prepopulate();
-    //    getLog().info("Located " + x + " DataSets with " + getEngine());
     IBDataException.cet.withTranslation(() -> Files.createDirectories(workingDirectory.toPath()));
     workingPathSupplier.setPath(workingDirectory.toPath()); // workingPathSupplier is a Singleton
     if (getSession() != null) {
-      getComponent().addConfig(CACHE_DIRECTORY_CONFIG_ITEM, Paths.get(getSession().getLocalRepository().getBasedir())
-          .resolve(".cache").resolve("download-maven-plugin").toAbsolutePath().toString());
+      cacheDirSupplier.setPath(Paths.get(getSession().getLocalRepository().getBasedir()).resolve(".cache")
+          .resolve("download-maven-plugin").toAbsolutePath());
     }
     getComponent().setMojoExecution(getMojo());
     getComponent().setProject(getProject());

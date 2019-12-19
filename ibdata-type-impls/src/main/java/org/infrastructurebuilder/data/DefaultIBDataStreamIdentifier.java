@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBMetadataUtils.w3cDocumentEqualser;
 
 import java.util.Date;
@@ -37,9 +38,13 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final Document metadata;
   private final String path;
   private final String mimeType;
+  private final String originalLength;
+  private final String originalRowCount;
+  private IBDataStructuredDataMetadata structuredDataMetadata = null;
 
   public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
-      Checksum checksum, Date creationDate, Document metadata, String mimeType, Optional<String> path) {
+      Checksum checksum, Date creationDate, Document metadata, String mimeType, Optional<String> path, Optional<String> oLength,
+      Optional<String> oRowCount) {
     this.id = id;
     this.url = requireNonNull(url);
     this.name = requireNonNull(name);
@@ -49,11 +54,13 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     this.metadata = requireNonNull(metadata);
     this.mimeType = requireNonNull(mimeType);
     this.path = requireNonNull(path).orElse(null);
+    this.originalLength = requireNonNull(oLength).orElse(null);
+    this.originalRowCount = requireNonNull(oRowCount).orElse(null);
   }
 
   public DefaultIBDataStreamIdentifier(IBDataStreamIdentifier ds) {
     this(ds.getId(), ds.getURL(), ds.getName(), ds.getDescription(), ds.getChecksum(), ds.getCreationDate(),
-        ds.getMetadataAsDocument(), ds.getMimeType(), Optional.ofNullable(ds.getPath()));
+        ds.getMetadataAsDocument(), ds.getMimeType(), ofNullable(ds.getPath()), ofNullable(ds.getOriginalLength()), ofNullable(ds.getOriginalRowCount()));
   }
 
   @Override
@@ -109,6 +116,11 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   @Override
+  public String getSha512() {
+    return getChecksum().toString();
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -160,4 +172,22 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     return true;
   }
 
+  @Override
+  public Optional<IBDataStructuredDataMetadata> getStructuredDataMetadata() {
+    return ofNullable(this.structuredDataMetadata );
+  }
+
+  public void setStructuredDataMetadata(IBDataStructuredDataMetadata structuredDataMetadata) {
+    this.structuredDataMetadata = structuredDataMetadata;
+  }
+
+  @Override
+  public String getOriginalLength() {
+    return this.originalLength;
+  }
+
+  @Override
+  public String getOriginalRowCount() {
+    return this.originalRowCount;
+  }
 }

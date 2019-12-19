@@ -16,21 +16,19 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
-import static org.infrastructurebuilder.data.IBDataConstants.CACHE_DIRECTORY_CONFIG_ITEM;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+//import static org.infrastructurebuilder.data.IBDataSource.SPLIT_ZIPS_CONFIG;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyDocumentSupplier;
 
+import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -40,13 +38,10 @@ import javax.inject.Named;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngester;
-import org.infrastructurebuilder.data.IBDataSetIdentifier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
-import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -60,7 +55,6 @@ import org.slf4j.Logger;
 public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplier {
 
   public static final String NAME = "default";
-  public static final String UNZIP = "unarchive";
 
   @Inject
   public DefaultIBDataIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log) {
@@ -72,8 +66,8 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   }
 
   @Override
-  final protected IBDataIngester configuredType(ConfigMapSupplier config) {
-    return new DefaultIBDataIngester(getWps().get(), getLog(), config.get());
+  final protected IBDataIngester getInstance() {
+    return new DefaultIBDataIngester(getWps().get(), getLog(), getConfig().get());
   }
 
   @Override
@@ -81,16 +75,18 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config);
   }
 
-  final static DefaultIBDataStreamSupplier xyz(Path workingPath, IBDataSource source,
+  final static DefaultIBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource source,
       IBChecksumPathType ibPathChecksumType, Date now) {
+    String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
     Path localPath = ibPathChecksumType.getPath();
+    String size = ibPathChecksumType.size().toString();
     String p = requireNonNull(workingPath).relativize(localPath).toString();
     Checksum c = ibPathChecksumType.getChecksum();
     UUID id = c.asUUID().get();
 
     DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(id
     // Created URL
-        , Optional.of(source.getSourceURL())
+        , of(src)
         // Name
         , source.getName()
         //
@@ -100,50 +96,43 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
         //
         , now
         //
-        , source.getMetadata().orElse(IBMetadataUtils.emptyDocumentSupplier.get())
+        , source.getMetadata().orElse(emptyDocumentSupplier.get())
         //
         , ibPathChecksumType.getType()
         //
-        , Optional.of(p));
+        , of(p)
+        // Size
+        , of(size)
+        // rows
+        , empty());
 
     return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, ibPathChecksumType));
 
   };
 
-  final static Stream<Supplier<IBDataStream>> dataSourceToStreamMapper(Path workingPath, Date now,
-      IBDataSource source) {
-    List<IBChecksumPathType> list = source.get();
-    return list.stream().map(ibPathChecksumType -> xyz(workingPath, source, ibPathChecksumType, now));
-  };
-
   public final class DefaultIBDataIngester extends AbstractIBDataIngester {
-
-    private final Path cacheDirectory;
-    private final boolean splitZips;
 
     public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config) {
       super(workingPath, log, config);
-      this.cacheDirectory = ofNullable(
-          requireNonNull(config, "Config map not supplied").getString(CACHE_DIRECTORY_CONFIG_ITEM)).map(Paths::get)
-              .orElseThrow(() -> new IBDataException("No cache directory specified"));
-      this.splitZips = ofNullable(
-          requireNonNull(config, "Config map not supplied").getString(CACHE_DIRECTORY_CONFIG_ITEM))
-              .map(Boolean::parseBoolean).orElse(false);
     }
 
     @Override
-    public List<Supplier<IBDataStream>> ingest(Ingestion ingest, IBDataSetIdentifier dsi,
-        SortedMap<String, IBDataSourceSupplier> dssList) {
-      requireNonNull(dsi, "IBDataSetIdentifier for ingestion");
+    public List<Supplier<IBDataStream>> ingest(SortedMap<String, IBDataSourceSupplier> dssList) {
+//      requireNonNull(dsi, "IBDataSetIdentifier for ingestion");
       requireNonNull(dssList, "List of IBDataSourceSupplier instances");
-      Date now = new Date(); // Ok for "now"  (Get it?)
-      ConfigMap over = new ConfigMap();
-      over.put(IBDataSource.TARGET_PATH, getWorkingPath());
-      over.put(IBDataSource.CACHE_DIR, this.cacheDirectory);
-      over.put(UNZIP, this.splitZips);
-      ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).overrideConfiguration(over).get();
-      return dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms))
-          .flatMap(u -> dataSourceToStreamMapper(getWorkingPath(), now, u)).collect(toList());
+      Date now = new Date(); // Ok for "now" (Get it?)
+      ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).get();
+      Stream<IBDataSource> q = dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms));
+      // flatmap the data source
+      return q.flatMap(source -> {
+        List<IBChecksumPathType> l = source.get();
+        return l.stream().map(ibPathChecksumType -> {
+          DefaultIBDataStreamSupplier dss = toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now);
+          return dss;
+        });
+      })
+          // to a list
+          .collect(toList());
     }
 
   }

@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.IBUtils.nullSafeObjectToString;
@@ -36,8 +37,6 @@ import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
-import static org.infrastructurebuilder.IBConstants.*;
-
 public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implements IBDataStream {
 
   private final List<InputStream> createdInputStreamsForThisInstance = new Vector<>();
@@ -46,11 +45,13 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   private final IBChecksumPathType cpt;
   private Checksum calculatedChecksum = null;
 
-  //  public DefaultIBDataStream(IBDataStreamIdentifier ds, UUID id,  Date now, Supplier<InputStream> ins) {
-  //    super(id, ds.getURL(), ds.getName(), ds.getDescription(), ds.getChecksum(), now, ds.getMetadataAsDocument(),
-  //        ds.getMimeType(), Optional.ofNullable(ds.getPath()));
-  //    this.ss = requireNonNull(ins);
-  //  }
+  // public DefaultIBDataStream(IBDataStreamIdentifier ds, UUID id, Date now,
+  // Supplier<InputStream> ins) {
+  // super(id, ds.getURL(), ds.getName(), ds.getDescription(), ds.getChecksum(),
+  // now, ds.getMetadataAsDocument(),
+  // ds.getMimeType(), Optional.ofNullable(ds.getPath()));
+  // this.ss = requireNonNull(ins);
+  // }
 
   public final static DefaultIBDataStream from(DataStream ds, Supplier<Path> pathToRoot) {
     return new DefaultIBDataStream(ds,
@@ -60,7 +61,8 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins) {
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
-        identifier.getMimeType(), ofNullable(identifier.getPath()));
+        identifier.getMimeType(), ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
+        ofNullable(identifier.getOriginalRowCount()));
     this.cpt = new BasicIBChecksumPathType(Objects.requireNonNull(ins), identifier.getChecksum(),
         identifier.getMimeType());
     this.ss = this.cpt;
@@ -70,7 +72,8 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         requireNonNull(ins).getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
         requireNonNull(ins).getType(),
-        nullSafeObjectToString.apply(ofNullable(ins.getPath()).map(Path::getFileName).orElse(null)));
+        nullSafeObjectToString.apply(ofNullable(ins.getPath()).map(Path::getFileName).orElse(null)),
+        ofNullable(identifier.getOriginalLength()), ofNullable(identifier.getOriginalRowCount()));
     this.cpt = ins;
     this.calculatedChecksum = this.cpt.getChecksum();
     this.ss = requireNonNull(ins);
@@ -117,4 +120,14 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
     return new DefaultIBDataStream(this, cet.withReturningTranslation(() -> newCpt.moveTo(target)));
   }
 
+  @Override
+  public Optional<IBDataStructuredDataMetadata> getIBDataStructuredDataMetadata() {
+    return empty();
+  }
+
+  @Override
+  public Optional<Path> getPathIfAvailable() {
+    return Optional.ofNullable(this.cpt).map(IBChecksumPathType::getPath);
+
+  }
 }

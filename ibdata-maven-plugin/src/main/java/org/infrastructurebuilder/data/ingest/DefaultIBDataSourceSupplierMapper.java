@@ -22,6 +22,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SUFFIX;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,15 +39,18 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -54,10 +59,15 @@ import org.w3c.dom.Document;
 @Named
 public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
   public final static List<String> HEADERS = Arrays.asList("http://", "https://", "file:", "zip:", "jar:");
+  private final WGetterSupplier wgs;
+  private final ArchiverManager archiverManager;
 
   @Inject
-  public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e) {
-    super(requireNonNull(l).get(), requireNonNull(t2e));
+  public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e, WGetterSupplier wgs,
+      ArchiverManager am, @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
+    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
+    this.wgs = requireNonNull(wgs);
+    this.archiverManager = requireNonNull(am);
   }
 
   public List<String> getHeaders() {
@@ -68,76 +78,86 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultIBDataSource(getLog(),
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.getName(),
-            v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), ofNullable(v.getMimeType()),
-            getMapper()));
+            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.isExpandArchives(),
+            v.getName(), v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()),
+            ofNullable(v.getMimeType()), wgs, this.archiverManager, getMapper()),
+        getWorkingPath());
   }
-
 
   public class DefaultIBDataSource extends AbstractIBDataSource {
 
     private final Path targetPath;
-    private final Path cacheDirectory;
-    private final TypeToExtensionMapper t2e;
     private final Optional<String> mimeType;
-
+    private final WGetterSupplier wgs;
+    private final ArchiverManager am;
+    private final TypeToExtensionMapper mapper;
     private List<IBChecksumPathType> read;
 
-    private DefaultIBDataSource(Logger log, String id, String source, Optional<BasicCredentials> creds,
-        Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> additionalConfig, Path targetPath,
-        Optional<String> name, Optional<String> description, Path cacheDir, Optional<String> mimeType,
-        TypeToExtensionMapper t2e) {
+    private DefaultIBDataSource(Logger log, String id, String sourceUrl, boolean expandArchives,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
+        Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
-      super(log, id, source, name, description, creds, checksum, metadata, additionalConfig);
+      super(log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
-      this.cacheDirectory = cacheDir;
-      this.t2e = t2e;
       this.mimeType = mimeType;
+      this.wgs = requireNonNull(wgs);
+      this.am = requireNonNull(am);
+      this.mapper = requireNonNull(mapper);
     }
 
-    public DefaultIBDataSource(Logger log, String source, Optional<String> name, Optional<String> description,
-        Optional<Checksum> checksum, Optional<Document> metadata, Optional<String> targetType,
-        TypeToExtensionMapper t2e) {
-      this(log, randomUUID().toString(), source, empty(), checksum, metadata, empty(), null, name, description, null,
-          targetType, t2e);
+    public DefaultIBDataSource(Logger log, String source, boolean expandArchives, Optional<String> name,
+        Optional<String> description, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
+      this(log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), null, name,
+          description, targetType, wgs, am, mapper);
     }
 
     @Override
     public IBDataSource withAdditionalConfig(ConfigMap config) {
-      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), getCredentials(), getChecksum(), getMetadata(),
-          of(config), config.get(TARGET_PATH), getName(), getDescription(), config.get(CACHE_DIR), getMimeType(), t2e);
+      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), isExpandArchives(), getCredentials(),
+          getChecksum(), getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), getMimeType(),
+          this.wgs, this.am, this.mapper);
+    }
+
+    @Override
+    public Optional<String> getMimeType() {
+      return this.mimeType;
     }
 
     @Override
     public List<IBChecksumPathType> get() {
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {
-          IBChecksumPathType localRead;
-          URL src = cet.withReturningTranslation(() -> new URL(source));
+          List<IBChecksumPathType> localRead;
+          URL src = IBUtils.translateToWorkableArchiveURL(source);
+          WGetter wget = wgs.get();
           switch (src.getProtocol()) {
           case "http":
           case "https":
-            WGetter wget = new WGetter(getLog(), getCredentials(), this.t2e);
-            localRead = wget.collectCacheAndCopyToChecksumNamedFile(
+            localRead = wget.collectCacheAndCopyToChecksumNamedFile(false, getCredentials(),
                 // Target directory
                 targetPath,
                 // URL
-                src,
+                src.toExternalForm(),
                 // "Optional" checksum
                 checksum,
-                // Location of the cacheDirectory
-                cacheDirectory,
                 // Mime type from supplied value (not calculated value)
                 this.mimeType,
                 // Slightly insane defaults
-                false, 3, 0, false).orElseThrow(() -> new IBDataException("Could not read "));
+                3, 0, false, isExpandArchives()).orElseThrow(() -> new IBDataException("Could not read "));
             break;
           case "file":
           case "zip":
+          case "jar":
             try (InputStream ins = src.openStream()) {
-              localRead = cet
-                  .withReturningTranslation(() -> copyToDeletedOnExitTempChecksumAndPath(ofNullable(targetPath),
-                      IBDATA_PREFIX, IBDATA_SUFFIX, ins));
+              localRead = new ArrayList<>();
+              IBChecksumPathType val = cet.withReturningTranslation(
+                  () -> copyToDeletedOnExitTempChecksumAndPath(targetPath, IBDATA_PREFIX, IBDATA_SUFFIX, ins));
+              localRead.add(val);
+              if (isExpandArchives()) {
+                localRead.addAll(wget.expand(targetPath, val, of(src.toExternalForm())));
+              }
 
             } catch (IOException e) {
               throw new IBDataException(e);
@@ -146,7 +166,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
           default:
             throw new IBDataException("Default processor cannot handle protocol " + source);
           }
-          read = Arrays.asList(localRead);
+          read = localRead;
         }
         return read;
       }).orElse(Collections.emptyList());

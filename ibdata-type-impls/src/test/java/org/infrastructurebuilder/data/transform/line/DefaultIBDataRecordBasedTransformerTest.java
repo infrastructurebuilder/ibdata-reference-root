@@ -15,12 +15,15 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -31,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -48,6 +52,7 @@ import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -68,7 +73,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
   private IBDataDataStreamRecordFinalizerSupplier<String> finalizerSupplier;
   private Map<String, IBDataRecordTransformerSupplier> rs;
   private Path p;
-  private DefaultIBDataRecordBasedTransformer t;
+  private DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer t;
   private Path thePath;
   private ConfigMap cfg;
   private ConfigMapSupplier cms;
@@ -92,11 +97,13 @@ public class DefaultIBDataRecordBasedTransformerTest {
     rs.put("test2", test2);
     HashMap<String, Object> hm = new HashMap<>();
     hm.put(TRANSFORMERSLIST, sj.toString());
+    hm.put("A", "A");
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
-    //    s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
+    // s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
     finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> thePath, () -> log).configure(cms);
-    t = new DefaultIBDataRecordBasedTransformer(thePath, log, rs, finalizerSupplier.get());
+    t = new DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer(thePath, log, cms.get(), rs,
+        finalizerSupplier.get());
     DataSet d1 = new DataSet();
     d1.setUuid(UUID.randomUUID().toString());
     d1.setGroupId("x");
@@ -114,9 +121,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformation.setDescription("some description");
 
     transformer = new Transformer().copy(transformation);
-
     suppliedStreams = new ArrayList<>();
-
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg").toExternalForm()));
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/lines.txt").toExternalForm()));
 
@@ -126,13 +131,14 @@ public class DefaultIBDataRecordBasedTransformerTest {
     IBChecksumPathType c = readPathTypeFromFile(resource);
     Document metadata = IBMetadataUtils.emptyDocumentSupplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
-        c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()));
+        c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()), empty(),
+        empty());
     return new DefaultIBDataStream(i, c);
   }
 
   private IBChecksumPathType readPathTypeFromFile(String resource) throws Exception {
-    try (InputStream in = new URL(resource).openStream()) {
-      return copyToDeletedOnExitTempChecksumAndPath(of(thePath), "abc", "b", in);
+    try (InputStream in = IBUtils.translateToWorkableArchiveURL(resource).openStream()) {
+      return copyToDeletedOnExitTempChecksumAndPath(thePath, "abc", "b", in);
     }
   }
 
@@ -143,10 +149,14 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   @Test
   public void testTransform() {
-    IBDataTransformationResult q = t.configure(cfg).transform(transformer, ds, suppliedStreams, true);
+    IBDataTransformationResult q = t.transform(transformer, ds, suppliedStreams, true);
     assertEquals(0, q.getErrors().size());
-
     // FIXME Test the actual output
+  }
+
+  @Test
+  public void testGetLogger() {
+    assertEquals(log, t.getLog());
   }
 
   public class DefaultTestingIBDataRecordTransformerSupplier
@@ -169,7 +179,6 @@ public class DefaultIBDataRecordBasedTransformerTest {
     public String getHint() {
       return "test" + type;
     }
-
 
     @Override
     public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
@@ -208,6 +217,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
       public String apply(String t) {
         return t.trim();
       }
+
       @Override
       public Class<String> getInboundClass() {
         return String.class;
@@ -224,6 +234,15 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
       protected Test2(Path ps, ConfigMap config, Logger l) {
         super(ps, config, l);
+        assertEquals(log, getLogger());
+        assertEquals(thePath, getWorkingPath());
+        assertEquals("A", getConfiguration("A"));
+        assertEquals("A", getObjectConfiguration("A", null));
+        assertEquals("B", getObjectConfiguration("B", "B"));
+        assertFalse(getOptionalObjectConfiguration("B").isPresent());
+        Optional<String> a = getTypedObject("A");
+        assertTrue(respondsTo("A"));
+        assertFalse(respondsTo(null));
       }
 
       @Override
@@ -240,6 +259,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
       public String apply(String t) {
         return t.toUpperCase();
       }
+
       @Override
       public Class<String> getInboundClass() {
         return String.class;

@@ -15,25 +15,30 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
+import java.nio.file.Path;
 
 abstract public class AbstractIBDataSourceSupplier implements IBDataSourceSupplier {
 
   protected final IBDataSource src;
   protected final String id;
+  private final Path workingPath;
 
-  public AbstractIBDataSourceSupplier(String id, IBDataSource src) {
-    this.id = Objects.requireNonNull(id);
-    this.src = Objects.requireNonNull(src);
+  public AbstractIBDataSourceSupplier(String id, IBDataSource src, Path workingPath) {
+    this.id = requireNonNull(id);
+    this.src = requireNonNull(src);
+    this.workingPath = requireNonNull(workingPath);
+  }
+
+  @Override
+  public String getId() {
+    return id;
   }
 
   @Override
   public IBDataSource get() {
     return this.src;
-  }
-
-  public String getId() {
-    return this.src.getId();
   }
 
   @Override
