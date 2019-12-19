@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -30,7 +31,16 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
  */
 public interface IBDataSetFinalizer<T>  {
 
-  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> suppliers) throws IOException;
+  /**
+   * Finalize a dataset
+   * @param dsi1 The datasets
+   * @param target target to send to
+   * @param suppliers List of the IBDataStream suppliers used here
+   * @param basedir Optional string that is the absolute path of Maven's ${basedir}
+   * @return an IBChecksumPathType
+   * @throws IOException
+   */
+  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> suppliers, Optional<String> basedir) throws IOException;
 
   Path getWorkingPath();
 

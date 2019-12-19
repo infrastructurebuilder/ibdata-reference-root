@@ -85,11 +85,11 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
 
     @Override
     public IBChecksumPathType finalize(IBDataSet inboundDataSet, Transformation target,
-        List<Supplier<IBDataStream>> ibdssList) throws IOException {
+        List<Supplier<IBDataStream>> ibdssList, Optional<String> basedir) throws IOException {
       DataSet targetDataSet = target.asDataSet();
       targetDataSet.setPath(inboundDataSet.getPath());
 
-      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, getTypeToExtensionMapper());
+      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, getTypeToExtensionMapper(), basedir);
     }
 
   }

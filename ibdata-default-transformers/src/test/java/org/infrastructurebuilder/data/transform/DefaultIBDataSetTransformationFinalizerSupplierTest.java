@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -110,7 +111,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
     IBDataSetFinalizer<Transformation> p = (IBDataSetFinalizer<Transformation>) p2.get();
     assertNotNull(p);
 
-    IBChecksumPathType g = p.finalize(ds, x, Collections.emptyList());
+    IBChecksumPathType g = p.finalize(ds, x, Collections.emptyList(), Optional.empty());
     assertTrue(Files.exists(g.getPath().resolve(IBDataConstants.IBDATA).resolve(IBDataConstants.IBDATASET_XML)));
   }
 

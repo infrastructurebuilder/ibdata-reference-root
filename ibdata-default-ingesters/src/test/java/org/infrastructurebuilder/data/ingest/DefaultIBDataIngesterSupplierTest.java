@@ -191,7 +191,7 @@ public class DefaultIBDataIngesterSupplierTest {
     c = dis.get();// configure() call default returns itself
     List<Supplier<IBDataStream>> val = c.ingest(dss);
 
-    IBChecksumPathType finalized = finalizer.finalize(ibdataset, i, val);
+    IBChecksumPathType finalized = finalizer.finalize(ibdataset, i, val, Optional.empty());
     assertTrue(Files.isDirectory(finalized.getPath()));
     assertNotNull(val);
     assertEquals(1, val.size());

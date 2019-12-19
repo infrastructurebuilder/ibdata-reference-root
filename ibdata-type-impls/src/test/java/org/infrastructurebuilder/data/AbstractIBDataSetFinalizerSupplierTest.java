@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -131,7 +132,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     IBDataSetFinalizer<Dummy> v = c.configure(cms).get();
     assertNotNull(v.getWorkingPath());
     assertTrue(Files.isDirectory(v.getWorkingPath()));
-    IBChecksumPathType g = v.finalize(dsi1, new Dummy(), Collections.emptyList());
+    IBChecksumPathType g = v.finalize(dsi1, new Dummy(), Collections.emptyList(), Optional.empty());
     assertEquals(dummyPath, g.getPath());
     assertEquals(new Checksum().toString(), g.getChecksum().toString());
   }
@@ -147,7 +148,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<Supplier<IBDataStream>> suppliers)
+    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<Supplier<IBDataStream>> suppliers, Optional<String> basedir)
         throws IOException {
       getConfig();
       return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());

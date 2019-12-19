@@ -17,7 +17,7 @@ package org.infrastructurebuilder.data;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataConstants.*;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataConstants.MARKER_FILE;
@@ -67,6 +67,9 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
 
   @Parameter(required = false, defaultValue = "false")
   private boolean skip;
+
+  @Parameter(required = true, defaultValue = "${basedir}", readonly = true)
+  private File basedir;
 
   @Parameter(property = IBDATA_WORKING_DIRECTORY, defaultValue = "${project.build.directory}/ibdata")
   private File workingDirectory;
@@ -126,8 +129,6 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
   protected abstract void _execute() throws MojoExecutionException, MojoFailureException;
 
   protected void _setup() throws MojoFailureException {
-    //    int x = getEngine().prepopulate();
-    //    getLog().info("Located " + x + " DataSets with " + getEngine());
     IBDataException.cet.withTranslation(() -> Files.createDirectories(workingDirectory.toPath()));
     workingPathSupplier.setPath(workingDirectory.toPath()); // workingPathSupplier is a Singleton
     if (getSession() != null) {

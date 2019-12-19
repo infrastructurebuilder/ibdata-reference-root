@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -79,12 +80,12 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList)
+    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList, Optional<String> basedir)
         throws IOException {
       // dsi2 is always null (currently). There is no "previous dataset" to contend
       // with in ingestion
       return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,
-          getTypeToExtensionMapper());
+          getTypeToExtensionMapper(), basedir);
     }
 
   }

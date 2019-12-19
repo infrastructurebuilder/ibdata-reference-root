@@ -104,7 +104,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // do the ingestion
         .ingest(dsSupplierFactory.mapIngestionToSourceSuppliers(ingest));
     try {
-      return finalizer.finalize(null, ingest, suppliers);
+      return finalizer.finalize(null, ingest, suppliers, getBaseDir());
     } catch (IOException e) {
       throw new MojoFailureException("Failed to finalize", e);
     }
