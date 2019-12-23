@@ -59,10 +59,15 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   }
 
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins) {
+    this(identifier, ins, empty());
+  }
+
+  public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins, Optional<IBDataStructuredDataMetadata> sdmd) {
     super(identifier.getId(), identifier.getURL(), identifier.getName(), identifier.getDescription(),
         identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadataAsDocument(),
         identifier.getMimeType(), ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
         ofNullable(identifier.getOriginalRowCount()));
+    sdmd.ifPresent(s -> this.setStructuredDataMetadata(s));
     this.cpt = new BasicIBChecksumPathType(Objects.requireNonNull(ins), identifier.getChecksum(),
         identifier.getMimeType());
     this.ss = this.cpt;

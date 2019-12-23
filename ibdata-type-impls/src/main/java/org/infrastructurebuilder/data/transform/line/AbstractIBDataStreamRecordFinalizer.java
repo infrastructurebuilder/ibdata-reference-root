@@ -18,7 +18,10 @@ package org.infrastructurebuilder.data.transform.line;
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isDirectory;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
@@ -39,7 +42,10 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
+import org.infrastructurebuilder.data.IBDataStructuredDataMetadata;
 import org.infrastructurebuilder.data.IBDataTransformationError;
+import org.infrastructurebuilder.data.IBStreamerFactory;
+import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;
 
@@ -48,8 +54,9 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
   private final String id;
   private final Path workingPath;
   private final Optional<O> writer;
+  private final Logger log;
   private boolean closed = false;
-  private Logger log;
+  protected DataStreamStructuredMetadata smd = null;
 
   public AbstractIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map,
       Optional<O> optionalWriter) {
@@ -87,7 +94,7 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
 
   @Override
   public Supplier<IBDataStream> finalizeRecord(IBDataStreamIdentifier ds) {
-    DefaultIBDataStream stream = new DefaultIBDataStream(ds, getWorkingPath());
+    DefaultIBDataStream stream = new DefaultIBDataStream(ds, getWorkingPath(), getStructuredMetadata());
     return new DefaultIBDataStreamSupplier(stream);
   }
 
@@ -114,17 +121,26 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
   @Override
   public Optional<IBDataTransformationError> writeRecord(T recordToWrite) {
     try {
+      this.smd = updateStructuredMetadata(this.smd, recordToWrite);
       writeThrows(recordToWrite);
-      return Optional.empty();
+      return empty();
     } catch (Throwable e) {
-      return Optional
-          .of(new DefaultIBDataTransformationError(Optional.of(e), ofNullable(recordToWrite).map(k -> k.toString())));
+      return of(new DefaultIBDataTransformationError(of(e), ofNullable(recordToWrite).map(k -> k.toString())));
     }
+  }
+
+  // Override to create/set this.smd in order to collect structured metadata
+  protected DataStreamStructuredMetadata updateStructuredMetadata(DataStreamStructuredMetadata current, T recordToWrite) {
+    return null;
+  };
+
+  protected Optional<IBDataStructuredDataMetadata> getStructuredMetadata() {
+    return ofNullable(this.smd);
   }
 
   @Override
   public OutputStream getWriterTarget() throws IOException {
-    return Files.newOutputStream(getWorkingPath(), StandardOpenOption.CREATE_NEW);
+    return Files.newOutputStream(getWorkingPath(), CREATE_NEW);
   }
 
 }

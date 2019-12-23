@@ -73,6 +73,12 @@ public class DefaultIBDataRecordBasedTransformerSupplierTest {
   }
 
   @Test
+  public void testGetDataLineSuppliers() {
+    AbstractIBDataRecordBasedTransformer p = (AbstractIBDataRecordBasedTransformer) s.withFinalizer(finalizer).configure(cms).get();
+    Map<String, IBDataRecordTransformerSupplier> q = p.getDataLineSuppliers();
+    assertEquals(1,q.size());
+  }
+  @Test
   public void testGet() {
     IBDataTransformer p = s.withFinalizer(finalizer).configure(cms).get();
     assertNotNull(p);

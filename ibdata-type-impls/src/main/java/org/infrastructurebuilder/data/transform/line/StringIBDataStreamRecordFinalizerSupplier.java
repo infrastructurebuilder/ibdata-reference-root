@@ -32,6 +32,7 @@ import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
+import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -85,6 +86,13 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
     protected void writeThrows(String recordToWrite) throws Throwable {
       getWriter().write(recordToWrite);
       getWriter().write("\n");
+    }
+
+    @Override
+    protected DataStreamStructuredMetadata updateStructuredMetadata(DataStreamStructuredMetadata current,
+        String recordToWrite) {
+      // TODO At least record the string length
+      return null;
     }
 
     @Override
