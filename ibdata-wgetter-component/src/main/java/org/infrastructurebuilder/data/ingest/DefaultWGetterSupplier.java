@@ -495,6 +495,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
           boolean done = false;
           while (!done && this.retries > 0) {
             try {
+              getLog().debug("Getting " + this.uri.toASCIIString() + " to file " + outputFile );
               doGet(outputFile);
               // if (this.md5 != null) {
               // SignatureUtils.verifySignature(outputFile, this.md5,
