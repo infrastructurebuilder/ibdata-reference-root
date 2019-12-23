@@ -46,12 +46,10 @@
       <artifactId>avro</artifactId>
     </dependency>
     <!--  Optional compression -->
-    <!--
     <dependency>
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
     </dependency>
-     -->
     <!--
      -->
   </dependencies>

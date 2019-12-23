@@ -196,7 +196,9 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       File outputDirectory = targetDir.toFile();
       String outputFileName = source.toAbsolutePath().toString();
       try {
-        UnArchiver unarchiver = this.am.getUnArchiver(outputFile);
+        String type = t2e.getExtensionForType(src.getType()).substring(1);
+        UnArchiver unarchiver = this.am.getUnArchiver(type);
+        log.debug("Unarchiver type is " + type + " " + unarchiver.toString());
         unarchiver.setSourceFile(outputFile);
         if (isFileUnArchiver(unarchiver)) {
           unarchiver
