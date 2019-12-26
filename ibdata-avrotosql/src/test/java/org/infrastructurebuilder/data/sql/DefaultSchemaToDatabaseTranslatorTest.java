@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
+import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
+import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
@@ -33,8 +35,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultSchemaToDatabaseTranslatorTest {
+  public final static Logger log = LoggerFactory.getLogger(DefaultSchemaToDatabaseTranslatorTest.class);
 
   private static TestingPathSupplier wps;
 
@@ -55,7 +60,8 @@ public class DefaultSchemaToDatabaseTranslatorTest {
   public void setUp() throws Exception {
     s2d = new DefaultSchemaToDatabaseTranslator(wps);
     URL v = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toUri().toURL();
-    s = Arrays.asList(IBDataAvroUtils.avroSchemaFromString.apply(v.toExternalForm()));
+    s = Arrays.asList(new DefaultIBDataAvroUtilsSupplier(() -> log, new DefaultGenericDataSupplier(() -> log)).get()
+        .avroSchemaFromString(v.toExternalForm()));
   }
 
   @After

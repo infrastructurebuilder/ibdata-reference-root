@@ -18,7 +18,6 @@ package org.infrastructurebuilder.data;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.nio.file.Path;
-import java.util.Optional;
 
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.specific.SpecificData;

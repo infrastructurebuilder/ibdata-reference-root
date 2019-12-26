@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -32,18 +33,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
-import org.infrastructurebuilder.data.Formatters;
-import org.infrastructurebuilder.data.IBDataAvroUtils;
-import org.infrastructurebuilder.data.IBDataConstants;
+import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
-import org.infrastructurebuilder.data.JooqRecordWriter;
+import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -72,11 +69,16 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public static final String SCHEMA = "schema"; // "Optional" (sort of )
 
   public static final String NAMESPACE = "namespace";
+  private final IBDataAvroUtilsSupplier aus;
+  private final JooqAvroRecordWriterSupplier jrws;
 
   @Inject
   public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, IBDataAvroUtilsSupplier gds,
+      JooqAvroRecordWriterSupplier jrws) {
     super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
+    this.aus = requireNonNull(gds);
+    this.jrws = requireNonNull(jrws);
   }
 
   public List<String> getHeaders() {
@@ -89,7 +91,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
         new DefaultDatabaseIBDataSource(getLog(), temporaryId,
             v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, Optional.empty(),
             ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(),
-            v.getDescription(), getMapper()),
+            v.getDescription(), getMapper(), this.aus, this.jrws),
         getWorkingPath());
   }
 
@@ -100,19 +102,20 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     private List<IBChecksumPathType> read;
 
-    private final GenericData jrmpGD;
+    private final IBDataAvroUtilsSupplier aus;
+    private final JooqAvroRecordWriterSupplier jwrs;
 
     public DefaultDatabaseIBDataSource(Logger l, String tempId, String source, boolean expand,
         Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
-        TypeToExtensionMapper t2e) {
+        TypeToExtensionMapper t2e, IBDataAvroUtilsSupplier jds, JooqAvroRecordWriterSupplier jrws) {
 
-      super(l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata, additionalConfig);
+      super(l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata,
+          additionalConfig);
       this.targetPath = targetPath;
       this.t2e = t2e;
-      ConfigMap cfg = additionalConfig.orElse(new ConfigMap());
-      this.jrmpGD = new MapProxyGenericData(new Formatters(cfg));
-
+      this.aus = requireNonNull(jds);
+      this.jwrs = requireNonNull(jrws);
     }
 
     private Connection conn;
@@ -124,13 +127,15 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     }
 
     @Override
-    public DefaultDatabaseIBDataSource withAdditionalConfig(ConfigMap config) {
+    public DefaultDatabaseIBDataSource configure(ConfigMap config) {
       return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), false, getCredentials(), getChecksum(),
-          getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), t2e);
+          getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), t2e,
+          (IBDataAvroUtilsSupplier) this.aus.configure(config),
+          (JooqAvroRecordWriterSupplier) this.jwrs.configure(config));
     }
 
     @Override
-    public List<IBChecksumPathType> get() {
+    public List<IBChecksumPathType> getInstance() {
       if (conn == null) {
         String url = getSourceURL();
         BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", Optional.empty()));
@@ -138,7 +143,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
             () -> DriverManager.getConnection(url, bc.getKeyId(), bc.getSecret().orElse(null)));
 
       }
-      ConfigMap cfg = getAdditionalConfig().orElseThrow(() -> new IBDataException(NO_QUERY_MSG));
+      ConfigMap cfg = getConfig();
       String sql = cfg.getString(QUERY);
       SQLDialect dialect = SQLDialect.valueOf(cfg.getString(DIALECT));
       if (!getName().isPresent())
@@ -155,15 +160,14 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
             String namespace = cfg.getOrDefault(NAMESPACE, DEFAULT_NAMESPACE);
             Schema schema = sString
                 // Either we already have a schema
-                .map(IBDataAvroUtils.avroSchemaFromString::apply)
+                .map(qq -> this.aus.get().avroSchemaFromString(qq))
                 // Or we have to produce one
                 .orElse(IBDataJooqUtils.schemaFromRecordResults(getLog(), namespace, recordName,
                     getDescription().orElse(""), firstResult));
             result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the
                                                                                // schema
             getLog().info("Reading data from dataset");
-            read = Arrays.asList(
-                new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, this.jrmpGD).writeRecords(result));
+            read = singletonList(this.jwrs.get().writeRecords(result));
           } else
             throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
         }
@@ -175,7 +179,6 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     public Optional<String> getMimeType() {
       return of(IBConstants.AVRO_BINARY);
     }
-
   }
 
 }

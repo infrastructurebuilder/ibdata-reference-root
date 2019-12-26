@@ -35,9 +35,13 @@ import org.apache.avro.data.TimeConversions.DateConversion;
 import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.infrastructurebuilder.IBConstants;
+import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
+import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
+import org.infrastructurebuilder.data.GenericDataSupplier;
 import org.infrastructurebuilder.data.IBDataConstants;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -80,6 +84,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
 
   private IBDataSource ds;
 
+  private DefaultGenericDataSupplier gds;
+
+  private DefaultIBDataAvroUtilsSupplier aus;
+
+  private JooqAvroRecordWriterSupplier jrws;
+
   @Before
   public void setUp() throws Exception {
     c = new ConfigMap();
@@ -89,7 +99,10 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
     c.put("query", "SELECT * FROM TEST ORDER BY ID;");
     c.put(IBDataConstants.DATE_FORMATTER, "yyyy-MM-dd");
     t2e = new DefaultTypeToExtensionMapper();
-    d = new DefaultDatabaseIBDataSourceSupplierMapper(() -> log, t2e, wps);
+     gds = new DefaultGenericDataSupplier(() -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds );
+    jrws = new JooqAvroRecordWriterSupplier(() -> log, aus);
+    d = new DefaultDatabaseIBDataSourceSupplierMapper(() -> log, t2e, wps,  aus, jrws);
     b = new DefaultIBDataStreamIdentifierConfigBean();
     b.setDescription("desc");
     b.setId(UUID.randomUUID().toString());
@@ -110,7 +123,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   public void test() throws MalformedURLException {
     assertTrue(d.respondsTo(b));
     s = d.getSupplierFor(b.getTemporaryId(), b);
-    ds = s.get().withAdditionalConfig(c);
+    ds = s.get().configure(c);
     List<IBChecksumPathType> p = ds.get();
     assertTrue(p.size() > 0);
     Optional<Stream<GenericRecord>> x = genericStreamFromInputStream.apply(p.get(0).get());

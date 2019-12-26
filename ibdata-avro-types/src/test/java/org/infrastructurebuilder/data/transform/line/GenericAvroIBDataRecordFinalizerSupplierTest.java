@@ -30,18 +30,20 @@ import java.util.stream.Stream;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.apache.avro.generic.GenericRecord;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultAvroGenericRecordStreamSupplier;
 import org.infrastructurebuilder.data.DefaultAvroGenericRecordStreamSupplierTest;
+import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
+import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
+import org.infrastructurebuilder.data.GenericDataSupplier;
 import org.infrastructurebuilder.data.IBDataAvroUtils;
+import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStructuredDataFieldMetadata;
-import org.infrastructurebuilder.data.IBDataStructuredDataMetadata;
 import org.infrastructurebuilder.data.model.DataStream;
-import org.infrastructurebuilder.data.transform.BA;
 import org.infrastructurebuilder.data.transform.line.GenericAvroIBDataRecordFinalizerSupplier.GenericAvroIBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -72,16 +74,19 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
   private ConfigMapSupplier cms;
   private GenericRecord record;
   private Schema schema;
+  private IBDataAvroUtilsSupplier aus;
+  private GenericDataSupplier gds;
+  private String schemaString;
 
   @Before
   public void setUp() throws Exception {
     cms = new DefaultConfigMapSupplier();
-    String schemaString = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString();
+    schemaString = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString();
     cms.addValue(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaString);
     cms.addValue(IBDataStreamRecordFinalizer.NUMBER_OF_ROWS_TO_SKIP_PARAM, "1");
-    g = new GenericAvroIBDataRecordFinalizerSupplier(wps, () -> log);
-    schema = IBDataAvroUtils.avroSchemaFromString.apply(schemaString);
-    record = new Record(schema);
+    gds = new DefaultGenericDataSupplier(() -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds);
+    g = new GenericAvroIBDataRecordFinalizerSupplier(wps, () -> log, aus);
 
   }
 
@@ -97,13 +102,20 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
 
   @Test
   public void testGet() {
-    IBDataStreamRecordFinalizer<GenericRecord> q = g.configure(cms).get();
+    IBDataDataStreamRecordFinalizerSupplier<GenericRecord> f1 = g.configure(cms);
+    IBDataStreamRecordFinalizer<GenericRecord> q = f1.get();
     assertEquals(1, q.getNumberOfRowsToSkip());
+    aus = (IBDataAvroUtilsSupplier) aus.configure(cms.get());
+    schema = aus.get().avroSchemaFromString(schemaString);
+    record = new Record(schema);
     q.writeRecord(record);
   }
 
   @Test
   public void testAccreteDate() throws Exception {
+    aus = (IBDataAvroUtilsSupplier) aus.configure(cms.get());
+    schema = aus.get().avroSchemaFromString(schemaString);
+    record = new Record(schema);
     List<GenericRecord> l = new ArrayList<>();
     DataStream id = new DataStream();
     id.setUuid(UUID.randomUUID().toString());

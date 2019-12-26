@@ -19,9 +19,13 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
+import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.util.IBUtils.copyToDeletedOnExitTempPath;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,31 +33,27 @@ import java.util.Vector;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.apache.avro.file.DataFileStream;
+import org.apache.avro.file.DataFileReader;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumReader;
 
 public class DefaultAvroGenericRecordStreamSupplier implements IBDataSpecificStreamFactory<GenericRecord> {
   public final static List<String> TYPES = Arrays.asList(AVRO_BINARY);
 
   public final static Function<InputStream, Optional<Stream<GenericRecord>>> genericStreamFromInputStream = (ins) -> {
     List<GenericRecord> l = new Vector<>();
-
-    try (DataFileStream<GenericRecord> s = new DataFileStream<GenericRecord>(ins,
-        new GenericDatumReader<GenericRecord>())) {
-      // FIXME OBVIOUSLY NOT CORRECT!!!!  You WILL run out of memory
-      s.forEach(l::add);
+    Path target = cet.withReturningTranslation(() -> copyToDeletedOnExitTempPath("ib", ".avro", ins));
+    cet.withTranslation(() -> ins.close());
+    DatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
+    try (DataFileReader<GenericRecord> dataFileReader = new DataFileReader<>(target.toFile(), datumReader)) {
+      dataFileReader.forEach(l::add);
       return of(l.stream());
-      //      stream(
-      //          // From splterator
-      //          spliteratorUnknownSize(s, 0), // with no characteristics
-      //          // not parallel
-      //          false);
     } catch (IOException e) {
       return empty();
     } finally {
-      IBDataException.cet.withTranslation(() -> {
-        ins.close();
+      cet.withTranslation(() -> {
+        Files.delete(target);
       });
     }
   };

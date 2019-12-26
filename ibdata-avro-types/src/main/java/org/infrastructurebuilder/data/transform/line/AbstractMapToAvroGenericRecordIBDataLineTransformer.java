@@ -49,12 +49,6 @@ abstract public class AbstractMapToAvroGenericRecordIBDataLineTransformer
       Field f = s.getField(k);
       if (f != null) {
         rb.set(f, t.get(k));
-        //      else {
-        //
-        //      }
-        //      Field v = s.getField(k);
-        //      if (v != null) {
-        //        r.put(k, managedValue(v.schema(), k, t.get(k), getFormatters()));
       } else {
         if (!alreadyWarned.contains(k)) {
           getLogger().warn("*** Field '" + k + "' not known in schema!  ");

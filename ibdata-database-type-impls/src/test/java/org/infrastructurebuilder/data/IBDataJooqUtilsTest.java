@@ -35,10 +35,12 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.MapProxyGenericData;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.infrastructurebuilder.IBConstants;
+import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier.JooqRecordWriter;
 import org.infrastructurebuilder.data.ingest.DefaultIBDataStreamIdentifierConfigBean;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -104,7 +106,15 @@ public class IBDataJooqUtilsTest {
 
   private Record firstRecord;
 
+  private JooqAvroRecordWriterSupplier w2;
+
+  private GenericDataSupplier gds;
+
+  private DefaultIBDataAvroUtilsSupplier aus;
+
   private JooqRecordWriter w;
+
+  private ConfigMap cms;
 
   public static Logger getLog() {
     return log;
@@ -118,7 +128,7 @@ public class IBDataJooqUtilsTest {
     theUrl = "jdbc:h2:" + wps.getTestClasses().resolve("test").toAbsolutePath().toString();
     c.put("url", theUrl);
     c.put("query", SELECT_STRING);
-//    c.put(IBDataSource.TARGET_PATH, wps.get());
+    //    c.put(IBDataSource.TARGET_PATH, wps.get());
     c.put(IBDataConstants.DATE_FORMATTER, "yyyy-MM-dd");
     t2e = new DefaultTypeToExtensionMapper();
     b = new DefaultIBDataStreamIdentifierConfigBean();
@@ -147,7 +157,16 @@ public class IBDataJooqUtilsTest {
     result = create.fetch(SELECT_STRING); // Read again if we had to create the schema
     getLog().info("Reading data from dataset");
     firstRecord = result.get(0); // First record
-    w = new JooqRecordWriter(() -> getLog(), () -> targetPath, schema, jrmpGD);
+    Path schemaFile = wps.get().resolve(UUID.randomUUID().toString());
+    IBUtils.writeString(schemaFile, schema.toString(true));
+    cms = new ConfigMap();
+    cms.put(JooqAvroRecordWriterSupplier.TARGET, targetPath);
+    cms.put(JooqAvroRecordWriterSupplier.SCHEMA, schemaFile.toAbsolutePath().toUri().toURL().toExternalForm());
+
+    gds = new DefaultGenericDataSupplier(() -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds);
+    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(() -> getLog(), aus).configure(cms);
+    w = w2.get();
     read = w.writeRecords(result);
   }
 
@@ -185,6 +204,7 @@ public class IBDataJooqUtilsTest {
     assertNotNull(k);
     assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
   }
+
   @Test
   public void testBigIntegerType() {
     Field<BigInteger> f = DSL.field("A", BigInteger.class);
@@ -208,6 +228,7 @@ public class IBDataJooqUtilsTest {
     assertNotNull(k);
     assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
   }
+
   @Test
   public void testDateTime() {
     Field<LocalDateTime> f = DSL.localDateTime(LocalDateTime.now());
@@ -215,21 +236,22 @@ public class IBDataJooqUtilsTest {
     assertNotNull(k);
     assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
   }
+
   @Test
   public void testInterval() {
     DataType<YearToMonth> dt = DefaultDataType.getDataType(SQLDialect.H2, YearToMonth.class);
-     Field<YearToMonth> f = DSL.field("A",  dt);
-    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
-    assertNotNull(k);
-    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
-  }
-  @Test
-  public void testTime() {
-     Field<Time> f = DSL.currentTime();
+    Field<YearToMonth> f = DSL.field("A", dt);
     org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
     assertNotNull(k);
     assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
   }
 
+  @Test
+  public void testTime() {
+    Field<Time> f = DSL.currentTime();
+    org.apache.avro.Schema.Field k = getFieldFromType("A", f, f.getDataType(), true);
+    assertNotNull(k);
+    assertNotNull(getFieldFromType("A", f, f.getDataType(), false));
+  }
 
 }

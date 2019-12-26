@@ -122,7 +122,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
       requireNonNull(dssList, "List of IBDataSourceSupplier instances");
       Date now = new Date(); // Ok for "now" (Get it?)
       ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).get();
-      Stream<IBDataSource> q = dssList.values().stream().map(Supplier::get).map(ds -> ds.withAdditionalConfig(cms));
+      Stream<IBDataSource> q = dssList.values().stream().map(Supplier::get).map(ds -> ds.configure(cms));
       // flatmap the data source
       return q.flatMap(source -> {
         List<IBChecksumPathType> l = source.get();

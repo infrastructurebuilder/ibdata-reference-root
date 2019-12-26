@@ -39,7 +39,11 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.generic.MapProxyGenericData;
+import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
+import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.Formatters;
+import org.infrastructurebuilder.data.GenericDataSupplier;
+import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -70,20 +74,24 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
     wps.finalize();
   }
 
-  private Path wp;
   private DefaultMapToGenericRecordIBDataLineTransformerSupplier s;
   private ConfigMapSupplier cms;
   private ConfigMap cm;
   private Path schemaFile;
+
+  private IBDataAvroUtilsSupplier aus;
+
+  private GenericDataSupplier gds;
 
   @Before
   public void setUp() throws Exception {
     schemaFile = wps.getTestClasses().resolve(BA + ".avsc").toAbsolutePath();
     cm = new ConfigMap();
     cm.put(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
-    wp = wps.get();
     cms = new DefaultConfigMapSupplier().addConfiguration(cm);
-    s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(wps, () -> log);
+    gds = new DefaultGenericDataSupplier(() -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds);
+    s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(wps, () -> log, aus);
   }
 
   @After

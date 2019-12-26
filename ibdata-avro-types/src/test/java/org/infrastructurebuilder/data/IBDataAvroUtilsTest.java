@@ -15,13 +15,11 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.infrastructurebuilder.data.IBDataAvroUtils.avroSchemaFromString;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,23 +33,38 @@ import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.transform.BA;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IBDataAvroUtilsTest {
+  public final static Logger log = LoggerFactory.getLogger(IBDataAvroUtilsTest.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
   private Schema schema;
   private Record r;
   private Map<String, Field> fields;
   private Schema schema2;
   private Map<String, Field> fields2;
+  private IBDataAvroUtilsSupplier aus;
+  private GenericDataSupplier gds;
+  private IBDataAvroUtils au;
+  private DefaultConfigMapSupplier cms;
 
   @Before
   public void setUp() throws Exception {
+
+    ConfigMap init= new ConfigMap();
+    cms = new DefaultConfigMapSupplier(init);
+    gds = new DefaultGenericDataSupplier(() -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(init);
+    au = aus.get();
     Path p = wps.getTestClasses().resolve("ba.avsc");
-    schema = avroSchemaFromString.apply(p.toAbsolutePath().toString());
+    schema = au.avroSchemaFromString(p.toAbsolutePath().toString());
     schema2 = BA.SCHEMA$;
     r = new GenericData.Record(schema);
     fields = schema.getFields().stream().collect(Collectors.toMap(Field::name, Function.identity()));
@@ -67,12 +80,11 @@ public class IBDataAvroUtilsTest {
   public void testFromSchemaAndPathAndTranslator() throws IOException {
 
     Path targetPath = wps.get();
-    DataFileWriter<GenericRecord> d = IBDataAvroUtils.fromSchemaAndPathAndTranslator(
-        targetPath.resolve(UUID.randomUUID().toString() + ".avro"), schema, Optional.empty());
+    DataFileWriter<GenericRecord> d = au
+        .fromSchemaAndPathAndTranslator(targetPath.resolve(UUID.randomUUID().toString() + ".avro"), schema);
     assertNotNull(d);
     d.close();
-    d = IBDataAvroUtils.fromSchemaAndPathAndTranslator(targetPath.resolve(UUID.randomUUID().toString() + ".avro"),
-        schema, Optional.of(new GenericData()));
+    d = au.fromSchemaAndPathAndTranslator(targetPath.resolve(UUID.randomUUID().toString() + ".avro"), schema);
     assertNotNull(d);
     d.close();
 
@@ -80,41 +92,41 @@ public class IBDataAvroUtilsTest {
 
   @Test(expected = IBException.class)
   public void testNotObvioyslyBrokenURLZip() {
-    avroSchemaFromString.apply("zip:file:/nope.jar");
+    au.avroSchemaFromString("zip:file:/nope.jar");
   }
 
   @Test(expected = IBDataException.class)
   public void testNotObvioyslyBrokenURLHttp() {
-    avroSchemaFromString.apply("http://www.example.com");
+    au.avroSchemaFromString("http://www.example.com");
   }
 
   @Test(expected = IBDataException.class)
   public void testNotObvioyslyBrokenURLHttps() {
-    avroSchemaFromString.apply("https://www.example.com");
+    au.avroSchemaFromString("https://www.example.com");
   }
 
   @Test(expected = IBException.class)
   public void testNotObvioyslyBrokenURLJar() {
-    avroSchemaFromString.apply("jar:file:/nope.zip");
+    au.avroSchemaFromString("jar:file:/nope.zip");
   }
 
   @Test(expected = IBDataException.class)
   public void testNotObvioyslyBrokenURLFile() {
-    avroSchemaFromString.apply("file:/nopw.www.example.com");
+    au.avroSchemaFromString("file:/nopw.www.example.com");
   }
 
   @Test(expected = IBDataException.class)
   public void testNulled() {
-    avroSchemaFromString.apply(null);
+    au.avroSchemaFromString(null);
   }
 
   @Test(expected = IBDataException.class)
   public void testBrokenURL() {
-    avroSchemaFromString.apply("noep:@3");
+    au.avroSchemaFromString("noep:@3");
   }
 
   @Test(expected = IBDataException.class)
   public void testFromMapAndWpNulled() {
-    IBDataAvroUtils.fromMapAndWP.apply(wps.getTestClasses(), new ConfigMap());
+    au.fromMapAndWP(wps.getTestClasses(), null);
   }
 }

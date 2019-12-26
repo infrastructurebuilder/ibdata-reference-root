@@ -27,7 +27,6 @@ import org.apache.avro.generic.MapProxyGenericData;
 import org.apache.avro.generic.MapProxyGenericData.IBDataJRMPDateConversion;
 import org.apache.avro.generic.MapProxyGenericData.IBDataJRMPTimeConversion;
 import org.apache.avro.generic.MapProxyGenericData.IBDataJRMPTimestampConversion;
-import org.infrastructurebuilder.data.Formatters;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

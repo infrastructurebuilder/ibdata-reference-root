@@ -34,7 +34,7 @@ public class DefaultTestingSource extends AbstractIBDataSource {
   }
 
   @Override
-  public List<IBChecksumPathType> get() {
+  public List<IBChecksumPathType> getInstance() {
     return Collections.emptyList();
   }
 

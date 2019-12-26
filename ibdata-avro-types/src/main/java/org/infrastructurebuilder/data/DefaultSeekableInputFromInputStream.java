@@ -22,7 +22,6 @@ import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.cop
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Optional;
 
 import org.apache.avro.file.SeekableFileInput;
 import org.apache.avro.file.SeekableInput;

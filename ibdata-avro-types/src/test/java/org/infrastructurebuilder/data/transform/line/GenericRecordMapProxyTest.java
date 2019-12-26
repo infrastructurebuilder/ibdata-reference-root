@@ -29,19 +29,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.infrastructurebuilder.data.IBDataAvroUtils;
+import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
+import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
+import org.infrastructurebuilder.data.GenericDataSupplier;
+import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenericRecordMapProxyTest {
+  public final static Logger log = LoggerFactory.getLogger(GenericRecordMapProxyTest.class);
 
   public final static TestingPathSupplier wps = new TestingPathSupplier();
 
@@ -57,11 +63,16 @@ public class GenericRecordMapProxyTest {
   private GenericRecordBuilder b;
   private GenericRecord r;
   private GenericRecordMapProxy p;
+  private IBDataAvroUtilsSupplier aus;
+
+  private GenericDataSupplier gds;
 
   @Before
   public void setUp() throws Exception {
-    schema = IBDataAvroUtils.avroSchemaFromString
-        .apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
+    ConfigMap cms = new ConfigMap();
+    gds = new DefaultGenericDataSupplier(() -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(cms);
+    schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     b = new GenericRecordBuilder(schema);
     r = new GenericData.Record(schema);
     p = new GenericRecordMapProxy(r);

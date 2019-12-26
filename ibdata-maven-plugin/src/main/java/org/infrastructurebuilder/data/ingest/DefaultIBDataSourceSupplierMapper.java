@@ -114,7 +114,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     @Override
-    public IBDataSource withAdditionalConfig(ConfigMap config) {
+    public IBDataSource configure(ConfigMap config) {
       return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), isExpandArchives(), getCredentials(),
           getChecksum(), getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), getMimeType(),
           this.wgs, this.am, this.mapper);
@@ -126,7 +126,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     @Override
-    public List<IBChecksumPathType> get() {
+    public List<IBChecksumPathType> getInstance() {
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {
           List<IBChecksumPathType> localRead;

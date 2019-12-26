@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,14 +29,18 @@ import org.apache.avro.Schema;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.BA;
+import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
+  public final static Logger log = LoggerFactory.getLogger(DefaultAvroIBTypedRecordDataStreamSupplierTest.class);
   public static final String CHECKSUM = "3b2c63ccb53069e8b0472ba50053fcae7d1cc84ef774ff2b01c8a0658637901b7d91e71534243b5d29ee246e925efb985b4dbd7330ab1ab251d1e1b8848b9c49";
 
   private static final String LOAD1 = "ba.avro";
@@ -60,6 +63,11 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
   private InputStream ins;
   private DataStream id;
 
+  private IBDataAvroUtilsSupplier aus;
+
+  private GenericDataSupplier gds;
+  private ConfigMap cms;
+
   @Before
   public void setUp() throws Exception {
     targetPath = wps.get();
@@ -70,7 +78,10 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
     id.setSha512(CHECKSUM);
     id.setMetadata(new Xpp3Dom("metadata"));
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
-    schema = IBDataAvroUtils.avroSchemaFromString.apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
+    cms = new ConfigMap();
+    gds = new DefaultGenericDataSupplier(() -> log).configure(cms);
+    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(cms);
+    schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBTypedRecordDataStreamSupplier<BA>(targetPath, stream, new BA().getSpecificData(), parallel);
   }
 

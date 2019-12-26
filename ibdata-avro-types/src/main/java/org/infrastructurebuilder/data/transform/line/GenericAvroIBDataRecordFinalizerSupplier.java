@@ -15,8 +15,8 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
+import static java.util.Objects.requireNonNull;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.FLOAT;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,17 +30,18 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.avro.AvroRuntimeException;
+import org.apache.avro.LogicalType;
+import org.apache.avro.LogicalTypes.Date;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.IBConstants;
-import org.infrastructurebuilder.data.IBDataAvroUtils;
+import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
-import org.infrastructurebuilder.data.IBDataStructuredDataMetadata;
 import org.infrastructurebuilder.data.IBDataStructuredDataMetadataType;
 import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;
 import org.infrastructurebuilder.data.model.StructuredFieldMetadata;
@@ -56,27 +57,33 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
   public static final String NAME = "avro-generic";
   private static final List<Class<?>> ACCEPTABLE_TYPES = Arrays.asList(IndexedRecord.class);
+  private final IBDataAvroUtilsSupplier aus;
 
   @Inject
   public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l) {
-    this(wps, l, null);
+      LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
+    this(wps, l, null, aus);
   }
 
-  private GenericAvroIBDataRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
+  private GenericAvroIBDataRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms,
+      IBDataAvroUtilsSupplier aus) {
     super(ps, l, cms);
+    this.aus = requireNonNull(aus);
   }
 
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<GenericRecord> configure(ConfigMapSupplier cms) {
-    return new GenericAvroIBDataRecordFinalizerSupplier(getWps(), () -> getLog(), cms);
+    return new GenericAvroIBDataRecordFinalizerSupplier(getWps(), () -> getLog(), cms,
+        (IBDataAvroUtilsSupplier) aus.configure(cms.get()));
   }
 
   @Override
   public IBDataStreamRecordFinalizer<GenericRecord> get() {
+    ConfigMap config = getCms().get();
+    String schemaString = config.getString(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM);
     // The working path needs to be stable and pre-existent
     return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
-        getLog(), getCms().get());
+        getLog(), config, schemaString);
   }
 
   public final class GenericAvroIBDataStreamRecordFinalizer
@@ -84,8 +91,9 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
     private final int numberOfRowsToSkip;
 
-    public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map) {
-      super(id, workingPath, l, map, Optional.of(IBDataAvroUtils.fromMapAndWP.apply(workingPath, map)));
+    public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map,
+        String schemaLocation) {
+      super(id, workingPath, l, map, Optional.of(aus.get().fromMapAndWP(workingPath, schemaLocation)));
       this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
     }
 
@@ -133,6 +141,12 @@ public class GenericAvroIBDataRecordFinalizerSupplier
         int j = i;
         StructuredFieldMetadata element = current.getFields().get(i);
         element.getType().ifPresent(mdt -> {
+          Field field = fields[j];
+          LogicalType lt = field.schema().getLogicalType();
+          if (lt instanceof Date) {
+            LogicalType qt = lt;
+            lt = qt;
+          }
           BigInteger v2;
           Object val = recordToWrite.get(j);
           BigInteger max2;
@@ -158,12 +172,12 @@ public class GenericAvroIBDataRecordFinalizerSupplier
               ll = ((byte[]) val).length;
               break;
             case INT:
-              val = ((Integer)val).longValue();
+              val = ((Integer) val).longValue();
             case LONG:
               ll = (long) val;
               break;
             case STRING:
-              ll = (long)( val.toString()).length();
+              ll = (long) (val.toString()).length();
               break;
             default:
               throw new IBDataException("Impossible");
@@ -189,7 +203,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
     }
 
     private IBDataStructuredDataMetadataType getMetadataTypeFromField(Field field) {
-      IBDataStructuredDataMetadataType t;
+      //      IBDataStructuredDataMetadataType t;
       Schema s = field.schema();
       if (s.isUnion()) {
         s = s.getTypes().get(s.getTypes().size() - 1);

@@ -220,6 +220,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
 
           inboundObject.ifPresent(l -> {
             // log.info(String.format(" as '%s'", l));
+
             finalizer.writeRecord(l).ifPresent(e -> errorList.add((IBDataTransformationError) e));
           });
 

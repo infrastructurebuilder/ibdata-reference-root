@@ -17,46 +17,57 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
 
-abstract public class AbstractIBDataSource implements IBDataSource {
+abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
+    implements IBDataSource {
 
   protected final String id;
   protected final String source;
   protected final Optional<BasicCredentials> creds;
   protected final Optional<Checksum> checksum;
   protected final Optional<Document> metadata;
-  protected final Optional<ConfigMap> additionalConfig;
   protected final Optional<String> name;
   protected final Optional<String> desc;
-  private final Logger logger;
   private final boolean expandArchives;
 
-  public AbstractIBDataSource(Logger logger, String id, String source, boolean expand, Optional<String> name, Optional<String> desc, Optional<BasicCredentials> creds,
-      Optional<Checksum> checksum, Optional<Document> metadata, Optional<ConfigMap> config) {
-    super();
+  public AbstractIBDataSource(Logger logger
+  // Temp id
+      , String id
+      // "URL" or JDBC URL etc
+      , String source
+      // True if we expand archives
+      , boolean expand
+      // Name
+      , Optional<String> name
+      // Description
+      , Optional<String> desc
+      // Creds
+      , Optional<BasicCredentials> creds
+      // Target value checksum
+      , Optional<Checksum> checksum
+      // Metdata
+      , Optional<Document> metadata
+      // Configuration
+      , Optional<ConfigMap> config) {
+    super(config.orElse(null), () -> logger);
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);
     this.checksum = requireNonNull(checksum);
-    this.additionalConfig = requireNonNull(config);
-
     this.metadata = requireNonNull(metadata);
-    this.logger = requireNonNull(logger);
     this.name = requireNonNull(name);
     this.desc = requireNonNull(desc);
     this.expandArchives = expand;
-  }
-
-  @Override
-  public Logger getLog() {
-    return this.logger;
   }
 
   @Override
@@ -85,11 +96,6 @@ abstract public class AbstractIBDataSource implements IBDataSource {
   }
 
   @Override
-  public Optional<ConfigMap> getAdditionalConfig() {
-    return this.additionalConfig;
-  }
-
-  @Override
   public Optional<String> getName() {
     return this.name;
   }
@@ -108,7 +114,7 @@ abstract public class AbstractIBDataSource implements IBDataSource {
    * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
    */
   @Override
-  public IBDataSource withAdditionalConfig(ConfigMap config) {
+  public IBDataSource configure(ConfigMap config) {
     return this;
   }
 }
