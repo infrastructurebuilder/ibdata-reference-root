@@ -19,20 +19,17 @@ import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-abstract public class AbstractIBDataSet implements IBDataSet {
+import org.infrastructurebuilder.data.model.DataSet;
 
-  private final UUID id;
-  private final Date creationDate;
-  private final Object metadata;
-  private final Optional<String> name;
-  private final Optional<String> description;
+abstract public class AbstractIBDataSet extends DataSet implements IBDataSet {
+  private static final long serialVersionUID = 3647886656035674148L;
   private final Optional<String> path;
-  private final String groupId, artifactId, version;
-
-  private Path underlyingPath = null;
 
   protected AbstractIBDataSet(IBDataSet set) {
     this(requireNonNull(set).getId(), set.getCreationDate(), set.getMetadata(), set.getName(), set.getDescription(),
@@ -41,36 +38,17 @@ abstract public class AbstractIBDataSet implements IBDataSet {
 
   public AbstractIBDataSet(UUID id, Date date, Object metadata, Optional<String> name, Optional<String> description,
       Optional<String> path, String groupId, String artifactId, String version) {
-    this.id = requireNonNull(id, getClass().getCanonicalName() + "." + "id");
-    this.creationDate = requireNonNull(date, getClass().getCanonicalName() + "." + "creationDate");
-    this.metadata = requireNonNull(metadata, getClass().getCanonicalName() + "." + "metadata");
-    this.name = requireNonNull(name, getClass().getCanonicalName() + "." + "name");
-    this.description = requireNonNull(description, getClass().getCanonicalName() + "." + "description");
+    super();
+    setCreationDate(requireNonNull(date, getClass().getCanonicalName() + "." + "creationDate"));
+    setDataSetDescription(
+        requireNonNull(description, getClass().getCanonicalName() + "." + "description").orElse(null));
+    setDataSetName(requireNonNull(name.orElse(null), getClass().getCanonicalName() + "." + "name"));
+    setMetadata(requireNonNull(metadata, getClass().getCanonicalName() + "." + "metadata"));
+    setGroupId(requireNonNull(groupId, getClass().getCanonicalName() + "." + "groupId"));
+    setArtifactId(requireNonNull(artifactId, getClass().getCanonicalName() + "." + "artifactId"));
+    setVersion(requireNonNull(version, getClass().getCanonicalName() + "." + "version"));
+    setUuid(requireNonNull(id, getClass().getCanonicalName() + "." + "id").toString());
     this.path = requireNonNull(path, getClass().getCanonicalName() + "." + "path");
-    this.groupId = requireNonNull(groupId, getClass().getCanonicalName() + "." + "groupId");
-    this.artifactId = requireNonNull(artifactId, getClass().getCanonicalName() + "." + "artifactId");
-    this.version = requireNonNull(version, getClass().getCanonicalName() + "." + "version");
-  }
-
-  @Override
-  public Date getCreationDate() {
-    return this.creationDate;
-  }
-
-  @Override
-  public UUID getId() {
-    return this.id;
-  }
-
-  @Override
-  public Optional<String> getDescription() {
-    return this.description;
-
-  }
-
-  @Override
-  public Optional<String> getName() {
-    return this.name;
   }
 
   @Override
@@ -79,32 +57,8 @@ abstract public class AbstractIBDataSet implements IBDataSet {
   }
 
   @Override
-  public String getGroupId() {
-    return this.groupId;
-  }
-
-  @Override
-  public String getArtifactId() {
-    return this.artifactId;
-  }
-
-  @Override
-  public String getVersion() {
-    return this.version;
-  }
-
-  @Override
-  public Object getMetadata() {
-    return this.metadata;
-  }
-
-  protected AbstractIBDataSet setUnderlyingPath(Path p) {
-    this.underlyingPath = p;
-    return this;
-  }
-
-  private Optional<Path> underLyingPath() {
-    return Optional.ofNullable(underlyingPath);
+  public List<IBSchema> getSchemaSuppliers() {
+    return getSchemas().stream().collect(Collectors.toList());
   }
 
 }

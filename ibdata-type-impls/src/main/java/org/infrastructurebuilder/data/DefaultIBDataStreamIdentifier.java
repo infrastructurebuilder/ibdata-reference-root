@@ -190,4 +190,16 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   public String getOriginalRowCount() {
     return this.originalRowCount;
   }
+
+  @Override
+  public Optional<UUID> getReferencedSchemaId() {
+    // TODO Acquire schema id somehow?
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<IBDataProvenance> getProvenance() {
+    // TODO Acquire provenance
+    return Optional.empty();
+  }
 }

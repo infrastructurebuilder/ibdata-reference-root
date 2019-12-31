@@ -135,4 +135,9 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
     return Optional.ofNullable(this.cpt).map(IBChecksumPathType::getPath);
 
   }
+
+  @Override
+  public Optional<IBDataProvenance> getProvenance() {
+    return super.getProvenance();
+  }
 }

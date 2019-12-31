@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-
+import com.google.protobuf.Field;
 import com.google.protobuf.GeneratedMessageV3;
 
 public class GenericRecordMapProxy<T extends GeneratedMessageV3> implements Map<String, Object>, Supplier<T> {

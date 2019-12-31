@@ -139,7 +139,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       // Config supplied from plguin in pom
       List<Transformation> transformations) throws MojoFailureException {
 
-    Map<UUID, IBDataStream> availableStreams = this.engine.getAvailableIds().stream().map(this.engine::fetchDataSetById)
+    Map<UUID, IBDataStream> availableStreams = this.engine.getAvailableDataStreamIds().stream().map(this.engine::fetchDataSetById)
         .filter(Optional::isPresent).map(Optional::get)
         // To the stream suppliers
         .flatMap(s -> s.getStreamSuppliers().stream())

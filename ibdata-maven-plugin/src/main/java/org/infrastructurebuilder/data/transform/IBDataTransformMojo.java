@@ -15,10 +15,10 @@
  */
 package org.infrastructurebuilder.data.transform;
 
+import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -26,10 +26,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
@@ -64,7 +62,8 @@ public class IBDataTransformMojo extends AbstractIBDataMojo {
     List<URL> l = new ArrayList<>();
     if (this.injectDependencies) {
       try {
-        List<Path> myList = (List<Path>) this.getProject().getCompileClasspathElements().stream().map(x -> Paths.get(x.toString())).collect(Collectors.toList());
+        List<Path> myList = (List<Path>) this.getProject().getCompileClasspathElements().stream()
+            .map(x -> Paths.get(x.toString())).collect(toList());
         for (Path ff : myList) {
           l.add(ff.toUri().toURL());
         }
@@ -73,8 +72,9 @@ public class IBDataTransformMojo extends AbstractIBDataMojo {
       }
     }
     component.setAdditionalURLS(l);
-    // Note: component.transform translates all IBDataExecptions into MojoFailureExceptions
-    IBChecksumPathType theResult = component.transform(transformations);
+    // Note: component.transform translates all IBDataExecptions into
+    // MojoFailureExceptions
+    IBChecksumPathType theResult = component.transform(transformations.stream().collect(toList()));
     getLog().debug("Setting plugin context");
     @SuppressWarnings("rawtypes")
     final Map pc = getPluginContext();

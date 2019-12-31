@@ -55,10 +55,10 @@ public class DefaultIBDataEngineTest {
 
   @Test
   public void test() throws MalformedURLException {
-    assertEquals(0, de.getAvailableIds().size());
+    assertEquals(0, de.getAvailableDataStreamIds().size());
     de.setAdditionalURLS(Arrays.asList(wps.getTestClasses().resolve("test.jar").toUri().toURL()));
     assertEquals(1, de.prepopulate());
-    assertEquals(1, de.getAvailableIds().size());
+    assertEquals(1, de.getAvailableDataStreamIds().size());
   }
 
 }

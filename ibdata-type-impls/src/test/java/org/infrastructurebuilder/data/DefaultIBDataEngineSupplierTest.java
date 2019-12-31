@@ -54,11 +54,11 @@ public class DefaultIBDataEngineSupplierTest {
     v.setAdditionalURLS(null);
     v.setAdditionalURLS(Arrays.asList(tpath.toUri().toURL()));
     assertNotNull(v);
-    assertEquals(0, v.getAvailableIds().size());
+    assertEquals(0, v.getAvailableDataStreamIds().size());
     int qv = v.prepopulate();
     d.getLog().info("Got " + v.prepopulate());
-    assertEquals(1,v.getAvailableIds().size());
-    UUID i = v.getAvailableIds().get(0);
+    assertEquals(1,v.getAvailableDataStreamIds().size());
+    UUID i = v.getAvailableDataStreamIds().get(0);
     q = v.fetchDataSetById(i);
   }
 

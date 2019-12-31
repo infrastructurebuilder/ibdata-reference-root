@@ -34,6 +34,7 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.MapProxyGenericData;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier.JooqRecordWriter;
 import org.infrastructurebuilder.data.ingest.DefaultIBDataStreamIdentifierConfigBean;

@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.IBDataConstants;
@@ -80,7 +81,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
     x.setId("id");
     x.setDescription(DESC);
     x.setName(NAME);
-    x.setMetadata(new Xpp3Dom("metadata"));
+    x.setMetadata(new XmlPlexusConfiguration("metadata"));
     x.forceDefaults(GROUP, ARTIFACT, VERSION);
 
     cms = new DefaultConfigMapSupplier();

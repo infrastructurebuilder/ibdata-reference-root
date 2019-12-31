@@ -22,9 +22,15 @@ import static org.infrastructurebuilder.data.AbstractModelTest.NAME;
 import static org.infrastructurebuilder.data.AbstractModelTest.VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
@@ -80,6 +87,7 @@ public class AddStreamTransformerSupplierTest {
   private DefaultGAV gav;
   private Transformer x1;
   private Transformation x;
+  private Path finalWP;
 
   @Before
   public void setUp() throws Exception {
@@ -92,11 +100,14 @@ public class AddStreamTransformerSupplierTest {
     x.setId("id");
     x.setDescription(DESC);
     x.setName(NAME);
-    x.setMetadata(new Xpp3Dom("metadata"));
+    x.setMetadata(new XmlPlexusConfiguration("metadata"));
     x.forceDefaults(GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
     p = new AddStreamTransformerSupplier(wps, () -> log);
-    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(wps, () -> log);
+    finalWP = wps.get();
+//    .resolve(UUID.randomUUID().toString());
+//    Files.createDirectories(finalWP.getParent());
+    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> finalWP, () -> log);
     finalizer = finalizerSupplier.configure(cms).get();
     finalData = new DataSet();
     finalData.setUuid(UUID.randomUUID().toString());
@@ -126,6 +137,17 @@ public class AddStreamTransformerSupplierTest {
   public void testAccepts() {
   }
 
+  @Test(expected = FileAlreadyExistsException.class)
+  public void testGetWriter() throws IOException {
+    assertTrue(Files.exists(finalizer.getWorkingPath()));
+
+    ByteArrayInputStream source = new ByteArrayInputStream("ABC".getBytes());
+    try (OutputStream outs = finalizer.getWriterTarget()) {
+      IBUtils.copy(source, outs);
+    }
+    assertTrue(Files.exists(finalizer.getWorkingPath()));
+  }
+
   @Test
   public void testConfigureConfigMapSupplier() throws IOException {
     assertEquals(0, finalizer.getNumberOfRowsToSkip());
@@ -151,4 +173,10 @@ public class AddStreamTransformerSupplierTest {
     assertTrue(q.get().isPresent());
   }
 
+
+  @Test
+  public void testFinalizerGet() {
+    InputStream k = finalizer.get();
+    assertNotNull(k);
+  }
 }

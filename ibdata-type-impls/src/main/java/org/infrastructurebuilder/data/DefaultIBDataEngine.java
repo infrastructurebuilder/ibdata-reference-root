@@ -56,11 +56,6 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
   private final List<URL> additionalURLS = new ArrayList<>();
 
-  //  private final static Function<? super UUID, ? extends IBDataSet> mappingFunction = (uuid) -> {
-  //    // FIXME We currently return null from mappingFunction because it doesn't get called
-  //    return null;
-  //  };
-  //
   @Inject
   public DefaultIBDataEngine(@Named("maven-log") LoggerSupplier log) {
     this.log = log.get();
@@ -95,20 +90,23 @@ public class DefaultIBDataEngine implements IBDataEngine {
         @Override
         public void run() {
           List<URL> kv;
-          //      kv = CPScanner.scanResources(new ResourceFilter().packageName("META-INF").resourceName("MANIFEST.MF"));
-          //      log.info("Acquired " + kv.size() + " META-INF urls from classpath");
+          // kv = CPScanner.scanResources(new
+          // ResourceFilter().packageName("META-INF").resourceName("MANIFEST.MF"));
+          // log.info("Acquired " + kv.size() + " META-INF urls from classpath");
           kv = CPScanner.scanResources(new ResourceFilter().packageName(IBDATA).resourceName(IBDATASET_XML));
           log.info("Acquired " + kv.size() + " urls from classpath");
-          //      Enumeration<URL> kv = cet.withReturningTranslation(() -> getClass().getClassLoader().getResources(IBDATA_IBDATASET_XML));
+          // Enumeration<URL> kv = cet.withReturningTranslation(() ->
+          // getClass().getClassLoader().getResources(IBDATA_IBDATASET_XML));
           Map<UUID, ? extends DefaultIBDataSet> x = kv.stream()
-              //          enumerationAsStream(
-              //          // This [should] get all the XML files in the classpath.  I don't want to use a CP scanner....
-              //          kv, true)
+              // enumerationAsStream(
+              // // This [should] get all the XML files in the classpath. I don't want to use
+              // a CP scanner....
+              // kv, true)
               // Convert supplier URL to Extended Dataset
               .map(mapDataSetToDefaultIBDataSet)
-              // Only get them if they're here  Optional::stream in Java 11
+              // Only get them if they're here Optional::stream in Java 11
               .filter(Optional::isPresent).map(Optional::get)
-              //         Collection
+              // Collection
               .collect(toMap(k -> k.getId(), identity()));
           ref.set(x);
         }
@@ -139,12 +137,19 @@ public class DefaultIBDataEngine implements IBDataEngine {
   @Override
   public Optional<IBDataStream> fetchDataStreamByMetadataPatternMatcher(Map<String, Pattern> patternMap) {
     throw new IBDataException("not implemented yet");
-    //    return Optional.empty();  // FIXME implement fetchDataStreamByMetadataPatternMatcher
+    // return Optional.empty(); // FIXME implement
+    // fetchDataStreamByMetadataPatternMatcher
   }
 
   @Override
-  public List<UUID> getAvailableIds() {
+  public List<UUID> getAvailableDataStreamIds() {
     return cachedDataSets.keySet().stream().collect(toList());
+  }
+
+  @Override
+  public Optional<IBSchema> fetchSchemaById(UUID id) {
+    return Optional.ofNullable(cachedDataSets.values().parallelStream().flatMap(ds -> ds.getSchemas().parallelStream())
+        .filter(s -> s.getId().equals(id)).findAny().orElse(null));
   }
 
 }

@@ -18,11 +18,8 @@ package org.infrastructurebuilder.data.ingest;
 import static org.infrastructurebuilder.data.IBDataConstants.INGESTION_TARGET;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMATION_TARGET;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
