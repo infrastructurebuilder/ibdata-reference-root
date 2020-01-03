@@ -254,10 +254,10 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     newStream.setMetadata(IBMetadataUtils.translateToXpp3Dom.apply(t.getTargetStreamMetadataAsDocument()));
     newStream.setCreationDate(new Date());
     newStream.setUuid(c.asUUID().get().toString());
-    newStream.setSourceURL(cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm()));
+    newStream.setUrl(cet.withReturningTranslation(() -> targetPath.toUri().toURL().toExternalForm()));
     newStream.setSha512(c.toString());
-    newStream.setDataStreamDescription(t.getTransformation().getDescription());
-    newStream.setDataStreamName(t.getTransformation().getName());
+    newStream.setDescription(t.getTransformation().getDescription());
+    newStream.setName(t.getTransformation().getName());
     Supplier<IBDataStream> x = finalizer.finalizeRecord(newStream);
     map.put(x.get().getId(), x);
     IBDataSet newSet = new DefaultIBDataSet(ds2).withStreamSuppliers(map);

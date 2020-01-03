@@ -59,11 +59,11 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
 
   @Override
   public final SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i) {
-    List<IBDataSourceSupplier> k = i.getDataSet().getStreams().stream().map(dStream -> {
+    List<IBDataSourceSupplier> k = i.getDataSet().getDataStreams().stream().map(dStream -> {
 
       IBDataSourceSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
           .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
-      return first.getSupplierFor(dStream.getTemporaryId(), dStream);
+      return first.getSupplierFor(dStream.getTemporaryId().orElse(null), dStream);
 
     }).collect(Collectors.toList());
     return k.stream().collect(

@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -25,22 +26,31 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 /**
  * Returns a writen IBDataSet from the supplied finalizer config type
+ *
  * @author mykel.alvis
  *
  * @param <T>
  */
-public interface IBDataSetFinalizer<T>  {
+public interface IBDataSetFinalizer<T> {
 
   /**
    * Finalize a dataset
-   * @param dsi1 The datasets
-   * @param target target to send to
+   *
+   * @param dsi1      The datasets
+   * @param target    target to send to
    * @param suppliers List of the IBDataStream suppliers used here
-   * @param basedir Optional string that is the absolute path of Maven's ${basedir}
+   * @param basedir   Optional string that is the absolute path of Maven's
+   *                  ${basedir}
    * @return an IBChecksumPathType
    * @throws IOException
    */
-  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> suppliers, Optional<String> basedir) throws IOException;
+  default IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> suppliers,
+      Optional<String> basedir) throws IOException {
+    return this.finalize(dsi1, target, suppliers, Collections.emptyList(), basedir);
+  }
+
+  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> dataStreamSuppliers,
+      List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException;
 
   Path getWorkingPath();
 

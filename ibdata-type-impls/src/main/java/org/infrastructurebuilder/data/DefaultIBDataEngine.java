@@ -107,7 +107,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
               // Only get them if they're here Optional::stream in Java 11
               .filter(Optional::isPresent).map(Optional::get)
               // Collection
-              .collect(toMap(k -> k.getId(), identity()));
+              .collect(toMap(k -> k.getUuid(), identity()));
           ref.set(x);
         }
 
@@ -149,7 +149,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
   @Override
   public Optional<IBSchema> fetchSchemaById(UUID id) {
     return Optional.ofNullable(cachedDataSets.values().parallelStream().flatMap(ds -> ds.getSchemas().parallelStream())
-        .filter(s -> s.getId().equals(id)).findAny().orElse(null));
+        .filter(s -> s.getUuid().equals(id)).findAny().orElse(null));
   }
 
 }

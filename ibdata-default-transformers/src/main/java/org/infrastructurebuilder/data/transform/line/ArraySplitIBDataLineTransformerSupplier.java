@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data.transform.line;
 
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
-import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;

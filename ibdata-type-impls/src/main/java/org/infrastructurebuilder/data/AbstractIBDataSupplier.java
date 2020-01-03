@@ -15,18 +15,29 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.file.Path;
 
-abstract public class AbstractIBDataSourceSupplier extends AbstractIBDataSupplier<IBDataSource>
-    implements IBDataSourceSupplier {
+public class AbstractIBDataSupplier<T> {
 
-  public AbstractIBDataSourceSupplier(String id, IBDataSource src, Path workingPath) {
-    super(id, src, workingPath);
+  protected final T src;
+  protected final String id;
+  protected final Path workingPath;
+
+  public AbstractIBDataSupplier(String id, T src, Path workingPath) {
+    this.id = requireNonNull(id);
+    this.src = requireNonNull(src);
+    this.workingPath = requireNonNull(workingPath);
   }
 
-  @Override
-  public int compareTo(IBDataSourceSupplier o) {
-    return this.get().getId().compareTo(o.get().getId());
+  public String getId() {
+    return id;
   }
+
+  public T get() {
+    return this.src;
+  }
+
 
 }

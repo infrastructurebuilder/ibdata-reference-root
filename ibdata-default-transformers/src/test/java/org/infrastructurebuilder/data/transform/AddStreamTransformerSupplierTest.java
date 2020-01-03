@@ -42,7 +42,6 @@ import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
-import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
@@ -119,8 +118,8 @@ public class AddStreamTransformerSupplierTest {
     finalData.setMetadata(new Xpp3Dom("metadata"));
     gav = new DefaultGAV(GROUP, ARTIFACT, VERSION);
     finalData.setModelVersion("1.0");
-    finalData.setDataSetDescription(DESC);
-    finalData.setDataSetName(NAME);
+    finalData.setDescription(DESC);
+    finalData.setName(NAME);
 
     ds = new DefaultIBDataSet(finalData);
   }

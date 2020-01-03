@@ -33,10 +33,10 @@ import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
@@ -51,7 +51,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 public class DefaultIBDataStreamTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultIBDataStreamTest.class);
@@ -80,7 +79,7 @@ public class DefaultIBDataStreamTest {
   private DefaultIBDataStreamIdentifier identifier, identifier2;
   private DefaultIBDataStream ib1;
   private Checksum checksum, checksum2;
-  private Document metadata;
+  private Xpp3Dom metadata;
   private String mimeType;
   private InputStream rick, lines;
   private Path p1;
@@ -96,7 +95,7 @@ public class DefaultIBDataStreamTest {
     p1 = wps.get();
     path = p1.resolve(UUID.randomUUID().toString() + ".jpg");
     path2 = p1.resolve(UUID.randomUUID().toString() + ".txt");
-    metadata = IBMetadataUtils.emptyDocumentSupplier.get();
+    metadata = IBMetadataUtils.emptyXpp3Supplier.get();
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);
@@ -113,12 +112,15 @@ public class DefaultIBDataStreamTest {
     ds.setUuid(UUID.randomUUID().toString());
     ds.setMimeType(JPG);
     ds.setCreationDate(now);
+    ds.setMetadata(new Xpp3Dom("metadata"));
     ds2 = new DataStream();
     ds2.setPath(path.toString());
     ds2.setSha512(CHECKSUM);
     ds2.setUuid(UUID.randomUUID().toString());
     ds2.setMimeType(cType.getType());
     ds2.setCreationDate(now);
+    ds2.setMetadata(new Xpp3Dom("metadata"));
+
   }
 
   @Test(expected = IBException.class)
@@ -178,7 +180,7 @@ public class DefaultIBDataStreamTest {
 
   @Test
   public void testGetURL() throws MalformedURLException {
-    assertTrue(ib1.getURL().get().startsWith(p1.toUri().toURL().toExternalForm()));
+    assertTrue(ib1.getUrl().get().startsWith(p1.toUri().toURL().toExternalForm()));
   }
 
   @Test

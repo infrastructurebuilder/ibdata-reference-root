@@ -13,20 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.infrastructurebuilder.data;
+File buildLog = new File(basedir, 'build.log')
+assert new File(basedir, 'target').exists();
+assert buildLog.exists()
+assert buildLog.text.contains("BUILD SUCCESS")
+assert buildLog.text.contains("About to execute ingest")
+assert buildLog.text.contains("[INFO] Data ingestion is complete with ")
 
-import java.nio.file.Path;
-
-abstract public class AbstractIBDataSourceSupplier extends AbstractIBDataSupplier<IBDataSource>
-    implements IBDataSourceSupplier {
-
-  public AbstractIBDataSourceSupplier(String id, IBDataSource src, Path workingPath) {
-    super(id, src, workingPath);
-  }
-
-  @Override
-  public int compareTo(IBDataSourceSupplier o) {
-    return this.get().getId().compareTo(o.get().getId());
-  }
-
-}
+assert buildLog.text.contains("About to execute package")

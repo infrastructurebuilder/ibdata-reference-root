@@ -32,7 +32,7 @@ import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 @Mojo(name = "ingest", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
-public class IBDataIngestMojo extends AbstractIBDataMojo {
+public class IBDataDataStreamIngestMojo extends AbstractIBDataMojo {
 
   @Parameter(required = true)
   private Ingestion ingest;

@@ -20,13 +20,13 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Optional;
 
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
-import org.w3c.dom.Document;
 
 abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
     implements IBDataSource {
@@ -35,7 +35,7 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
   protected final String source;
   protected final Optional<BasicCredentials> creds;
   protected final Optional<Checksum> checksum;
-  protected final Optional<Document> metadata;
+  protected final Optional<Xpp3Dom> metadata;
   protected final Optional<String> name;
   protected final Optional<String> desc;
   private final boolean expandArchives;
@@ -56,7 +56,7 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
       // Target value checksum
       , Optional<Checksum> checksum
       // Metdata
-      , Optional<Document> metadata
+      , Optional<Xpp3Dom> metadata
       // Configuration
       , Optional<ConfigMap> config) {
     super(config.orElse(null), () -> logger);
@@ -86,7 +86,7 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
   }
 
   @Override
-  public Optional<Document> getMetadata() {
+  public Optional<Xpp3Dom> getMetadata() {
     return metadata;
   }
 

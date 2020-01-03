@@ -40,6 +40,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSource;
@@ -78,8 +79,8 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultIBDataSource(getLog(),
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.isExpandArchives(),
-            v.getName(), v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()),
+            v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.isExpandArchives(),
+            v.getName(), v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadata()),
             ofNullable(v.getMimeType()), wgs, this.archiverManager, getMapper()),
         getWorkingPath());
   }
@@ -94,7 +95,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     private List<IBChecksumPathType> read;
 
     private DefaultIBDataSource(Logger log, String id, String sourceUrl, boolean expandArchives,
-        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Xpp3Dom> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
@@ -107,7 +108,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     public DefaultIBDataSource(Logger log, String source, boolean expandArchives, Optional<String> name,
-        Optional<String> description, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<String> description, Optional<Checksum> checksum, Optional<Xpp3Dom> metadata,
         Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
       this(log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), null, name,
           description, targetType, wgs, am, mapper);

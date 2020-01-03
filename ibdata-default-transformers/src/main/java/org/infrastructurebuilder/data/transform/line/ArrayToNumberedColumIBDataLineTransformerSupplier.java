@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
-import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;

@@ -15,14 +15,6 @@
     limitations under the License.
 
 -->
-<!-- Copyright © 2019 admin (admin@infrastructurebuilder.org) Licensed under
-  the Apache License, Version 2.0 (the "License"); you may not use this file
-  except in compliance with the License. You may obtain a copy of the License
-  at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable
-  law or agreed to in writing, software distributed under the License is distributed
-  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied. See the License for the specific language governing permissions
-  and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -71,25 +63,25 @@
         <extensions>true</extensions>
         <executions>
           <execution>
-            <id>ABS</id>
+            <id>SchemaIngestionTest</id>
             <phase>generate-sources</phase>
             <goals>
-              <goal>ingest</goal>
+              <goal>ingest-schema</goal>
             </goals>
             <configuration>
-              <ingest>
+              <schema>
                 <id>xyz</id>
                 <ingester>default</ingester>
                 <dataSet>
-                  <name>jeff</name>
-                  <description>Describe Jeff in 5 words</description>
+                  <name>bill</name>
+                  <description>Describe bill in 5 words</description>
                   <metadata>
-                    <y>
-                      <x />
-                    </y>
+                    <m>
+                      <q />
+                    </m>
                   </metadata>
-                  <dataStreams>
-                    <dataStream>
+                  <schemas>
+                    <stream>
                       <temporaryId>temp1</temporaryId>
                       <name>one</name>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f1.zip?agree=yes</url>
@@ -100,8 +92,8 @@
                         </here>
                         <abc />
                       </metadata>
-                    </dataStream>
-                    <dataStream>
+                    </stream>
+                    <stream>
                       <temporaryId>temp2</temporaryId>
                       <name>two</name>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f2.zip?agree=yes</url>
@@ -112,8 +104,8 @@
                         </here>
                         <abc />
                       </metadata>
-                    </dataStream>
-                    <dataStream>
+                    </stream>
+                    <stream>
                       <temporaryId>temp3</temporaryId>
                       <name>three</name>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f3.zip?agree=yes</url>
@@ -124,8 +116,8 @@
                         </here>
                         <abc />
                       </metadata>
-                    </dataStream>
-                    <dataStream>
+                    </stream>
+                    <stream>
                       <temporaryId>temp4</temporaryId>
                       <name>four</name>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f4.zip?agree=yes</url>
@@ -136,8 +128,8 @@
                         </here>
                         <abc />
                       </metadata>
-                    </dataStream>
-                    <dataStream>
+                    </stream>
+                    <stream>
                       <temporaryId>five5</temporaryId>
                       <name>five</name>
                       <url>https://file-examples.com/wp-content/uploads/2017/02/zip_2MB.zip</url>
@@ -149,22 +141,22 @@
                         <abc />
                       </metadata>
                       <expandArchives>true</expandArchives>
-                    </dataStream>
-                    <dataStream>
+                    </stream>
+                    <stream>
                       <temporaryId>SICKS</temporaryId>
                       <name>six</name>
                       <url>file://${basedir}/src/main/resources/test.zip</url>
                       <expandArchives>true</expandArchives>
-                    </dataStream>
-                    <dataStream>
+                    </stream>
+                    <stream>
                       <temporaryId>v</temporaryId>
                       <name>vee</name>
                       <url>file://${basedir}/src/main/resources/verify.zip</url>
                       <expandArchives>false</expandArchives>
-                    </dataStream>
-                  </dataStreams>
+                    </stream>
+                  </schemas>
                 </dataSet>
-              </ingest>
+              </schema>
             </configuration>
           </execution>
         </executions>

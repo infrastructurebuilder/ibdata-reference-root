@@ -21,7 +21,6 @@ import static org.infrastructurebuilder.data.IBDataModelUtils.forceToFinalizedPa
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,9 +34,8 @@ import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSet;
-import org.infrastructurebuilder.data.IBDataSetFinalizer;
-import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
+import org.infrastructurebuilder.data.IBSchema;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -85,11 +83,13 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
 
     @Override
     public IBChecksumPathType finalize(IBDataSet inboundDataSet, Transformation target,
-        List<Supplier<IBDataStream>> ibdssList, Optional<String> basedir) throws IOException {
+        List<Supplier<IBDataStream>> ibdssList, List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir)
+        throws IOException {
       DataSet targetDataSet = target.asDataSet();
-      targetDataSet.setPath(inboundDataSet.getPath());
+      targetDataSet.setPath(inboundDataSet.getPath().orElse(null));
 
-      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, getTypeToExtensionMapper(), basedir);
+      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, getTypeToExtensionMapper(),
+          basedir);
     }
 
   }

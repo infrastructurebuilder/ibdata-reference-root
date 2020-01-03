@@ -80,8 +80,8 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     d.setUuid(UUID.randomUUID().toString());
     d.setCreationDate(new Date());
     d.setArtifactId("A");
-    d.setDataSetDescription("desc");
-    d.setDataSetName("name");
+    d.setDescription("desc");
+    d.setName("name");
     d.setGroupId("G");
     d.setMetadata(new Xpp3Dom("metadata"));
     d.setVersion("1.0");
@@ -148,8 +148,8 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<Supplier<IBDataStream>> suppliers, Optional<String> basedir)
-        throws IOException {
+    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<Supplier<IBDataStream>> suppliers,
+        List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
       getConfig();
       return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());
     }

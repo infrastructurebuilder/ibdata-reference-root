@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Path;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 import org.infrastructurebuilder.data.model.DataSet;
 
 public class DefaultIBDataSet extends AbstractIBDataSet {
-
+  private static final long serialVersionUID = -1385333942182011178L;
   private final Map<UUID, Supplier<IBDataStream>> streamSuppliers;
 
   public final static DefaultIBDataSet readWithSuppliers(DataSet ds, Supplier<Path> pathToRoot) {
@@ -46,16 +45,16 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
   }
 
   private DefaultIBDataSet(IBDataSetIdentifier ds, Map<UUID, Supplier<IBDataStream>> streamSuppliers) {
-    super(requireNonNull(ds).getId(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
-        ds.getDescription(), ofNullable(ds.getPath()), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
+    super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
+        ds.getDescription(), ds.getPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
 
     );
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 
   private DefaultIBDataSet(IBDataSet ds, Map<UUID, Supplier<IBDataStream>> streamSuppliers) {
-    super(requireNonNull(ds).getId(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
-        ds.getDescription(), ofNullable(ds.getPath()), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
+    super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
+        ds.getDescription(), ds.getPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 

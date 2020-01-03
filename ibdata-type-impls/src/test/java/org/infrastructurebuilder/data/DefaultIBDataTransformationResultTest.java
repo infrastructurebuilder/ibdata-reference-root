@@ -55,8 +55,8 @@ public class DefaultIBDataTransformationResultTest {
     ds = new DataSet();
     ds.setUuid(UUID.randomUUID().toString());
     ds.setCreationDate(new Date());
-    ds.setDataSetName("name");
-    ds.setDataSetDescription("desc");
+    ds.setName("name");
+    ds.setDescription("desc");
     ds.setMetadata(new Xpp3Dom("metadata"));
     ds.setGroupId("A");
     ds.setArtifactId("B");

@@ -26,7 +26,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +63,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 public class DefaultIBDataRecordBasedTransformerTest {
 
@@ -109,8 +107,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
     d1.setGroupId("x");
     d1.setArtifactId("y");
     d1.setVersion("1.0.0-SNAPSHOT");
-    d1.setDataSetName("a");
-    d1.setDataSetDescription("desc");
+    d1.setName("a");
+    d1.setDescription("desc");
     d1.setMetadata(new Xpp3Dom("metadata"));
     d1.setModelVersion("0.11");
     d1.setCreationDate(creationDate);
@@ -121,6 +119,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformation.setDescription("some description");
 
     transformer = new Transformer().copy(transformation);
+    transformer.setTargetStreamMetadata(new Xpp3Dom("metadata"));
     suppliedStreams = new ArrayList<>();
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg").toExternalForm()));
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/lines.txt").toExternalForm()));
@@ -129,7 +128,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   private IBDataStream getStreamFromURL(String resource) throws Exception {
     IBChecksumPathType c = readPathTypeFromFile(resource);
-    Document metadata = IBMetadataUtils.emptyDocumentSupplier.get();
+    Xpp3Dom metadata = IBMetadataUtils.emptyXpp3Supplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
         c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()), empty(),
         empty());

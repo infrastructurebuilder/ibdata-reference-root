@@ -18,7 +18,6 @@ package org.infrastructurebuilder.data;
 import static org.junit.Assert.assertEquals;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

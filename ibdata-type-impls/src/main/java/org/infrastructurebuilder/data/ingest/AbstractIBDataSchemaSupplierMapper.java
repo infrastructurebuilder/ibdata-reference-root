@@ -23,26 +23,25 @@ import java.util.Optional;
 
 import org.infrastructurebuilder.data.AbstractIBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataSource;
-import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSourceSupplierMapper {
+abstract public class AbstractIBDataSchemaSupplierMapper implements IBDataSchemaSupplierMapper {
 
   private final Logger log;
   private final TypeToExtensionMapper mapper;
   private final PathSupplier wps;
 
-  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
+  public AbstractIBDataSchemaSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
     this.wps = requireNonNull(wps);
   }
 
   @Override
-  public boolean respondsTo(IBDataStreamIdentifier v) {
-    String u = Optional.ofNullable(v).flatMap(IBDataStreamIdentifier::getUrl).orElse("");
+  public boolean respondsTo(DefaultIBDataSchemaIdentifierConfigBean v) {
+    String u = Optional.ofNullable(v).flatMap(DefaultIBDataSchemaIdentifierConfigBean::getUrl).orElse("");
     return getHeaders().stream().anyMatch(h -> u.startsWith(h));
   }
 

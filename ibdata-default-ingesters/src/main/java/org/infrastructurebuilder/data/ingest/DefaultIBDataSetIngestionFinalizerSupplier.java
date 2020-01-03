@@ -35,6 +35,7 @@ import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
+import org.infrastructurebuilder.data.IBSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -80,8 +81,8 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList, Optional<String> basedir)
-        throws IOException {
+    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList,
+        List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
       // dsi2 is always null (currently). There is no "previous dataset" to contend
       // with in ingestion
       return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,

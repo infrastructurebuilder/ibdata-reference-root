@@ -121,7 +121,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   @Test
   public void test() throws MalformedURLException {
     assertTrue(d.respondsTo(b));
-    s = d.getSupplierFor(b.getTemporaryId(), b);
+    s = d.getSupplierFor(b.getTemporaryId().orElse(null), b);
     ds = s.get().configure(c);
     List<IBChecksumPathType> p = ds.get();
     assertTrue(p.size() > 0);

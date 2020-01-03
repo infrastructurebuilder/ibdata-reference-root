@@ -16,16 +16,16 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.data.IBMetadataUtils.w3cDocumentEqualser;
 
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.util.artifacts.Checksum;
-import org.w3c.dom.Document;
 
 public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
@@ -35,15 +35,16 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final Optional<String> description;
   private final Checksum checksum;
   private final Date creationDate;
-  private final Document metadata;
+  private final Xpp3Dom metadata;
   private final String path;
   private final String mimeType;
   private final String originalLength;
   private final String originalRowCount;
   private IBDataStructuredDataMetadata structuredDataMetadata = null;
+  private String temporaryId;
 
   public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
-      Checksum checksum, Date creationDate, Document metadata, String mimeType, Optional<String> path, Optional<String> oLength,
+      Checksum checksum, Date creationDate, Xpp3Dom metadata, String mimeType, Optional<String> path, Optional<String> oLength,
       Optional<String> oRowCount) {
     this.id = id;
     this.url = requireNonNull(url);
@@ -59,8 +60,8 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   public DefaultIBDataStreamIdentifier(IBDataStreamIdentifier ds) {
-    this(ds.getId(), ds.getURL(), ds.getName(), ds.getDescription(), ds.getChecksum(), ds.getCreationDate(),
-        ds.getMetadataAsDocument(), ds.getMimeType(), ofNullable(ds.getPath()), ofNullable(ds.getOriginalLength()), ofNullable(ds.getOriginalRowCount()));
+    this(ds.getId(), ds.getUrl(), ds.getName(), ds.getDescription(), ds.getChecksum(), ds.getCreationDate(),
+        ds.getMetadata(), ds.getMimeType(), ofNullable(ds.getPath()), ofNullable(ds.getOriginalLength()), ofNullable(ds.getOriginalRowCount()));
   }
 
   @Override
@@ -69,7 +70,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   @Override
-  public Optional<String> getURL() {
+  public Optional<String> getUrl() {
 
     return this.url;
   }
@@ -98,7 +99,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   @Override
-  public Document getMetadata() {
+  public Xpp3Dom getMetadata() {
 
     return this.metadata;
   }
@@ -122,18 +123,8 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (checksum.hashCode());
-    result = prime * result + (creationDate.hashCode());
-    result = prime * result + (description.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + (metadata.hashCode());
-    result = prime * result + (mimeType.hashCode());
-    result = prime * result + (name.hashCode());
-    result = prime * result + ((path == null) ? 0 : path.hashCode());
-    result = prime * result + (url.hashCode());
-    return result;
+    return Objects.hash(checksum, creationDate, description, id, metadata, mimeType, name, originalLength,
+        originalRowCount, path, structuredDataMetadata, url);
   }
 
   @Override
@@ -145,32 +136,20 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     if (getClass() != obj.getClass())
       return false;
     DefaultIBDataStreamIdentifier other = (DefaultIBDataStreamIdentifier) obj;
-    if (!checksum.equals(other.checksum))
-      return false;
-    if (!creationDate.equals(other.creationDate))
-      return false;
-    if (!description.equals(other.description))
-      return false;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
-    if (!mimeType.equals(other.mimeType))
-      return false;
-    if (!name.equals(other.name))
-      return false;
-    if (path == null) {
-      if (other.path != null)
-        return false;
-    } else if (!path.equals(other.path))
-      return false;
-    if (!url.equals(other.url))
-      return false;
-    if (!w3cDocumentEqualser.apply(metadata, other.metadata))
-      return false;
-    return true;
+    return Objects.equals(checksum, other.checksum)
+        && Objects.equals(creationDate, other.creationDate)
+        && Objects.equals(description, other.description)
+        && Objects.equals(id, other.id)
+        && Objects.equals(metadata, other.metadata)
+        && Objects.equals(mimeType, other.mimeType)
+        && Objects.equals(name, other.name)
+        && Objects.equals(originalLength, other.originalLength)
+        && Objects.equals(originalRowCount, other.originalRowCount)
+        && Objects.equals(path, other.path)
+        && Objects.equals(structuredDataMetadata, other.structuredDataMetadata)
+        && Objects.equals(url, other.url);
   }
+
 
   @Override
   public Optional<IBDataStructuredDataMetadata> getStructuredDataMetadata() {
@@ -193,13 +172,20 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   @Override
   public Optional<UUID> getReferencedSchemaId() {
-    // TODO Acquire schema id somehow?
-    return Optional.empty();
+    return empty();
   }
 
   @Override
   public Optional<IBDataProvenance> getProvenance() {
-    // TODO Acquire provenance
-    return Optional.empty();
+    return empty();
+  }
+
+  @Override
+  public Optional<String> getTemporaryId() {
+    return ofNullable(this.temporaryId);
+  }
+
+  public void setTemporaryId(String temporaryId) {
+    this.temporaryId = temporaryId;
   }
 }

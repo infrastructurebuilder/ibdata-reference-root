@@ -132,7 +132,7 @@ public class IBDataIngestMavenComponentTest {
   @Ignore
   @Test
   public void testIngestFile() {
-    ds.setStreams(streams);
+    ds.setDataStreams(streams);
     config.setDataSet(ds);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
@@ -145,7 +145,7 @@ public class IBDataIngestMavenComponentTest {
   @Ignore
   @Test
   public void testIngestDownload() {
-    ds.setStreams(new ArrayList<>(Arrays.asList(ds3)));
+    ds.setDataStreams(new ArrayList<>(Arrays.asList(ds3)));
     config.setDataSet(ds);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();
@@ -155,7 +155,7 @@ public class IBDataIngestMavenComponentTest {
   @Ignore
   @Test
   public void testIngestMultiDownload() throws IOException {
-    dsMulti.setStreams(Arrays.asList(ds4, ds3));
+    dsMulti.setDataStreams(Arrays.asList(ds4, ds3));
     config.setDataSet(dsMulti);
     DefaultIBDataIngesterSupplier s = new DefaultIBDataIngesterSupplier(wps, () -> log);
     ingester = s.get();

@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBMetadataUtils.emptyDocumentSupplier;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 import javax.xml.transform.TransformerException;
 
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.junit.Before;
@@ -38,7 +40,8 @@ import org.w3c.dom.Element;
 
 public class DefaultIBDataStreamIdentifierTest {
 
-  private static final String DEFAULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+  private static final String DEFAULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+      "<metadata/>";
   private IBDataSource ibds;
   private DefaultIBDataStreamIdentifier i;
   private UUID id;
@@ -47,7 +50,7 @@ public class DefaultIBDataStreamIdentifierTest {
   private Optional<String> description;
   private Checksum checksum;
   private Date creationDate;
-  private Document metadata;
+  private Xpp3Dom metadata;
   private String mimeType;
   private Optional<String> path;
   private DefaultIBDataStreamIdentifier i2;
@@ -61,13 +64,13 @@ public class DefaultIBDataStreamIdentifierTest {
     description = of("dsdescription");
     checksum = new Checksum("cdef");
     creationDate = new Date();
-    metadata = emptyDocumentSupplier.get();
+    metadata = emptyXpp3Supplier.get();
     mimeType = IBConstants.APPLICATION_OCTET_STREAM;
     path = of("./");
-    i = new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, metadata, mimeType, path,empty(), empty());
+    i = new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, metadata, mimeType, path,
+        empty(), empty());
     i2 = new DefaultIBDataStreamIdentifier(i);
   }
-
 
   @Test
   public void testHashCode() {
@@ -76,7 +79,7 @@ public class DefaultIBDataStreamIdentifierTest {
     assertNotEquals(i.hashCode(),
         //
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, metadata, mimeType,
-            empty(),empty(), empty()).hashCode());
+            empty(), empty(), empty()).hashCode());
   }
 
   @Test
@@ -86,7 +89,7 @@ public class DefaultIBDataStreamIdentifierTest {
 
   @Test
   public void testGetURL() {
-    assertEquals(url, i.getURL());
+    assertEquals(url, i.getUrl());
   }
 
   @Test
@@ -126,90 +129,92 @@ public class DefaultIBDataStreamIdentifierTest {
 
   @Test
   public void testEquals() throws MalformedURLException, TransformerException {
-    i = new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, metadata, mimeType, path,empty(), empty());
+    i = new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, metadata, mimeType, path,
+        empty(), empty());
 
-    Document doc = emptyDocumentSupplier.get();
-    Element root = doc.createElement("root");
-    Element newChild = doc.createElement("something");
+    Document orig = emptyDocumentSupplier.get();
+    Element root = orig.createElement("root");
+    Element newChild = orig.createElement("something");
     newChild.setTextContent("ABC");
     // create the root element node
-    Element element = doc.createElement("root");
-    doc.appendChild(element);
+    Element element = orig.createElement("root");
+    orig.appendChild(element);
 
     // create a comment node given the specified string
-    Comment comment = doc.createComment("This is a comment");
-    doc.insertBefore(comment, element);
+    Comment comment = orig.createComment("This is a comment");
+    orig.insertBefore(comment, element);
 
     // add element after the first child of the root element
-    Element itemElement = doc.createElement("item");
+    Element itemElement = orig.createElement("item");
     element.appendChild(itemElement);
 
     // add an attribute to the node
     itemElement.setAttribute("myattr", "attrvalue");
 
     // create text for the node
-    itemElement.insertBefore(doc.createTextNode("text"), itemElement.getLastChild());
+    itemElement.insertBefore(orig.createTextNode("text"), itemElement.getLastChild());
 
     root.appendChild(newChild);
 
-    String thedoc = IBMetadataUtils.stringifyDocument.apply(doc);
+    String thedoc = IBMetadataUtils.stringifyDocument.apply(orig);
+    Xpp3Dom doc = IBMetadataUtils.translateToXpp3Dom.apply(thedoc);
 
     assertEquals(i, i);
     assertNotEquals(i, null);
     assertNotEquals(i, "abc");
-    assertNotEquals(i,
-        new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, doc, mimeType, path,empty(), empty()));
-    assertNotEquals(i,
-        new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, doc, mimeType, path,empty(), empty()));
+    assertNotEquals(i, new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, doc,
+        mimeType, path, empty(), empty()));
+    assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, doc,
+        mimeType, path, empty(), empty()));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, of("https://himomImhome.com"), name, description, checksum,
-        creationDate, doc, mimeType, path,empty(), empty()));
+        creationDate, doc, mimeType, path, empty(), empty()));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, name, description, new Checksum("abcd"), creationDate,
-        metadata, mimeType, path,empty(), empty()));
-    assertNotEquals(i,
-        new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, new Date(), metadata, mimeType, path,empty(), empty()));
+        metadata, mimeType, path, empty(), empty()));
+    assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, new Date(), metadata,
+        mimeType, path, empty(), empty()));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, of("newName"), description, checksum, creationDate,
-        metadata, mimeType, path,empty(), empty()));
+        metadata, mimeType, path, empty(), empty()));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, name, of("newDesc"), checksum, creationDate, metadata,
-        mimeType, path,empty(), empty()));
+        mimeType, path, empty(), empty()));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(UUID.randomUUID(), url, name, description, checksum,
-        creationDate, metadata, mimeType, path,empty(), empty()));
+        creationDate, metadata, mimeType, path, empty(), empty()));
     UUID id1 = UUID.randomUUID();
     assertNotEquals(
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()),
-        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()));
+            path, empty(), empty()),
+        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType, path,
+            empty(), empty()));
     assertEquals(
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()),
+            path, empty(), empty()),
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()));
+            path, empty(), empty()));
     assertEquals(
-        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()),
-        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()));
+        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType, path,
+            empty(), empty()),
+        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType, path,
+            empty(), empty()));
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, metadata,
-        "other/type", path,empty(), empty()));
+        "other/type", path, empty(), empty()));
 
     assertNotEquals(
         new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            empty(),empty(), empty()),
-        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()));
+            empty(), empty(), empty()),
+        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType, path,
+            empty(), empty()));
     assertEquals(
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, metadata, mimeType,
-            empty(),empty(), empty()),
+            empty(), empty(), empty()),
         new DefaultIBDataStreamIdentifier(null, url, name, description, checksum, creationDate, metadata, mimeType,
-            empty(),empty(), empty()));
+            empty(), empty(), empty()));
     assertNotEquals(
+        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType, path,
+            empty(), empty()),
         new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            path,empty(), empty()),
-        new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata, mimeType,
-            empty(),empty(), empty()));
+            empty(), empty(), empty()));
 
     assertNotEquals(i, new DefaultIBDataStreamIdentifier(id1, url, name, description, checksum, creationDate, metadata,
-        mimeType, path,empty(), empty()));
+        mimeType, path, empty(), empty()));
     assertEquals(i, i2);
   }
 

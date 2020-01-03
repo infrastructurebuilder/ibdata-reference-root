@@ -21,7 +21,7 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 //import static org.infrastructurebuilder.data.IBDataSource.SPLIT_ZIPS_CONFIG;
-import static org.infrastructurebuilder.data.IBMetadataUtils.emptyDocumentSupplier;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -96,7 +96,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
         //
         , now
         //
-        , source.getMetadata().orElse(emptyDocumentSupplier.get())
+        , source.getMetadata().orElse(emptyXpp3Supplier.get())
         //
         , ibPathChecksumType.getType()
         //

@@ -74,8 +74,8 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     ds.setGroupId(project.getGroupId());
     ds.setArtifactId(project.getArtifactId());
     ds.setVersion(project.getVersion());
-    ds.setDataSetName(project.getName());
-    ds.setDataSetDescription(project.getDescription());
+    ds.setName(project.getName());
+    ds.setDescription(project.getDescription());
     ds.setCreationDate(new Date());
     ds.setMetadata(new Xpp3Dom("metadata"));
 

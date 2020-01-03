@@ -1,5 +1,5 @@
 /**
- * Copyright © 2019 admin (admin@infrastructurebuilder.org)
+	 * Copyright © 2019 admin (admin@infrastructurebuilder.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,9 +35,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.avro.Schema;
-import org.infrastructurebuilder.IBConstants;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
-import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
@@ -55,7 +56,6 @@ import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
-import org.w3c.dom.Document;
 
 @Named("jdbc-jooq")
 public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
@@ -74,7 +74,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
   @Inject
   public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, /* IBDataAvroUtilsSupplier gds,*/
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, /* IBDataAvroUtilsSupplier gds, */
       JooqAvroRecordWriterSupplier jrws) {
     super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
 //    this.aus = requireNonNull(gds);
@@ -89,9 +89,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
         new DefaultDatabaseIBDataSource(getLog(), temporaryId,
-            v.getURL().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, Optional.empty(),
-            ofNullable(v.getChecksum()), of(v.getMetadataAsDocument()), Optional.empty(), null, v.getName(),
-            v.getDescription(), getMapper(), /*this.aus,*/ this.jrws),
+            v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, empty(),
+            ofNullable(v.getChecksum()), of(v.getMetadata()), empty(), null, v.getName(), v.getDescription(),
+            getMapper(), /* this.aus, */ this.jrws),
         getWorkingPath());
   }
 
@@ -106,7 +106,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     private final JooqAvroRecordWriterSupplier jwrs;
 
     public DefaultDatabaseIBDataSource(Logger l, String tempId, String source, boolean expand,
-        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Document> metadata,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Xpp3Dom> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         TypeToExtensionMapper t2e, /* IBDataAvroUtilsSupplier jds, */JooqAvroRecordWriterSupplier jrws) {
 
@@ -130,7 +130,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     public DefaultDatabaseIBDataSource configure(ConfigMap config) {
       return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), false, getCredentials(), getChecksum(),
           getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), t2e,
-          /*(IBDataAvroUtilsSupplier) this.aus.configure(config),*/
+          /* (IBDataAvroUtilsSupplier) this.aus.configure(config), */
           (JooqAvroRecordWriterSupplier) this.jwrs.configure(config));
     }
 
@@ -138,7 +138,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     public List<IBChecksumPathType> getInstance() {
       if (conn == null) {
         String url = getSourceURL();
-        BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", Optional.empty()));
+        BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", empty()));
         conn = IBDataException.cet.withReturningTranslation(
             () -> DriverManager.getConnection(url, bc.getKeyId(), bc.getSecret().orElse(null)));
 
@@ -172,12 +172,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
             throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
         }
         return read;
-      }).orElse(Collections.emptyList());
+      }).orElse(emptyList());
     }
 
     @Override
     public Optional<String> getMimeType() {
-      return of(IBConstants.AVRO_BINARY);
+      return of(AVRO_BINARY);
     }
   }
 

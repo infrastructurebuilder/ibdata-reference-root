@@ -103,8 +103,8 @@ public class PassThruTransformerSupplierTest {
     finalData.setMetadata(new Xpp3Dom("metadata"));
     gav = new DefaultGAV(GROUP, ARTIFACT, VERSION);
     finalData.setModelVersion("1.0");
-    finalData.setDataSetDescription(DESC);
-    finalData.setDataSetName(NAME);
+    finalData.setDescription(DESC);
+    finalData.setName(NAME);
 
     ds = new DefaultIBDataSet(finalData);
   }

@@ -44,7 +44,6 @@ import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStructuredDataMetadata;
 import org.infrastructurebuilder.data.IBDataTransformationError;
-import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.slf4j.Logger;

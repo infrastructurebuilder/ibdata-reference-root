@@ -83,8 +83,8 @@
                       <x />
                     </y>
                   </metadata>
-                  <streams>
-                    <stream>
+                  <dataStreams>
+                    <dataStream>
                       <temporaryId>temp1</temporaryId>
                       <name>one</name>
                       <mimeType>application/pdf</mimeType>
@@ -96,8 +96,8 @@
                         </here>
                         <abc />
                       </metadata>
-                    </stream>
-                  </streams>
+                    </dataStream>
+                  </dataStreams>
                 </dataSet>
               </ingest>
             </configuration>

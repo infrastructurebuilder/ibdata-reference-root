@@ -36,6 +36,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultTestingSource;
 import org.infrastructurebuilder.data.IBDataException;
@@ -112,6 +113,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     DataSet dset = dsi.asDataSet();
     dset.setCreationDate(now);
     dset.setUuid(UUID.randomUUID().toString());
+    dset.setMetadata(new Xpp3Dom("metadata"));
     ibdataset = new DefaultIBDataSet(dset);
     dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
