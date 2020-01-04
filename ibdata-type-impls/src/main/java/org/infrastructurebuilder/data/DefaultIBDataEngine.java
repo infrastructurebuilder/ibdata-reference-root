@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -28,7 +30,6 @@ import java.net.URLClassLoader;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
   }
 
   public void setAdditionalURLS(List<URL> additionalURLS) {
-    this.additionalURLS.addAll(Optional.ofNullable(additionalURLS).orElse(Collections.emptyList()));
+    this.additionalURLS.addAll(ofNullable(additionalURLS).orElse(emptyList()));
   }
 
   @Override
@@ -125,7 +126,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
   @Override
   public Optional<IBDataSet> fetchDataSetById(UUID id) {
-    return Optional.ofNullable(cachedDataSets.get(id));
+    return ofNullable(cachedDataSets.get(id));
   }
 
   @Override
@@ -148,7 +149,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
   @Override
   public Optional<IBSchema> fetchSchemaById(UUID id) {
-    return Optional.ofNullable(cachedDataSets.values().parallelStream().flatMap(ds -> ds.getSchemas().parallelStream())
+    return ofNullable(cachedDataSets.values().parallelStream().flatMap(ds -> ds.getSchemas().parallelStream())
         .filter(s -> s.getUuid().equals(id)).findAny().orElse(null));
   }
 

@@ -66,7 +66,7 @@ public class IBDataTypeImplsModelUtilsTest {
         .translateToWorkableArchiveURL("jar:" + testJar.toUri().toURL().toExternalForm() + "!" + IBDATA_IBDATASET_XML);
     Optional<DefaultIBDataSet> q = mapDataSetToDefaultIBDataSet.apply(url);
     assertTrue(q.isPresent());
-    assertEquals("99139ebc-4c01-3c93-89c1-2219c7e4ebf6", q.get().getUuid().toString());
+    assertEquals("86c74030-b133-345a-be07-ad4cec057780", q.get().getUuid().toString());
   }
 
   @Test

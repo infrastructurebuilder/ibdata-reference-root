@@ -18,11 +18,10 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 
-import org.infrastructurebuilder.data.AbstractIBDataSourceSupplier;
-import org.infrastructurebuilder.data.IBDataSource;
+import org.infrastructurebuilder.data.AbstractIBDataSchemaSupplier;
+import org.infrastructurebuilder.data.IBDataSchema;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -45,8 +44,6 @@ abstract public class AbstractIBDataSchemaSupplierMapper implements IBDataSchema
     return getHeaders().stream().anyMatch(h -> u.startsWith(h));
   }
 
-  abstract public List<String> getHeaders();
-
   public Logger getLog() {
     return log;
   }
@@ -60,9 +57,9 @@ abstract public class AbstractIBDataSchemaSupplierMapper implements IBDataSchema
     return wps.get();
   }
 
-  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier {
+  public class DefaultIBDataSchemaSupplier extends AbstractIBDataSchemaSupplier {
 
-    public DefaultIBDataSourceSupplier(String temporaryId, IBDataSource src, Path workingPath) {
+    public DefaultIBDataSchemaSupplier(String temporaryId, IBDataSchema src, Path workingPath) {
       super(temporaryId, src, workingPath);
     }
 

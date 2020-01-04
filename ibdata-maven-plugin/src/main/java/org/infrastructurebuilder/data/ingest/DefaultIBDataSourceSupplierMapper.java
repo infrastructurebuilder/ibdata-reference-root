@@ -77,12 +77,19 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
 
   @Override
   public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-    return new DefaultIBDataSourceSupplier(temporaryId,
-        new DefaultIBDataSource(getLog(),
-            v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), v.isExpandArchives(),
-            v.getName(), v.getDescription(), ofNullable(v.getChecksum()), of(v.getMetadata()),
-            ofNullable(v.getMimeType()), wgs, this.archiverManager, getMapper()),
-        getWorkingPath());
+    return new DefaultIBDataSourceSupplier(temporaryId // Temp id for this
+        , new DefaultIBDataSource(getLog() // Log (always)
+            , v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)) // URL
+            , v.isExpandArchives() // Expand archives
+            , v.getName() // Name
+            , v.getDescription() // desc
+            , ofNullable(v.getChecksum()) // checksum
+            , of(v.getMetadata()) // metadata
+            , ofNullable(v.getMimeType()) // mime
+            , wgs // wgetter supplier
+            , this.archiverManager // archiver manager (for expanding archives)
+            , getMapper()) // Mapper
+        , getWorkingPath());
   }
 
   public class DefaultIBDataSource extends AbstractIBDataSource {

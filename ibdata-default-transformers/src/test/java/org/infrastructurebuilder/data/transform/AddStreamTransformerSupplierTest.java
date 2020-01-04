@@ -95,6 +95,7 @@ public class AddStreamTransformerSupplierTest {
     x1.setHint(PassThruTransformerSupplier.NAME);
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
+    x1.setTargetStreamMetadata(new Xpp3Dom("metadata"));
     x = new Transformation();
     x.setId("id");
     x.setDescription(DESC);
@@ -165,6 +166,7 @@ public class AddStreamTransformerSupplierTest {
   @Test(expected = IBException.class)
   public void testUncnfiguredConfigureConfigMapSupplier() throws IOException {
     p = (AddStreamTransformerSupplier) p.withFinalizer(finalizer).configure(cms);
+
     IBDataTransformer t = p.get();
     assertEquals(AddStreamTransformerSupplier.ADD_STREAM, t.getHint());
     assertFalse(t.respondsTo(null));
