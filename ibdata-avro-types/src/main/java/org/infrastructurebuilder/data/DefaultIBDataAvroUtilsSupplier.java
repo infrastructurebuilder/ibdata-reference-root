@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.infrastructurebuilder.IBConstants.FILE_PREFIX;
@@ -37,6 +39,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
@@ -125,6 +128,11 @@ public class DefaultIBDataAvroUtilsSupplier extends AbstractConfigurableSupplier
       return w;
     }
 
+    @Override
+    public final List<PersistedIBSchema> fromAvroSchema(Schema schema) {
+      return Collections.emptyList();
+    }
   }
+
 
 }

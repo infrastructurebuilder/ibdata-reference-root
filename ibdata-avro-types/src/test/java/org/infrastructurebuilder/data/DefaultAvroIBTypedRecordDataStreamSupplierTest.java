@@ -76,7 +76,7 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
     id.setSha512(CHECKSUM);
-    id.setMetadata(new Xpp3Dom("metadata"));
+    id.setMetadata(new Metadata());
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     cms = new ConfigMap();
     gds = new DefaultGenericDataSupplier(() -> log).configure(cms);

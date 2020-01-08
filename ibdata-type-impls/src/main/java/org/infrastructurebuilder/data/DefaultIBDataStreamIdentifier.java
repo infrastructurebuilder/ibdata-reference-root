@@ -35,7 +35,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final Optional<String> description;
   private final Checksum checksum;
   private final Date creationDate;
-  private final Xpp3Dom metadata;
+  private final Metadata metadata;
   private final String path;
   private final String mimeType;
   private final String originalLength;
@@ -44,7 +44,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private String temporaryId;
 
   public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
-      Checksum checksum, Date creationDate, Xpp3Dom metadata, String mimeType, Optional<String> path, Optional<String> oLength,
+      Checksum checksum, Date creationDate, Metadata metadata, String mimeType, Optional<String> path, Optional<String> oLength,
       Optional<String> oRowCount) {
     this.id = id;
     this.url = requireNonNull(url);
@@ -99,7 +99,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   }
 
   @Override
-  public Xpp3Dom getMetadata() {
+  public Metadata getMetadata() {
 
     return this.metadata;
   }

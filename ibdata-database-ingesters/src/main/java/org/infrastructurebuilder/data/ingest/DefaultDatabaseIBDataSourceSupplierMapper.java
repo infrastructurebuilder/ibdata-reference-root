@@ -57,6 +57,7 @@ import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -121,7 +122,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
     private final JooqAvroRecordWriterSupplier jwrs;
 
     public DefaultDatabaseIBDataSource(Logger l, String tempId, String source, boolean expand,
-        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Xpp3Dom> metadata,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Metadata> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         TypeToExtensionMapper t2e, /* IBDataAvroUtilsSupplier jds, */JooqAvroRecordWriterSupplier jrws) {
 

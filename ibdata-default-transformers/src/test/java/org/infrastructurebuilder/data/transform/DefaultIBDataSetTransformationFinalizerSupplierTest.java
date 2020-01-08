@@ -37,6 +37,7 @@ import org.infrastructurebuilder.data.IBDataConstants;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
@@ -93,7 +94,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
     finalData.setGroupId(GROUP);
     finalData.setArtifactId(ARTIFACT);
     finalData.setVersion(VERSION);
-    finalData.setMetadata(new Xpp3Dom("metadata"));
+    finalData.setMetadata(new Metadata());
     gav = new DefaultGAV(GROUP, ARTIFACT, VERSION);
     finalData.setModelVersion("1.0");
     finalData.setDescription(DESC);

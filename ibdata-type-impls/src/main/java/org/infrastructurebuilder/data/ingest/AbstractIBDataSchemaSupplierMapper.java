@@ -19,9 +19,12 @@ import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.SortedSet;
 
 import org.infrastructurebuilder.data.AbstractIBDataSchemaSupplier;
-import org.infrastructurebuilder.data.IBDataSchema;
+import org.infrastructurebuilder.data.IBDataSchemaIdentifier;
+import org.infrastructurebuilder.data.IBDataSchemaSource;
+import org.infrastructurebuilder.data.model.DataSchema;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -39,9 +42,10 @@ abstract public class AbstractIBDataSchemaSupplierMapper implements IBDataSchema
   }
 
   @Override
-  public boolean respondsTo(DefaultIBDataSchemaIdentifierConfigBean v) {
-    String u = Optional.ofNullable(v).flatMap(DefaultIBDataSchemaIdentifierConfigBean::getUrl).orElse("");
-    return getHeaders().stream().anyMatch(h -> u.startsWith(h));
+  public boolean respondsTo(IBDataSchemaIdentifier v) {
+    return false;
+//    String u = Optional.ofNullable(v).flatMap(IBDataSchemaIdentifier::getUrl).orElse("");
+//    return getHeaders().stream().anyMatch(h -> u.startsWith(h));
   }
 
   public Logger getLog() {
@@ -59,7 +63,7 @@ abstract public class AbstractIBDataSchemaSupplierMapper implements IBDataSchema
 
   public class DefaultIBDataSchemaSupplier extends AbstractIBDataSchemaSupplier {
 
-    public DefaultIBDataSchemaSupplier(String temporaryId, IBDataSchema src, Path workingPath) {
+    public DefaultIBDataSchemaSupplier(String temporaryId, SortedSet<IBDataSchemaSource> src, Path workingPath) {
       super(temporaryId, src, workingPath);
     }
 

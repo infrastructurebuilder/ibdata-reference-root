@@ -16,13 +16,13 @@
 package org.infrastructurebuilder.data;
 
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.slf4j.Logger;
 
 public interface IBDataAvroUtils {
@@ -47,5 +47,7 @@ public interface IBDataAvroUtils {
   GenericData getGenericData();
 
   Logger getLog();
+
+  List<PersistedIBSchema> fromAvroSchema(Schema schema);
 
 }

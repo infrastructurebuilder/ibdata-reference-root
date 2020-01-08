@@ -46,6 +46,7 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -55,7 +56,6 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
-import org.w3c.dom.Document;
 
 @Named
 public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper {
@@ -102,7 +102,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     private List<IBChecksumPathType> read;
 
     private DefaultIBDataSource(Logger log, String id, String sourceUrl, boolean expandArchives,
-        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Xpp3Dom> metadata,
+        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Metadata> metadata,
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
@@ -115,7 +115,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     public DefaultIBDataSource(Logger log, String source, boolean expandArchives, Optional<String> name,
-        Optional<String> description, Optional<Checksum> checksum, Optional<Xpp3Dom> metadata,
+        Optional<String> description, Optional<Checksum> checksum, Optional<Metadata> metadata,
         Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
       this(log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), null, name,
           description, targetType, wgs, am, mapper);

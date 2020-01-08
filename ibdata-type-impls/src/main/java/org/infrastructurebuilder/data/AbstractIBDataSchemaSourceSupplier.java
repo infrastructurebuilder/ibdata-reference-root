@@ -16,17 +16,17 @@
 package org.infrastructurebuilder.data;
 
 import java.nio.file.Path;
-import java.util.SortedSet;
 
-abstract public class AbstractIBDataSchemaSupplier extends AbstractIBDataSupplier<SortedSet<IBDataSchemaSource>> implements IBDataSchemaSupplier {
+abstract public class AbstractIBDataSchemaSourceSupplier extends AbstractIBDataSupplier<IBDataSchemaSource>
+    implements IBDataSchemaSourceSupplier {
 
-  public AbstractIBDataSchemaSupplier(String id, SortedSet<IBDataSchemaSource> src, Path workingPath) {
+  public AbstractIBDataSchemaSourceSupplier(String id, IBDataSchemaSource src, Path workingPath) {
     super(id, src, workingPath);
   }
 
   @Override
-  public int compareTo(IBDataSchemaSupplier o) {
-    return this.getId().compareTo(o.getId());
+  public int compareTo(IBDataSchemaSourceSupplier o) {
+    return this.get().getId().compareTo(o.get().getId());
   }
 
 }

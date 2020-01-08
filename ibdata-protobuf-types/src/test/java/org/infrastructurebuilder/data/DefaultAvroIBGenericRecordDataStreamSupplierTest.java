@@ -68,7 +68,7 @@ public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
     id.setSha512(CHECKSUM);
-    id.setMetadata(new Xpp3Dom("metadata"));
+    id.setMetadata(new Metadata());
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     schema = IBDataProtobufUtils.avroSchemaFromString.apply(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBGenericRecordDataStreamSupplier(targetPath, stream, parallel, schema);

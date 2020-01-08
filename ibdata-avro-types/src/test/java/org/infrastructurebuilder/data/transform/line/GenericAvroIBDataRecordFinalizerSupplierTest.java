@@ -43,6 +43,7 @@ import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStructuredDataFieldMetadata;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.line.GenericAvroIBDataRecordFinalizerSupplier.GenericAvroIBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -121,7 +122,7 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
     id.setSha512(DefaultAvroGenericRecordStreamSupplierTest.CHECKSUM);
-    id.setMetadata(new Xpp3Dom("metadata"));
+    id.setMetadata(new Metadata());
     DefaultIBDataStream identifier = new DefaultIBDataStream(id, wps.getTestClasses().resolve("ba.avro"));
     DefaultAvroGenericRecordStreamSupplier d = new DefaultAvroGenericRecordStreamSupplier();
     Optional<Stream<GenericRecord>> q = d.from(identifier);

@@ -47,6 +47,7 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.line.StringIBDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.util.IBUtils;
@@ -95,7 +96,7 @@ public class AddStreamTransformerSupplierTest {
     x1.setHint(PassThruTransformerSupplier.NAME);
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
-    x1.setTargetStreamMetadata(new Xpp3Dom("metadata"));
+    x1.setTargetStreamMetadata(new Metadata());
     x = new Transformation();
     x.setId("id");
     x.setDescription(DESC);
@@ -116,7 +117,7 @@ public class AddStreamTransformerSupplierTest {
     finalData.setGroupId(GROUP);
     finalData.setArtifactId(ARTIFACT);
     finalData.setVersion(VERSION);
-    finalData.setMetadata(new Xpp3Dom("metadata"));
+    finalData.setMetadata(new Metadata());
     gav = new DefaultGAV(GROUP, ARTIFACT, VERSION);
     finalData.setModelVersion("1.0");
     finalData.setDescription(DESC);

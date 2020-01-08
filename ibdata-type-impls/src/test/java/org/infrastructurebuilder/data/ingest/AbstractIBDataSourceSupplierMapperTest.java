@@ -46,6 +46,7 @@ import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -113,7 +114,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     DataSet dset = dsi.asDataSet();
     dset.setCreationDate(now);
     dset.setUuid(UUID.randomUUID().toString());
-    dset.setMetadata(new Xpp3Dom("metadata"));
+    dset.setMetadata(new Metadata());
     ibdataset = new DefaultIBDataSet(dset);
     dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 

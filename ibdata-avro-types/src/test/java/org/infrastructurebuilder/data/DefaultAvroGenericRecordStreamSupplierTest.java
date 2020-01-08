@@ -62,7 +62,7 @@ public class DefaultAvroGenericRecordStreamSupplierTest {
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
     id.setSha512(CHECKSUM);
-    id.setMetadata(new Xpp3Dom("metadata"));
+    id.setMetadata(new Metadata());
     identifier = new DefaultIBDataStream(id, wps.getTestClasses().resolve("ba.avro"));
     d = new DefaultAvroGenericRecordStreamSupplier();
   }

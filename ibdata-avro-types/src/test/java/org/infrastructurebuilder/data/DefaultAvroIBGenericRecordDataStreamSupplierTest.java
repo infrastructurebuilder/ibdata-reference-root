@@ -73,7 +73,7 @@ public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
     id.setUuid(UUID.randomUUID().toString());
     id.setCreationDate(new Date());
     id.setSha512(CHECKSUM);
-    id.setMetadata(new Xpp3Dom("metadata"));
+    id.setMetadata(new Metadata());
     ConfigMap cms = new ConfigMap();
     gds = new DefaultGenericDataSupplier(() -> log);
     aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(cms);

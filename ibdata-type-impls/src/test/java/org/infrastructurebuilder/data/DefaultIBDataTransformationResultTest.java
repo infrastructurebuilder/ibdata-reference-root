@@ -57,7 +57,7 @@ public class DefaultIBDataTransformationResultTest {
     ds.setCreationDate(new Date());
     ds.setName("name");
     ds.setDescription("desc");
-    ds.setMetadata(new Xpp3Dom("metadata"));
+    ds.setMetadata(new Metadata());
     ds.setGroupId("A");
     ds.setArtifactId("B");
     ds.setVersion("1.0.0");

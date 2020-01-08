@@ -57,6 +57,7 @@ import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
 import org.infrastructurebuilder.data.IBDataTypeImplsModelUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -77,7 +78,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     ds.setName(project.getName());
     ds.setDescription(project.getDescription());
     ds.setCreationDate(new Date());
-    ds.setMetadata(new Xpp3Dom("metadata"));
+    ds.setMetadata(new Metadata());
 
     ds.setPath(IBDataException.cet
         .withReturningTranslation(() -> workingPath.toAbsolutePath().toUri().toURL().toExternalForm()));

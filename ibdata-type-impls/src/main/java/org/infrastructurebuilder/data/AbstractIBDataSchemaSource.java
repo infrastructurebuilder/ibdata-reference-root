@@ -28,25 +28,22 @@ import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
-    implements IBDataSource {
+abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
+    implements IBDataSchemaSource {
 
   protected final String id;
-  protected final String source;
+//  protected final String source;
   protected final Optional<BasicCredentials> creds;
   protected final Optional<Checksum> checksum;
   protected final Optional<Metadata> metadata;
   protected final Optional<String> name;
   protected final Optional<String> desc;
-  private final boolean expandArchives;
 
-  public AbstractIBDataSource(Logger logger
+  public AbstractIBDataSchemaSource(Logger logger
   // Temp id
       , String id
-      // "URL" or JDBC URL etc
-      , String source
-      // True if we expand archives
-      , boolean expand
+//      // "URL" or JDBC URL etc
+//      , String source
       // Name
       , Optional<String> name
       // Description
@@ -61,19 +58,18 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
       , Optional<ConfigMap> config) {
     super(config.orElse(null), () -> logger);
     this.id = requireNonNull(id);
-    this.source = requireNonNull(source);
+//    this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);
     this.checksum = requireNonNull(checksum);
     this.metadata = requireNonNull(metadata);
     this.name = requireNonNull(name);
     this.desc = requireNonNull(desc);
-    this.expandArchives = expand;
   }
 
-  @Override
-  public String getSourceURL() {
-    return source;
-  }
+//  @Override
+//  public String getSourceURL() {
+//    return source;
+//  }
 
   @Override
   public Optional<BasicCredentials> getCredentials() {
@@ -105,16 +101,11 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
     return this.desc;
   }
 
-  @Override
-  public boolean isExpandArchives() {
-    return this.expandArchives;
-  }
-
   /**
    * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
    */
   @Override
-  public IBDataSource configure(ConfigMap config) {
+  public IBDataSchemaSource configure(ConfigMap config) {
     return this;
   }
 }

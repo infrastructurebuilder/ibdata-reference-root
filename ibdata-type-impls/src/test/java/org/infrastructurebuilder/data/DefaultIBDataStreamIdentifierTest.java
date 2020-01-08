@@ -50,7 +50,7 @@ public class DefaultIBDataStreamIdentifierTest {
   private Optional<String> description;
   private Checksum checksum;
   private Date creationDate;
-  private Xpp3Dom metadata;
+  private Metadata metadata;
   private String mimeType;
   private Optional<String> path;
   private DefaultIBDataStreamIdentifier i2;
@@ -157,7 +157,7 @@ public class DefaultIBDataStreamIdentifierTest {
     root.appendChild(newChild);
 
     String thedoc = IBMetadataUtils.stringifyDocument.apply(orig);
-    Xpp3Dom doc = IBMetadataUtils.translateToXpp3Dom.apply(thedoc);
+    Metadata doc = IBMetadataUtils.translateToMetadata.apply(thedoc);
 
     assertEquals(i, i);
     assertNotEquals(i, null);

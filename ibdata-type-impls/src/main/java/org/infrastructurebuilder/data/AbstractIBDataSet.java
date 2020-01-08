@@ -16,12 +16,13 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataSet;
@@ -38,8 +39,7 @@ abstract public class AbstractIBDataSet extends DataSet implements IBDataSet {
       Optional<String> path, String groupId, String artifactId, String version) {
     super();
     setCreationDate(requireNonNull(date, getClass().getCanonicalName() + "." + "creationDate"));
-    setDescription(
-        requireNonNull(description, getClass().getCanonicalName() + "." + "description").orElse(null));
+    setDescription(requireNonNull(description, getClass().getCanonicalName() + "." + "description").orElse(null));
     setName(requireNonNull(name.orElse(null), getClass().getCanonicalName() + "." + "name"));
     setMetadata(requireNonNull(metadata, getClass().getCanonicalName() + "." + "metadata"));
     setGroupId(requireNonNull(groupId, getClass().getCanonicalName() + "." + "groupId"));
@@ -50,8 +50,15 @@ abstract public class AbstractIBDataSet extends DataSet implements IBDataSet {
   }
 
   @Override
-  public List<IBSchema> getSchemaSuppliers() {
-    return getSchemas().stream().collect(Collectors.toList());
+  public List<Supplier<IBDataSchemaIdentifier>> getSchemaSuppliers() {
+    return getSchemas().stream().map(k -> {
+      return new Supplier<IBDataSchemaIdentifier>() {
+        @Override
+        public IBDataSchemaIdentifier get() {
+          return (IBDataSchemaIdentifier) k;
+        }
+      };
+    }).collect(toList());
   }
 
 }

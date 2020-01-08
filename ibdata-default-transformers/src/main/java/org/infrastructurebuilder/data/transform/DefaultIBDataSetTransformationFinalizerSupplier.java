@@ -88,7 +88,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
       DataSet targetDataSet = target.asDataSet();
       targetDataSet.setPath(inboundDataSet.getPath().orElse(null));
 
-      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, getTypeToExtensionMapper(),
+      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList ,schemaSuppliers, getTypeToExtensionMapper(),
           basedir);
     }
 

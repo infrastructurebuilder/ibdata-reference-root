@@ -79,7 +79,7 @@ public class DefaultIBDataStreamTest {
   private DefaultIBDataStreamIdentifier identifier, identifier2;
   private DefaultIBDataStream ib1;
   private Checksum checksum, checksum2;
-  private Xpp3Dom metadata;
+  private Metadata metadata;
   private String mimeType;
   private InputStream rick, lines;
   private Path p1;
@@ -112,14 +112,14 @@ public class DefaultIBDataStreamTest {
     ds.setUuid(UUID.randomUUID().toString());
     ds.setMimeType(JPG);
     ds.setCreationDate(now);
-    ds.setMetadata(new Xpp3Dom("metadata"));
+    ds.setMetadata(new Metadata());
     ds2 = new DataStream();
     ds2.setPath(path.toString());
     ds2.setSha512(CHECKSUM);
     ds2.setUuid(UUID.randomUUID().toString());
     ds2.setMimeType(cType.getType());
     ds2.setCreationDate(now);
-    ds2.setMetadata(new Xpp3Dom("metadata"));
+    ds2.setMetadata(new Metadata());
 
   }
 

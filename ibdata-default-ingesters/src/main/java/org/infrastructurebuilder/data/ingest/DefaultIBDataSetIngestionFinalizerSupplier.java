@@ -83,10 +83,9 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
     @Override
     public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList,
         List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
-      // dsi2 is always null (currently). There is no "previous dataset" to contend
-      // with in ingestion
+      // dsi2 is always null. There is no "previous dataset" in ingestion
       return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,
-          getTypeToExtensionMapper(), basedir);
+          schemaSuppliers, getTypeToExtensionMapper(), basedir);
     }
 
   }

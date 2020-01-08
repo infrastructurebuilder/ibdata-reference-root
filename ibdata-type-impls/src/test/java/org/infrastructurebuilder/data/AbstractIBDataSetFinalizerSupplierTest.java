@@ -83,7 +83,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     d.setDescription("desc");
     d.setName("name");
     d.setGroupId("G");
-    d.setMetadata(new Xpp3Dom("metadata"));
+    d.setMetadata(new Metadata());
     d.setVersion("1.0");
     dsi1 = new DefaultIBDataSet(d);
     c = getSupplier(log, wps, cms, t2e);

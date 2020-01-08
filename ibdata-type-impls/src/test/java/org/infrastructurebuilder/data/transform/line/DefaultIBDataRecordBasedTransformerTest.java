@@ -48,6 +48,7 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBMetadataUtils;
+import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.Transformation;
 import org.infrastructurebuilder.data.transform.Transformer;
@@ -109,7 +110,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     d1.setVersion("1.0.0-SNAPSHOT");
     d1.setName("a");
     d1.setDescription("desc");
-    d1.setMetadata(new Xpp3Dom("metadata"));
+    d1.setMetadata(new Metadata());
     d1.setModelVersion("0.11");
     d1.setCreationDate(creationDate);
     ds = new DefaultIBDataSet(d1);
@@ -119,7 +120,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformation.setDescription("some description");
 
     transformer = new Transformer().copy(transformation);
-    transformer.setTargetStreamMetadata(new Xpp3Dom("metadata"));
+    transformer.setTargetStreamMetadata(new Metadata());
     suppliedStreams = new ArrayList<>();
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/rick.jpg").toExternalForm()));
     suppliedStreams.add(getStreamFromURL(getClass().getResource("/lines.txt").toExternalForm()));
@@ -128,7 +129,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   private IBDataStream getStreamFromURL(String resource) throws Exception {
     IBChecksumPathType c = readPathTypeFromFile(resource);
-    Xpp3Dom metadata = IBMetadataUtils.emptyXpp3Supplier.get();
+    Metadata metadata = IBMetadataUtils.emptyXpp3Supplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
         c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()), empty(),
         empty());

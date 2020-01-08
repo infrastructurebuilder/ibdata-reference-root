@@ -25,6 +25,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.spi.FileSystemProvider;
@@ -43,6 +44,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.infrastructurebuilder.data.model.DataSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.slf4j.Logger;
 
@@ -149,8 +151,12 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
   @Override
   public Optional<IBSchema> fetchSchemaById(UUID id) {
-    return ofNullable(cachedDataSets.values().parallelStream().flatMap(ds -> ds.getSchemas().parallelStream())
-        .filter(s -> s.getUuid().equals(id)).findAny().orElse(null));
+    Optional<DataSchema> a = ofNullable(cachedDataSets.values().parallelStream()
+        .flatMap(ds -> ds.getSchemas().parallelStream()).filter(s -> s.getUuid().equals(id)).findAny().orElse(null));
+
+    Optional<InputStream> b = a.map(c -> c.getUuid()).flatMap(this::fetchDataStreamById).map(IBDataStream::get);
+
+    return Optional.empty();
   }
 
 }
