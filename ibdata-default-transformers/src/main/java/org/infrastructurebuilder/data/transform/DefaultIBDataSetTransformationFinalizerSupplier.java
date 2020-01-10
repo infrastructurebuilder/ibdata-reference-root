@@ -34,9 +34,9 @@ import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSet;
-import org.infrastructurebuilder.data.IBDataStream;
-import org.infrastructurebuilder.data.IBSchema;
+import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -83,13 +83,13 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
 
     @Override
     public IBChecksumPathType finalize(IBDataSet inboundDataSet, Transformation target,
-        List<Supplier<IBDataStream>> ibdssList, List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir)
-        throws IOException {
+        List<IBDataStreamSupplier> ibdssList, List<Supplier<PersistedIBSchema>> schemaSuppliers,
+        Optional<String> basedir) throws IOException {
       DataSet targetDataSet = target.asDataSet();
       targetDataSet.setPath(inboundDataSet.getPath().orElse(null));
 
-      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList ,schemaSuppliers, getTypeToExtensionMapper(),
-          basedir);
+      return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, schemaSuppliers,
+          getTypeToExtensionMapper(), basedir);
     }
 
   }

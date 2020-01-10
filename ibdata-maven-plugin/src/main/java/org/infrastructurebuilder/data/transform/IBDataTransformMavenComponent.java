@@ -41,7 +41,6 @@ import javax.inject.Named;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.DefaultIBDataEngine;
 import org.infrastructurebuilder.data.DefaultIBDataSet;

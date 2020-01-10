@@ -32,7 +32,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.AbstractIBDataSchemaSource;
-import org.infrastructurebuilder.data.IBDataSchemaIdentifier;
 import org.infrastructurebuilder.data.IBDataSchemaSource;
 import org.infrastructurebuilder.data.IBDataSchemaSupplier;
 import org.infrastructurebuilder.data.Metadata;
@@ -56,13 +55,13 @@ public class DefaultIBDataSchemaSupplierMapper extends AbstractIBDataSchemaSuppl
   }
 
   @Override
-  public boolean respondsTo(IBDataSchemaIdentifier v) {
+  public boolean respondsTo(IBDataSchemaIngestionConfig v) {
 
     return super.respondsTo(v);
   }
 
   @Override
-  public IBDataSchemaSupplier getSupplierFor(String temporaryId, IBDataSchemaIdentifier v) {
+  public IBDataSchemaSupplier getSupplierFor(String temporaryId, IBDataSchemaIngestionConfig v) {
     SortedSet<IBDataSchemaSource> theSet = Collections.emptySortedSet();
 
     return new DefaultIBDataSchemaSupplier(temporaryId // Temp id for this

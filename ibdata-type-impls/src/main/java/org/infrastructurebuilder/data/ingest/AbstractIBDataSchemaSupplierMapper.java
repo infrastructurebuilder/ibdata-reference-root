@@ -18,13 +18,10 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.SortedSet;
 
 import org.infrastructurebuilder.data.AbstractIBDataSchemaSupplier;
-import org.infrastructurebuilder.data.IBDataSchemaIdentifier;
 import org.infrastructurebuilder.data.IBDataSchemaSource;
-import org.infrastructurebuilder.data.model.DataSchema;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -42,7 +39,7 @@ abstract public class AbstractIBDataSchemaSupplierMapper implements IBDataSchema
   }
 
   @Override
-  public boolean respondsTo(IBDataSchemaIdentifier v) {
+  public boolean respondsTo(IBDataSchemaIngestionConfig v) {
     return false;
 //    String u = Optional.ofNullable(v).flatMap(IBDataSchemaIdentifier::getUrl).orElse("");
 //    return getHeaders().stream().anyMatch(h -> u.startsWith(h));

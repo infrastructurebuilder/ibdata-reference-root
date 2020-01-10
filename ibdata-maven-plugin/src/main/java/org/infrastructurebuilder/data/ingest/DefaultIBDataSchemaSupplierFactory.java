@@ -15,7 +15,9 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.util.Collections.synchronizedSortedMap;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
@@ -24,7 +26,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -64,13 +65,13 @@ public class DefaultIBDataSchemaSupplierFactory implements IBDataSchemaSupplierF
     List<IBDataSchemaSupplier> k = i.getDataSet().getDataSchemas().stream().map(dSchema -> {
 
       IBDataSchemaSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(dSchema)).findFirst()
-          .orElseThrow(() -> new IBDataException("No data sources are available for " + dSchema.getTemporaryId()));
+          .orElseThrow(() -> new IBDataException("No schema sources are available for " + dSchema.getTemporaryId()));
 
       return first.getSupplierFor(dSchema.getTemporaryId(), dSchema);
 
     }).collect(toList());
-    return k.stream()
-        .collect(toMap(IBDataSchemaSupplier::getId, Function.identity(), (prev, now) -> now, () -> new TreeMap<>()));
+    return k.stream().collect(toMap(IBDataSchemaSupplier::getId, identity(), (prev, now) -> now,
+        () -> synchronizedSortedMap(new TreeMap<>())));
   }
 
 }

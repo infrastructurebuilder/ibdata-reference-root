@@ -27,7 +27,6 @@ import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBStreamerFactory;
-import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -50,7 +49,7 @@ public class IBDataPackageMavenComponent extends AbstractIBDataMavenComponent {
       // Mapper for extensions to mime types
       TypeToExtensionMapper defaultTypeToExtensionMapper,
       // The configuration map. Does not include config from components
-      @Named(ConfigMapSupplier.MAVEN) ConfigMapSupplier mavenConfigMapSupplier,
+      @Named(ConfigMapSupplier.MAVEN_WITH_SERVERS) ConfigMapSupplier mavenConfigMapSupplier,
       //
       Map<String, IBDataIngesterSupplier> allIngesters,
       Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers,

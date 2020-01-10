@@ -15,14 +15,16 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static edu.emory.mathcs.backport.java.util.Collections.synchronizedSortedMap;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -45,7 +47,8 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
 
   @Inject
   public DefaultIBDataSourceSupplierFactory(LoggerSupplier l, TypeToExtensionMapper t2e,
-      List<IBDataSourceSupplierMapper> dssMappers, @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
+      List<IBDataSourceSupplierMapper> dssMappers,
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
     this.log = requireNonNull(l).get();
     this.mapper = requireNonNull(t2e);
     this.dssMappers = requireNonNull(dssMappers);
@@ -66,8 +69,8 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
       return first.getSupplierFor(dStream.getTemporaryId().orElse(null), dStream);
 
     }).collect(Collectors.toList());
-    return k.stream().collect(
-        Collectors.toMap(IBDataSourceSupplier::getId, Function.identity(), (prev, now) -> now, () -> new TreeMap<>()));
+    return k.stream().collect(toMap(IBDataSourceSupplier::getId, identity(), (prev, now) -> now,
+        () -> synchronizedSortedMap(new TreeMap<>())));
   }
 
 }

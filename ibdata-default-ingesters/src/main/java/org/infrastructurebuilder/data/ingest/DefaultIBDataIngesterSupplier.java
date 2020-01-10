@@ -41,7 +41,7 @@ import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
-import org.infrastructurebuilder.data.IBDataStream;
+import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -117,7 +117,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     }
 
     @Override
-    public List<Supplier<IBDataStream>> ingest(SortedMap<String, IBDataSourceSupplier> dssList) {
+    public List<IBDataStreamSupplier> ingest(SortedMap<String, IBDataSourceSupplier> dssList) {
 //      requireNonNull(dsi, "IBDataSetIdentifier for ingestion");
       requireNonNull(dssList, "List of IBDataSourceSupplier instances");
       Date now = new Date(); // Ok for "now" (Get it?)

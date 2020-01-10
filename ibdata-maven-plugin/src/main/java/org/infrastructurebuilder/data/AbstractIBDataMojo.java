@@ -17,7 +17,7 @@ package org.infrastructurebuilder.data;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
-import static org.infrastructurebuilder.data.IBDataConstants.*;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_DIRECTORY;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataConstants.MARKER_FILE;

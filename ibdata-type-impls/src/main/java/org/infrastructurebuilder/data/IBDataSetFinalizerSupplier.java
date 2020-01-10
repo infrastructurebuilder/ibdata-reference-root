@@ -25,5 +25,5 @@ import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
  * @author mykel.alvis
  *
  */
-public interface IBDataSetFinalizerSupplier<T> extends CMSConfigurableSupplier<IBDataSetFinalizer<T>>, IBLoggerEnabled  {
+public interface IBDataSetFinalizerSupplier<T extends DataSetEnabled> extends CMSConfigurableSupplier<IBDataSetFinalizer<T>>, IBLoggerEnabled  {
 }

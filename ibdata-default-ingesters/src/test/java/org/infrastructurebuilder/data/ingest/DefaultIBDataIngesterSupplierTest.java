@@ -38,9 +38,7 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultTestingSource;
 import org.infrastructurebuilder.data.IBDataException;
@@ -51,6 +49,7 @@ import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
+import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
@@ -192,7 +191,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
     c = dis.get();// configure() call default returns itself
-    List<Supplier<IBDataStream>> val = c.ingest(dss);
+    List<IBDataStreamSupplier> val = c.ingest(dss);
 
     IBChecksumPathType finalized = finalizer.finalize(ibdataset, i, val, Optional.empty());
     assertTrue(Files.isDirectory(finalized.getPath()));
@@ -208,7 +207,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
     c = dis.get();// configure() call default returns itself
-    List<Supplier<IBDataStream>> val = c.ingest(dssPass);
+    List<IBDataStreamSupplier> val = c.ingest(dssPass);
     assertNotNull(val);
   }
 

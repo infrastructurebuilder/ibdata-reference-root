@@ -21,7 +21,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
-public abstract class AbstractIBDataSetFinalizerSupplier<T>
+public abstract class AbstractIBDataSetFinalizerSupplier<T extends DataSetEnabled>
     extends AbstractIBDataConfigurableSupplier<IBDataSetFinalizer<T>> implements IBDataSetFinalizerSupplier<T> {
   private final TypeToExtensionMapper t2e;
 

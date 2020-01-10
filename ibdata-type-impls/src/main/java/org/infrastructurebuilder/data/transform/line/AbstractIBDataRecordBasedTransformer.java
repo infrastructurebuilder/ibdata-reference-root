@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,6 +48,7 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
+import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataTransformationError;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBMetadataUtils;
@@ -235,7 +235,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     requireNonNull(finalizer, "No finalizer supplied to localTransform");
     final Map<String, List<Long>> errors = new HashMap<>();
     final List<IBDataTransformationError> errorList = new ArrayList<>();
-    Map<UUID, Supplier<IBDataStream>> map = new HashMap<>();
+    Map<UUID, IBDataStreamSupplier> map = new HashMap<>();
 
     String finalType = null;
     for (IBDataStream stream : Stream
@@ -258,7 +258,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
     newStream.setSha512(c.toString());
     newStream.setDescription(t.getTransformation().getDescription());
     newStream.setName(t.getTransformation().getName());
-    Supplier<IBDataStream> x = finalizer.finalizeRecord(newStream);
+    IBDataStreamSupplier x = finalizer.finalizeRecord(newStream);
     map.put(x.get().getId(), x);
     IBDataSet newSet = new DefaultIBDataSet(ds2).withStreamSuppliers(map);
     return new DefaultIBDataTransformationResult(ofNullable(newSet), errorList, getWorkingPath());

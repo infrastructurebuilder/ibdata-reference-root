@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 /**
@@ -31,7 +32,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
  *
  * @param <T>
  */
-public interface IBDataSetFinalizer<T> {
+public interface IBDataSetFinalizer<T extends DataSetEnabled> {
 
   /**
    * Finalize a dataset
@@ -44,13 +45,13 @@ public interface IBDataSetFinalizer<T> {
    * @return an IBChecksumPathType
    * @throws IOException
    */
-  default IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> suppliers,
+  default IBChecksumPathType finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> suppliers,
       Optional<String> basedir) throws IOException {
     return this.finalize(dsi1, target, suppliers, Collections.emptyList(), basedir);
   }
 
-  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<Supplier<IBDataStream>> dataStreamSuppliers,
-      List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException;
+  IBChecksumPathType finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> dataStreamSuppliers,
+      List<Supplier<PersistedIBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException;
 
   Path getWorkingPath();
 

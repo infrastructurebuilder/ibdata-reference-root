@@ -16,9 +16,8 @@
 package org.infrastructurebuilder.data;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
-public class DefaultIBDataStreamSupplier implements Supplier<IBDataStream> {
+public class DefaultIBDataStreamSupplier implements IBDataStreamSupplier {
 
   private final IBDataStream dataStream;
 

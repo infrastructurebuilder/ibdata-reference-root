@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data.util.files;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.*;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_ACCESS;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORD;
@@ -44,13 +46,18 @@ import static org.infrastructurebuilder.IBConstants.XML;
 import static org.infrastructurebuilder.IBConstants.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
+@SuppressWarnings("serial")
 @Named
 public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
 
@@ -58,6 +65,7 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
 
   private final static Map<String, String> map = new HashMap<String, String>() {
     {
+      put(IBDATA_SCHEMA, XML);
       put(APPLICATION_XML, XML);
       put(TEXT_PLAIN, TXT);
       put(APPLICATION_ZIP, ZIP);
@@ -77,6 +85,18 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
     }
   };
 
+  private final static Map<String, SortedSet<String>> reverseMap = new HashMap<String, SortedSet<String>>() {
+    {
+      for (Map.Entry<String, String> e : map.entrySet()) {
+        if (containsKey(e.getKey())) {
+          get(e.getKey()).add(e.getValue());
+        } else {
+          put(e.getKey(), new TreeSet<String>(singleton(e.getValue())));
+        }
+      }
+    }
+  };
+
   private final String defaultExtension;
 
   @Inject
@@ -86,7 +106,12 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
 
   @Override
   public String getExtensionForType(String key) {
-    return ofNullable(map.get(key)).orElse(this.defaultExtension);
+    return map.getOrDefault(key, defaultExtension);
+  }
+
+  @Override
+  public SortedSet<String> reverseMapFromExtension(String extension) {
+    return reverseMap.getOrDefault(extension, emptySortedSet());
   }
 
 }

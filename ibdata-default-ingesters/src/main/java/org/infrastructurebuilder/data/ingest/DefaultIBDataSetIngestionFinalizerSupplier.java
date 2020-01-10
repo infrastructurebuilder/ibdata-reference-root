@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -34,8 +35,9 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
-import org.infrastructurebuilder.data.IBDataStream;
-import org.infrastructurebuilder.data.IBSchema;
+import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -81,11 +83,13 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<Supplier<IBDataStream>> ibdssList,
-        List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
+    public IBChecksumPathType finalize(IBDataSet dsi2, Ingestion target, List<IBDataStreamSupplier> ibdssList,
+        List<Supplier<PersistedIBSchema>> schemaList, Optional<String> basedir) throws IOException {
+      DataSet d = target.asDataSet();
+      Map<String, IBDataSchemaIngestionConfig> p = target.asSchemaIngestion();
       // dsi2 is always null. There is no "previous dataset" in ingestion
-      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), target.asDataSet(), ibdssList,
-          schemaSuppliers, getTypeToExtensionMapper(), basedir);
+      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), d, ibdssList, schemaList,
+          getTypeToExtensionMapper(), basedir);
     }
 
   }

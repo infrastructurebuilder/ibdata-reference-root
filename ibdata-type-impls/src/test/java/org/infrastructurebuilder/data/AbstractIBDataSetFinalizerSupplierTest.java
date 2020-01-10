@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -25,12 +26,15 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.infrastructurebuilder.data.ingest.IBDataSchemaIngestionConfig;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -101,7 +105,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
       @Override
       protected IBDataSetFinalizer<Dummy> getInstance() {
-        return new DummySupplier(getConfig().get(), getConfig().get().get("path"));
+        return new DummyFinalizer(getConfig().get(), getConfig().get().get("path"));
       }
 
     };
@@ -137,19 +141,30 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     assertEquals(new Checksum().toString(), g.getChecksum().toString());
   }
 
-  public final static class Dummy {
+  public final static class Dummy implements DataSetEnabled {
+
+    @Override
+    public DataSet asDataSet() {
+      // TODO Auto-generated method stub
+      return null;
+    }
+
+    @Override
+    public Map<String, IBDataSchemaIngestionConfig> asSchemaIngestion() {
+      return emptyMap();
+    }
 
   }
 
-  public final static class DummySupplier extends AbstractIBDataSetFinalizer<Dummy> {
+  public final static class DummyFinalizer extends AbstractIBDataSetFinalizer<Dummy>  {
 
-    public DummySupplier(ConfigMap map, Path p) {
+    public DummyFinalizer(ConfigMap map, Path p) {
       super(map, p);
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<Supplier<IBDataStream>> suppliers,
-        List<Supplier<IBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
+    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<IBDataStreamSupplier> suppliers,
+        List<Supplier<PersistedIBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
       getConfig();
       return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());
     }
