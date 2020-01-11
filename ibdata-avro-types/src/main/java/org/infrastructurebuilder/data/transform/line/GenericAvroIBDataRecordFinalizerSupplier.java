@@ -127,19 +127,21 @@ public class GenericAvroIBDataRecordFinalizerSupplier
           StructuredFieldMetadata fm = new StructuredFieldMetadata();
           fm.setIndex(i);
           IBDataStructuredDataMetadataType mdt = getMetadataTypeFromField(fields[i]);
-          fm.setMetadataType(mdt.name());
-          fm.setNullable(new Boolean(fields[i].schema().isNullable()).toString());
-          try {
-            fm.setEnumerations(fields[i].schema().getEnumSymbols());
-          } catch (AvroRuntimeException a) {
-            fm.setEnumerations(null);
-          }
+          // FIXME  These moved to the schema!
+//          fm.setMetadataType(mdt.name());
+//          fm.setNullable(new Boolean(fields[i].schema().isNullable()).toString());
+//          try {
+//            fm.setEnumerations(fields[i].schema().getEnumSymbols());
+//          } catch (AvroRuntimeException a) {
+//            fm.setEnumerations(null);
+//          }
           current.addField(fm);
         }
       }
       for (int i = 0; i < fields.length; ++i) {
         int j = i;
         StructuredFieldMetadata element = current.getFields().get(i);
+        /* FIXME These moved to the schema!
         element.getType().ifPresent(mdt -> {
           Field field = fields[j];
           LogicalType lt = field.schema().getLogicalType();
@@ -198,6 +200,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
             break;
           }
         });
+        */
       }
       return current;
     }

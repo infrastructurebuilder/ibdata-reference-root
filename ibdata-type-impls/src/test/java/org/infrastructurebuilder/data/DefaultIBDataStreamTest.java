@@ -148,7 +148,7 @@ public class DefaultIBDataStreamTest {
   @Test(expected = IBDataException.class)
   public void testGetChecksumWithFailingInputStream() {
     Supplier<InputStream> ins = () -> new ThrowingInputStream(IOException.class);
-    Reflect.on(ib2).set("ss", ins).set("calculatedChecksum", null);
+    Reflect.on(ib2).set("streamSupplier", ins).set("calculatedChecksum", null);
     ib2.getChecksum(); // Setup to fail
   }
 

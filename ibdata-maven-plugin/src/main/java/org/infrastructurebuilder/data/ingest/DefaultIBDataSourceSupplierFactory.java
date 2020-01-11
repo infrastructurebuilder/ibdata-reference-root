@@ -61,7 +61,7 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
   }
 
   @Override
-  public final SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(Ingestion i) {
+  public final SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(IBIngestion i) {
     List<IBDataSourceSupplier> k = i.getDataSet().getDataStreams().stream().map(dStream -> {
 
       IBDataSourceSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()

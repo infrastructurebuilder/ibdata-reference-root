@@ -82,7 +82,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
   private IBDataIngester c;
   private SortedMap<String, IBDataSourceSupplier> dss, dssFail, dssPass;
   private DefaultIBDataSetIdentifier dsi;
-  private Ingestion i;
+  private IBIngestion i;
   private TypeToExtensionMapper t2e = new DefaultTypeToExtensionMapper();
   private IBDataSourceSupplier k;
   private IBDataSet ibdataset;
@@ -106,8 +106,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dsi.setName("name");
     dsi.setPath(f.toString());
     dsi.injectGAV("X", "Y", "1.0");
-    i = new Ingestion();
-    i.setDataSet(dsi);
+    i = new FakeIBIngestion(dsi);
     dss = new TreeMap<>();
     dssFail = new TreeMap<>();
     dssPass = new TreeMap<>();
@@ -222,5 +221,6 @@ public class AbstractIBDataSourceSupplierMapperTest {
     IBChecksumPathType unfinalized = source.get().get(0);
     assertTrue(Files.isRegularFile(unfinalized.getPath()));
   }
+
 
 }

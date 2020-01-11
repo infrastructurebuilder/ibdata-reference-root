@@ -15,7 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -150,8 +151,8 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     }
 
     @Override
-    public Map<String, IBDataSchemaIngestionConfig> asSchemaIngestion() {
-      return emptyMap();
+    public SortedMap<String, IBDataSchemaIngestionConfig> asSchemaIngestion() {
+      return emptySortedMap();
     }
 
   }
@@ -164,7 +165,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
     @Override
     public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<IBDataStreamSupplier> suppliers,
-        List<Supplier<PersistedIBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException {
+        List<IBIngestedSchemaSupplier> schemaSuppliers, Optional<String> basedir) throws IOException {
       getConfig();
       return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());
     }

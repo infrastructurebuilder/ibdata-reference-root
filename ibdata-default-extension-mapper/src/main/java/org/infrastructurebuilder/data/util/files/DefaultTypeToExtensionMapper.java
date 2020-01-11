@@ -88,10 +88,10 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
   private final static Map<String, SortedSet<String>> reverseMap = new HashMap<String, SortedSet<String>>() {
     {
       for (Map.Entry<String, String> e : map.entrySet()) {
-        if (containsKey(e.getKey())) {
-          get(e.getKey()).add(e.getValue());
+        if (containsKey(e.getValue())) {
+          get(e.getValue()).add(e.getKey());
         } else {
-          put(e.getKey(), new TreeSet<String>(singleton(e.getValue())));
+          put(e.getValue(), new TreeSet<String>(singleton(e.getKey())));
         }
       }
     }

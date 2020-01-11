@@ -51,7 +51,7 @@ public interface IBDataSetFinalizer<T extends DataSetEnabled> {
   }
 
   IBChecksumPathType finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> dataStreamSuppliers,
-      List<Supplier<PersistedIBSchema>> schemaSuppliers, Optional<String> basedir) throws IOException;
+      List<IBIngestedSchemaSupplier> schemaSuppliers, Optional<String> basedir) throws IOException;
 
   Path getWorkingPath();
 

@@ -86,7 +86,7 @@ public class DefaultIBDataIngesterSupplierTest {
   private IBDataIngester c;
   private SortedMap<String, IBDataSourceSupplier> dss, dssFail, dssPass;
   private DefaultIBDataSetIdentifier dsi;
-  private Ingestion i;
+  private IBIngestion i;
   private IBDataSourceSupplierMapper dssm, dssmFail, dssmPass;
   private TypeToExtensionMapper t2e = new DefaultTypeToExtensionMapper();
   private IBDataSourceSupplier k;
@@ -111,8 +111,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dsi.setName("name");
     dsi.setPath(f.toString());
     dsi.injectGAV("X", "Y", "1.0");
-    i = new Ingestion();
-    i.setDataSet(dsi);
+    i = new FakeIBIngestion(dsi);
     dss = new TreeMap<>();
     dssFail = new TreeMap<>();
     dssPass = new TreeMap<>();
@@ -187,7 +186,7 @@ public class DefaultIBDataIngesterSupplierTest {
 
   @Test
   public void testGet() throws IOException {
-    IBDataSetFinalizer<Ingestion> finalizer = ibdfs.get();
+    IBDataSetFinalizer<IBIngestion> finalizer = ibdfs.get();
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
     c = dis.get();// configure() call default returns itself

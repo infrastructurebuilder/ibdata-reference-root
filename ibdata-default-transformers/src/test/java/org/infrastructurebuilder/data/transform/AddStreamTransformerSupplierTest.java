@@ -86,7 +86,7 @@ public class AddStreamTransformerSupplierTest {
   private Date now;
   private DefaultGAV gav;
   private Transformer x1;
-  private Transformation x;
+  private IBTransformation x;
   private Path finalWP;
 
   @Before
@@ -97,11 +97,7 @@ public class AddStreamTransformerSupplierTest {
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
     x1.setTargetStreamMetadata(new Metadata());
-    x = new Transformation();
-    x.setId("id");
-    x.setDescription(DESC);
-    x.setName(NAME);
-    x.setMetadata(new XmlPlexusConfiguration("metadata"));
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"));
     x.forceDefaults(GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
     p = new AddStreamTransformerSupplier(wps, () -> log);

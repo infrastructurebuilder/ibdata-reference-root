@@ -174,12 +174,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
             final Result<Record> firstResult = create.fetch(sql);
             sString = ofNullable(cfg.getString(SCHEMA));
             String namespace = cfg.getOrDefault(NAMESPACE, DEFAULT_NAMESPACE);
-            Schema avroSchema = sString
-                // Either we already have a schema
-                .map(qq -> this.aus.get().avroSchemaFromString(qq))
-                // Or we have to produce one
-                .orElse(IBDataJooqUtils.schemaFromRecordResults(getLog(), namespace, recordName,
-                    getDescription().orElse(""), firstResult));
+//            Schema avroSchema = sString
+//                // Either we already have a schema
+//                .map(qq -> this.aus.get().avroSchemaFromString(qq))
+//                // Or we have to produce one
+//                .orElse(IBDataJooqUtils.schemaFromRecordResults(getLog(), namespace, recordName,
+//                    getDescription().orElse(""), firstResult));
             result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the
                                                                                // schema
             getLog().info("Reading data from dataset");

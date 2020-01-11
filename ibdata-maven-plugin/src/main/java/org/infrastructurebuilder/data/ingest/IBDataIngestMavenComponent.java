@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ import org.infrastructurebuilder.data.IBDataSchemaIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -51,7 +53,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
   private final Map<String, IBDataIngesterSupplier> allIngesters;
   private final Map<String, IBDataSchemaIngesterSupplier> allSchemaIngesters;
   private final IBDataSourceSupplierFactory dsSupplierFactory;
-  private final IBDataSchemaSupplierFactory dschemaSupplierFactory;
+//  private final IBDataSchemaSupplierFactory dschemaSupplierFactory;
 
   /**
    * Injected constructor.
@@ -84,8 +86,8 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       final IBStreamerFactory streamerFactory,
       // DataSourceSupplier Factory
       final IBDataSourceSupplierFactory ibdssf,
-      // DataSourceSupplier Factory
-      final IBDataSchemaSupplierFactory ibdschemasf,
+//      // DataSourceSupplier Factory
+//      final IBDataSchemaSupplierFactory ibdschemasf,
       // Schema ingesters
       final Map<String, IBDataSchemaIngesterSupplier> allSchemaIngesters) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
@@ -93,7 +95,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     this.allIngesters = requireNonNull(allIngesters);
     this.allSchemaIngesters = requireNonNull(allSchemaIngesters);
     this.dsSupplierFactory = requireNonNull(ibdssf);
-    this.dschemaSupplierFactory = requireNonNull(ibdschemasf);
+//    this.dschemaSupplierFactory = requireNonNull(ibdschemasf);
   }
 
   @SuppressWarnings("unchecked")
@@ -125,14 +127,16 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     //  Ingest ALL defined schemas in the Ingestion
     Optional<String> theSchemaIngesterHint = ofNullable(requireNonNull(ingest).getSchemaIngester());
 
-    List<Supplier<PersistedIBSchema>> schemaSuppliers = theSchemaIngesterHint // Only one ingester for a dataset
+    List<IBIngestedSchemaSupplier> schemaSuppliers = theSchemaIngesterHint // Only one ingester for a dataset
         .flatMap(j -> ofNullable(this.allSchemaIngesters.get(j))) // Get the supplier
         .orElseThrow(() -> new MojoFailureException("No schema Ingester for " + theSchemaIngesterHint.orElse(null)))
         .configure(getConfigMapSupplier()) // configure it
-        .get() // get the actual ingester
-        .ingest(dschemaSupplierFactory.mapIngestionToSuppliers(ingest)) // Produces sorted set
+        .get() // get the actual schema ingester, could be expensive
+//        .ingest(dschemaSupplierFactory.mapIngestionToSuppliers(ingest)) // Produces sorted set
         // which we then convert into an ordered no-dupes list
+        .ingest(ingest.asSchemaIngestion())
         .stream().collect(toList());
+    ;
 
     // TODO Fetch the schema
 

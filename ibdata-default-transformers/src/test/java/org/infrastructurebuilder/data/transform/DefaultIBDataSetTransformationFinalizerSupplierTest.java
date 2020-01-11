@@ -69,7 +69,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
 
   private ConfigMapSupplier cms;
   private IBDataSetFinalizerSupplier<?> fs;
-  private Transformation x;
+  private IBTransformation x;
   private IBDataSet dsi;
   private DataSet finalData;
   private Date now;
@@ -78,11 +78,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    x = new Transformation();
-    x.setId("id");
-    x.setDescription(DESC);
-    x.setName(NAME);
-    x.setMetadata(new XmlPlexusConfiguration("metadata"));
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"));
     x.forceDefaults(GROUP, ARTIFACT, VERSION);
 
     cms = new DefaultConfigMapSupplier();
@@ -110,7 +106,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
   @Test
   public void testGetAndFinalize() throws IOException {
     ConfigurableSupplier<?, ConfigMapSupplier> p2 = fs.configure(cms);
-    IBDataSetFinalizer<Transformation> p = (IBDataSetFinalizer<Transformation>) p2.get();
+    IBDataSetFinalizer<IBTransformation> p = (IBDataSetFinalizer<IBTransformation>) p2.get();
     assertNotNull(p);
 
     IBChecksumPathType g = p.finalize(ds, x, Collections.emptyList(), Optional.empty());

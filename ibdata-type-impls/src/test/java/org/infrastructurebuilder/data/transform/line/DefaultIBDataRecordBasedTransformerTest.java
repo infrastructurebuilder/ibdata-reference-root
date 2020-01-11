@@ -37,7 +37,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
@@ -50,7 +49,7 @@ import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBMetadataUtils;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.transform.Transformation;
+import org.infrastructurebuilder.data.transform.FakeIBTransformation;
 import org.infrastructurebuilder.data.transform.Transformer;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -115,9 +114,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     d1.setCreationDate(creationDate);
     ds = new DefaultIBDataSet(d1);
 
-    Transformation transformation = new Transformation();
-    transformation.setName("some name");
-    transformation.setDescription("some description");
+    FakeIBTransformation transformation = new FakeIBTransformation();
 
     transformer = new Transformer().copy(transformation);
     transformer.setTargetStreamMetadata(new Metadata());

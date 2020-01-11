@@ -137,8 +137,7 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
 
     Map<Integer, ? extends IBDataStructuredDataFieldMetadata> smd = f.getStructuredMetadata().get().getFieldMap();
     assertEquals(8, smd.size());
-    assertFalse(smd.get(5).isNullable().get());
-    assertFalse(smd.get(3).isEnumeration());
+    assertFalse(smd.get(5).isNulled().isPresent());
     assertEquals(13, smd.get(4).getMaxIntValue().get().intValue());
     assertEquals(6, smd.get(4).getMinIntValue().get().intValue());
   }

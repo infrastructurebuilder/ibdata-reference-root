@@ -35,6 +35,7 @@ import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 @Named(DefaultIBDataSetTransformationFinalizerSupplier.NAME)
 public class DefaultIBDataSetTransformationFinalizerSupplier
-    extends AbstractIBDataSetFinalizerSupplier<Transformation> {
+    extends AbstractIBDataSetFinalizerSupplier<IBTransformation> {
 
   static final String NAME = "default-transform";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplier.class);
@@ -75,16 +76,16 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
         getWps().get());
   }
 
-  private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<Transformation> {
+  private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBTransformation> {
 
     public TransformationIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath.resolve(UUID.randomUUID().toString()));
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet inboundDataSet, Transformation target,
-        List<IBDataStreamSupplier> ibdssList, List<Supplier<PersistedIBSchema>> schemaSuppliers,
-        Optional<String> basedir) throws IOException {
+    public IBChecksumPathType finalize(IBDataSet inboundDataSet, IBTransformation target,
+        List<IBDataStreamSupplier> ibdssList, List<IBIngestedSchemaSupplier> schemaSuppliers, Optional<String> basedir)
+        throws IOException {
       DataSet targetDataSet = target.asDataSet();
       targetDataSet.setPath(inboundDataSet.getPath().orElse(null));
 

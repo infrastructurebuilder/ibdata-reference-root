@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
@@ -75,7 +74,7 @@ public class PassThruTransformerSupplierTest {
   private Date now;
   private DefaultGAV gav;
   private Transformer x1;
-  private Transformation x;
+  private IBTransformation x;
 
   @Before
   public void setUp() throws Exception {
@@ -84,11 +83,7 @@ public class PassThruTransformerSupplierTest {
     x1.setHint(PassThruTransformerSupplier.NAME);
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
-    x = new Transformation();
-    x.setId("id");
-    x.setDescription(DESC);
-    x.setName(NAME);
-    x.setMetadata(new XmlPlexusConfiguration("metadata"));
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"));
     x.forceDefaults(GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
     p = new PassThruTransformerSupplier(wps, () -> log);

@@ -15,9 +15,15 @@
  */
 package org.infrastructurebuilder.util.files;
 
+import static org.infrastructurebuilder.IBConstants.APPLICATION_XML;
+import static org.infrastructurebuilder.IBConstants.DEFAULT_EXTENSION;
+import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
+import static org.infrastructurebuilder.IBConstants.XML;
 import static org.junit.Assert.assertEquals;
 
-import org.infrastructurebuilder.IBConstants;
+import java.util.Arrays;
+import java.util.TreeSet;
+
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,8 +39,13 @@ public class DefaultTypeToExtensionMapperTest {
 
   @Test
   public void testGetExtensionForType() {
-    assertEquals(IBConstants.XML, t2e.getExtensionForType(IBConstants.APPLICATION_XML));
-    assertEquals(IBConstants.DEFAULT_EXTENSION, t2e.getExtensionForType("text/whackadoodle"));
+    assertEquals(XML, t2e.getExtensionForType(APPLICATION_XML));
+    assertEquals(DEFAULT_EXTENSION, t2e.getExtensionForType("text/whackadoodle"));
+  }
+
+  @Test
+  public void testReverseMap1() {
+    assertEquals(new TreeSet<>(Arrays.asList(IBDATA_SCHEMA, APPLICATION_XML)), t2e.reverseMapFromExtension(XML));
   }
 
 }

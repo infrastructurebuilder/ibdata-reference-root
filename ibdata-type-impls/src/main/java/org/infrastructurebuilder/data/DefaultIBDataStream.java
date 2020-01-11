@@ -41,7 +41,7 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
 
   private final List<InputStream> createdInputStreamsForThisInstance = new Vector<>();
 
-  private final Supplier<InputStream> ss;
+  private final Supplier<InputStream> streamSupplier;
   private final IBChecksumPathType cpt;
   private Checksum calculatedChecksum = null;
 
@@ -56,13 +56,13 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
 
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins, Optional<IBDataStructuredDataMetadata> sdmd) {
     super(identifier.getId(), identifier.getUrl(), identifier.getName(), identifier.getDescription(),
-        identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadata(),
-        identifier.getMimeType(), ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
+        identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadata(), identifier.getMimeType(),
+        ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
         ofNullable(identifier.getOriginalRowCount()));
     sdmd.ifPresent(s -> this.setStructuredDataMetadata(s));
     this.cpt = new BasicIBChecksumPathType(Objects.requireNonNull(ins), identifier.getChecksum(),
         identifier.getMimeType());
-    this.ss = this.cpt;
+    this.streamSupplier = this.cpt;
   }
 
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, IBChecksumPathType ins) {
@@ -73,12 +73,12 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
         ofNullable(identifier.getOriginalLength()), ofNullable(identifier.getOriginalRowCount()));
     this.cpt = ins;
     this.calculatedChecksum = this.cpt.getChecksum();
-    this.ss = requireNonNull(ins);
+    this.streamSupplier = requireNonNull(ins);
   }
 
   @Override
   public InputStream get() {
-    InputStream str = cet.withReturningTranslation(() -> this.ss.get());
+    InputStream str = cet.withReturningTranslation(() -> this.streamSupplier.get());
     createdInputStreamsForThisInstance.add(str);
     return str;
 
@@ -102,34 +102,23 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
       try {
         stream.close();
       } catch (IOException e) {
-        // If they won't close, we'll have to leak that
+        // Nothing can actually be done
       }
     });
   }
 
   @Override
   public IBDataStream relocateTo(Path newWorkingPath, TypeToExtensionMapper t2e) {
-    IBChecksumPathType newCpt;
-    Path target;
-    newCpt = this.cpt;
+    IBChecksumPathType newCpt = this.cpt;
     String newTargetName = newCpt.getChecksum().asUUID().get().toString() + t2e.getExtensionForType(newCpt.getType());
-    target = newWorkingPath.resolve(newTargetName);
+    Path target = newWorkingPath.resolve(newTargetName);
     return new DefaultIBDataStream(this, cet.withReturningTranslation(() -> newCpt.moveTo(target)));
   }
 
   @Override
-  public Optional<IBDataStructuredDataMetadata> getIBDataStructuredDataMetadata() {
-    return empty();
-  }
-
-  @Override
   public Optional<Path> getPathIfAvailable() {
-    return Optional.ofNullable(this.cpt).map(IBChecksumPathType::getPath);
+    return ofNullable(this.cpt).map(IBChecksumPathType::getPath);
 
   }
 
-  @Override
-  public Optional<IBDataProvenance> getProvenance() {
-    return super.getProvenance();
-  }
 }
