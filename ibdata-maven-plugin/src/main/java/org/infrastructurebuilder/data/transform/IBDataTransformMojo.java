@@ -43,7 +43,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 public class IBDataTransformMojo extends AbstractIBDataMojo {
 
   @Parameter(required = true)
-  private List<Transformation> transformations = new ArrayList<>();
+  private List<DefaultIBTransformation> transformations = new ArrayList<>();
 
   @Parameter(required = false, property = "ibdata.injectDependencies")
   private boolean injectDependencies = false;

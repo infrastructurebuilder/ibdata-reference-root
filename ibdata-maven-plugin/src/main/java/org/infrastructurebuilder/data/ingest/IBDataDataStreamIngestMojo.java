@@ -35,7 +35,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 public class IBDataDataStreamIngestMojo extends AbstractIBDataMojo {
 
   @Parameter(required = true)
-  private Ingestion ingest;
+  private DefaultIBIngestion ingest;
 
   @Component
   IBDataIngestMavenComponent component;

@@ -27,13 +27,12 @@ import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.infrastructurebuilder.data.DataSetEnabled;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.ingest.IBDataSchemaIngestionConfig;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
-public class Transformation implements IBTransformation {
+public class DefaultIBTransformation implements IBTransformation {
 
   private String id = DEFAULT;
   private List<Transformer> transformers = new ArrayList<>();

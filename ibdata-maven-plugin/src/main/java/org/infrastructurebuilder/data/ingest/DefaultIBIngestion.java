@@ -26,7 +26,7 @@ import org.infrastructurebuilder.data.DataSetEnabled;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
-public class Ingestion implements  IBIngestion {
+public class DefaultIBIngestion implements  IBIngestion {
 
   private String id = "default";
   private String schemaIngester = null; // "default";

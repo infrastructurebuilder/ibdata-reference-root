@@ -17,14 +17,19 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
 
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
@@ -41,6 +46,41 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final String originalRowCount;
   private IBDataStructuredDataMetadata structuredDataMetadata = null;
   private String temporaryId;
+
+  public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource source,
+      IBChecksumPathType ibPathChecksumType, Date now) {
+    String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
+    Path localPath = ibPathChecksumType.getPath();
+    String size = ibPathChecksumType.size().toString();
+    String p = requireNonNull(workingPath).relativize(localPath).toString();
+    Checksum c = ibPathChecksumType.getChecksum();
+    UUID id = c.asUUID().get();
+
+    DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(id
+    // Created URL
+        , of(src)
+        // Name
+        , source.getName()
+        //
+        , source.getDescription()
+        //
+        , ibPathChecksumType.getChecksum()
+        //
+        , now
+        //
+        , source.getMetadata().orElse(emptyXpp3Supplier.get())
+        //
+        , ibPathChecksumType.getType()
+        //
+        , of(p)
+        // Size
+        , of(size)
+        // rows
+        , empty());
+
+    return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, ibPathChecksumType));
+
+  };
 
   public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
       Checksum checksum, Date creationDate, Metadata metadata, String mimeType, Optional<String> path, Optional<String> oLength,

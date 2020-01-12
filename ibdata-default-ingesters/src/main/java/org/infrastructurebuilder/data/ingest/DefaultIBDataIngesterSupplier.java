@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier.toIBDataStreamSupplier;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 //import static org.infrastructurebuilder.data.IBDataSource.SPLIT_ZIPS_CONFIG;
 import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
@@ -29,14 +30,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.DefaultIBDataStream;
-import org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier;
 import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSource;
@@ -75,41 +73,6 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config);
   }
 
-  final static DefaultIBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource source,
-      IBChecksumPathType ibPathChecksumType, Date now) {
-    String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
-    Path localPath = ibPathChecksumType.getPath();
-    String size = ibPathChecksumType.size().toString();
-    String p = requireNonNull(workingPath).relativize(localPath).toString();
-    Checksum c = ibPathChecksumType.getChecksum();
-    UUID id = c.asUUID().get();
-
-    DefaultIBDataStreamIdentifier ddsi = new DefaultIBDataStreamIdentifier(id
-    // Created URL
-        , of(src)
-        // Name
-        , source.getName()
-        //
-        , source.getDescription()
-        //
-        , ibPathChecksumType.getChecksum()
-        //
-        , now
-        //
-        , source.getMetadata().orElse(emptyXpp3Supplier.get())
-        //
-        , ibPathChecksumType.getType()
-        //
-        , of(p)
-        // Size
-        , of(size)
-        // rows
-        , empty());
-
-    return new DefaultIBDataStreamSupplier(new DefaultIBDataStream(ddsi, ibPathChecksumType));
-
-  };
-
   public final class DefaultIBDataIngester extends AbstractIBDataIngester {
 
     public DefaultIBDataIngester(Path workingPath, Logger log, ConfigMap config) {
@@ -118,22 +81,23 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
 
     @Override
     public List<IBDataStreamSupplier> ingest(SortedMap<String, IBDataSourceSupplier> dssList) {
-//      requireNonNull(dsi, "IBDataSetIdentifier for ingestion");
-      requireNonNull(dssList, "List of IBDataSourceSupplier instances");
       Date now = new Date(); // Ok for "now" (Get it?)
-      ConfigMap cms = new DefaultConfigMapSupplier(getConfig()).get();
-      Stream<IBDataSource> q = dssList.values().stream().map(Supplier::get).map(ds -> ds.configure(cms));
-      // flatmap the data source
-      return q.flatMap(source -> {
-        List<IBChecksumPathType> l = source.get();
-        return l.stream().map(ibPathChecksumType -> {
-          DefaultIBDataStreamSupplier dss = toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now);
-          return dss;
-        });
-      })
-          // to a list
+      return requireNonNull(dssList, "List of IBDataSourceSupplier instances")
+          // SortedMap values come out in order, because that's how it works
+          .values().stream()
+          // Get the IBDataSource
+          .map(IBDataSourceSupplier::get)
+          // Get CONFIGURED source
+          .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get()))
+          // map configured source to
+          .flatMap(source -> {
+            return source.get().stream()
+                .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));
+          })
+          // Collect to an ordered list
           .collect(toList());
     }
+
 
   }
 

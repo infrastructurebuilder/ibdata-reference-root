@@ -36,7 +36,7 @@ public class IngestionTest {
 
   private static final String DEFAULT = "default";
   private static final String DEFAULT_INGEST = "default-ingest";
-  private Ingestion i;
+  private DefaultIBIngestion i;
   private DefaultIBDataSetIdentifier ds;
   private Map<String, Object> fc;
   private DataSet targetDs;
@@ -77,7 +77,7 @@ public class IngestionTest {
     targetDs.setMetadata(new Metadata());
     targetDs.setModelEncoding("UTF-8");
     targetDs.setModelVersion("1.0.0");
-    i = new Ingestion();
+    i = new DefaultIBIngestion();
 
     ids = (DefaultIBDataSetIdentifier) i.getDataSet();
     ids.injectGAV("A", "B", "1.0.0-SNAPSHOT");

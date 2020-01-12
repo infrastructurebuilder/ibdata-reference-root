@@ -137,7 +137,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
   @SuppressWarnings("unchecked")
   public IBChecksumPathType transform(
       // Config supplied from plguin in pom
-      List<Transformation> transformations) throws MojoFailureException {
+      List<DefaultIBTransformation> transformations) throws MojoFailureException {
 
     Map<UUID, IBDataStream> availableStreams = this.engine.getAvailableDataStreamIds().stream().map(this.engine::fetchDataSetById)
         .filter(Optional::isPresent).map(Optional::get)
@@ -150,7 +150,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     // Every Transformation produces a single DataStream
     try { // Outer catch for throwing MojoFailureException if anything goes awry
       IBDataTransformationResult ref = null;
-      for (Transformation transformation : transformations) {
+      for (DefaultIBTransformation transformation : transformations) {
         requireNonNull(transformation); // FIXME is this redundant?
         // Inject the required stuff here
         transformation.forceDefaults(p.getGroupId(), p.getArtifactId(), p.getVersion());
@@ -166,9 +166,9 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
 
         // Get the configured finalizer
         // Acquire DataSet finalizer
-        IBDataSetFinalizer<Transformation> finalizer;
+        IBDataSetFinalizer<DefaultIBTransformation> finalizer;
         try {
-          finalizer = (IBDataSetFinalizer<Transformation>) getDataSetFinalizerSupplier(transformation.getFinalizer(),
+          finalizer = (IBDataSetFinalizer<DefaultIBTransformation>) getDataSetFinalizerSupplier(transformation.getFinalizer(),
               transformation.getFinalizerConfig()); //,              Optional.ofNullable(ref).map(IBDataTransformationResult::getWorkingPathSupplier)*/);
         } catch (ClassCastException e) {
           throw new IBDataException("Finalizer " + transformation.getFinalizer() + " in transformation "

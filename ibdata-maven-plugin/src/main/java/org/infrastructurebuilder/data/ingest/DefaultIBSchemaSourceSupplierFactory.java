@@ -17,11 +17,9 @@ package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -31,27 +29,28 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBDataSourceSupplier;
+import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
+import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
 @Named
-public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierFactory {
+public class DefaultIBSchemaSourceSupplierFactory implements IBSchemaSourceSupplierFactory {
 
   private final TypeToExtensionMapper mapper;
   private final Logger log;
-  private final List<IBDataSourceSupplierMapper> dssMappers;
+  private final List<IBSchemaSourceSupplierMapper> ssMappers;
   private final PathSupplier workingPathSupplier;
 
   @Inject
-  public DefaultIBDataSourceSupplierFactory(LoggerSupplier l, TypeToExtensionMapper t2e,
-      List<IBDataSourceSupplierMapper> dssMappers,
+  public DefaultIBSchemaSourceSupplierFactory(LoggerSupplier l, TypeToExtensionMapper t2e,
+      List<IBSchemaSourceSupplierMapper> dssMappers,
       @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
     this.log = requireNonNull(l).get();
     this.mapper = requireNonNull(t2e);
-    this.dssMappers = requireNonNull(dssMappers);
+    this.ssMappers = requireNonNull(dssMappers);
     this.workingPathSupplier = requireNonNull(workingPathSupplier);
   }
 
@@ -61,16 +60,17 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
   }
 
   @Override
-  public final SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(IBIngestion i) {
-    List<IBDataSourceSupplier> k = i.getDataSet().getDataStreams().stream().map(dStream -> {
-
-      IBDataSourceSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
+  public final SortedMap<String, IBSchemaSourceSupplier> mapIngestionToSuppliers(IBIngestion i) {
+    SortedMap<String, IBDataSchemaIngestionConfig> ingestionConfiug = i.asSchemaIngestion();
+    List<IBIngestedSchemaSupplier> k = i.getDataSet().getDataSchemas().stream().map(dStream -> {
+      IBSchemaSourceSupplierMapper first = ssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
           .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
-      return first.getSupplierFor(dStream.getTemporaryId().orElse(null), dStream);
-
+      return first.getSupplierFor(dStream.getTemporaryId(), dStream);
     }).collect(Collectors.toList());
-    return k.stream().collect(toMap(IBDataSourceSupplier::getId, identity(), (prev, now) -> now,
-        () -> Collections.synchronizedSortedMap(new TreeMap<>())));
+    ;
+    SortedMap<String, IBIngestedSchemaSupplier> q = k.stream()
+        .collect(Collectors.toMap(IBIngestedSchemaSupplier::getTemporaryId, identity(), (prev, now) -> now, TreeMap::new));
+    return null;
   }
 
 }

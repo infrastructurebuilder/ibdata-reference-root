@@ -28,7 +28,7 @@ import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
-    implements IBDataSchemaSource {
+    implements IBSchemaSource {
 
   protected final String id;
 //  protected final String source;
@@ -104,7 +104,7 @@ abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSup
    * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
    */
   @Override
-  public IBDataSchemaSource configure(ConfigMap config) {
+  public IBSchemaSource configure(ConfigMap config) {
     return this;
   }
 }

@@ -35,7 +35,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
-import org.infrastructurebuilder.data.IBDataSchemaIngesterSupplier;
+import org.infrastructurebuilder.data.IBSchemaIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
@@ -51,8 +51,9 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 public final class IBDataIngestMavenComponent extends AbstractIBDataMavenComponent {
 
   private final Map<String, IBDataIngesterSupplier> allIngesters;
-  private final Map<String, IBDataSchemaIngesterSupplier> allSchemaIngesters;
+  private final Map<String, IBSchemaIngesterSupplier> allSchemaIngesters;
   private final IBDataSourceSupplierFactory dsSupplierFactory;
+  private final IBSchemaSourceSupplierFactory ssSupplierFactory;
 //  private final IBDataSchemaSupplierFactory dschemaSupplierFactory;
 
   /**
@@ -87,26 +88,27 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       // DataSourceSupplier Factory
       final IBDataSourceSupplierFactory ibdssf,
 //      // DataSourceSupplier Factory
-//      final IBDataSchemaSupplierFactory ibdschemasf,
+      final IBSchemaSourceSupplierFactory ibdschemasf,
       // Schema ingesters
-      final Map<String, IBDataSchemaIngesterSupplier> allSchemaIngesters) {
+      final Map<String, IBSchemaIngesterSupplier> allSchemaIngesters) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
         streamerFactory);
     this.allIngesters = requireNonNull(allIngesters);
     this.allSchemaIngesters = requireNonNull(allSchemaIngesters);
     this.dsSupplierFactory = requireNonNull(ibdssf);
+    this.ssSupplierFactory = requireNonNull(ibdschemasf);
 //    this.dschemaSupplierFactory = requireNonNull(ibdschemasf);
   }
 
   @SuppressWarnings("unchecked")
-  public IBChecksumPathType ingest(Ingestion ingest) throws MojoFailureException {
+  public IBChecksumPathType ingest(DefaultIBIngestion ingest) throws MojoFailureException {
     MavenProject p = getProject().orElseThrow(() -> new MojoFailureException("No supplied project"));
     requireNonNull(ingest).getDataSet().injectGAV(p.getGroupId(), p.getArtifactId(), p.getVersion()); // Ugh...side
                                                                                                       // effects
 
-    IBDataSetFinalizer<Ingestion> finalizer;
+    IBDataSetFinalizer<DefaultIBIngestion> finalizer;
     try {
-      finalizer = (IBDataSetFinalizer<Ingestion>) getDataSetFinalizerSupplier(ingest.getFinalizer(),
+      finalizer = (IBDataSetFinalizer<DefaultIBIngestion>) getDataSetFinalizerSupplier(ingest.getFinalizer(),
           ingest.getFinalizerConfig());
     } catch (ClassCastException e) {
       throw new MojoFailureException("Finalizer " + ingest.getFinalizer() + " was not considered viable", e);
@@ -132,9 +134,9 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         .orElseThrow(() -> new MojoFailureException("No schema Ingester for " + theSchemaIngesterHint.orElse(null)))
         .configure(getConfigMapSupplier()) // configure it
         .get() // get the actual schema ingester, could be expensive
-//        .ingest(dschemaSupplierFactory.mapIngestionToSuppliers(ingest)) // Produces sorted set
+        .ingest(ssSupplierFactory.mapIngestionToSuppliers(ingest)) // Produces sorted set
         // which we then convert into an ordered no-dupes list
-        .ingest(ingest.asSchemaIngestion())
+//        .ingest(ingest.asSchemaIngestion())
         .stream().collect(toList());
     ;
 
