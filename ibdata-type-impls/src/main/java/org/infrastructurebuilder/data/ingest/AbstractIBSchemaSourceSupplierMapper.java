@@ -18,23 +18,20 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 
-import org.infrastructurebuilder.data.AbstractIBDataSourceSupplier;
-import org.infrastructurebuilder.data.IBDataSource;
-import org.infrastructurebuilder.data.IBDataStreamIdentifier;
+import org.infrastructurebuilder.data.AbstractIBSchemaSourceSupplier;
+import org.infrastructurebuilder.data.IBSchemaSource;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBSchemaSupplierMapper implements IBSchemaSourceSupplierMapper {
+abstract public class AbstractIBSchemaSourceSupplierMapper implements IBSchemaSourceSupplierMapper {
 
   private final Logger log;
   private final TypeToExtensionMapper mapper;
   private final PathSupplier wps;
 
-  public AbstractIBSchemaSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
+  public AbstractIBSchemaSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
     this.wps = requireNonNull(wps);
@@ -62,10 +59,10 @@ abstract public class AbstractIBSchemaSupplierMapper implements IBSchemaSourceSu
     return wps.get();
   }
 
-  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier {
+  public class DefaultIBSchemaSourceSupplier extends AbstractIBSchemaSourceSupplier {
 
-    public DefaultIBDataSourceSupplier(String temporaryId, IBDataSource src, Path workingPath) {
-      super(temporaryId, src, workingPath);
+    public DefaultIBSchemaSourceSupplier(String id, IBSchemaSource src, Path workingPath) {
+      super(id, src, workingPath);
     }
 
   }

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;

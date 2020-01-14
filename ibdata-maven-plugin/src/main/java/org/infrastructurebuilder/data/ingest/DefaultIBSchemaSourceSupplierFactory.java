@@ -15,21 +15,22 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.util.Collections.synchronizedSortedMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
 import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -61,16 +62,19 @@ public class DefaultIBSchemaSourceSupplierFactory implements IBSchemaSourceSuppl
 
   @Override
   public final SortedMap<String, IBSchemaSourceSupplier> mapIngestionToSuppliers(IBIngestion i) {
-    SortedMap<String, IBDataSchemaIngestionConfig> ingestionConfiug = i.asSchemaIngestion();
-    List<IBIngestedSchemaSupplier> k = i.getDataSet().getDataSchemas().stream().map(dStream -> {
-      IBSchemaSourceSupplierMapper first = ssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
-          .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
-      return first.getSupplierFor(dStream.getTemporaryId(), dStream);
-    }).collect(Collectors.toList());
-    ;
-    SortedMap<String, IBIngestedSchemaSupplier> q = k.stream()
-        .collect(Collectors.toMap(IBIngestedSchemaSupplier::getTemporaryId, identity(), (prev, now) -> now, TreeMap::new));
-    return null;
+    SortedMap<String, IBDataSchemaIngestionConfig> schemaIngest = i.asSchemaIngestion();
+    List<IBSchemaSourceSupplier> k = i.getDataSet().getDataSchemas().stream()
+        // Stream of DefaultIBDataSchemaIngestionConfig
+        .map(dStream -> {
+          IBSchemaSourceSupplierMapper first = ssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
+              .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
+          return first.getSupplierFor(dStream.getTemporaryId(), dStream);
+        })
+        // To a list
+        .collect(toList());
+    return k.stream().collect(toMap(IBSchemaSourceSupplier::getId, identity(), (left, right) -> {
+      throw new IBDataException(String.format("Duplicated key for %s and %s", left, right));
+    }, () -> synchronizedSortedMap(new TreeMap<>())));
   }
 
 }

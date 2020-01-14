@@ -36,7 +36,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultIBDataSet;
 import org.infrastructurebuilder.data.DefaultTestingSource;
 import org.infrastructurebuilder.data.IBDataException;
@@ -76,15 +75,15 @@ public class AbstractIBDataSourceSupplierMapperTest {
     wps.finalize();
   }
 
-  private IBDataIngesterSupplier dis;
+  private IBDataIngesterSupplier<Object> dis;
   private ConfigMap configMap;
   private DefaultConfigMapSupplier cms;
   private IBDataIngester c;
-  private SortedMap<String, IBDataSourceSupplier> dss, dssFail, dssPass;
+  private SortedMap<String, IBDataSourceSupplier<?>> dss, dssFail, dssPass;
   private DefaultIBDataSetIdentifier dsi;
   private IBIngestion i;
   private TypeToExtensionMapper t2e = new DefaultTypeToExtensionMapper();
-  private IBDataSourceSupplier k;
+  private IBDataSourceSupplier<?> k;
   private IBDataSet ibdataset;
   private Date now = new Date();
   private Checksum filesDotTxtChecksum;
@@ -118,8 +117,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+        IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
               IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
@@ -141,8 +140,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+        IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(new Checksum("ABCD"));
           };
@@ -168,8 +167,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+        IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(filesDotTxtChecksum);
           };
@@ -215,8 +214,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
   @Test
   public void testGet() throws IOException {
-    IBDataSourceSupplier supplier = dssm.getSupplierFor(UUID.randomUUID().toString(), null);
-    IBDataSource source = supplier.get();
+    IBDataSourceSupplier<?> supplier = dssm.getSupplierFor(UUID.randomUUID().toString(), null);
+     IBDataSource<?> source = supplier.get();
 
     IBChecksumPathType unfinalized = source.get().get(0);
     assertTrue(Files.isRegularFile(unfinalized.getPath()));

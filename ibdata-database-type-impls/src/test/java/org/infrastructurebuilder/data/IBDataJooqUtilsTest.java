@@ -164,8 +164,8 @@ public class IBDataJooqUtilsTest {
     cms.put(JooqAvroRecordWriterSupplier.TARGET, targetPath);
     cms.put(JooqAvroRecordWriterSupplier.SCHEMA, schemaFile.toAbsolutePath().toUri().toURL().toExternalForm());
 
-    gds = new DefaultGenericDataSupplier(() -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds);
+    gds = new DefaultGenericDataSupplier(wps, () -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
     w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(() -> getLog(), aus).configure(cms);
     w = w2.get();
     read = w.writeRecords(result);

@@ -15,6 +15,11 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
+import java.nio.file.Path;
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -23,27 +28,28 @@ import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 
 @Named
-public class DefaultGenericDataSupplier extends AbstractConfigurableSupplier<GenericData, ConfigMap>
+public class DefaultGenericDataSupplier extends AbstractConfigurableSupplier<GenericData, ConfigMap, Object>
     implements GenericDataSupplier {
 
   @Inject
-  public DefaultGenericDataSupplier(LoggerSupplier l) {
-    super(null, l);
+  public DefaultGenericDataSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
+    super(wps, null, l);
   }
 
-  private DefaultGenericDataSupplier(ConfigMap config, LoggerSupplier l) {
-    super(config, l);
+  private DefaultGenericDataSupplier(PathSupplier wps, ConfigMap config, LoggerSupplier l) {
+    super(wps, config, l);
   }
 
   @Override
   public GenericDataSupplier configure(ConfigMap config) {
-    return new DefaultGenericDataSupplier(config, () -> getLog());
+    return new DefaultGenericDataSupplier(getWps(), config, () -> getLog());
   }
 
   @Override
-  protected GenericData getInstance() {
+  protected GenericData getInstance(Optional<Path> workingPath, Optional<Object> in) {
     Formatters f = new Formatters(getConfig());
     return new MapProxyGenericData(f);
   }

@@ -89,8 +89,8 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
     cm = new ConfigMap();
     cm.put(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
     cms = new DefaultConfigMapSupplier().addConfiguration(cm);
-    gds = new DefaultGenericDataSupplier(() -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds);
+    gds = new DefaultGenericDataSupplier(wps, () -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
     s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(wps, () -> log, aus);
   }
 

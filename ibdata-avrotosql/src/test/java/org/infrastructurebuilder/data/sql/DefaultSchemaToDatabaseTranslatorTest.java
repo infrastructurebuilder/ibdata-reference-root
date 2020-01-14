@@ -60,7 +60,7 @@ public class DefaultSchemaToDatabaseTranslatorTest {
   public void setUp() throws Exception {
     s2d = new DefaultSchemaToDatabaseTranslator(wps);
     URL v = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toUri().toURL();
-    s = Arrays.asList(new DefaultIBDataAvroUtilsSupplier(() -> log, new DefaultGenericDataSupplier(() -> log)).get()
+    s = Arrays.asList(new DefaultIBDataAvroUtilsSupplier(wps, () -> log, new DefaultGenericDataSupplier(wps, () -> log)).get()
         .avroSchemaFromString(v.toExternalForm()));
   }
 

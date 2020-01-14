@@ -15,42 +15,33 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.DefaultIBDataStreamIdentifier.toIBDataStreamSupplier;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-//import static org.infrastructurebuilder.data.IBDataSource.SPLIT_ZIPS_CONFIG;
-import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
 
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedMap;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.infrastructurebuilder.data.DefaultIBDataStream;
-import org.infrastructurebuilder.data.DefaultIBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBDataIngester;
-import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
-import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 
 @Named(DefaultIBDataIngesterSupplier.NAME)
-public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplier {
+public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplier<Object> {
 
   public static final String NAME = "default";
 
@@ -64,8 +55,8 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   }
 
   @Override
-  final protected IBDataIngester getInstance() {
-    return new DefaultIBDataIngester(getWps().get(), getLog(), getConfig().get());
+  protected IBDataIngester getInstance(Optional<Path> workingPath, Optional<Object> in) {
+    return new DefaultIBDataIngester(workingPath.get(), getLog(), getConfig().get());
   }
 
   @Override
@@ -80,7 +71,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     }
 
     @Override
-    public List<IBDataStreamSupplier> ingest(SortedMap<String, IBDataSourceSupplier> dssList) {
+    public List<IBDataStreamSupplier> ingest(SortedMap<String, IBDataSourceSupplier<?>> dssList) {
       Date now = new Date(); // Ok for "now" (Get it?)
       return requireNonNull(dssList, "List of IBDataSourceSupplier instances")
           // SortedMap values come out in order, because that's how it works
@@ -91,13 +82,13 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
           .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get()))
           // map configured source to
           .flatMap(source -> {
+            getLog().info(format("Mapping %s from %s", source.getId(), source.getSourceURL()));
             return source.get().stream()
                 .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));
           })
           // Collect to an ordered list
           .collect(toList());
     }
-
 
   }
 

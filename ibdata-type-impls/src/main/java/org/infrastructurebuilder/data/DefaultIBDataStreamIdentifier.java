@@ -47,7 +47,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private IBDataStructuredDataMetadata structuredDataMetadata = null;
   private String temporaryId;
 
-  public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource source,
+  public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource<?> source,
       IBChecksumPathType ibPathChecksumType, Date now) {
     String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
     Path localPath = ibPathChecksumType.getPath();

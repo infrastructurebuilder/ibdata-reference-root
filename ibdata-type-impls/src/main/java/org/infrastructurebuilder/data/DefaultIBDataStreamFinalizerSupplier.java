@@ -15,6 +15,8 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import java.nio.file.Path;
 
 import javax.inject.Inject;
@@ -31,7 +33,7 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
   private static final String WP_MESSAGE = "Working Path Config";
 
   @Inject
-  public DefaultIBDataStreamFinalizerSupplier(PathSupplier wps, LoggerSupplier l) {
+  public DefaultIBDataStreamFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
     this(wps, null, l);
   }
 

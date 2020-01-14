@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import org.apache.avro.Conversion;
 import org.apache.avro.generic.GenericData;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class DefaultGenericDataSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultGenericDataSupplierTest.class);
+  private final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -47,7 +49,7 @@ public class DefaultGenericDataSupplierTest {
   @Before
   public void setUp() throws Exception {
     config = new ConfigMap();
-    d = new DefaultGenericDataSupplier(() -> log).configure(config);
+    d = new DefaultGenericDataSupplier(wps,() -> log).configure(config);
   }
 
   @After

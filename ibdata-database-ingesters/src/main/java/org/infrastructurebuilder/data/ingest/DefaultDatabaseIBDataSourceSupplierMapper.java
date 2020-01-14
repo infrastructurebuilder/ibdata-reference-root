@@ -102,18 +102,17 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   }
 
   @Override
-  public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+  public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
-        new DefaultDatabaseIBDataSource(getLog(), temporaryId,
+        new DefaultDatabaseIBDataSource(() -> getWorkingPath(), getLog(), temporaryId,
             v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, empty(),
-            ofNullable(v.getChecksum()), of(v.getMetadata()), empty(), null, v.getName(), v.getDescription(),
-            getMapper(), /* this.aus, */ this.jrws),
+            ofNullable(v.getChecksum()), of(v.getMetadata()), empty(), v.getName(), v.getDescription(), getMapper(),
+            /* this.aus, */ this.jrws),
         getWorkingPath());
   }
 
-  public class DefaultDatabaseIBDataSource extends AbstractIBDataSource implements AutoCloseable {
+  public class DefaultDatabaseIBDataSource extends AbstractIBDataSource<Object> implements AutoCloseable {
 
-    private final Path targetPath;
     private final TypeToExtensionMapper t2e;
 
     private List<IBChecksumPathType> read;
@@ -121,14 +120,13 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 //    private final IBDataAvroUtilsSupplier aus;
     private final JooqAvroRecordWriterSupplier jwrs;
 
-    public DefaultDatabaseIBDataSource(Logger l, String tempId, String source, boolean expand,
+    public DefaultDatabaseIBDataSource(PathSupplier wps, Logger l, String tempId, String source, boolean expand,
         Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Metadata> metadata,
-        Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
+        Optional<ConfigMap> additionalConfig, Optional<String> name, Optional<String> description,
         TypeToExtensionMapper t2e, /* IBDataAvroUtilsSupplier jds, */JooqAvroRecordWriterSupplier jrws) {
 
-      super(l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata,
+      super(wps, l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata,
           additionalConfig);
-      this.targetPath = targetPath;
       this.t2e = t2e;
 //      this.aus = requireNonNull(jds);
       this.jwrs = requireNonNull(jrws);
@@ -144,14 +142,14 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     @Override
     public DefaultDatabaseIBDataSource configure(ConfigMap config) {
-      return new DefaultDatabaseIBDataSource(getLog(), getId(), getSourceURL(), false, getCredentials(), getChecksum(),
-          getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), t2e,
+      return new DefaultDatabaseIBDataSource(() -> getWorkingPath().get(), getLog(), getId(), getSourceURL(), false,
+          getCredentials(), getChecksum(), getMetadata(), of(config), getName(), getDescription(), t2e,
           /* (IBDataAvroUtilsSupplier) this.aus.configure(config), */
           (JooqAvroRecordWriterSupplier) this.jwrs.configure(config));
     }
 
     @Override
-    public List<IBChecksumPathType> getInstance() {
+    public List<IBChecksumPathType> getInstance(Optional<Path> workingPath, Optional<Object> in) {
       if (conn == null) {
         String url = getSourceURL();
         BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", empty()));

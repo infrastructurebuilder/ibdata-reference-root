@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;

@@ -15,7 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptySortedMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -26,20 +26,15 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.ingest.IBDataSchemaIngestionConfig;
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
-import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -67,7 +62,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     wps.finalize();
   }
 
-  private AbstractIBDataSetFinalizerSupplier<Dummy> c;
+  private AbstractIBDataSetFinalizerSupplier<Dummy,Object> c;
   private DefaultTypeToExtensionMapper t2e;
   private DefaultConfigMapSupplier cms;
   private IBDataSet dsi1;
@@ -95,17 +90,17 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
   }
 
-  private AbstractIBDataSetFinalizerSupplier<Dummy> getSupplier(Logger log, TestingPathSupplier wps,
+  private AbstractIBDataSetFinalizerSupplier<Dummy,Object> getSupplier(Logger log, TestingPathSupplier wps,
       DefaultConfigMapSupplier cms, DefaultTypeToExtensionMapper t2e) {
-    return new AbstractIBDataSetFinalizerSupplier<Dummy>(log, wps, cms, t2e) {
+    return new AbstractIBDataSetFinalizerSupplier<Dummy,Object>(log, wps, cms, t2e) {
 
       @Override
-      public AbstractCMSConfigurableSupplier<IBDataSetFinalizer<Dummy>> getConfiguredSupplier(ConfigMapSupplier cms) {
+      public AbstractIBDataSetFinalizerSupplier<Dummy,Object> getConfiguredSupplier(ConfigMapSupplier cms) {
         return this;
       }
 
       @Override
-      protected IBDataSetFinalizer<Dummy> getInstance() {
+      protected IBDataSetFinalizer<Dummy> getInstance(Optional<Path> workingPath, Optional<Object> nothing) {
         return new DummyFinalizer(getConfig().get(), getConfig().get().get("path"));
       }
 
@@ -157,7 +152,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
   }
 
-  public final static class DummyFinalizer extends AbstractIBDataSetFinalizer<Dummy>  {
+  public final static class DummyFinalizer extends AbstractIBDataSetFinalizer<Dummy, Object>  {
 
     public DummyFinalizer(ConfigMap map, Path p) {
       super(map, p);
@@ -165,7 +160,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
     @Override
     public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<IBDataStreamSupplier> suppliers,
-        List<IBIngestedSchemaSupplier> schemaSuppliers, Optional<String> basedir) throws IOException {
+        List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir) throws IOException {
       getConfig();
       return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());
     }

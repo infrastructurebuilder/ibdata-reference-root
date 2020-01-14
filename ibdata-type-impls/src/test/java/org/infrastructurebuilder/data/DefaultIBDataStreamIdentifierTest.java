@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import javax.xml.transform.TransformerException;
 
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.junit.Before;

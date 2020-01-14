@@ -68,7 +68,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
   }
 
   private ConfigMapSupplier cms;
-  private IBDataSetFinalizerSupplier<?> fs;
+  private IBDataSetFinalizerSupplier<?,Object> fs;
   private IBTransformation x;
   private IBDataSet dsi;
   private DataSet finalData;
@@ -105,7 +105,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
 
   @Test
   public void testGetAndFinalize() throws IOException {
-    ConfigurableSupplier<?, ConfigMapSupplier> p2 = fs.configure(cms);
+    ConfigurableSupplier<?, ConfigMapSupplier,?> p2 = fs.configure(cms);
     IBDataSetFinalizer<IBTransformation> p = (IBDataSetFinalizer<IBTransformation>) p2.get();
     assertNotNull(p);
 

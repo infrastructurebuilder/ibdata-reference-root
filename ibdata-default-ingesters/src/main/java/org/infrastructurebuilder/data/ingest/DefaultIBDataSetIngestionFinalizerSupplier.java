@@ -35,7 +35,7 @@ import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
+import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
 @Named(DefaultIBDataSetIngestionFinalizerSupplier.DEFAULT_INGEST)
 @Typed(IBDataSetFinalizerSupplier.class)
-public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier<IBIngestion> {
+public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier<IBIngestion,Object> {
 
   public static final String DEFAULT_INGEST = "default-ingest";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
@@ -70,12 +70,12 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   }
 
   @Override
-  protected IngestionIBDataSetFinalizer getInstance() {
+  protected IngestionIBDataSetFinalizer getInstance(Optional<Path> workingPath, Optional<Object> in) {
     return new IngestionIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
-        getWps().get());
+        workingPath.get());
   }
 
-  private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBIngestion> {
+  private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBIngestion,Object> {
 
     public IngestionIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath);
@@ -83,7 +83,7 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
 
     @Override
     public IBChecksumPathType finalize(IBDataSet dsi2, IBIngestion target, List<IBDataStreamSupplier> ibdssList,
-        List<IBIngestedSchemaSupplier> schemaList, Optional<String> basedir) throws IOException {
+        List<IBSchemaDAOSupplier> schemaList, Optional<String> basedir) throws IOException {
       DataSet d = target.asDataSet();
       Map<String, IBDataSchemaIngestionConfig> p = target.asSchemaIngestion();
       // dsi2 is always null. There is no "previous dataset" in ingestion

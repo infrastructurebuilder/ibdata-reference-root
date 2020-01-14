@@ -19,6 +19,6 @@ import org.apache.avro.generic.GenericData;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 
-public interface GenericDataSupplier extends ConfigurableSupplier<GenericData, ConfigMap> {
+public interface GenericDataSupplier extends ConfigurableSupplier<GenericData, ConfigMap, Object> {
 
 }

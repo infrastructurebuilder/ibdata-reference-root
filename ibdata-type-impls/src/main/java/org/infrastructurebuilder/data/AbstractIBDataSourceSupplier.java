@@ -17,15 +17,15 @@ package org.infrastructurebuilder.data;
 
 import java.nio.file.Path;
 
-abstract public class AbstractIBDataSourceSupplier extends AbstractIBDataSupplier<IBDataSource>
-    implements IBDataSourceSupplier {
+abstract public class AbstractIBDataSourceSupplier<P> extends AbstractIBDataSupplier<IBDataSource<P>>
+    implements IBDataSourceSupplier<P> {
 
   public AbstractIBDataSourceSupplier(String id, IBDataSource src, Path workingPath) {
     super(id, src, workingPath);
   }
 
   @Override
-  public int compareTo(IBDataSourceSupplier o) {
+  public int compareTo(IBDataSourceSupplier<P> o) {
     return this.get().getId().compareTo(o.get().getId());
   }
 

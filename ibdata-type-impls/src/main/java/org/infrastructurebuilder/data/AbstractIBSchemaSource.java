@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.empty;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,11 +25,12 @@ import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
-    implements IBSchemaSource {
+abstract public class AbstractIBSchemaSource<P> extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap, P>
+    implements IBSchemaSource<P> {
 
   protected final String id;
 //  protected final String source;
@@ -38,7 +40,20 @@ abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSup
   protected final Optional<String> name;
   protected final Optional<String> desc;
 
-  public AbstractIBDataSchemaSource(Logger logger
+  public AbstractIBSchemaSource(PathSupplier wps, Logger logger) {
+    super(wps, null, () -> logger);
+    this.id = null;
+    this.creds = empty();
+    this.checksum = empty();
+    this.metadata = empty();
+    this.name = empty();
+    this.desc = empty();
+  }
+
+  protected AbstractIBSchemaSource(
+      PathSupplier wps
+      // Logger
+      ,Logger logger
   // Temp id
       , String id
 //      // "URL" or JDBC URL etc
@@ -55,7 +70,8 @@ abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSup
       , Optional<Metadata> metadata
       // Configuration
       , Optional<ConfigMap> config) {
-    super(config.orElse(null), () -> logger);
+
+    super(wps, config.orElse(null), () -> logger);
     this.id = requireNonNull(id);
 //    this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);
@@ -101,10 +117,10 @@ abstract public class AbstractIBDataSchemaSource extends AbstractConfigurableSup
   }
 
   /**
-   * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
+   * Override this to acquire additional configuration OR ELSE IT NEVER HAPPENED!
    */
   @Override
-  public IBSchemaSource configure(ConfigMap config) {
+  public IBSchemaSource<P> configure(ConfigMap config) {
     return this;
   }
 }

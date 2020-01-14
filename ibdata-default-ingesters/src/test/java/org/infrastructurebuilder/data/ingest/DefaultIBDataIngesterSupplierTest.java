@@ -84,12 +84,12 @@ public class DefaultIBDataIngesterSupplierTest {
   private ConfigMap configMap;
   private DefaultConfigMapSupplier cms;
   private IBDataIngester c;
-  private SortedMap<String, IBDataSourceSupplier> dss, dssFail, dssPass;
+  private SortedMap<String, IBDataSourceSupplier<?>> dss, dssFail, dssPass;
   private DefaultIBDataSetIdentifier dsi;
   private IBIngestion i;
   private IBDataSourceSupplierMapper dssm, dssmFail, dssmPass;
   private TypeToExtensionMapper t2e = new DefaultTypeToExtensionMapper();
-  private IBDataSourceSupplier k;
+  private IBDataSourceSupplier<Object> k;
   private DefaultIBDataSetIngestionFinalizerSupplier ibdfs;
   private IBDataSet ibdataset;
   private Date now = new Date();
@@ -170,7 +170,7 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    k = dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
+    k = (IBDataSourceSupplier<Object>) dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
     dss.put("X", k);
   }
 
@@ -180,7 +180,7 @@ public class DefaultIBDataIngesterSupplierTest {
 
   @Test
   public void testType() {
-    IBDataSource ibds = new DefaultTestingSource("dummy:source");
+    IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source");
     assertFalse(ibds.getMimeType().isPresent());
   }
 

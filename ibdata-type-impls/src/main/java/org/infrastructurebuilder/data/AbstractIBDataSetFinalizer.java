@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import org.infrastructurebuilder.util.config.ConfigMap;
 
-abstract public class AbstractIBDataSetFinalizer<T extends DataSetEnabled> implements IBDataSetFinalizer<T> {
+abstract public class AbstractIBDataSetFinalizer<T extends DataSetEnabled,P> implements IBDataSetFinalizer<T> {
 
   private final ConfigMap config;
   private final Path workingPath;

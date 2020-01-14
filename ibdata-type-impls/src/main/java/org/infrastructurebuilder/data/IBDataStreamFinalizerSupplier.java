@@ -18,5 +18,5 @@ package org.infrastructurebuilder.data;
 import org.infrastructurebuilder.util.IBLoggerEnabled;
 import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
-public interface IBDataStreamFinalizerSupplier extends CMSConfigurableSupplier<IBDataStreamFinalizer>, IBLoggerEnabled {
+public interface IBDataStreamFinalizerSupplier extends CMSConfigurableSupplier<IBDataStreamFinalizer,Object>, IBLoggerEnabled {
 }

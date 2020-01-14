@@ -93,8 +93,8 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
 
     cms = new DefaultConfigMapSupplier(new ConfigMap(p1));
 
-    gds = new DefaultGenericDataSupplier(() -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds);
+    gds = new DefaultGenericDataSupplier(wps, () -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(wps,() -> log, gds);
     DefaultMapToGenericRecordIBDataLineTransformerSupplier s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(() -> workingPath, () -> log, aus).configure(cms);
     test = (AbstractMapToAvroGenericRecordIBDataLineTransformer) s.get();
   }

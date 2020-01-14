@@ -17,6 +17,12 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.IBConstants.FILE_PREFIX;
+import static org.infrastructurebuilder.IBConstants.HTTPS_PREFIX;
+import static org.infrastructurebuilder.IBConstants.HTTP_PREFIX;
+import static org.infrastructurebuilder.IBConstants.ZIP_PREFIX;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,12 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.infrastructurebuilder.IBConstants.FILE_PREFIX;
-import static org.infrastructurebuilder.IBConstants.HTTPS_PREFIX;
-import static org.infrastructurebuilder.IBConstants.HTTP_PREFIX;
-import static org.infrastructurebuilder.IBConstants.ZIP_PREFIX;
-import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
@@ -44,30 +46,32 @@ import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
-import org.infrastructurebuilder.util.config.ConfigurableSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
-public class DefaultIBDataAvroUtilsSupplier extends AbstractConfigurableSupplier<IBDataAvroUtils, ConfigMap>
+@Named
+public class DefaultIBDataAvroUtilsSupplier extends AbstractConfigurableSupplier<IBDataAvroUtils, ConfigMap,Object>
     implements IBDataAvroUtilsSupplier {
 
   private final GenericDataSupplier gds;
 
-  public DefaultIBDataAvroUtilsSupplier(LoggerSupplier ls, GenericDataSupplier gds) {
-    this(null, ls, gds);
+  @Inject
+  public DefaultIBDataAvroUtilsSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier ls, GenericDataSupplier gds) {
+    this(wps, null, ls, gds);
   }
 
-  private DefaultIBDataAvroUtilsSupplier(ConfigMap config, LoggerSupplier l, GenericDataSupplier gds) {
-    super(config, l);
+  private DefaultIBDataAvroUtilsSupplier(PathSupplier wps, ConfigMap config, LoggerSupplier l, GenericDataSupplier gds) {
+    super(wps, config, l);
     this.gds = requireNonNull(gds);
   }
 
   @Override
   public IBDataAvroUtilsSupplier configure(ConfigMap config) {
-    return new DefaultIBDataAvroUtilsSupplier(config, () -> getLog(), (GenericDataSupplier) gds.configure(config));
+    return new DefaultIBDataAvroUtilsSupplier(getWps(), config, () -> getLog(), (GenericDataSupplier) gds.configure(config));
   }
 
   @Override
-  protected IBDataAvroUtils getInstance() {
+  protected IBDataAvroUtils getInstance(Optional<Path> workingPath, Optional<Object> in) {
     return new DefaultIBDataAvroUtils(getLog(), gds.get());
   }
 

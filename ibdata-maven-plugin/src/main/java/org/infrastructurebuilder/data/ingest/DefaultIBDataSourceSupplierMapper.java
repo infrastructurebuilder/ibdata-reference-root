@@ -75,7 +75,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   }
 
   @Override
-  public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+  public IBDataSourceSupplier<?> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId // Temp id for this
         , new DefaultIBDataSource(getLog() // Log (always)
             , v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)) // URL
@@ -91,7 +91,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
         , getWorkingPath());
   }
 
-  public class DefaultIBDataSource extends AbstractIBDataSource {
+  public class DefaultIBDataSource extends AbstractIBDataSource<String> {
 
     private final Path targetPath;
     private final Optional<String> mimeType;
@@ -105,7 +105,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
         Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
         Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
-      super(log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
+      super(()-> targetPath, log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
       this.targetPath = targetPath;
       this.mimeType = mimeType;
       this.wgs = requireNonNull(wgs);
@@ -121,9 +121,9 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     @Override
-    public IBDataSource configure(ConfigMap config) {
+    public IBDataSource<String> configure(ConfigMap config) {
       return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), isExpandArchives(), getCredentials(),
-          getChecksum(), getMetadata(), of(config), getWorkingPath(), getName(), getDescription(), getMimeType(),
+          getChecksum(), getMetadata(), of(config), getWorkingPath().get(), getName(), getDescription(), getMimeType(),
           this.wgs, this.am, this.mapper);
     }
 
@@ -133,7 +133,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     @Override
-    public List<IBChecksumPathType> getInstance() {
+    public List<IBChecksumPathType> getInstance(Optional<Path> workingPath, Optional<String> in) {
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {
           List<IBChecksumPathType> localRead;

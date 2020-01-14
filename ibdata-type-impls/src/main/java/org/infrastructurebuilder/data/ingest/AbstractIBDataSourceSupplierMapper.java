@@ -61,10 +61,10 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
     return wps.get();
   }
 
-  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier {
+  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier<Object> {
 
-    public DefaultIBDataSourceSupplier(String temporaryId, IBDataSource src, Path workingPath) {
-      super(temporaryId, src, workingPath);
+    public DefaultIBDataSourceSupplier(String id, IBDataSource<?> src, Path workingPath) {
+      super(id, src, workingPath);
     }
 
   }

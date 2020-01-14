@@ -15,17 +15,17 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.util.Collections.synchronizedSortedMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -61,16 +61,16 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
   }
 
   @Override
-  public final SortedMap<String, IBDataSourceSupplier> mapIngestionToSourceSuppliers(IBIngestion i) {
-    List<IBDataSourceSupplier> k = i.getDataSet().getDataStreams().stream().map(dStream -> {
+  public final SortedMap<String, IBDataSourceSupplier<?>> mapIngestionToSourceSuppliers(IBIngestion i) {
+    List<IBDataSourceSupplier<?>> k = i.getDataSet().getDataStreams().stream().map(dStream -> {
 
       IBDataSourceSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
           .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
       return first.getSupplierFor(dStream.getTemporaryId().orElse(null), dStream);
 
-    }).collect(Collectors.toList());
+    }).collect(toList());
     return k.stream().collect(toMap(IBDataSourceSupplier::getId, identity(), (prev, now) -> now,
-        () -> Collections.synchronizedSortedMap(new TreeMap<>())));
+        () -> synchronizedSortedMap(new TreeMap<>())));
   }
 
 }

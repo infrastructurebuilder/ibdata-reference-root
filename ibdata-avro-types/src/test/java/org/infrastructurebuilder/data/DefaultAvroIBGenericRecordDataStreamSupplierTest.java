@@ -75,8 +75,8 @@ public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
     id.setSha512(CHECKSUM);
     id.setMetadata(new Metadata());
     ConfigMap cms = new ConfigMap();
-    gds = new DefaultGenericDataSupplier(() -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(cms);
+    gds = new DefaultGenericDataSupplier(wps, () -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBGenericRecordDataStreamSupplier(targetPath, stream, parallel, schema);

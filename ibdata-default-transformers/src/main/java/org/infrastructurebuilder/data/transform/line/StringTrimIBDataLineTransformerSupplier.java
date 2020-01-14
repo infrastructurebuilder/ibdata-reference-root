@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
   private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
 
   @javax.inject.Inject
-  public StringTrimIBDataLineTransformerSupplier(PathSupplier wps, LoggerSupplier l) {
+  public StringTrimIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
     this(wps, null, l);
   }
 

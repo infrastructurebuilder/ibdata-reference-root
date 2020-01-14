@@ -20,6 +20,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH
 
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
+import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.IBSchemaIngester;
 import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -38,7 +39,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 @Named(DefaultIBSchemaIngesterSupplier.NAME)
-public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSupplier {
+public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSupplier<Object> {
 
   public static final String NAME = "default";
 
@@ -52,8 +53,8 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
   }
 
   @Override
-  final protected IBSchemaIngester getInstance() {
-    return new DefaultIBSchemaIngester(getWps().get(), getLog(), getConfig().get());
+  final protected IBSchemaIngester getInstance(Optional<Path> workingPath, Optional<Object> in) {
+    return new DefaultIBSchemaIngester(workingPath.get(), getLog(), getConfig().get());
   }
 
   @Override
@@ -86,7 +87,7 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
 //    }
 
     @Override
-    public SortedSet<IBIngestedSchemaSupplier> ingest(
+    public SortedSet<IBSchemaDAOSupplier> ingest(
         SortedMap<String, IBSchemaSourceSupplier> dss) {
       Date now = new Date(); // Ok for "now" (Get it?)
       return requireNonNull(dss, "Map of IBDataSchemaIngestionConfig instances")
@@ -94,7 +95,7 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
           .values().stream()
           // Get the IBDataSchemaIngestionConfig
           .map(siConfig -> {
-            return (IBIngestedSchemaSupplier) null;
+            return (IBSchemaDAOSupplier) null;
           })
 //          // Get CONFIGURED source
 //          .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get()))

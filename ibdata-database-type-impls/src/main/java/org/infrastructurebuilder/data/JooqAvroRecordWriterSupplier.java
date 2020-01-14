@@ -43,12 +43,11 @@ import org.jooq.Record;
 import org.slf4j.Logger;
 
 @Named(JooqAvroRecordWriterSupplier.NAME)
-public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<JooqRecordWriter, ConfigMap> {
+public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<JooqRecordWriter, ConfigMap,Object> {
   static final String NAME = "jooq-record-writer";
   public final static String SCHEMA = "schema";
   public final static String TARGET = "target";
   private final IBDataAvroUtilsSupplier aus;
-  private final Path workingPath;
   private final Optional<Schema> schema;
 
   @Inject
@@ -58,9 +57,8 @@ public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<J
 
   private JooqAvroRecordWriterSupplier(ConfigMap config, LoggerSupplier l, IBDataAvroUtilsSupplier aus, Path targetDir,
       Schema targetSchema) {
-    super(config, l);
+    super(() -> targetDir, config, l);
     this.aus = Objects.requireNonNull(aus);
-    this.workingPath = targetDir;
     this.schema = Optional.ofNullable(targetSchema);
   }
 
@@ -74,8 +72,8 @@ public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<J
   }
 
   @Override
-  protected JooqRecordWriter getInstance() {
-    return new JooqRecordWriter(getLog(), this.workingPath, this.schema.orElse(null), this.aus.get());
+  protected JooqRecordWriter getInstance(Optional<Path> workingPath, Optional<Object> in) {
+    return new JooqRecordWriter(getLog(), getWorkingPath().orElse(null), this.schema.orElse(null), this.aus.get());
   }
 
   /**

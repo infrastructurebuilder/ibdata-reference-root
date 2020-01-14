@@ -34,8 +34,9 @@ import org.eclipse.sisu.Nullable;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataSet;
+import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
+import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 @Named(DefaultIBDataSetTransformationFinalizerSupplier.NAME)
 public class DefaultIBDataSetTransformationFinalizerSupplier
-    extends AbstractIBDataSetFinalizerSupplier<IBTransformation> {
+    extends AbstractIBDataSetFinalizerSupplier<IBTransformation,Object> {
 
   static final String NAME = "default-transform";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplier.class);
@@ -71,12 +72,12 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
   }
 
   @Override
-  protected TransformationIBDataSetFinalizer getInstance() {
+  protected TransformationIBDataSetFinalizer getInstance(Optional<Path> workingPath, Optional<Object> in) {
     return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         getWps().get());
   }
 
-  private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBTransformation> {
+  private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBTransformation,Object> {
 
     public TransformationIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath.resolve(UUID.randomUUID().toString()));
@@ -84,7 +85,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
 
     @Override
     public IBChecksumPathType finalize(IBDataSet inboundDataSet, IBTransformation target,
-        List<IBDataStreamSupplier> ibdssList, List<IBIngestedSchemaSupplier> schemaSuppliers, Optional<String> basedir)
+        List<IBDataStreamSupplier> ibdssList, List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir)
         throws IOException {
       DataSet targetDataSet = target.asDataSet();
       targetDataSet.setPath(inboundDataSet.getPath().orElse(null));

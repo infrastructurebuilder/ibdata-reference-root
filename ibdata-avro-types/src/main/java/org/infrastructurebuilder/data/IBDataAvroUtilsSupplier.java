@@ -18,6 +18,6 @@ package org.infrastructurebuilder.data;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 
-public interface IBDataAvroUtilsSupplier extends ConfigurableSupplier<IBDataAvroUtils, ConfigMap>{
+public interface IBDataAvroUtilsSupplier extends ConfigurableSupplier<IBDataAvroUtils, ConfigMap, Object> {
 
 }

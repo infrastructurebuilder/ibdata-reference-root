@@ -33,7 +33,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.transform.BA;
 import org.infrastructurebuilder.util.config.ConfigMap;
-import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.AfterClass;
@@ -60,8 +59,8 @@ public class IBDataAvroUtilsTest {
 
     ConfigMap init= new ConfigMap();
     cms = new DefaultConfigMapSupplier(init);
-    gds = new DefaultGenericDataSupplier(() -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(init);
+    gds = new DefaultGenericDataSupplier(wps, () -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(wps,() -> log, gds).configure(init);
     au = aus.get();
     Path p = wps.getTestClasses().resolve("ba.avsc");
     schema = au.avroSchemaFromString(p.toAbsolutePath().toString());

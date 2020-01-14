@@ -24,11 +24,12 @@ import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap>
-    implements IBDataSource {
+abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap,P>
+    implements IBDataSource<P> {
 
   protected final String id;
   protected final String source;
@@ -39,7 +40,11 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
   protected final Optional<String> desc;
   private final boolean expandArchives;
 
-  public AbstractIBDataSource(Logger logger
+  public AbstractIBDataSource(
+      // Wprlomg target
+      PathSupplier wps,
+      // Logger
+      Logger logger
   // Temp id
       , String id
       // "URL" or JDBC URL etc
@@ -58,7 +63,7 @@ abstract public class AbstractIBDataSource extends AbstractConfigurableSupplier<
       , Optional<Metadata> metadata
       // Configuration
       , Optional<ConfigMap> config) {
-    super(config.orElse(null), () -> logger);
+    super(wps, config.orElse(null), () -> logger);
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);

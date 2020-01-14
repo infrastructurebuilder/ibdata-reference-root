@@ -18,8 +18,6 @@ package org.infrastructurebuilder.data.transform.line;
 import static java.util.Objects.requireNonNull;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -29,9 +27,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.avro.AvroRuntimeException;
-import org.apache.avro.LogicalType;
-import org.apache.avro.LogicalTypes.Date;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.DataFileWriter;
@@ -40,7 +35,6 @@ import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
-import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStructuredDataMetadataType;
 import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;

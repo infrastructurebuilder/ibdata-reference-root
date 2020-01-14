@@ -39,7 +39,7 @@ abstract public class AbstractIBDataMavenComponent {
   private final PathSupplier lateBoundWorkingPathSupplier;
   private final Log log;
   private final TypeToExtensionMapper t2e;
-  private final Map<String, IBDataSetFinalizerSupplier<?>> allDataSetFinalizers;
+  private final Map<String, IBDataSetFinalizerSupplier<?,?>> allDataSetFinalizers;
   private final IBStreamerFactory streamerFactory;
   private MavenProject project;
   private MavenSession session;
@@ -53,7 +53,7 @@ abstract public class AbstractIBDataMavenComponent {
       // A TypeToExtensionMapper (maybe this should be a map?)
       final TypeToExtensionMapper t2e,
       // ConfigMapSupplier (maven version, usually)
-      final ConfigMapSupplier mavenCMS, Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers,
+      final ConfigMapSupplier mavenCMS, Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers,
       final IBStreamerFactory streamerFactory) {
     this.lateBoundWorkingPathSupplier = requireNonNull(workingPathSupplier);
     this.log = requireNonNull(log);
@@ -73,7 +73,7 @@ abstract public class AbstractIBDataMavenComponent {
     // overrideWorkingPath = Optional.empty(); // FIXME Remove this parameter
     // (FIXED)
 
-    final IBDataSetFinalizerSupplier<?> supplier = ofNullable(allDataSetFinalizers.get(key))
+    final IBDataSetFinalizerSupplier<?,?> supplier = ofNullable(allDataSetFinalizers.get(key))
         .orElseThrow(() -> new MojoFailureException("No finalizer name " + key));
     requireNonNull(config);
     // Little bit of a hack here

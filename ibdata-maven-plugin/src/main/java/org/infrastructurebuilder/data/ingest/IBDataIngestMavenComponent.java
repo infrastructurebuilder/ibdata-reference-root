@@ -39,7 +39,7 @@ import org.infrastructurebuilder.data.IBSchemaIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
-import org.infrastructurebuilder.data.IBIngestedSchemaSupplier;
+import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -50,8 +50,8 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 @Named("ingest")
 public final class IBDataIngestMavenComponent extends AbstractIBDataMavenComponent {
 
-  private final Map<String, IBDataIngesterSupplier> allIngesters;
-  private final Map<String, IBSchemaIngesterSupplier> allSchemaIngesters;
+  private final Map<String, IBDataIngesterSupplier<?>> allIngesters;
+  private final Map<String, IBSchemaIngesterSupplier<?>> allSchemaIngesters;
   private final IBDataSourceSupplierFactory dsSupplierFactory;
   private final IBSchemaSourceSupplierFactory ssSupplierFactory;
 //  private final IBDataSchemaSupplierFactory dschemaSupplierFactory;
@@ -80,9 +80,9 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       final TypeToExtensionMapper defaultTypeToExtensionMapper,
       // The configuration map. Does not include config from components
       @Named(ConfigMapSupplier.MAVEN_WITH_SERVERS) final ConfigMapSupplier mavenConfigMapSupplier,
-      final Map<String, IBDataIngesterSupplier> allIngesters,
+      final Map<String, IBDataIngesterSupplier<?>> allIngesters,
       // All DataSetFinalizer suppliers
-      final Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers,
+      final Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers,
       // Streamer factory
       final IBStreamerFactory streamerFactory,
       // DataSourceSupplier Factory
@@ -90,7 +90,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
 //      // DataSourceSupplier Factory
       final IBSchemaSourceSupplierFactory ibdschemasf,
       // Schema ingesters
-      final Map<String, IBSchemaIngesterSupplier> allSchemaIngesters) {
+      final Map<String, IBSchemaIngesterSupplier<?>> allSchemaIngesters) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
         streamerFactory);
     this.allIngesters = requireNonNull(allIngesters);
@@ -129,7 +129,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
     //  Ingest ALL defined schemas in the Ingestion
     Optional<String> theSchemaIngesterHint = ofNullable(requireNonNull(ingest).getSchemaIngester());
 
-    List<IBIngestedSchemaSupplier> schemaSuppliers = theSchemaIngesterHint // Only one ingester for a dataset
+    List<IBSchemaDAOSupplier> schemaSuppliers = theSchemaIngesterHint // Only one ingester for a dataset
         .flatMap(j -> ofNullable(this.allSchemaIngesters.get(j))) // Get the supplier
         .orElseThrow(() -> new MojoFailureException("No schema Ingester for " + theSchemaIngesterHint.orElse(null)))
         .configure(getConfigMapSupplier()) // configure it

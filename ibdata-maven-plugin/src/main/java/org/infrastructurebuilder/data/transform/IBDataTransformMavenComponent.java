@@ -117,7 +117,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       Map<String, IBDataTransformerSupplier> allTransformers,
       // All available IBDataDataStreamRecordFinalizerSupplier instances
       Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers,
-      Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers, IBStreamerFactory streamerFactory,
+      Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers, IBStreamerFactory streamerFactory,
       IBDataEngine engine) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
         streamerFactory);

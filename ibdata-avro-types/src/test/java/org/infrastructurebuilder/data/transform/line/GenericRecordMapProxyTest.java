@@ -70,8 +70,8 @@ public class GenericRecordMapProxyTest {
   @Before
   public void setUp() throws Exception {
     ConfigMap cms = new ConfigMap();
-    gds = new DefaultGenericDataSupplier(() -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(() -> log, gds).configure(cms);
+    gds = new DefaultGenericDataSupplier(wps, () -> log);
+    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     b = new GenericRecordBuilder(schema);
     r = new GenericData.Record(schema);

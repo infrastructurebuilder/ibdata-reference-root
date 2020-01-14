@@ -51,8 +51,8 @@ public class IBDataPackageMavenComponent extends AbstractIBDataMavenComponent {
       // The configuration map. Does not include config from components
       @Named(ConfigMapSupplier.MAVEN_WITH_SERVERS) ConfigMapSupplier mavenConfigMapSupplier,
       //
-      Map<String, IBDataIngesterSupplier> allIngesters,
-      Map<String, IBDataSetFinalizerSupplier<?>> allDSFinalizers,
+      Map<String, IBDataIngesterSupplier<?>> allIngesters,
+      Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers,
       final IBStreamerFactory notUsed) {
     super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers, notUsed);
   }

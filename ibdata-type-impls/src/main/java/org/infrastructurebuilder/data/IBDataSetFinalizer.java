@@ -20,9 +20,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 
 /**
@@ -51,7 +49,7 @@ public interface IBDataSetFinalizer<T extends DataSetEnabled> {
   }
 
   IBChecksumPathType finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> dataStreamSuppliers,
-      List<IBIngestedSchemaSupplier> schemaSuppliers, Optional<String> basedir) throws IOException;
+      List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir) throws IOException;
 
   Path getWorkingPath();
 
