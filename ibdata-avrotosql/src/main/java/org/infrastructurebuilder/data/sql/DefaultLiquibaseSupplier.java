@@ -83,12 +83,12 @@ public class DefaultLiquibaseSupplier extends AbstractConfigurableSupplier<Liqui
 
   @Override
   public DefaultLiquibaseSupplier configure(ConfigMapSupplier config) {
-    return new DefaultLiquibaseSupplier(() -> getWorkingPath().get(), () -> getLog(), getSuppliers(), config,
+    return new DefaultLiquibaseSupplier(getWps(), () -> getLog(), getSuppliers(), config,
         getDialectMapper(), config.get().getString(SOURCE_URL), ofNullable(config.get().getOrDefault(CREDS, null)));
   }
 
   @Override
-  protected Liquibase getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected Liquibase getInstance(PathSupplier workingPath, Optional<Object> in) {
     IBDataDatabaseDriverSupplier ds = getDialectMapper().getSupplierForURL(url)
         .orElseThrow(() -> new IBDataException("Failed to acquire IBDatabaseDialect for " + url));
     DataSource dataSource = ds.getDataSourceSupplier(url, creds)

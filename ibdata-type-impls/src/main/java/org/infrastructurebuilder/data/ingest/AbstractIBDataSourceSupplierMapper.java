@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,14 +56,14 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
   }
 
   @Override
-  public Path getWorkingPath() {
-    return wps.get();
+  public PathSupplier getWps() {
+    return wps;
   }
 
-  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier<Object> {
+  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier<String> {
 
-    public DefaultIBDataSourceSupplier(String id, IBDataSource<?> src, Path workingPath) {
-      super(id, src, workingPath);
+    public DefaultIBDataSourceSupplier(String id, IBDataSource<String> src, PathSupplier wps) {
+      super(id, src, wps);
     }
 
   }

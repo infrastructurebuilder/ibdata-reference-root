@@ -35,14 +35,17 @@ public class IBDataTransactionReport extends AbstractMavenReport {
   private static final String IB_DATA_TRANSACTION_REPORT_NAME = "IBData Transaction Report";
   private static final String IBDATA_TRX_REPORT = "ibdata-trx-report";
 
+  @Override
   public String getOutputName() {
     return IBDATA_TRX_REPORT;
   }
 
+  @Override
   public String getName(Locale locale) {
     return IB_DATA_TRANSACTION_REPORT_NAME;
   }
 
+  @Override
   public String getDescription(Locale locale) {
     return DESCRIPTION;
   }

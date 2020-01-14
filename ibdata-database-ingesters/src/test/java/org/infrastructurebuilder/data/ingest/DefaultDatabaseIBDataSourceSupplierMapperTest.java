@@ -79,9 +79,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
 
   private DefaultIBDataStreamIdentifierConfigBean b;
 
-  private IBDataSourceSupplier<Object> s;
+  private IBDataSourceSupplier<String> s;
 
-  private IBDataSource<Object> ds;
+  private IBDataSource<String> ds;
 
   private DefaultGenericDataSupplier gds;
 
@@ -97,11 +97,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
     c.put("url", theUrl);
     c.put("query", "SELECT * FROM TEST ORDER BY ID;");
     c.put(IBDataConstants.DATE_FORMATTER, "yyyy-MM-dd");
+
     t2e = new DefaultTypeToExtensionMapper();
     gds = new DefaultGenericDataSupplier(wps, () -> log);
     aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    jrws = new JooqAvroRecordWriterSupplier(() -> log, aus);
-    d = new DefaultDatabaseIBDataSourceSupplierMapper(() -> log, t2e, wps, jrws);
+    jrws = new JooqAvroRecordWriterSupplier(wps, () -> log, aus);
+    d = new DefaultDatabaseIBDataSourceSupplierMapper(wps, () -> log, t2e, jrws);
     b = new DefaultIBDataStreamIdentifierConfigBean();
     b.setDescription("desc");
     b.setId(UUID.randomUUID().toString());

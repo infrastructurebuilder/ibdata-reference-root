@@ -71,7 +71,7 @@ public class DefaultIBDataAvroUtilsSupplier extends AbstractConfigurableSupplier
   }
 
   @Override
-  protected IBDataAvroUtils getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected IBDataAvroUtils getInstance(PathSupplier wps, Optional<Object> in) {
     return new DefaultIBDataAvroUtils(getLog(), gds.get());
   }
 

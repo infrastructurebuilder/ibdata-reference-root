@@ -166,7 +166,7 @@ public class IBDataJooqUtilsTest {
 
     gds = new DefaultGenericDataSupplier(wps, () -> log);
     aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(() -> getLog(), aus).configure(cms);
+    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> getLog(), aus).configure(cms);
     w = w2.get();
     read = w.writeRecords(result);
   }

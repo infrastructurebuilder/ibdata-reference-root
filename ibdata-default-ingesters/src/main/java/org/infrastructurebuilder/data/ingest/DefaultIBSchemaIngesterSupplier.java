@@ -53,7 +53,7 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
   }
 
   @Override
-  final protected IBSchemaIngester getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  final protected IBSchemaIngester getInstance(PathSupplier workingPath, Optional<Object> in) {
     return new DefaultIBSchemaIngester(workingPath.get(), getLog(), getConfig().get());
   }
 

@@ -21,12 +21,10 @@ import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedMap;
-import java.util.function.Supplier;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -34,6 +32,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
+import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBSchemaIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
@@ -41,7 +40,6 @@ import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.IBStreamerFactory;
-import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -82,7 +80,7 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
       @Named(ConfigMapSupplier.MAVEN_WITH_SERVERS) final ConfigMapSupplier mavenConfigMapSupplier,
       final Map<String, IBDataIngesterSupplier<?>> allIngesters,
       // All DataSetFinalizer suppliers
-      final Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers,
+      final Map<String, IBDataSetFinalizerSupplier<?, ?>> allDSFinalizers,
       // Streamer factory
       final IBStreamerFactory streamerFactory,
       // DataSourceSupplier Factory
@@ -126,18 +124,23 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // do the ingestion
         .ingest(dsSupplierFactory.mapIngestionToSourceSuppliers(ingest));
 
-    //  Ingest ALL defined schemas in the Ingestion
+    // Ingest ALL defined schemas in the Ingestion
     Optional<String> theSchemaIngesterHint = ofNullable(requireNonNull(ingest).getSchemaIngester());
 
-    List<IBSchemaDAOSupplier> schemaSuppliers = theSchemaIngesterHint // Only one ingester for a dataset
-        .flatMap(j -> ofNullable(this.allSchemaIngesters.get(j))) // Get the supplier
-        .orElseThrow(() -> new MojoFailureException("No schema Ingester for " + theSchemaIngesterHint.orElse(null)))
-        .configure(getConfigMapSupplier()) // configure it
-        .get() // get the actual schema ingester, could be expensive
-        .ingest(ssSupplierFactory.mapIngestionToSuppliers(ingest)) // Produces sorted set
-        // which we then convert into an ordered no-dupes list
+    Optional<IBSchemaIngesterSupplier<?>> theSchemaIngester = theSchemaIngesterHint // Only one ingester for a dataset
+        .map(j -> {
+          return ofNullable(this.allSchemaIngesters.get(j))
+              .orElseThrow(() -> new IBDataException("No schema Ingester for " + j));
+        });
+
+    List<IBSchemaDAOSupplier> schemaSuppliers = theSchemaIngester // Only one ingester for a dataset
+        .map(si -> si.configure(getConfigMapSupplier()) // configure it
+            .get() // get the actual schema ingester, could be expensive
+            .ingest(ssSupplierFactory.mapIngestionToSuppliers(ingest)) // Produces sorted set
+            // which we then convert into an ordered no-dupes list
 //        .ingest(ingest.asSchemaIngestion())
-        .stream().collect(toList());
+            .stream().collect(toList()))
+        .orElse(Collections.emptyList());
     ;
 
     // TODO Fetch the schema

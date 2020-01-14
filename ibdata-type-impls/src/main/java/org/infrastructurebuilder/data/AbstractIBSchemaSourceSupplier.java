@@ -17,10 +17,12 @@ package org.infrastructurebuilder.data;
 
 import java.nio.file.Path;
 
+import org.infrastructurebuilder.util.config.PathSupplier;
+
 abstract public class AbstractIBSchemaSourceSupplier extends AbstractIBDataSupplier<IBSchemaSource>
     implements IBSchemaSourceSupplier {
 
-  public AbstractIBSchemaSourceSupplier(String id, IBSchemaSource src, Path workingPath) {
+  public AbstractIBSchemaSourceSupplier(String id, IBSchemaSource src, PathSupplier workingPath) {
     super(id, src, workingPath);
   }
 

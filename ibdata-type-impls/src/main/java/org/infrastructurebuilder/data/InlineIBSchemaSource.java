@@ -18,9 +18,9 @@ package org.infrastructurebuilder.data;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 import java.io.StringReader;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,10 +41,9 @@ public class InlineIBSchemaSource extends AbstractIBSchemaSource<Xpp3Dom> {
     super(wps, logger);
   }
 
-  private InlineIBSchemaSource(
-      PathSupplier wps
-      // logger
-      ,Logger logger
+  private InlineIBSchemaSource(PathSupplier wps
+  // logger
+      , Logger logger
       // id
       , String id
       // name
@@ -70,12 +69,11 @@ public class InlineIBSchemaSource extends AbstractIBSchemaSource<Xpp3Dom> {
     Optional<BasicCredentials> creds2 = empty();
     Optional<String> desc2 = empty();
     Optional<String> name2 = empty();
-    return new InlineIBSchemaSource(() -> getWorkingPath().get(), getLog(), id, name2, desc2, creds2, checksum2, metadata2, Optional.of(config));
+    return new InlineIBSchemaSource(getWps(), getLog(), id, name2, desc2, creds2, checksum2, metadata2, of(config));
   }
 
-
   @Override
-  protected List<IBChecksumPathType> getInstance(Optional<Path> workingPath, Optional<Xpp3Dom> inline) {
+  protected List<IBChecksumPathType> getInstance(PathSupplier workingPath, Optional<Xpp3Dom> inline) {
     PersistedIBSchemaXpp3Writer writer = new PersistedIBSchemaXpp3Writer();
     PersistedIBSchemaXpp3Reader reader = new PersistedIBSchemaXpp3Reader();
     PersistedIBSchema v = IBDataException.cet.withReturningTranslation(

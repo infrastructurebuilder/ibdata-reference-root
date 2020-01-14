@@ -17,18 +17,18 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Optional.empty;
 
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DefaultTestingSource extends AbstractIBDataSource<Object> {
+public class DefaultTestingSource extends AbstractIBDataSource<String> {
   public final static Logger log = LoggerFactory.getLogger(DefaultTestingSource.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
 
@@ -52,7 +52,7 @@ public class DefaultTestingSource extends AbstractIBDataSource<Object> {
   }
 
   @Override
-  protected List<IBChecksumPathType> getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected List<IBChecksumPathType> getInstance(PathSupplier workingPath, Optional<String> in) {
     return Collections.emptyList();
   }
 

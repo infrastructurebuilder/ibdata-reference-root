@@ -61,7 +61,7 @@ abstract public class AbstractIBSchemaSourceSupplierMapper implements IBSchemaSo
 
   public class DefaultIBSchemaSourceSupplier extends AbstractIBSchemaSourceSupplier {
 
-    public DefaultIBSchemaSourceSupplier(String id, IBSchemaSource src, Path workingPath) {
+    public DefaultIBSchemaSourceSupplier(String id, IBSchemaSource src, PathSupplier workingPath) {
       super(id, src, workingPath);
     }
 

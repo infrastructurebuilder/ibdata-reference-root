@@ -55,7 +55,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   }
 
   @Override
-  protected IBDataIngester getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected IBDataIngester getInstance(PathSupplier workingPath, Optional<Object> in) {
     return new DefaultIBDataIngester(workingPath.get(), getLog(), getConfig().get());
   }
 

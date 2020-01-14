@@ -19,13 +19,15 @@ import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
 
+import org.infrastructurebuilder.util.config.PathSupplier;
+
 public class AbstractIBDataSupplier<T> {
 
   protected final T src;
   protected final String id;
-  protected final Path workingPath;
+  protected final PathSupplier workingPath;
 
-  public AbstractIBDataSupplier(String id, T src, Path workingPath) {
+  public AbstractIBDataSupplier(String id, T src, PathSupplier workingPath) {
     this.id = requireNonNull(id);
     this.src = requireNonNull(src);
     this.workingPath = requireNonNull(workingPath);

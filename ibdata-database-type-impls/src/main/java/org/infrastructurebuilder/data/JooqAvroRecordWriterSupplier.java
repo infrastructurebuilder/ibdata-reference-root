@@ -15,9 +15,12 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.lang.String.format;
 import static java.nio.file.Files.createTempFile;
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.io.IOException;
@@ -37,47 +40,65 @@ import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
 import org.jooq.Record;
 import org.slf4j.Logger;
 
 @Named(JooqAvroRecordWriterSupplier.NAME)
-public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<JooqRecordWriter, ConfigMap,Object> {
+public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<JooqRecordWriter, ConfigMap, Object> {
   static final String NAME = "jooq-record-writer";
   public final static String SCHEMA = "schema";
   public final static String TARGET = "target";
   private final IBDataAvroUtilsSupplier aus;
-  private final Optional<Schema> schema;
+  private final Schema schema;
 
   @Inject
-  public JooqAvroRecordWriterSupplier(LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
-    this(null, l, aus, null, null);
+  public JooqAvroRecordWriterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
+      IBDataAvroUtilsSupplier aus) {
+    this(wps, null, l, aus, null);
   }
 
-  private JooqAvroRecordWriterSupplier(ConfigMap config, LoggerSupplier l, IBDataAvroUtilsSupplier aus, Path targetDir,
-      Schema targetSchema) {
-    super(() -> targetDir, config, l);
+  private JooqAvroRecordWriterSupplier(PathSupplier wps, ConfigMap config, LoggerSupplier l,
+      IBDataAvroUtilsSupplier aus, Schema targetSchema) {
+    super(wps, config, l);
     this.aus = Objects.requireNonNull(aus);
-    this.schema = Optional.ofNullable(targetSchema);
+    this.schema = targetSchema;
   }
 
   @Override
   public JooqAvroRecordWriterSupplier configure(ConfigMap config) {
     IBDataAvroUtilsSupplier a = (IBDataAvroUtilsSupplier) this.aus.configure(config);
-    Path workingPath = config.get(TARGET);
-    Optional<String> schemaString = Optional.ofNullable(config.getString(SCHEMA));
-    Schema schema = schemaString.map(ss -> a.get().avroSchemaFromString(ss)).orElse(null);
-    return new JooqAvroRecordWriterSupplier(config, () -> getLog(), a, workingPath, schema);
+    return new JooqAvroRecordWriterSupplier(
+        // My working path supplier
+        getWps()
+        // The config
+        , config
+        // Logger supplier
+        , () -> getLog()
+        // Avro utils supplier
+        , a
+        // The schema (or die)
+        , ofNullable(
+            // Schema string
+            config.getString(SCHEMA))
+                // Map to a schema
+                .map(ss -> a.get().avroSchemaFromString(ss))
+                // or die
+                .orElseThrow(
+                    () -> new IBDataException(format("No Schema available in % instance", this.getClass().getName()))));
   }
 
   @Override
-  protected JooqRecordWriter getInstance(Optional<Path> workingPath, Optional<Object> in) {
-    return new JooqRecordWriter(getLog(), getWorkingPath().orElse(null), this.schema.orElse(null), this.aus.get());
+  protected JooqRecordWriter getInstance(PathSupplier workingPath, Optional<Object> in) {
+    return new JooqRecordWriter(getLog(), workingPath.get(), this.schema, this.aus.get());
   }
 
   /**
-   * Writes Jooq Record instances to a stream as Avro GenericRecord instances using the mapped Schema and optional GenericData
+   * Writes Jooq Record instances to a stream as Avro GenericRecord instances
+   * using the mapped Schema and optional GenericData
+   *
    * @author mykel.alvis
    *
    */
@@ -97,7 +118,7 @@ public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<J
 
     @Override
     public IBChecksumPathType writeRecords(Iterable<Record> result) {
-      //    GenericData gd = new MapProxyGenericData(this.f);
+      // GenericData gd = new MapProxyGenericData(this.f);
       Path path = cet.withReturningTranslation(() -> createTempFile(workingPath, "JooqRecords", ".avro"));
       try (DataFileWriter<GenericRecord> w = f.fromSchemaAndPathAndTranslator(path, schema)) {
         for (Record r : result) {

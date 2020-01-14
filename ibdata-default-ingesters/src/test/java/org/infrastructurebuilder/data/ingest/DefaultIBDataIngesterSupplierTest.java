@@ -89,7 +89,7 @@ public class DefaultIBDataIngesterSupplierTest {
   private IBIngestion i;
   private IBDataSourceSupplierMapper dssm, dssmFail, dssmPass;
   private TypeToExtensionMapper t2e = new DefaultTypeToExtensionMapper();
-  private IBDataSourceSupplier<Object> k;
+  private IBDataSourceSupplier<String> k;
   private DefaultIBDataSetIngestionFinalizerSupplier ibdfs;
   private IBDataSet ibdataset;
   private Date now = new Date();
@@ -134,7 +134,7 @@ public class DefaultIBDataIngesterSupplierTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
+        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
       }
 
       @Override
@@ -146,7 +146,7 @@ public class DefaultIBDataIngesterSupplierTest {
     dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
         IBDataSource ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(filesDotTxtChecksum);
@@ -161,7 +161,7 @@ public class DefaultIBDataIngesterSupplierTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
+        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
       }
 
       @Override
@@ -170,7 +170,7 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    k = (IBDataSourceSupplier<Object>) dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
+    k = (IBDataSourceSupplier<String>) dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
     dss.put("X", k);
   }
 
@@ -180,7 +180,7 @@ public class DefaultIBDataIngesterSupplierTest {
 
   @Test
   public void testType() {
-    IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source");
+    IBDataSource<String> ibds = new DefaultTestingSource("dummy:source");
     assertFalse(ibds.getMimeType().isPresent());
   }
 

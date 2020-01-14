@@ -55,7 +55,7 @@ abstract public class AbstractIBDataSet extends DataSet implements IBDataSet {
       return new Supplier<IBDataSchemaIdentifier>() {
         @Override
         public IBDataSchemaIdentifier get() {
-          return (IBDataSchemaIdentifier) k;
+          return k;
         }
       };
     }).collect(toList());

@@ -49,11 +49,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.avro.Schema;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBDataJooqUtils;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
@@ -89,29 +86,30 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   private final JooqAvroRecordWriterSupplier jrws;
 
   @Inject
-  public DefaultDatabaseIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, /* IBDataAvroUtilsSupplier gds, */
+  public DefaultDatabaseIBDataSourceSupplierMapper(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,LoggerSupplier l, TypeToExtensionMapper t2e,
+       /* IBDataAvroUtilsSupplier gds, */
       JooqAvroRecordWriterSupplier jrws) {
-    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
+    super(requireNonNull(l).get(), requireNonNull(t2e), wps);
 //    this.aus = requireNonNull(gds);
     this.jrws = requireNonNull(jrws);
   }
 
+  @Override
   public List<String> getHeaders() {
     return HEADERS;
   }
 
   @Override
-  public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+  public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId,
-        new DefaultDatabaseIBDataSource(() -> getWorkingPath(), getLog(), temporaryId,
+        new DefaultDatabaseIBDataSource(getWps(), getLog(), temporaryId,
             v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, empty(),
             ofNullable(v.getChecksum()), of(v.getMetadata()), empty(), v.getName(), v.getDescription(), getMapper(),
             /* this.aus, */ this.jrws),
-        getWorkingPath());
+        getWps());
   }
 
-  public class DefaultDatabaseIBDataSource extends AbstractIBDataSource<Object> implements AutoCloseable {
+  public class DefaultDatabaseIBDataSource extends AbstractIBDataSource<String> implements AutoCloseable {
 
     private final TypeToExtensionMapper t2e;
 
@@ -142,14 +140,13 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     @Override
     public DefaultDatabaseIBDataSource configure(ConfigMap config) {
-      return new DefaultDatabaseIBDataSource(() -> getWorkingPath().get(), getLog(), getId(), getSourceURL(), false,
+      return new DefaultDatabaseIBDataSource(getWps(), getLog(), getId(), getSourceURL(), false,
           getCredentials(), getChecksum(), getMetadata(), of(config), getName(), getDescription(), t2e,
-          /* (IBDataAvroUtilsSupplier) this.aus.configure(config), */
-          (JooqAvroRecordWriterSupplier) this.jwrs.configure(config));
+          this.jwrs.configure(config));
     }
 
     @Override
-    public List<IBChecksumPathType> getInstance(Optional<Path> workingPath, Optional<Object> in) {
+    public List<IBChecksumPathType> getInstance(PathSupplier workingPath, Optional<String> in) {
       if (conn == null) {
         String url = getSourceURL();
         BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", empty()));

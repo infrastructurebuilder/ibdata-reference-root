@@ -38,6 +38,7 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
 import org.infrastructurebuilder.util.files.IBChecksumPathType;
@@ -100,7 +101,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
       }
 
       @Override
-      protected IBDataSetFinalizer<Dummy> getInstance(Optional<Path> workingPath, Optional<Object> nothing) {
+      protected IBDataSetFinalizer<Dummy> getInstance(PathSupplier workingPath, Optional<Object> nothing) {
         return new DummyFinalizer(getConfig().get(), getConfig().get().get("path"));
       }
 

@@ -49,7 +49,7 @@ public class DefaultGenericDataSupplier extends AbstractConfigurableSupplier<Gen
   }
 
   @Override
-  protected GenericData getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected GenericData getInstance(PathSupplier workingPath, Optional<Object> in) {
     Formatters f = new Formatters(getConfig());
     return new MapProxyGenericData(f);
   }

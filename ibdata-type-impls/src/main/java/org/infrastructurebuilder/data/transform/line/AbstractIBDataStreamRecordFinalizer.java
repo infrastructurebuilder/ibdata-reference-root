@@ -81,6 +81,7 @@ abstract public class AbstractIBDataStreamRecordFinalizer<T, O> implements IBDat
     return id;
   }
 
+  @Override
   public Path getWorkingPath() {
     return workingPath;
   }

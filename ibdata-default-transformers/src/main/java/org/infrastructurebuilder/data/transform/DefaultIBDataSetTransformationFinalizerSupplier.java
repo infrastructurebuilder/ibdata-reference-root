@@ -72,7 +72,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
   }
 
   @Override
-  protected TransformationIBDataSetFinalizer getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected TransformationIBDataSetFinalizer getInstance(PathSupplier workingPath, Optional<Object> in) {
     return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         getWps().get());
   }

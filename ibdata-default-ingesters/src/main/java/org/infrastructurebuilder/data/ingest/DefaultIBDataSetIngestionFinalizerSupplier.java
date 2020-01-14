@@ -70,7 +70,7 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
   }
 
   @Override
-  protected IngestionIBDataSetFinalizer getInstance(Optional<Path> workingPath, Optional<Object> in) {
+  protected IngestionIBDataSetFinalizer getInstance(PathSupplier workingPath, Optional<Object> in) {
     return new IngestionIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         workingPath.get());
   }

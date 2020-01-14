@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.infrastructurebuilder.data.DataSetEnabled;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
@@ -52,7 +51,8 @@ public class DefaultIBIngestion implements  IBIngestion {
 
   @Override
   public String getSchemaIngester() {
-    return ofNullable(this.schemaIngester).orElse(getId());
+//    return ofNullable(this.schemaIngester).orElse(getId());
+    return this.schemaIngester;
   }
 
   @Override

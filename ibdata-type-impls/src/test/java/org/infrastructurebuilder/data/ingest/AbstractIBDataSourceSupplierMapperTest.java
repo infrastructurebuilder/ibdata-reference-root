@@ -75,7 +75,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     wps.finalize();
   }
 
-  private IBDataIngesterSupplier<Object> dis;
+  private IBDataIngesterSupplier<String> dis;
   private ConfigMap configMap;
   private DefaultConfigMapSupplier cms;
   private IBDataIngester c;
@@ -117,8 +117,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+        IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public List<IBChecksumPathType> get() {
             try (InputStream source = newInputStream(f)) {
               IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
@@ -128,7 +128,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
+        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
       }
 
       @Override
@@ -140,8 +140,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+        IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(new Checksum("ABCD"));
           };
@@ -155,7 +155,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
+        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
       }
 
       @Override
@@ -167,8 +167,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<Object> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource<Object> ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+        IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(filesDotTxtChecksum);
           };
@@ -182,7 +182,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWorkingPath());
+        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
       }
 
       @Override

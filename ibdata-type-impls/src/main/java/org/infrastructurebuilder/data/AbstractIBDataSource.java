@@ -41,11 +41,11 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
   private final boolean expandArchives;
 
   public AbstractIBDataSource(
-      // Wprlomg target
+      // PathSupplier target
       PathSupplier wps,
       // Logger
       Logger logger
-  // Temp id
+      // Temp id
       , String id
       // "URL" or JDBC URL etc
       , String source

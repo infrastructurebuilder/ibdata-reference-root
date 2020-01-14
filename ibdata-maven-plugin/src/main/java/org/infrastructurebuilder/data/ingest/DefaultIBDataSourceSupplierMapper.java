@@ -70,6 +70,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     this.archiverManager = requireNonNull(am);
   }
 
+  @Override
   public List<String> getHeaders() {
     return HEADERS;
   }
@@ -77,7 +78,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   @Override
   public IBDataSourceSupplier<?> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
     return new DefaultIBDataSourceSupplier(temporaryId // Temp id for this
-        , new DefaultIBDataSource(getLog() // Log (always)
+        , new DefaultIBDataSource(getWps(), getLog() // Log (always)
             , v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)) // URL
             , v.isExpandArchives() // Expand archives
             , v.getName() // Name
@@ -88,43 +89,41 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
             , wgs // wgetter supplier
             , this.archiverManager // archiver manager (for expanding archives)
             , getMapper()) // Mapper
-        , getWorkingPath());
+        , getWps());
   }
 
   public class DefaultIBDataSource extends AbstractIBDataSource<String> {
-
-    private final Path targetPath;
     private final Optional<String> mimeType;
     private final WGetterSupplier wgs;
     private final ArchiverManager am;
     private final TypeToExtensionMapper mapper;
     private List<IBChecksumPathType> read;
 
-    private DefaultIBDataSource(Logger log, String id, String sourceUrl, boolean expandArchives,
+    private DefaultIBDataSource(PathSupplier wps, Logger log, String id, String sourceUrl, boolean expandArchives,
         Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Metadata> metadata,
-        Optional<ConfigMap> additionalConfig, Path targetPath, Optional<String> name, Optional<String> description,
+        Optional<ConfigMap> additionalConfig, Optional<String> name, Optional<String> description,
         Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
-      super(()-> targetPath, log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata, additionalConfig);
-      this.targetPath = targetPath;
+      super(wps, log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata,
+          additionalConfig);
       this.mimeType = mimeType;
       this.wgs = requireNonNull(wgs);
       this.am = requireNonNull(am);
       this.mapper = requireNonNull(mapper);
     }
 
-    public DefaultIBDataSource(Logger log, String source, boolean expandArchives, Optional<String> name,
+    public DefaultIBDataSource(PathSupplier wps, Logger log, String source, boolean expandArchives, Optional<String> name,
         Optional<String> description, Optional<Checksum> checksum, Optional<Metadata> metadata,
         Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
-      this(log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), null, name,
+      this(wps, log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), name,
           description, targetType, wgs, am, mapper);
     }
 
     @Override
     public IBDataSource<String> configure(ConfigMap config) {
-      return new DefaultIBDataSource(getLog(), getId(), getSourceURL(), isExpandArchives(), getCredentials(),
-          getChecksum(), getMetadata(), of(config), getWorkingPath().get(), getName(), getDescription(), getMimeType(),
-          this.wgs, this.am, this.mapper);
+      return new DefaultIBDataSource(getWps(), getLog(), getId(), getSourceURL(), isExpandArchives(), getCredentials(),
+          getChecksum(), getMetadata(), of(config), getName(), getDescription(), getMimeType(), this.wgs, this.am,
+          this.mapper);
     }
 
     @Override
@@ -133,7 +132,8 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     @Override
-    public List<IBChecksumPathType> getInstance(Optional<Path> workingPath, Optional<String> in) {
+    public List<IBChecksumPathType> getInstance(PathSupplier workingPath, Optional<String> in) {
+      Path targetPath = getWps().get();
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {
           List<IBChecksumPathType> localRead;

@@ -269,6 +269,7 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
     return result;
   }
 
+  @Override
   protected IBDataPackageMavenComponent getComponent() {
     return component;
   }
