@@ -18,10 +18,10 @@ package org.infrastructurebuilder.data.archiver;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.util.config.TSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 
 @Named(IBDataLateBindingFinalizerConfigSupplier.NAME)
-public class IBDataLateBindingFinalizerConfigSupplier extends TSupplier<IBChecksumPathType> {
+public class IBDataLateBindingFinalizerConfigSupplier extends TSupplier<IBResource> {
 
   public static final String NAME = "ibdata-config-late";
 

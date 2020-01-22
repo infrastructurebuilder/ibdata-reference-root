@@ -17,8 +17,6 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 
-import java.nio.file.Path;
-
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 public class AbstractIBDataSupplier<T> {

@@ -30,9 +30,9 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.model.IBCPTInputSource;
-import org.infrastructurebuilder.util.files.model.io.xpp3.IBChecksumPathTypeModelXpp3ReaderEx;
+import org.infrastructurebuilder.util.files.model.io.xpp3.IBResourceModelXpp3ReaderEx;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -43,8 +43,8 @@ import org.junit.platform.commons.logging.LoggerFactory;
 public class InjectIBData implements ParameterResolver {
   private final static Logger log = LoggerFactory.getLogger(InjectIBData.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
-  private final static IBChecksumPathTypeModelXpp3ReaderEx reader = new IBChecksumPathTypeModelXpp3ReaderEx();
-  public final static Function<Path, ? extends IBChecksumPathType> readIBCPT = (marker) -> {
+  private final static IBResourceModelXpp3ReaderEx reader = new IBResourceModelXpp3ReaderEx();
+  public final static Function<Path, ? extends IBResource> readIBCPT = (marker) -> {
     try (InputStream in = Files.newInputStream(marker, NOFOLLOW_LINKS)) {
       return cet.withReturningTranslation(() -> reader.read(in, true, new IBCPTInputSource()));
     } catch (IOException e) {
@@ -63,7 +63,7 @@ public class InjectIBData implements ParameterResolver {
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     // FIXME how else to get WP other than set system property+write marker file
-    IBChecksumPathType v = readIBCPT.apply(wps.getRoot().resolve(MARKER_FILE).toAbsolutePath());
+    IBResource v = readIBCPT.apply(wps.getRoot().resolve(MARKER_FILE).toAbsolutePath());
     URL u = cet.withReturningTranslation(() -> v.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL());
     log.debug(() -> "About to read " + u.toExternalForm());
     return mapDataSetToDefaultIBDataSet.apply(u)

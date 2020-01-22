@@ -50,7 +50,7 @@ public class IBDataIngestMavenComponentTest {
   private MavenConfigMapSupplier cms;
   private DefaultIBIngestion config;
   private IBDataIngester ingester;
-  private Map<String, IBDataSourceSupplier> dataSourceSuppliers;
+  private Map<String, IBDataSourceSupplier<String>> dataSourceSuppliers;
   private DefaultIBDataSetIdentifier ds, dsMulti;
   private ArrayList<DefaultIBDataStreamIdentifierConfigBean> streams;
   private DefaultIBDataStreamIdentifierConfigBean ds1;

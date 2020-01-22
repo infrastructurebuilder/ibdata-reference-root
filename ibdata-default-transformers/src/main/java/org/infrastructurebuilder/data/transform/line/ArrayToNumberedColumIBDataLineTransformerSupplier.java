@@ -50,7 +50,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
 
   @Override
   public ArrayToNumberedColumIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArrayToNumberedColumIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new ArrayToNumberedColumIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

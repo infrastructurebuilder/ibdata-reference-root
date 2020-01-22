@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.infrastructurebuilder.util.artifacts.Checksum;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 
 public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
@@ -48,7 +48,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private String temporaryId;
 
   public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource<?> source,
-      IBChecksumPathType ibPathChecksumType, Date now) {
+      IBResource ibPathChecksumType, Date now) {
     String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
     Path localPath = ibPathChecksumType.getPath();
     String size = ibPathChecksumType.size().toString();

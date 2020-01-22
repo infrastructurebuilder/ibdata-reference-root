@@ -21,14 +21,14 @@ import java.nio.file.Path;
 
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBResource;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 
 public class AbstractIBDataConfigTestSetup {
   protected IBDataLateBindingFinalizerConfigSupplier c;
   protected Logger logger;
-  private IBChecksumPathType t;
+  private IBResource t;
   private Path p;
   private Checksum csum;
   private String type;
@@ -36,7 +36,7 @@ public class AbstractIBDataConfigTestSetup {
 
  public void abstractSetup() {
    Path p1 = wps.get();
-   t= DefaultIBChecksumPathType.from(p1, new Checksum(), APPLICATION_IBDATA_ARCHIVE);
+   t= DefaultIBResource.from(p1, new Checksum(), APPLICATION_IBDATA_ARCHIVE);
    c = new IBDataLateBindingFinalizerConfigSupplier();
    c.setT(t);
  }

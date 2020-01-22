@@ -42,7 +42,7 @@ public class DefaultTestIBDataRecordTransformerSupplierStringToString
 
   @Override
   protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new StringToStringRecordTransformer(getWps().get(), getLogger());
+    return new StringToStringRecordTransformer(getWorkingPathSupplier().get(), getLogger());
   }
 
   public static class StringToStringRecordTransformer extends AbstractIBDataRecordTransformer<String, String> {

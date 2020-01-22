@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import liquibase.database.core.MySQLDatabase;
-import liquibase.sdk.database.MockDatabase;
 
 public class AbstractIBDatabaseDriverSupplierTest {
 
@@ -107,7 +105,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   @Test(expected = SQLException.class)
   public void testFailingConnection1() throws SQLException {
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(JDBC_MYSQL, Optional.empty());
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, Optional.of(new DefaultBasicCredentials("SA", Optional.of("")))));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
@@ -115,7 +113,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
   @Test(expected = SQLException.class)
   public void testFailingConnection2a() throws SQLException {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.of("B"));
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(JDBC_MYSQL, Optional.of(creds));
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, Optional.empty()));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
@@ -123,7 +121,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
   @Test(expected = SQLException.class)
   public void testFailingConnection2b() throws SQLException {
     BasicCredentials creds = new DefaultBasicCredentials("A", Optional.empty());
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(JDBC_MYSQL, Optional.of(creds));
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, Optional.empty()));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }

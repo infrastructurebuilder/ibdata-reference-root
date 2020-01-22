@@ -46,7 +46,7 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
 
   @Override
   public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
-    return new StringTrimIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new StringTrimIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

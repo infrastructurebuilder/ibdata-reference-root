@@ -35,12 +35,6 @@ public class DefaultIBDatabaseDialectMapper implements IBDatabaseDialectMapper {
   }
 
   @Override
-  @Deprecated
-  public final Optional<IBDataDatabaseDriverSupplier> getSupplier(String key) {
-    return ofNullable(suppliers.get(requireNonNull(key,"Supplier key")));
-  }
-
-  @Override
   public final Optional<IBDataDatabaseDriverSupplier> getSupplierForURL(String jdbcURL) {
     return suppliers.values().stream().filter(s -> s.respondsTo(jdbcURL)).findAny();
   }

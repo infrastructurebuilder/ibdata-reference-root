@@ -17,7 +17,7 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -42,7 +42,7 @@ import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.ThrowingIBChecksumType;
 import org.infrastructurebuilder.util.files.ThrowingInputStream;
 import org.joor.Reflect;
@@ -84,7 +84,7 @@ public class DefaultIBDataStreamTest {
   private Path p1;
   private DefaultIBDataStream ib2;
   private DataStream ds;
-  private IBChecksumPathType cType;
+  private IBResource cType;
   private DataStream ds2;
   private final static Date now = new Date();
   private static TestingPathSupplier wps = new TestingPathSupplier();

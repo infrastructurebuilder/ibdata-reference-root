@@ -17,40 +17,37 @@ package org.infrastructurebuilder.data;
 
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
-import java.nio.file.Path;
-import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.util.LoggerSupplier;
-import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
-import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
+import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 @Named
-public class DefaultGenericDataSupplier extends AbstractConfigurableSupplier<GenericData, ConfigMap, Object>
+public class DefaultGenericDataSupplier extends AbstractCMSConfigurableSupplier<GenericData, Formatters>
     implements GenericDataSupplier {
 
   @Inject
   public DefaultGenericDataSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
-    super(wps, null, l);
+    super(wps, null, l, null);
   }
 
-  private DefaultGenericDataSupplier(PathSupplier wps, ConfigMap config, LoggerSupplier l) {
-    super(wps, config, l);
-  }
-
-  @Override
-  public GenericDataSupplier configure(ConfigMap config) {
-    return new DefaultGenericDataSupplier(getWps(), config, () -> getLog());
+  private DefaultGenericDataSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l, Formatters f) {
+    super(wps, config, l, f);
   }
 
   @Override
-  protected GenericData getInstance(PathSupplier workingPath, Optional<Object> in) {
-    Formatters f = new Formatters(getConfig());
+  public DefaultGenericDataSupplier getConfiguredSupplier(ConfigMapSupplier config) {
+    return new DefaultGenericDataSupplier(getWorkingPathSupplier(), config, () -> getLog(),
+        new Formatters(config.get()));
+  }
+
+  @Override
+  protected GenericData getInstance(PathSupplier workingPath, Formatters f) {
     return new MapProxyGenericData(f);
   }
 

@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,7 +42,7 @@ import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,11 +67,11 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
 
   @Override
   public DefaultIBDataSetIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), getWps(), cms, getTypeToExtensionMapper());
+    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), getWorkingPathSupplier(), cms, getTypeToExtensionMapper());
   }
 
   @Override
-  protected IngestionIBDataSetFinalizer getInstance(PathSupplier workingPath, Optional<Object> in) {
+  protected IngestionIBDataSetFinalizer getInstance(PathSupplier workingPath, Object in) {
     return new IngestionIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         workingPath.get());
   }
@@ -82,7 +83,7 @@ public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSe
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi2, IBIngestion target, List<IBDataStreamSupplier> ibdssList,
+    public IBResource finalize(IBDataSet dsi2, IBIngestion target, List<IBDataStreamSupplier> ibdssList,
         List<IBSchemaDAOSupplier> schemaList, Optional<String> basedir) throws IOException {
       DataSet d = target.asDataSet();
       Map<String, IBDataSchemaIngestionConfig> p = target.asSchemaIngestion();

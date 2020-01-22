@@ -28,8 +28,10 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
+import org.infrastructurebuilder.data.CredentialsFactory;
 import org.infrastructurebuilder.data.IBDataModelUtils;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.SettingsSupplier;
+import org.infrastructurebuilder.util.files.IBResource;
 
 @Mojo(name = "ingest", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true)
 public class IBDataDataStreamIngestMojo extends AbstractIBDataMojo {
@@ -38,7 +40,10 @@ public class IBDataDataStreamIngestMojo extends AbstractIBDataMojo {
   private DefaultIBIngestion ingest;
 
   @Component
-  IBDataIngestMavenComponent component;
+  private IBDataIngestMavenComponent component;
+
+  @Component
+  private CredentialsFactory cf;
 
   @Override
   protected IBDataIngestMavenComponent getComponent() {
@@ -52,7 +57,7 @@ public class IBDataDataStreamIngestMojo extends AbstractIBDataMojo {
     final Map pc = getPluginContext();
     if (pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoFailureException("Transformation and Ingestion cannot be performed in the same module build.");
-    IBChecksumPathType theResult = component.ingest(ingest);
+    IBResource theResult = component.ingest(ingest.setFactory(cf));
     getLog().debug("Class of the results is " + theResult.getClass());
     Path p = writeMarker(IBDataModelUtils.remodel(theResult));
     getLog().debug("Marker written to " + p);

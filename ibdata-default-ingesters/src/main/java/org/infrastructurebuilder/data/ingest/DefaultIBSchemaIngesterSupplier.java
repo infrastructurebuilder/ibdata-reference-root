@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -39,7 +40,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 @Named(DefaultIBSchemaIngesterSupplier.NAME)
-public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSupplier<Object> {
+public class DefaultIBSchemaIngesterSupplier<T> extends AbstractIBSchemaIngesterSupplier<T> {
 
   public static final String NAME = "default";
 
@@ -53,13 +54,14 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
   }
 
   @Override
-  final protected IBSchemaIngester getInstance(PathSupplier workingPath, Optional<Object> in) {
+  final protected IBSchemaIngester getInstance(PathSupplier workingPath, T in) {
     return new DefaultIBSchemaIngester(workingPath.get(), getLog(), getConfig().get());
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
-  public DefaultIBSchemaIngesterSupplier getConfiguredSupplier(ConfigMapSupplier config) {
-    return new DefaultIBSchemaIngesterSupplier(getWps(), () -> getLog(), config);
+  public DefaultIBSchemaIngesterSupplier<T> getConfiguredSupplier(ConfigMapSupplier config) {
+    return new DefaultIBSchemaIngesterSupplier(getWorkingPathSupplier(), () -> getLog(), config);
   }
 
   public final class DefaultIBSchemaIngester extends AbstractIBSchemaIngester {
@@ -68,17 +70,6 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
       super(workingPath, log, config);
     }
 
-//    public List<IBDataStreamSupplier> dataingest(SortedMap<String, IBDataSourceSupplier> dssList) {
-//      Date now = new Date(); // Ok for "now" (Get it?)
-//      return requireNonNull(dssList, "List of IBDataSourceSupplier instances")
-//          // SortedMap values come out in order, because that's how it works
-//          .values().stream()
-//          // Get the IBDataSource
-//          .map(IBDataSourceSupplier::get)
-//          // Get CONFIGURED source
-//          .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get()))
-//          // map configured source to
-//          .flatMap(source -> {
 //            return source.get().stream()
 //                .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));
 //          })
@@ -87,23 +78,19 @@ public class DefaultIBSchemaIngesterSupplier extends AbstractIBSchemaIngesterSup
 //    }
 
     @Override
-    public SortedSet<IBSchemaDAOSupplier> ingest(
-        SortedMap<String, IBSchemaSourceSupplier> dss) {
-      Date now = new Date(); // Ok for "now" (Get it?)
+    public SortedSet<IBSchemaDAOSupplier> ingest(SortedMap<String, IBSchemaSourceSupplier> dss) {
       return requireNonNull(dss, "Map of IBDataSchemaIngestionConfig instances")
           // SortedMap values come out in order, because that's how it works
           .values().stream()
           // Get the IBDataSchemaIngestionConfig
-          .map(siConfig -> {
-            return (IBSchemaDAOSupplier) null;
+          .map(sourceSupplier -> {
+           return DefaultIBSchemaDAOSupplierBuilder.newInstance()
+                // Capture this source
+                .withSource(sourceSupplier.get())
+                // Carry over config
+                .withIngestionConfig(sourceSupplier.getIngestionConfig()).build();
+//            return (IBSchemaDAOSupplier) null;
           })
-//          // Get CONFIGURED source
-//          .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get()))
-//          // map configured source to
-//          .flatMap(source -> {
-//            return source.get().stream()
-//                .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));
-//          })
           // Collect to an ordered list
           .collect(Collectors.toCollection(TreeSet::new));
     }

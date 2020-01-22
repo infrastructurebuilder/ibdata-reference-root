@@ -32,6 +32,7 @@ import javax.inject.Named;
  */
 @Named
 public class DefaultIBStreamerFactory implements IBStreamerFactory {
+  @SuppressWarnings("rawtypes")
   protected List<IBDataSpecificStreamFactory> sortedSuppliers;
 
   @Inject

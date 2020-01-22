@@ -22,7 +22,7 @@ import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToTempChecksumAndPath;
 
 import java.io.File;
 import java.net.ProxySelector;
@@ -81,8 +81,8 @@ import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.DefaultIBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBResource;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
@@ -145,7 +145,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     }
 
     @Override
-    synchronized public final Optional<List<IBChecksumPathType>> collectCacheAndCopyToChecksumNamedFile(
+    synchronized public final Optional<List<IBResource>> collectCacheAndCopyToChecksumNamedFile(
         boolean deleteExistingCacheIfPresent, Optional<BasicCredentials> creds, Path outputPath, String sourceString,
         Optional<Checksum> checksum, Optional<String> type, int retries, int readTimeOut, boolean skipCache,
         boolean expandArchives) {
@@ -168,11 +168,11 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       wget.setSkipCache(skipCache);
       wget.setCheckSignature(checksum.isPresent());
       wget.setMimeType(type.orElse(null));
-      Optional<List<IBChecksumPathType>> o = cet.withReturningTranslation(() -> this.wget.downloadIt());
+      Optional<List<IBResource>> o = cet.withReturningTranslation(() -> this.wget.downloadIt());
       if (expandArchives) {
         o.ifPresent(c -> {
-          IBChecksumPathType src = c.get(0);
-          List<IBChecksumPathType> l = expand(workingDir, src,
+          IBResource src = c.get(0);
+          List<IBResource> l = expand(workingDir, src,
               src.getSourceURL().map(URL::toExternalForm).map(n -> "zip:" + n));
           c.addAll(l);
         });
@@ -181,10 +181,10 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     }
 
     @Override
-    public List<IBChecksumPathType> expand(Path tempPath, IBChecksumPathType src, Optional<String> oSource) {
+    public List<IBResource> expand(Path tempPath, IBResource src, Optional<String> oSource) {
 
       Path source = requireNonNull(src).getPath();
-      List<IBChecksumPathType> l = new ArrayList<>();
+      List<IBResource> l = new ArrayList<>();
       Path targetDir = cet.withReturningTranslation(() -> Files.createTempDirectory(IBDATA_PREFIX)).toAbsolutePath();
       File outputFile = source.toFile();
       File outputDirectory = targetDir.toFile();
@@ -205,7 +205,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         for (Path p : IBUtils.allFilesInTree(targetDir)) {
           String tPath = cet.withReturningTranslation(() -> p.toUri().toURL().toExternalForm())
               .substring(rPath.length());
-          IBChecksumPathType q = cet
+          IBResource q = cet
               .withReturningTranslation(() -> copyToTempChecksumAndPath(tempPath, p, oSource, tPath));
           l.add(q);
         }
@@ -414,7 +414,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     // return;
     // }
     // NOTE FYI: Always returns a list of size() == 1 or empty()
-    public Optional<List<IBChecksumPathType>> downloadIt() throws MojoExecutionException, MojoFailureException {
+    public Optional<List<IBResource>> downloadIt() throws MojoExecutionException, MojoFailureException {
 //      if (/*StringUtils.isNotBlank(serverId) && */ (StringUtils.isNotBlank(username)
 //          || StringUtils.isNotBlank(password))) {
 //        throw new MojoExecutionException("Specify either serverId or username/password, not both");
@@ -479,7 +479,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
          */
         Checksum finalChecksum;
 //        if (!haveFile) {
-        File cached = cache.getArtifact(this.uri, null /* this.md5 */, null /* this.sha1 */, this.sha512);
+        File cached = cache.getArtifact(this.uri, null /* this.md5 */, null /* this.sha1 */, null /* this.sha256 */, this.sha512);
         if (this.deleteIfPresent && cached != null && cached.exists()) {
           getLog().warn("Deleting cached file " + cached);
           cached.delete();
@@ -525,11 +525,11 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         }
 //        }
         finalChecksum = (this.sha512 == null ? new Checksum(outputFile.toPath()) : new Checksum(this.sha512));
-        DefaultIBChecksumPathType pVal = new DefaultIBChecksumPathType(outputFile.toPath(), finalChecksum, empty());
+        DefaultIBResource pVal = new DefaultIBResource(outputFile.toPath(), finalChecksum, empty());
         String computedType = pVal.getType();
         if (this.mimeType == null)
           this.mimeType = computedType;
-        cache.install(this.uri, outputFile, null /* this.md5 */, null /* this.sha1 */, finalChecksum.toString());
+        cache.install(this.uri, outputFile, null /* this.md5 */, null /* this.sha1 */, null /* this.sha256 */ , finalChecksum.toString());
         /* Get the "final name" */
         String finalFileName = finalChecksum.asUUID().get().toString() + t2e.getExtensionForType(this.mimeType);
         Path newTarget = outputPath.resolve(finalFileName);
@@ -547,10 +547,10 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         //// buildContext.refresh(outputFile);
         Path outPath = newTarget;
 
-        DefaultIBChecksumPathType retVal = new DefaultIBChecksumPathType(outPath, finalChecksum,
+        DefaultIBResource retVal = new DefaultIBResource(outPath, finalChecksum,
             ofNullable(this.mimeType));
         retVal.setSource(this.uri.toURL().toExternalForm());
-        List<IBChecksumPathType> retVall = new ArrayList<>();
+        List<IBResource> retVall = new ArrayList<>();
         retVall.add(retVal);
         return Optional.of((retVall));
         // }

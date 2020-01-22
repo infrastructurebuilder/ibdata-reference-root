@@ -36,7 +36,7 @@ import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.GenericDataSupplier;
 import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
-import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -69,9 +69,9 @@ public class GenericRecordMapProxyTest {
 
   @Before
   public void setUp() throws Exception {
-    ConfigMap cms = new ConfigMap();
+    DefaultConfigMapSupplier cms = new DefaultConfigMapSupplier();
     gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     b = new GenericRecordBuilder(schema);
     r = new GenericData.Record(schema);

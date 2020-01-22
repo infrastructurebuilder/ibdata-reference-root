@@ -17,15 +17,15 @@ package org.infrastructurebuilder.data;
 
 import org.infrastructurebuilder.util.config.PathSupplier;
 
-abstract public class AbstractIBDataSchemaSourceSupplier extends AbstractIBDataSupplier<IBSchemaSource>
-    implements IBDataSchemaSourceSupplier {
+abstract public class AbstractIBDataSchemaSourceSupplier<P> extends AbstractIBDataSupplier<IBSchemaSource<P>>
+    implements IBDataSchemaSourceSupplier<P> {
 
-  public AbstractIBDataSchemaSourceSupplier(String id, IBSchemaSource src, PathSupplier workingPath) {
+  public AbstractIBDataSchemaSourceSupplier(String id, IBSchemaSource<P> src, PathSupplier workingPath) {
     super(id, src, workingPath);
   }
 
   @Override
-  public int compareTo(IBDataSchemaSourceSupplier o) {
+  public int compareTo(IBDataSchemaSourceSupplier<P> o) {
     return this.get().getId().compareTo(o.get().getId());
   }
 

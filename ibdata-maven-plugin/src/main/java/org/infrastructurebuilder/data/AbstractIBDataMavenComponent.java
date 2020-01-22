@@ -28,6 +28,7 @@ import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -35,6 +36,8 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 abstract public class AbstractIBDataMavenComponent {
+
+  private final IBArtifactVersionMapper artifactVersionMapper;
   private final ConfigMapSupplier configMapSupplier;
   private final PathSupplier lateBoundWorkingPathSupplier;
   private final Log log;
@@ -46,6 +49,8 @@ abstract public class AbstractIBDataMavenComponent {
   private MojoExecution mojoExecution;
 
   public AbstractIBDataMavenComponent(
+      // Artifact Version Mapper
+      final IBArtifactVersionMapper avm,
       // Local singleton late-bound path supplier for workingPath
       final PathSupplier workingPathSupplier,
       // The Maven log
@@ -55,6 +60,7 @@ abstract public class AbstractIBDataMavenComponent {
       // ConfigMapSupplier (maven version, usually)
       final ConfigMapSupplier mavenCMS, Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers,
       final IBStreamerFactory streamerFactory) {
+    this.artifactVersionMapper = requireNonNull(avm);
     this.lateBoundWorkingPathSupplier = requireNonNull(workingPathSupplier);
     this.log = requireNonNull(log);
     this.t2e = requireNonNull(t2e);

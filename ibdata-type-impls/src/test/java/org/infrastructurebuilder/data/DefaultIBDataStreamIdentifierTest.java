@@ -41,7 +41,7 @@ public class DefaultIBDataStreamIdentifierTest {
 
   private static final String DEFAULT_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
       "<metadata/>";
-  private IBDataSource ibds;
+  private IBDataSource<String> ibds;
   private DefaultIBDataStreamIdentifier i;
   private UUID id;
   private Optional<String> url;

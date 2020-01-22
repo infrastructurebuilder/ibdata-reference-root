@@ -18,7 +18,7 @@ package org.infrastructurebuilder.data.ingest;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -47,12 +47,13 @@ import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -87,7 +88,8 @@ public class AbstractIBDataSourceSupplierMapperTest {
   private IBDataSet ibdataset;
   private Date now = new Date();
   private Checksum filesDotTxtChecksum;
-  private AbstractIBDataSourceSupplierMapper dssm, dssmPass, dssmFail;
+  private AbstractIBDataSourceSupplierMapper<String> dssm, dssmPass, dssmFail;
+  private DataStream random;
 
   @Before
   public void setUp() throws Exception {
@@ -95,11 +97,11 @@ public class AbstractIBDataSourceSupplierMapperTest {
     filesDotTxtChecksum = new Checksum(f);
     Path cache = wps.get().toAbsolutePath();
     configMap = new ConfigMap();
-    //    configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
+    // configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
     cms = new DefaultConfigMapSupplier(configMap);
-    //    ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(wps, () -> log, t2e);
-    //    ibdfs = (DefaultIBDataSetIngestionFinalizerSupplier) ibdfs.configure(cms);
-    //    dis = new DefaultIBDataIngesterSupplier(wps, () -> log);
+    // ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(wps, () -> log, t2e);
+    // ibdfs = (DefaultIBDataSetIngestionFinalizerSupplier) ibdfs.configure(cms);
+    // dis = new DefaultIBDataIngesterSupplier(wps, () -> log);
     dsi = new DefaultIBDataSetIdentifier();
     dsi.setDescription("desc");
     dsi.setName("name");
@@ -114,21 +116,23 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dset.setUuid(UUID.randomUUID().toString());
     dset.setMetadata(new Metadata());
     ibdataset = new DefaultIBDataSet(dset);
-    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
+    random = new DataStream();
+    random.setTemporaryId(UUID.randomUUID().toString());
+    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+      public IBDataSourceSupplier<String> getSupplierFor( IBDataStreamIdentifier v) {
         IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
-          public List<IBChecksumPathType> get() {
+          public List<IBResource> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
+              IBResource reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
       }
 
       @Override
@@ -137,25 +141,25 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmFail = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
+    dssmFail = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+      public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
         IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(new Checksum("ABCD"));
           };
 
-          public List<IBChecksumPathType> get() {
+          public List<IBResource> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
+              IBResource reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
       }
 
       @Override
@@ -164,25 +168,25 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
+      public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
         IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(filesDotTxtChecksum);
           };
 
-          public List<IBChecksumPathType> get() {
+          public List<IBResource> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
+              IBResource reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
       }
 
       @Override
@@ -191,7 +195,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    k = dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
+    k = dssm.getSupplierFor(random); // Returning a dummy value no matter what
     dss.put("X", k);
   }
 
@@ -214,12 +218,11 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
   @Test
   public void testGet() throws IOException {
-    IBDataSourceSupplier<?> supplier = dssm.getSupplierFor(UUID.randomUUID().toString(), null);
-     IBDataSource<?> source = supplier.get();
+    IBDataSourceSupplier<?> supplier = dssm.getSupplierFor(random);
+    IBDataSource<?> source = supplier.get();
 
-    IBChecksumPathType unfinalized = source.get().get(0);
+    IBResource unfinalized = source.get().get(0);
     assertTrue(Files.isRegularFile(unfinalized.getPath()));
   }
-
 
 }

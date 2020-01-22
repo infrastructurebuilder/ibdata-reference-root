@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static org.infrastructurebuilder.data.DefaultAvroGenericRecordStreamSupplier.genericStreamFromInputStream;
+import static org.infrastructurebuilder.data.IBDataConstants.DIALECT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -29,11 +30,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.avro.LogicalType;
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.data.TimeConversions.DateConversion;
 import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
@@ -43,8 +44,9 @@ import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -79,9 +81,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
 
   private DefaultIBDataStreamIdentifierConfigBean b;
 
-  private IBDataSourceSupplier<String> s;
+  private IBDataSourceSupplier<Schema> s;
 
-  private IBDataSource<String> ds;
+  private IBDataSource<Schema> ds;
 
   private DefaultGenericDataSupplier gds;
 
@@ -92,7 +94,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   @Before
   public void setUp() throws Exception {
     c = new ConfigMap();
-    c.put(DefaultDatabaseIBDataSourceSupplierMapper.DIALECT, "H2");
+    c.put(DIALECT, "H2");
     theUrl = "jdbc:h2:" + wps.getTestClasses().resolve("test").toAbsolutePath().toString();
     c.put("url", theUrl);
     c.put("query", "SELECT * FROM TEST ORDER BY ID;");
@@ -101,7 +103,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
     t2e = new DefaultTypeToExtensionMapper();
     gds = new DefaultGenericDataSupplier(wps, () -> log);
     aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    jrws = new JooqAvroRecordWriterSupplier(wps, () -> log, aus);
+    jrws = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> log, aus).configure(new DefaultConfigMapSupplier(c));
     d = new DefaultDatabaseIBDataSourceSupplierMapper(wps, () -> log, t2e, jrws);
     b = new DefaultIBDataStreamIdentifierConfigBean();
     b.setDescription("desc");
@@ -122,9 +124,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   @Test
   public void test() throws MalformedURLException {
     assertTrue(d.respondsTo(b));
-    s = d.getSupplierFor(b.getTemporaryId().orElse(null), b);
+    s = d.getSupplierFor(b);
     ds = s.get().configure(c);
-    List<IBChecksumPathType> p = ds.get();
+    List<IBResource> p = ds.get();
     assertTrue(p.size() > 0);
     Optional<Stream<GenericRecord>> x = genericStreamFromInputStream.apply(p.get(0).get());
     assertTrue(x.isPresent());

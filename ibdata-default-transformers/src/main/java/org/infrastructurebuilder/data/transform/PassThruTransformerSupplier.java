@@ -50,7 +50,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
 
   @Override
   public PassThruTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new PassThruTransformerSupplier(getWps(), () -> getLog(), cms);
+    return new PassThruTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
   }
 
   @Override
@@ -60,7 +60,7 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
 
   @Override
   public PassThruTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer<?> finalizer) {
-    return new PassThruTransformerSupplier(getWps(), () -> getLog());
+    return new PassThruTransformerSupplier(getWorkingPathSupplier(), () -> getLog());
   }
 
   private final class PassThruTransformer extends AbstractIBDataTransformer {

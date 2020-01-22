@@ -62,15 +62,26 @@ public class DefaultIBDataSourceSupplierFactory implements IBDataSourceSupplierF
 
   @Override
   public final SortedMap<String, IBDataSourceSupplier<?>> mapIngestionToSourceSuppliers(IBIngestion i) {
-    List<IBDataSourceSupplier<?>> k = i.getDataSet().getDataStreams().stream().map(dStream -> {
-
-      IBDataSourceSupplierMapper first = dssMappers.stream().filter(m -> m.respondsTo(dStream)).findFirst()
-          .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
-      return first.getSupplierFor(dStream.getTemporaryId().orElse(null), dStream);
-
-    }).collect(toList());
-    return k.stream().collect(toMap(IBDataSourceSupplier::getId, identity(), (prev, now) -> now,
-        () -> synchronizedSortedMap(new TreeMap<>())));
+    return i.getDataSet().getDataStreams().stream()
+        // Map ingestion data streams
+        .map(dStream -> {
+          // To a Source Supplier
+          IBDataSourceSupplierMapper first = dssMappers.stream()
+              // that responds to that stream
+              .filter(m -> m.respondsTo(dStream))
+              // find the first one
+              .findFirst()
+              // or die
+              .orElseThrow(() -> new IBDataException("No data sources are available for " + dStream.getTemporaryId()));
+          return first.getSupplierFor(dStream);
+          // as a map
+        }).collect(toMap(
+            // With the key being the source supplier id
+            IBDataSourceSupplier::getId, identity()
+            // Dupes resolved by fiat
+            , (prev, now) -> now,
+            // Into a synchronized sorted tree map
+            () -> synchronizedSortedMap(new TreeMap<>())));
   }
 
 }

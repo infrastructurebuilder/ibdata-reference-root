@@ -49,7 +49,7 @@ abstract public class AbstractIBDataRecordTransformerSupplier<I, O> implements I
    */
   protected abstract IBDataRecordTransformer<I, O> getUnconfiguredTransformerInstance(Path workingPath);
 
-  protected PathSupplier getWps() {
+  protected PathSupplier getWorkingPathSupplier() {
     return wps;
   }
 

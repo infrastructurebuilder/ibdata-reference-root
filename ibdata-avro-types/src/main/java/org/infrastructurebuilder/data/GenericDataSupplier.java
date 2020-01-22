@@ -16,9 +16,8 @@
 package org.infrastructurebuilder.data;
 
 import org.apache.avro.generic.GenericData;
-import org.infrastructurebuilder.util.config.ConfigMap;
-import org.infrastructurebuilder.util.config.ConfigurableSupplier;
+import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
-public interface GenericDataSupplier extends ConfigurableSupplier<GenericData, ConfigMap, Object> {
+public interface GenericDataSupplier extends CMSConfigurableSupplier<GenericData,  Formatters> {
 
 }

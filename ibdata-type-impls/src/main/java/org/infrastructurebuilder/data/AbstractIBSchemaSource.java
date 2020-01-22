@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.BasicCredentials;
@@ -26,11 +27,11 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBSchemaSource<P> extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap, P>
-    implements IBSchemaSource<P> {
+abstract public class AbstractIBSchemaSource<P>
+    extends AbstractConfigurableSupplier<Map<String, IBResource>, ConfigMap, P> implements IBSchemaSource<P> {
 
   protected final String id;
 //  protected final String source;
@@ -41,7 +42,7 @@ abstract public class AbstractIBSchemaSource<P> extends AbstractConfigurableSupp
   protected final Optional<String> desc;
 
   public AbstractIBSchemaSource(PathSupplier wps, Logger logger) {
-    super(wps, null, () -> logger);
+    super(wps, null, () -> logger, null);
     this.id = null;
     this.creds = empty();
     this.checksum = empty();
@@ -50,11 +51,10 @@ abstract public class AbstractIBSchemaSource<P> extends AbstractConfigurableSupp
     this.desc = empty();
   }
 
-  protected AbstractIBSchemaSource(
-      PathSupplier wps
-      // Logger
-      ,Logger logger
-  // Temp id
+  protected AbstractIBSchemaSource(PathSupplier wps
+  // Logger
+      , Logger logger
+      // Temp id
       , String id
 //      // "URL" or JDBC URL etc
 //      , String source
@@ -69,9 +69,11 @@ abstract public class AbstractIBSchemaSource<P> extends AbstractConfigurableSupp
       // Metdata
       , Optional<Metadata> metadata
       // Configuration
-      , Optional<ConfigMap> config) {
+      , Optional<ConfigMap> config
+      // The param
+      , P parameter) {
 
-    super(wps, config.orElse(null), () -> logger);
+    super(wps, config.orElse(null), () -> logger, parameter);
     this.id = requireNonNull(id);
 //    this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);
@@ -80,11 +82,6 @@ abstract public class AbstractIBSchemaSource<P> extends AbstractConfigurableSupp
     this.name = requireNonNull(name);
     this.desc = requireNonNull(desc);
   }
-
-//  @Override
-//  public String getSourceURL() {
-//    return source;
-//  }
 
   @Override
   public Optional<BasicCredentials> getCredentials() {

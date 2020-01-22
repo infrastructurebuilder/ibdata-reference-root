@@ -19,8 +19,8 @@ import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -52,13 +52,14 @@ import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -94,6 +95,7 @@ public class DefaultIBDataIngesterSupplierTest {
   private IBDataSet ibdataset;
   private Date now = new Date();
   private Checksum filesDotTxtChecksum;
+  private DataStream random;
 
   @Before
   public void setUp() throws Exception {
@@ -120,21 +122,24 @@ public class DefaultIBDataIngesterSupplierTest {
     dset.setUuid(UUID.randomUUID().toString());
     dset.setMetadata(new Metadata());
     ibdataset = new DefaultIBDataSet(dset);
-    dssm = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
+    random = new DataStream();
+    random.setTemporaryId(UUID.randomUUID().toString());
+
+    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource ibds = new DefaultTestingSource("dummy:source") {
-          public List<IBChecksumPathType> get() {
+      public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
+        IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
+          public List<IBResource> get() {
             try {
-              IBChecksumPathType reference = copyToTempChecksumAndPath(wps.get(), f);
+              IBResource reference = copyToTempChecksumAndPath(wps.get(), f);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
       }
 
       @Override
@@ -143,25 +148,25 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper(log, t2e, wps) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
 
       @Override
-      public IBDataSourceSupplier<String> getSupplierFor(String temporaryId, IBDataStreamIdentifier v) {
-        IBDataSource ibds = new DefaultTestingSource("dummy:source") {
+      public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
+        IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public Optional<org.infrastructurebuilder.util.artifacts.Checksum> getChecksum() {
             return of(filesDotTxtChecksum);
           };
 
-          public List<IBChecksumPathType> get() {
+          public List<IBResource> get() {
             try (InputStream source = newInputStream(f)) {
-              IBChecksumPathType reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
+              IBResource reference = copyToDeletedOnExitTempChecksumAndPath(wps.get(), "X", "Y", source);
               return Arrays.asList(reference);
             } catch (IOException e) {
               throw new IBDataException("Test failed", e);
             }
           }
         };
-        return new DefaultIBDataSourceSupplier("X", ibds, getWps());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
       }
 
       @Override
@@ -170,7 +175,7 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    k = (IBDataSourceSupplier<String>) dssm.getSupplierFor(UUID.randomUUID().toString(), null); // Returning a dummy value no matter what
+    k = (IBDataSourceSupplier<String>) dssm.getSupplierFor(random); // Returning a dummy value no matter what
     dss.put("X", k);
   }
 
@@ -192,7 +197,7 @@ public class DefaultIBDataIngesterSupplierTest {
     c = dis.get();// configure() call default returns itself
     List<IBDataStreamSupplier> val = c.ingest(dss);
 
-    IBChecksumPathType finalized = finalizer.finalize(ibdataset, i, val, Optional.empty());
+    IBResource finalized = finalizer.finalize(ibdataset, i, val, Optional.empty());
     assertTrue(Files.isDirectory(finalized.getPath()));
     assertNotNull(val);
     assertEquals(1, val.size());
@@ -202,7 +207,7 @@ public class DefaultIBDataIngesterSupplierTest {
 
   @Test
   public void testPassChecksum() throws IOException {
-    dssPass.put("X", dssmPass.getSupplierFor(UUID.randomUUID().toString(), null));
+    dssPass.put("X", dssmPass.getSupplierFor(random));
     dis = dis.getConfiguredSupplier(cms);
     assertNotNull(dis);
     c = dis.get();// configure() call default returns itself

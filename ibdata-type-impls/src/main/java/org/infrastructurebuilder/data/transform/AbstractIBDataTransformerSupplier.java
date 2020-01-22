@@ -47,7 +47,7 @@ abstract public class AbstractIBDataTransformerSupplier implements IBDataTransfo
     this.logger = Objects.requireNonNull(l);
   }
 
-  public PathSupplier getWps() {
+  public PathSupplier getWorkingPathSupplier() {
     return wps;
   }
 

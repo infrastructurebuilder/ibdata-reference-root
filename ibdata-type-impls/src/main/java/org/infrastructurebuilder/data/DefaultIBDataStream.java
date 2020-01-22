@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.IBUtils.nullSafeObjectToString;
@@ -33,8 +34,8 @@ import java.util.function.Supplier;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.artifacts.Checksum;
-import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBResource;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implements IBDataStream {
@@ -42,12 +43,12 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   private final List<InputStream> createdInputStreamsForThisInstance = new Vector<>();
 
   private final Supplier<InputStream> streamSupplier;
-  private final IBChecksumPathType cpt;
+  private final IBResource cpt;
   private Checksum calculatedChecksum = null;
 
   public final static DefaultIBDataStream from(DataStream ds, Supplier<Path> pathToRoot) {
     return new DefaultIBDataStream(ds,
-        new BasicIBChecksumPathType(pathToRoot.get().resolve(ds.getPath()), ds.getChecksum(), ds.getMimeType()));
+        new DefaultIBResource(pathToRoot.get().resolve(ds.getPath()), ds.getChecksum(), of(ds.getMimeType())));
   }
 
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins) {
@@ -60,12 +61,12 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
         ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
         ofNullable(identifier.getOriginalRowCount()));
     sdmd.ifPresent(s -> this.setStructuredDataMetadata(s));
-    this.cpt = new BasicIBChecksumPathType(Objects.requireNonNull(ins), identifier.getChecksum(),
-        identifier.getMimeType());
+    this.cpt = new DefaultIBResource(Objects.requireNonNull(ins), identifier.getChecksum(),
+        of(identifier.getMimeType()));
     this.streamSupplier = this.cpt;
   }
 
-  public DefaultIBDataStream(IBDataStreamIdentifier identifier, IBChecksumPathType ins) {
+  public DefaultIBDataStream(IBDataStreamIdentifier identifier, IBResource ins) {
     super(identifier.getId(), identifier.getUrl(), identifier.getName(), identifier.getDescription(),
         requireNonNull(ins).getChecksum(), identifier.getCreationDate(), identifier.getMetadata(),
         requireNonNull(ins).getType(),
@@ -109,7 +110,7 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
 
   @Override
   public IBDataStream relocateTo(Path newWorkingPath, TypeToExtensionMapper t2e) {
-    IBChecksumPathType newCpt = this.cpt;
+    IBResource newCpt = this.cpt;
     String newTargetName = newCpt.getChecksum().asUUID().get().toString() + t2e.getExtensionForType(newCpt.getType());
     Path target = newWorkingPath.resolve(newTargetName);
     return new DefaultIBDataStream(this, cet.withReturningTranslation(() -> newCpt.moveTo(target)));
@@ -117,7 +118,7 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
 
   @Override
   public Optional<Path> getPathIfAvailable() {
-    return ofNullable(this.cpt).map(IBChecksumPathType::getPath);
+    return ofNullable(this.cpt).map(IBResource::getPath);
 
   }
 

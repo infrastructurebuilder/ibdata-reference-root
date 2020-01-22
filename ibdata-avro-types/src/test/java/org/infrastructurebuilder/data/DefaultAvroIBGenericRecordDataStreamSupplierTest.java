@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -74,9 +74,9 @@ public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
     id.setCreationDate(new Date());
     id.setSha512(CHECKSUM);
     id.setMetadata(new Metadata());
-    ConfigMap cms = new ConfigMap();
+    DefaultConfigMapSupplier cms = new DefaultConfigMapSupplier();
     gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBGenericRecordDataStreamSupplier(targetPath, stream, parallel, schema);

@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
+import org.infrastructurebuilder.data.CredentialsFactory;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
-public class DefaultIBIngestion implements  IBIngestion {
+public class DefaultIBIngestion implements IBIngestion {
 
   private String id = "default";
   private String schemaIngester = null; // "default";
@@ -33,6 +34,12 @@ public class DefaultIBIngestion implements  IBIngestion {
   private DefaultIBDataSetIdentifier dataSet = new DefaultIBDataSetIdentifier();
   private String finalizer = null;
   private Map<String, String> finalizerConfig = new HashMap<>();
+  private CredentialsFactory factory;
+
+  DefaultIBIngestion setFactory(CredentialsFactory factory) {
+    this.factory = factory;
+    return this;
+  }
 
   @Override
   public String getId() {
@@ -71,7 +78,7 @@ public class DefaultIBIngestion implements  IBIngestion {
   }
 
   public void setDataSet(DefaultIBDataSetIdentifier dataSet) {
-    this.dataSet = dataSet;
+    this.dataSet = dataSet.setFactory(factory);
   }
 
   @Override

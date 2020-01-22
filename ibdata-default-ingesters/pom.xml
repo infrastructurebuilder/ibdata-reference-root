@@ -28,7 +28,7 @@
   <description>Reference/Default ingesters for IBData</description>
   <properties>
   <jacoco.max.missed.classes>2</jacoco.max.missed.classes>
-  <test.coverage.percentage.required>78</test.coverage.percentage.required>
+  <test.coverage.percentage.required>65</test.coverage.percentage.required>
   </properties>
   <dependencies>
     <dependency>

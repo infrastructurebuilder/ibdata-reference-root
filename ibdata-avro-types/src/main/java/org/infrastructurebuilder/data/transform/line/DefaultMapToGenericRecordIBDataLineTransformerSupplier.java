@@ -55,13 +55,14 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
   @Inject
   public DefaultMapToGenericRecordIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
-    this(wps, null, l, aus);
+    super(wps, null, l);
+    this.aus = requireNonNull(aus);
   }
 
   private DefaultMapToGenericRecordIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms,
       LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
     super(wps, cms, l);
-    this.aus = requireNonNull(aus);
+    this.aus = (IBDataAvroUtilsSupplier) requireNonNull(aus).configure(cms);
   }
 
   @Override
@@ -71,8 +72,8 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
 
   @Override
   public DefaultMapToGenericRecordIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultMapToGenericRecordIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger(),
-        (IBDataAvroUtilsSupplier) this.aus.configure(cms.get()));
+    return new DefaultMapToGenericRecordIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger(),
+        this.aus);
   }
 
   @Override

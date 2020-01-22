@@ -47,7 +47,7 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
 
   @Override
   public RegexLineFilterSupplier configure(ConfigMapSupplier cms) {
-    return new RegexLineFilterSupplier(getWps(), cms, () -> getLogger());
+    return new RegexLineFilterSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

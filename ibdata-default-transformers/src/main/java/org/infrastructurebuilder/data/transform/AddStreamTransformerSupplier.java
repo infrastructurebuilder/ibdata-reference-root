@@ -62,12 +62,12 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
 
   @Override
   public AddStreamTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new AddStreamTransformerSupplier(getWps(), () -> getLog(), cms);
+    return new AddStreamTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
   }
 
   @Override
   protected AddStreamTransformer getConfiguredTransformerInstance(Path workingPath) {
-    return new AddStreamTransformer(getWps().get(), getLog(), getConfig());
+    return new AddStreamTransformer(getWorkingPathSupplier().get(), getLog(), getConfig());
   }
 
   public static class AddStreamTransformer extends AbstractIBDataTransformer {

@@ -50,7 +50,7 @@ public class ArrayToNameMapIBDataLineTransformerSupplier
 
   @Override
   public ArrayToNameMapIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArrayToNameMapIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new ArrayToNameMapIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.avro.Schema;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.BA;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -66,7 +66,7 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
   private IBDataAvroUtilsSupplier aus;
 
   private GenericDataSupplier gds;
-  private ConfigMap cms;
+  private DefaultConfigMapSupplier cms;
 
   @Before
   public void setUp() throws Exception {
@@ -78,9 +78,9 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
     id.setSha512(CHECKSUM);
     id.setMetadata(new Metadata());
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
-    cms = new ConfigMap();
-    gds = new DefaultGenericDataSupplier(wps, () -> log).configure(cms);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    cms = new DefaultConfigMapSupplier();
+    gds = (GenericDataSupplier) new DefaultGenericDataSupplier(wps, () -> log).configure(cms);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBTypedRecordDataStreamSupplier<BA>(targetPath, stream, new BA().getSpecificData(), parallel);
   }

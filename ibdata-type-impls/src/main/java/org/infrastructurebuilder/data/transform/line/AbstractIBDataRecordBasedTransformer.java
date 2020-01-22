@@ -66,15 +66,16 @@ import org.slf4j.LoggerFactory;
 abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDataTransformer {
   private static final String IMPOSSIBLECLASSNAME = "_impossibleclassname###";
   public final static Logger log = LoggerFactory.getLogger(AbstractIBDataRecordBasedTransformer.class);
-  private final Map<String, IBDataRecordTransformerSupplier> dataLineSuppliers;
+  private final Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineSuppliers;
   private final List<IBDataRecordTransformer<?, ?>> configuredTranformers;
-  private final IBDataStreamRecordFinalizer configuredFinalizer;
+  private final IBDataStreamRecordFinalizer<?> configuredFinalizer;
   private final Optional<Class<?>> finalType;
   private int countOfRowsSkippedSoFar = 0;
   private final List<String> firstType;
 
   protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, ConfigMap config,
-      Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers, IBDataStreamRecordFinalizer finalizer) {
+      Map<String, IBDataRecordTransformerSupplier<?, ?>> dataRecTransformerSuppliers,
+      IBDataStreamRecordFinalizer<?> finalizer) {
     super(workingPath, log, config);
     List<Class<?>> _fType = Collections.emptyList();
     this.dataLineSuppliers = dataRecTransformerSuppliers;
@@ -169,11 +170,11 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
         .orElseThrow(() -> new IBDataException("No list of configured record transformers"));
   }
 
-  protected Map<String, IBDataRecordTransformerSupplier> getDataLineSuppliers() {
+  protected Map<String, IBDataRecordTransformerSupplier<?,?>> getDataLineSuppliers() {
     return dataLineSuppliers;
   }
 
-  protected IBDataStreamRecordFinalizer getConfiguredFinalizer() {
+  protected IBDataStreamRecordFinalizer<?> getConfiguredFinalizer() {
     return configuredFinalizer;
   }
 
@@ -231,7 +232,7 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   }
 
   protected IBDataTransformationResult localTransform(Transformer t, IBDataSet ds2, List<IBDataStream> suppliedStreams,
-      IBDataStreamRecordFinalizer finalizer, boolean failOnError) {
+      IBDataStreamRecordFinalizer<?> finalizer, boolean failOnError) {
     requireNonNull(finalizer, "No finalizer supplied to localTransform");
     final Map<String, List<Long>> errors = new HashMap<>();
     final List<IBDataTransformationError> errorList = new ArrayList<>();

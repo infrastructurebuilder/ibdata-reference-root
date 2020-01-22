@@ -45,7 +45,7 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -109,7 +109,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
     IBDataSetFinalizer<IBTransformation> p = (IBDataSetFinalizer<IBTransformation>) p2.get();
     assertNotNull(p);
 
-    IBChecksumPathType g = p.finalize(ds, x, Collections.emptyList(), Optional.empty());
+    IBResource g = p.finalize(ds, x, Collections.emptyList(), Optional.empty());
     assertTrue(Files.exists(g.getPath().resolve(IBDataConstants.IBDATA).resolve(IBDataConstants.IBDATASET_XML)));
   }
 

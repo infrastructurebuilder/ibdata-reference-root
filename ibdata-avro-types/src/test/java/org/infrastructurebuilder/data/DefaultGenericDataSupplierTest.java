@@ -21,7 +21,9 @@ import java.time.LocalDate;
 
 import org.apache.avro.Conversion;
 import org.apache.avro.generic.GenericData;
-import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.ConfigurableSupplier;
+import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -43,13 +45,13 @@ public class DefaultGenericDataSupplierTest {
   public static void tearDownAfterClass() throws Exception {
   }
 
-  private GenericDataSupplier d;
-  private ConfigMap config;
+  private ConfigurableSupplier<GenericData, ConfigMapSupplier, Formatters> d;
+  private DefaultConfigMapSupplier config;
 
   @Before
   public void setUp() throws Exception {
-    config = new ConfigMap();
-    d = new DefaultGenericDataSupplier(wps,() -> log).configure(config);
+    config = new DefaultConfigMapSupplier();
+    d = new DefaultGenericDataSupplier(wps, () -> log).configure(config);
   }
 
   @After

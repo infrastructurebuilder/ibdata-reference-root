@@ -26,11 +26,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedMap;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataIngester;
+import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
@@ -41,7 +44,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 @Named(DefaultIBDataIngesterSupplier.NAME)
-public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplier<Object> {
+public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplier<String> {
 
   public static final String NAME = "default";
 
@@ -55,13 +58,13 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
   }
 
   @Override
-  protected IBDataIngester getInstance(PathSupplier workingPath, Optional<Object> in) {
+  protected IBDataIngester getInstance(PathSupplier workingPath, String in) {
     return new DefaultIBDataIngester(workingPath.get(), getLog(), getConfig().get());
   }
 
   @Override
   public DefaultIBDataIngesterSupplier getConfiguredSupplier(ConfigMapSupplier config) {
-    return new DefaultIBDataIngesterSupplier(getWps(), () -> getLog(), config);
+    return new DefaultIBDataIngesterSupplier(getWorkingPathSupplier(), () -> getLog(), config);
   }
 
   public final class DefaultIBDataIngester extends AbstractIBDataIngester {
@@ -73,21 +76,25 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
     @Override
     public List<IBDataStreamSupplier> ingest(SortedMap<String, IBDataSourceSupplier<?>> dssList) {
       Date now = new Date(); // Ok for "now" (Get it?)
-      return requireNonNull(dssList, "List of IBDataSourceSupplier instances")
+      List<IBDataSource<?>> list = requireNonNull(dssList, "List of IBDataSourceSupplier instances")
           // SortedMap values come out in order, because that's how it works
           .values().stream()
           // Get the IBDataSource
           .map(IBDataSourceSupplier::get)
           // Get CONFIGURED source
-          .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get()))
+          .map(ds -> ds.configure(new DefaultConfigMapSupplier(getConfig()).get())).collect(toList());
+
+      List<IBDataStreamSupplier> l2 =
           // map configured source to
-          .flatMap(source -> {
-            getLog().info(format("Mapping %s from %s", source.getId(), source.getSourceURL()));
-            return source.get().stream()
-                .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));
-          })
-          // Collect to an ordered list
-          .collect(toList());
+      list.stream().flatMap(source -> {
+        getLog().info(format("Mapping %s from %s", source.getId(), source.getSourceURL()));
+        getLog().info("Source type is " + source.getClass().getCanonicalName());
+        return source.get().stream()
+            .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));
+      })
+      // Collect to an ordered list
+      .collect(toList());
+      return l2;
     }
 
   }

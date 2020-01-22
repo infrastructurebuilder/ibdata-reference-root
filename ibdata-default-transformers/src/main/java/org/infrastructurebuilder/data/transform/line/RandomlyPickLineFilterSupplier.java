@@ -49,7 +49,7 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
 
   @Override
   public RandomlyPickLineFilterSupplier configure(ConfigMapSupplier cms) {
-    return new RandomlyPickLineFilterSupplier(getWps(), cms, () -> getLogger());
+    return new RandomlyPickLineFilterSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

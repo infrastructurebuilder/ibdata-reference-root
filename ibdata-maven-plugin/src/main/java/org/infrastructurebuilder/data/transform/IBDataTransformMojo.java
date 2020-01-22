@@ -37,7 +37,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
 import org.infrastructurebuilder.data.IBDataModelUtils;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 
 @Mojo(name = "transform", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class IBDataTransformMojo extends AbstractIBDataMojo {
@@ -74,7 +74,7 @@ public class IBDataTransformMojo extends AbstractIBDataMojo {
     component.setAdditionalURLS(l);
     // Note: component.transform translates all IBDataExecptions into
     // MojoFailureExceptions
-    IBChecksumPathType theResult = component.transform(transformations.stream().collect(toList()));
+    IBResource theResult = component.transform(transformations.stream().collect(toList()));
     getLog().debug("Setting plugin context");
     @SuppressWarnings("rawtypes")
     final Map pc = getPluginContext();

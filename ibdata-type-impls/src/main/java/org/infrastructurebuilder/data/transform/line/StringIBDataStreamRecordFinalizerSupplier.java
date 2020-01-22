@@ -57,13 +57,13 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
 
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<String> configure(ConfigMapSupplier cms) {
-    return new StringIBDataStreamRecordFinalizerSupplier(getWps(), () -> getLog(), cms);
+    return new StringIBDataStreamRecordFinalizerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
   }
 
   @Override
   public IBDataStreamRecordFinalizer<String> get() {
     // The working path needs to be stable and pre-existent
-    return new StringIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()), getLog(),
+    return new StringIBDataStreamRecordFinalizer(NAME, getWorkingPathSupplier().get().resolve(UUID.randomUUID().toString()), getLog(),
         getCms().get());
   }
 

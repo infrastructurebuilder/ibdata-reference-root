@@ -48,7 +48,7 @@ public class ArraySplitIBDataLineTransformerSupplier extends AbstractIBDataRecor
 
   @Override
   public ArraySplitIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArraySplitIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new ArraySplitIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

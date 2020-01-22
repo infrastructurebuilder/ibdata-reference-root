@@ -34,7 +34,7 @@ import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -88,7 +88,7 @@ public class DefaultWGetterSupplierTest {
     Path outputPath = wps.get();
 
     String src = HTTP_WWW_EXAMPLE_COM_INDEX_HTML; // wps.getTestClasses().resolve("rick.jpg").toUri().toURL().toExternalForm();
-    Optional<IBChecksumPathType> q = w
+    Optional<IBResource> q = w
         .collectCacheAndCopyToChecksumNamedFile(true, empty(), outputPath, src, CHECKSUM, empty(), 5, 1000, true, false)
         .map(l -> l.get(0));
     assertTrue(q.isPresent());
@@ -115,7 +115,7 @@ public class DefaultWGetterSupplierTest {
 
     String src = HTTP_WWW_EXAMPLE_COM_INDEX_HTML; // wps.getTestClasses().resolve("rick.jpg").toUri().toURL().toExternalForm();
     BasicCredentials creds = new DefaultBasicCredentials("A", of("B"));
-    Optional<IBChecksumPathType> q;
+    Optional<IBResource> q;
     q = w
         .collectCacheAndCopyToChecksumNamedFile(false, of(creds), outputPath, src, CHECKSUM, empty(), 5, 0, true, false)
         .map(l -> l.get(0));
@@ -142,10 +142,10 @@ public class DefaultWGetterSupplierTest {
     Path outputPath = wps.get();
     String src = "https://file-examples.com/wp-content/uploads/2017/02/zip_2MB.zip";
 //    String src = wps.getTestClasses().resolve("test.zip").toUri().toURL().toExternalForm();
-    Optional<List<IBChecksumPathType>> v = w.collectCacheAndCopyToChecksumNamedFile(false, empty(), outputPath, src,
+    Optional<List<IBResource>> v = w.collectCacheAndCopyToChecksumNamedFile(false, empty(), outputPath, src,
         ZIP_CHECKSUM, empty(), 5, 0, true, true);
     assertTrue(v.isPresent());
-    List<IBChecksumPathType> l = v.get();
+    List<IBResource> l = v.get();
     assertEquals(IBConstants.APPLICATION_ZIP, l.get(0).getType());
     assertEquals(IBConstants.APPLICATION_MSWORD, l.get(1).getType());
     assertEquals(1027072, Files.size(l.get(1).getPath()));

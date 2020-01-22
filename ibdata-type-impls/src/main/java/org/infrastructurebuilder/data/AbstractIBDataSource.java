@@ -25,10 +25,10 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSupplier<List<IBChecksumPathType>, ConfigMap,P>
+abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSupplier<List<IBResource>,ConfigMap, P>
     implements IBDataSource<P> {
 
   protected final String id;
@@ -62,8 +62,10 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
       // Metdata
       , Optional<Metadata> metadata
       // Configuration
-      , Optional<ConfigMap> config) {
-    super(wps, config.orElse(null), () -> logger);
+      , Optional<ConfigMap> config
+      // Parameter
+      , P param) {
+    super(wps, config.orElse(null), () -> logger, param);
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);
@@ -118,7 +120,7 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
    * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
    */
   @Override
-  public IBDataSource configure(ConfigMap config) {
+  public IBDataSource<P> configure(ConfigMap config) {
     return this;
   }
 }

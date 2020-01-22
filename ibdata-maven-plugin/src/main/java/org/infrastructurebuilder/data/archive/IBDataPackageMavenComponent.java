@@ -27,6 +27,7 @@ import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBStreamerFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -42,6 +43,8 @@ public class IBDataPackageMavenComponent extends AbstractIBDataMavenComponent {
    */
   @Inject
   public IBDataPackageMavenComponent(
+      // Versions mapper
+      IBArtifactVersionMapper artifactVersionMapper,
       // Late-bound  PathSupplier.  Must be set in the executor before use
       @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       // The logger
@@ -54,7 +57,7 @@ public class IBDataPackageMavenComponent extends AbstractIBDataMavenComponent {
       Map<String, IBDataIngesterSupplier<?>> allIngesters,
       Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers,
       final IBStreamerFactory notUsed) {
-    super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers, notUsed);
+    super(artifactVersionMapper, workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers, notUsed);
   }
 
 }

@@ -56,13 +56,13 @@ public class GenericProtobufIBDataRecordFinalizerSupplier
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<com.google.protobuf.GeneratedMessageV3> configure(
       ConfigMapSupplier cms) {
-    return new GenericProtobufIBDataRecordFinalizerSupplier(getWps(), () -> getLog(), cms);
+    return new GenericProtobufIBDataRecordFinalizerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
   }
 
   @Override
   public IBDataStreamRecordFinalizer<com.google.protobuf.GeneratedMessageV3> get() {
     // The working path needs to be stable and pre-existent
-    return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
+    return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWorkingPathSupplier().get().resolve(UUID.randomUUID().toString()),
         getLog(), getCms().get());
   }
 

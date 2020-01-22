@@ -21,17 +21,18 @@ import java.nio.file.Path;
 
 import org.infrastructurebuilder.data.AbstractIBSchemaSourceSupplier;
 import org.infrastructurebuilder.data.IBSchemaSource;
+import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBSchemaSourceSupplierMapper implements IBSchemaSourceSupplierMapper {
+abstract public class AbstractIBSchemaSourceSupplierMapper<P> implements IBSchemaSourceSupplierMapper {
 
-  private final Logger log;
+  private final LoggerSupplier log;
   private final TypeToExtensionMapper mapper;
   private final PathSupplier wps;
 
-  public AbstractIBSchemaSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
+  public AbstractIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper, PathSupplier wps) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
     this.wps = requireNonNull(wps);
@@ -47,7 +48,7 @@ abstract public class AbstractIBSchemaSourceSupplierMapper implements IBSchemaSo
 //  abstract public List<String> getHeaders();
 
   public Logger getLog() {
-    return log;
+    return log.get();
   }
 
   public TypeToExtensionMapper getMapper() {
@@ -59,12 +60,16 @@ abstract public class AbstractIBSchemaSourceSupplierMapper implements IBSchemaSo
     return wps.get();
   }
 
-  public class DefaultIBSchemaSourceSupplier extends AbstractIBSchemaSourceSupplier {
+  public class DefaultIBSchemaSourceSupplier extends AbstractIBSchemaSourceSupplier<P> {
 
-    public DefaultIBSchemaSourceSupplier(String id, IBSchemaSource src, PathSupplier workingPath) {
-      super(id, src, workingPath);
+    public DefaultIBSchemaSourceSupplier(String id, IBSchemaSource<P> src, PathSupplier workingPath,
+        IBDataSchemaIngestionConfig cfg) {
+      super(id, src, workingPath, cfg);
     }
 
   }
 
+  @Override
+  public void close() throws Exception {
+  }
 }

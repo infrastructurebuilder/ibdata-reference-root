@@ -18,7 +18,6 @@ package org.infrastructurebuilder.data;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.infrastructurebuilder.data.IBDataException;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.slf4j.Logger;

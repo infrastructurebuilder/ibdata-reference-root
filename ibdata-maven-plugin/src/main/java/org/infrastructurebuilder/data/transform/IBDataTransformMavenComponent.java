@@ -58,9 +58,10 @@ import org.infrastructurebuilder.data.IBDataTypeImplsModelUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 @Named("transform")
@@ -84,7 +85,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     return new DefaultIBDataTransformationResult(new DefaultIBDataSet(ds), workingPath);
   };
 
-  public final static Function<IBChecksumPathType, IBDataTransformationResult> fromPrevious = (previous) -> {
+  public final static Function<IBResource, IBDataTransformationResult> fromPrevious = (previous) -> {
     Optional<DefaultIBDataSet> ds = IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet.apply(
         cet.withReturningTranslation(() -> previous.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL()));
     return new DefaultIBDataTransformationResult(ds.get(), previous.getPath());
@@ -105,6 +106,8 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
    */
   @Inject
   public IBDataTransformMavenComponent(
+      // Versions mapper
+      IBArtifactVersionMapper artifactVersionMapper,
       // Late-bound  PathSupplier.  Must be set in the executor before use
       @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       // The logger
@@ -119,7 +122,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers,
       Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers, IBStreamerFactory streamerFactory,
       IBDataEngine engine) {
-    super(workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
+    super(artifactVersionMapper, workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
         streamerFactory);
     this.allTransformers = requireNonNull(allTransformers);
     this.allRecordFinalizers = requireNonNull(allRecordFinalizers);
@@ -135,7 +138,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
   }
 
   @SuppressWarnings("unchecked")
-  public IBChecksumPathType transform(
+  public IBResource transform(
       // Config supplied from plguin in pom
       List<DefaultIBTransformation> transformations) throws MojoFailureException {
 
@@ -146,7 +149,7 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
         // call the supplier
         .map(Supplier::get).collect(Collectors.toMap(k -> k.getId(), Function.identity()));
     MavenProject p = getProject().orElseThrow(() -> new IBDataException("No project available"));
-    IBChecksumPathType retVal = null;
+    IBResource retVal = null;
     // Every Transformation produces a single DataStream
     try { // Outer catch for throwing MojoFailureException if anything goes awry
       IBDataTransformationResult ref = null;

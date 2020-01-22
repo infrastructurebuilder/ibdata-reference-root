@@ -37,12 +37,12 @@ import org.slf4j.Logger;
 public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataTransformerSupplier {
 
   public static final String RECORD_BASED_TRANSFORMER_SUPPLIER = "record-based";
-  private final Map<String, IBDataRecordTransformerSupplier> dataLineSuppliers;
+  private final Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineSuppliers;
   private final IBDataStreamRecordFinalizer finalizer;
 
   @Inject
   public DefaultIBDataRecordBasedTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers) {
+      LoggerSupplier l, Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineTransformerSuppliers) {
     this(wps, l, null, dataLineTransformerSuppliers, null);
   }
 
@@ -52,7 +52,7 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
       // All config all the time
       ConfigMapSupplier cms,
       // All the available data line suppliers
-      Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers,
+      Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineTransformerSuppliers,
       IBDataStreamRecordFinalizer finalizer) {
     super(wps, l, cms);
     this.dataLineSuppliers = dataLineTransformerSuppliers;
@@ -67,20 +67,20 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), cms, this.dataLineSuppliers,
-        this.finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), cms,
+        this.dataLineSuppliers, this.finalizer);
   }
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWps(), () -> getLog(), null, dataLineSuppliers,
-        finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), null,
+        dataLineSuppliers, finalizer);
   }
 
   public static class DefaultIBDataRecordBasedTransformer extends AbstractIBDataRecordBasedTransformer {
 
     protected DefaultIBDataRecordBasedTransformer(Path workingPath, Logger l, ConfigMap config,
-        Map<String, IBDataRecordTransformerSupplier> dataRecTransformerSuppliers,
+        Map<String, IBDataRecordTransformerSupplier<?, ?>> dataRecTransformerSuppliers,
         // finalizer
         IBDataStreamRecordFinalizer finalizer) {
       super(workingPath, l, config, dataRecTransformerSuppliers, finalizer);

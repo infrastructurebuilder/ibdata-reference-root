@@ -36,7 +36,7 @@ public abstract class AbstractIBDataStreamFinalizerSupplier implements IBDataStr
     return cms;
   }
 
-  protected PathSupplier getWps() {
+  protected PathSupplier getWorkingPathSupplier() {
     return wps;
   }
 

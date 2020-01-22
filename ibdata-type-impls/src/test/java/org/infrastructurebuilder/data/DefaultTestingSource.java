@@ -15,16 +15,17 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,27 @@ public class DefaultTestingSource extends AbstractIBDataSource<String> {
   private final static TestingPathSupplier wps = new TestingPathSupplier();
 
   public DefaultTestingSource(String source) {
-    super(wps, log, UUID.randomUUID().toString(), source, true, empty(), empty(), empty(), empty(), empty(), empty());
+    super(wps, log
+    // random id
+        , UUID.randomUUID().toString()
+        // Source
+        , source
+        // expand archives
+        , true
+        // Name
+        , empty()
+        // Description
+        , empty()
+        // Creds
+        , empty()
+        // Target value checksum
+        , empty()
+        // Metadata
+        , empty()
+        // Config
+        , empty()
+        // No param
+        , null);
   }
 
   @Override
@@ -52,8 +73,8 @@ public class DefaultTestingSource extends AbstractIBDataSource<String> {
   }
 
   @Override
-  protected List<IBChecksumPathType> getInstance(PathSupplier workingPath, Optional<String> in) {
-    return Collections.emptyList();
+  protected List<IBResource> getInstance(PathSupplier workingPath, String in) {
+    return emptyList();
   }
 
 }

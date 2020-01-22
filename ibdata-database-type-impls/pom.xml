@@ -27,8 +27,8 @@
   <name>${project.artifactId}</name>
   <description>IBData ingesters for JDBC databases</description>
   <properties>
-    <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>70</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>2</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>58</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

@@ -15,20 +15,33 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.nio.file.Path;
+import static java.util.Objects.requireNonNull;
 
+import org.infrastructurebuilder.data.ingest.IBDataSchemaIngestionConfig;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
-abstract public class AbstractIBSchemaSourceSupplier extends AbstractIBDataSupplier<IBSchemaSource>
+abstract public class AbstractIBSchemaSourceSupplier<P> extends AbstractIBDataSupplier<IBSchemaSource<P>>
     implements IBSchemaSourceSupplier {
+  private final IBDataSchemaIngestionConfig ibdsic;
 
-  public AbstractIBSchemaSourceSupplier(String id, IBSchemaSource src, PathSupplier workingPath) {
+  public AbstractIBSchemaSourceSupplier(String id, IBSchemaSource<P> src, PathSupplier workingPath, IBDataSchemaIngestionConfig cfg) {
     super(id, src, workingPath);
+    this.ibdsic = requireNonNull(cfg);
+
   }
 
   @Override
   public int compareTo(IBSchemaSourceSupplier o) {
     return get().getId().compareTo(o.get().getId());
+  }
+
+  @Override
+  public IBDataSchemaIngestionConfig getIngestionConfig() {
+    return ibdsic;
+  }
+
+  @Override
+  public void close() throws Exception {
   }
 
 

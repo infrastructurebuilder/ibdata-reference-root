@@ -42,7 +42,7 @@ import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
 import org.infrastructurebuilder.data.archiver.DefaultIBDataMavenArchiveFinalizer;
 import org.infrastructurebuilder.data.archiver.IBDataLateBindingFinalizerConfigSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.logging.SLF4JFromMavenLogger;
 
 /**
@@ -146,7 +146,7 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
   @Parameter(property = "maven.jar.useDefaultManifestFile", defaultValue = "false")
   private boolean useDefaultManifestFile;
 
-  public File createArchive(final IBChecksumPathType context) throws MojoExecutionException {
+  public File createArchive(final IBResource context) throws MojoExecutionException {
     final File jarFile = getJarFile(outputDirectory, finalName, getClassifier());
     final MavenArchiver archiver = new MavenArchiver();
 
@@ -192,13 +192,15 @@ public class IBDataPackagingMojo extends AbstractIBDataMojo {
   @Override
   protected void _execute() throws MojoExecutionException, MojoFailureException {
     getLog().info("Executing Packaging");
+    @SuppressWarnings("rawtypes")
     final Map pc = getPluginContext();
 
     if (!pc.containsKey(INGESTION_TARGET) && !pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoExecutionException("Target does not exist");
     if (pc.containsKey(INGESTION_TARGET) && pc.containsKey(TRANSFORMATION_TARGET))
       throw new MojoExecutionException("Cannot package ingestion and transformation at the same time");
-    final IBChecksumPathType context = (IBChecksumPathType) pc.getOrDefault(INGESTION_TARGET,
+    @SuppressWarnings("unchecked")
+    final IBResource context = (IBResource) pc.getOrDefault(INGESTION_TARGET,
         pc.get(TRANSFORMATION_TARGET));
     final Path target = context.getPath();
     getLog().debug("Context payload acquired " + target.toString());

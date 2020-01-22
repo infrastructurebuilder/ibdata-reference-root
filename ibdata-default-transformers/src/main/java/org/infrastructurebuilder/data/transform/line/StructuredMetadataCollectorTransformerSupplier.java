@@ -55,7 +55,7 @@ package org.infrastructurebuilder.data.transform.line;
 //
 //  @Override
 //  public StructuredMetadataCollectorTransformerSupplier configure(ConfigMapSupplier cms) {
-//    return new StructuredMetadataCollectorTransformerSupplier(getWps(), cms, () -> getLogger());
+//    return new StructuredMetadataCollectorTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
 //  }
 //
 //  @Override

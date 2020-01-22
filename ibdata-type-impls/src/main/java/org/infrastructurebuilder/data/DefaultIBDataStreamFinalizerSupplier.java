@@ -47,12 +47,12 @@ public class DefaultIBDataStreamFinalizerSupplier extends AbstractIBDataStreamFi
 
   @Override
   public IBDataStreamFinalizerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataStreamFinalizerSupplier(getWps(), cms, () -> getLog());
+    return new DefaultIBDataStreamFinalizerSupplier(getWorkingPathSupplier(), cms, () -> getLog());
   }
 
   @Override
   public IBDataStreamFinalizer get() {
-    return new DefaultIBDataStreamFinalizer(getWps().get(), getCms().get());
+    return new DefaultIBDataStreamFinalizer(getWorkingPathSupplier().get(), getCms().get());
   }
 
   private class DefaultIBDataStreamFinalizer extends AbstractIBDataStreamFinalizer {

@@ -27,7 +27,7 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSourceSupplierMapper {
+abstract public class AbstractIBDataSourceSupplierMapper<T> implements IBDataSourceSupplierMapper {
 
   private final Logger log;
   private final TypeToExtensionMapper mapper;
@@ -56,13 +56,13 @@ abstract public class AbstractIBDataSourceSupplierMapper implements IBDataSource
   }
 
   @Override
-  public PathSupplier getWps() {
+  public PathSupplier getWorkingPathSupplier() {
     return wps;
   }
 
-  public class DefaultIBDataSourceSupplier extends AbstractIBDataSourceSupplier<String> {
+  public class DefaultIBDataSourceSupplier<T> extends AbstractIBDataSourceSupplier<T> {
 
-    public DefaultIBDataSourceSupplier(String id, IBDataSource<String> src, PathSupplier wps) {
+    public DefaultIBDataSourceSupplier(String id, IBDataSource<T> src, PathSupplier wps) {
       super(id, src, wps);
     }
 

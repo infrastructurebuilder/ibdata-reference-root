@@ -31,14 +31,12 @@ import java.util.stream.Stream;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.DefaultAvroGenericRecordStreamSupplier;
 import org.infrastructurebuilder.data.DefaultAvroGenericRecordStreamSupplierTest;
 import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataStream;
 import org.infrastructurebuilder.data.GenericDataSupplier;
-import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
@@ -106,7 +104,7 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
     IBDataDataStreamRecordFinalizerSupplier<GenericRecord> f1 = g.configure(cms);
     IBDataStreamRecordFinalizer<GenericRecord> q = f1.get();
     assertEquals(1, q.getNumberOfRowsToSkip());
-    aus = (IBDataAvroUtilsSupplier) aus.configure(cms.get());
+    aus = (IBDataAvroUtilsSupplier) aus.configure(cms);
     schema = aus.get().avroSchemaFromString(schemaString);
     record = new Record(schema);
     q.writeRecord(record);
@@ -114,7 +112,7 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
 
   @Test
   public void testAccreteDate() throws Exception {
-    aus = (IBDataAvroUtilsSupplier) aus.configure(cms.get());
+    aus = (IBDataAvroUtilsSupplier) aus.configure(cms);
     schema = aus.get().avroSchemaFromString(schemaString);
     record = new Record(schema);
     List<GenericRecord> l = new ArrayList<>();

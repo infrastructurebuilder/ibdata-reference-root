@@ -39,8 +39,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.infrastructurebuilder.util.files.model.IBChecksumPathTypeModel;
-import org.infrastructurebuilder.util.files.model.io.xpp3.IBChecksumPathTypeModelXpp3Writer;
+import org.infrastructurebuilder.util.files.model.IBResourceModel;
+import org.infrastructurebuilder.util.files.model.io.xpp3.IBResourceModelXpp3Writer;
 
 public abstract class AbstractIBDataMojo extends AbstractMojo {
 
@@ -141,12 +141,12 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
 
   }
 
-  protected Path writeMarker(IBChecksumPathTypeModel ds) throws MojoFailureException {
+  protected Path writeMarker(IBResourceModel ds) throws MojoFailureException {
     Path p = Paths.get(getProject().getBuild().getDirectory()).resolve(MARKER_FILE).toAbsolutePath();
     if (Files.exists(p))
       getLog().warn("Existing marker file");
     try (Writer writer = Files.newBufferedWriter(p, UTF_8, CREATE)) {
-      new IBChecksumPathTypeModelXpp3Writer().write(writer, ds);
+      new IBResourceModelXpp3Writer().write(writer, ds);
       return p;
     } catch (Exception e) { // Catch anything and translate it to an IBDataException
       throw new MojoFailureException("Failed to write marker to " + getWorkingDirectory(), e);

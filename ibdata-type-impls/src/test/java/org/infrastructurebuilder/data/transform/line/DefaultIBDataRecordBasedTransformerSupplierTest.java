@@ -49,15 +49,15 @@ public class DefaultIBDataRecordBasedTransformerSupplierTest {
   public static void tearDownAfterClass() throws Exception {
   }
 
-  private Map<String, IBDataRecordTransformerSupplier> dataLineTransformerSuppliers;
+  private Map<String, IBDataRecordTransformerSupplier<?,?>> dataLineTransformerSuppliers;
 
   private DefaultIBDataRecordBasedTransformerSupplier s;
 
   private DefaultConfigMapSupplier cms;
 
-  private IBDataStreamRecordFinalizer finalizer;
+  private IBDataStreamRecordFinalizer<String> finalizer;
 
-  private IBDataRecordTransformerSupplier drts;
+  private IBDataRecordTransformerSupplier<String,String> drts;
 
   @Before
   public void setUp() throws Exception {
@@ -65,7 +65,7 @@ public class DefaultIBDataRecordBasedTransformerSupplierTest {
     drts = new DefaultTestIBDataRecordTransformerSupplierStringToString(wps, cms, () -> log);
     dataLineTransformerSuppliers.put(NAME, drts);
     cms = new DefaultConfigMapSupplier();
-    s = new DefaultIBDataRecordBasedTransformerSupplier(wps, () -> log , dataLineTransformerSuppliers);
+    s = new DefaultIBDataRecordBasedTransformerSupplier(wps, () -> log, dataLineTransformerSuppliers);
   }
 
   @After
@@ -74,15 +74,17 @@ public class DefaultIBDataRecordBasedTransformerSupplierTest {
 
   @Test
   public void testGetDataLineSuppliers() {
-    AbstractIBDataRecordBasedTransformer p = (AbstractIBDataRecordBasedTransformer) s.withFinalizer(finalizer).configure(cms).get();
-    Map<String, IBDataRecordTransformerSupplier> q = p.getDataLineSuppliers();
-    assertEquals(1,q.size());
+    AbstractIBDataRecordBasedTransformer p = (AbstractIBDataRecordBasedTransformer) s.withFinalizer(finalizer)
+        .configure(cms).get();
+    Map<String, IBDataRecordTransformerSupplier<?, ?>> q = p.getDataLineSuppliers();
+    assertEquals(1, q.size());
   }
+
   @Test
   public void testGet() {
     IBDataTransformer p = s.withFinalizer(finalizer).configure(cms).get();
     assertNotNull(p);
-    assertEquals(DefaultIBDataRecordBasedTransformerSupplier.RECORD_BASED_TRANSFORMER_SUPPLIER,p.getHint());
+    assertEquals(DefaultIBDataRecordBasedTransformerSupplier.RECORD_BASED_TRANSFORMER_SUPPLIER, p.getHint());
   }
 
 }

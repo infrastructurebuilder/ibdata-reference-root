@@ -64,7 +64,7 @@ public class DefaultMapToProtobufIBDataLineTransformerSupplier
 
   @Override
   public DefaultMapToProtobufIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultMapToProtobufIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new DefaultMapToProtobufIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

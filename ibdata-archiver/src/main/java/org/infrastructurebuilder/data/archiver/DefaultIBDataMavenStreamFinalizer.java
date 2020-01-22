@@ -30,13 +30,13 @@ import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.infrastructurebuilder.util.LoggerSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 
 @Named
 public class DefaultIBDataMavenStreamFinalizer extends AbstractArchiveFinalizer implements ArchiveFinalizer {
   private final IBDataLateBindingFinalizerConfigSupplier configSupplier;
-  private IBChecksumPathType config = null;
+  private IBResource config = null;
   private final Logger logger;
 
   @Inject

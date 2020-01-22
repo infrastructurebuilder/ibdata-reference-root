@@ -15,18 +15,16 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.lang.String.format;
 import static java.nio.file.Files.createTempFile;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.of;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,65 +32,53 @@ import javax.inject.Named;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier.JooqRecordWriter;
-import org.infrastructurebuilder.data.ingest.IBDataAvroRecordWriter;
+import org.infrastructurebuilder.data.ingest.IBDataRecordWriter;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
-import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
-import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
+import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBResource;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.jooq.Record;
 import org.slf4j.Logger;
 
 @Named(JooqAvroRecordWriterSupplier.NAME)
-public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<JooqRecordWriter, ConfigMap, Object> {
+public class JooqAvroRecordWriterSupplier extends AbstractCMSConfigurableSupplier<IBDataRecordWriter<Record>, Schema> {
   static final String NAME = "jooq-record-writer";
   public final static String SCHEMA = "schema";
   public final static String TARGET = "target";
   private final IBDataAvroUtilsSupplier aus;
-  private final Schema schema;
 
   @Inject
   public JooqAvroRecordWriterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
       IBDataAvroUtilsSupplier aus) {
-    this(wps, null, l, aus, null);
+    super(wps, null, l);
+    this.aus = requireNonNull(aus);
   }
 
-  private JooqAvroRecordWriterSupplier(PathSupplier wps, ConfigMap config, LoggerSupplier l,
-      IBDataAvroUtilsSupplier aus, Schema targetSchema) {
-    super(wps, config, l);
-    this.aus = Objects.requireNonNull(aus);
-    this.schema = targetSchema;
+  private JooqAvroRecordWriterSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l,
+      IBDataAvroUtilsSupplier aus) {
+    super(wps, config, l, (Schema) config.get().get(SCHEMA));
+    this.aus = (IBDataAvroUtilsSupplier) requireNonNull(aus).configure(config);
   }
 
   @Override
-  public JooqAvroRecordWriterSupplier configure(ConfigMap config) {
-    IBDataAvroUtilsSupplier a = (IBDataAvroUtilsSupplier) this.aus.configure(config);
+  public JooqAvroRecordWriterSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
     return new JooqAvroRecordWriterSupplier(
         // My working path supplier
-        getWps()
+        getWorkingPathSupplier()
         // The config
-        , config
+        , cms
         // Logger supplier
         , () -> getLog()
         // Avro utils supplier
-        , a
-        // The schema (or die)
-        , ofNullable(
-            // Schema string
-            config.getString(SCHEMA))
-                // Map to a schema
-                .map(ss -> a.get().avroSchemaFromString(ss))
-                // or die
-                .orElseThrow(
-                    () -> new IBDataException(format("No Schema available in % instance", this.getClass().getName()))));
+        , this.aus);
   }
 
   @Override
-  protected JooqRecordWriter getInstance(PathSupplier workingPath, Optional<Object> in) {
-    return new JooqRecordWriter(getLog(), workingPath.get(), this.schema, this.aus.get());
+  protected JooqRecordWriter getInstance(PathSupplier wps, Schema in) {
+    return new JooqRecordWriter(getLog(), wps.get(), () -> in, this.aus.get());
   }
 
   /**
@@ -102,22 +88,22 @@ public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<J
    * @author mykel.alvis
    *
    */
-  public class JooqRecordWriter implements IBDataAvroRecordWriter<Record> {
+  public class JooqRecordWriter implements IBDataRecordWriter<Record> {
 
     private final Path workingPath;
     private final Schema schema;
     private final Logger log;
     private final IBDataAvroUtils f;
 
-    public JooqRecordWriter(Logger l, Path wp, Schema schema, IBDataAvroUtils f) {
+    public JooqRecordWriter(Logger l, Path wp, Supplier<Schema> schema, IBDataAvroUtils f) {
       this.log = requireNonNull(l);
       this.workingPath = requireNonNull(wp);
-      this.schema = requireNonNull(schema);
+      this.schema = requireNonNull(schema).get();
       this.f = requireNonNull(f);
     }
 
     @Override
-    public IBChecksumPathType writeRecords(Iterable<Record> result) {
+    public IBResource writeRecords(Iterable<Record> result) {
       // GenericData gd = new MapProxyGenericData(this.f);
       Path path = cet.withReturningTranslation(() -> createTempFile(workingPath, "JooqRecords", ".avro"));
       try (DataFileWriter<GenericRecord> w = f.fromSchemaAndPathAndTranslator(path, schema)) {
@@ -129,7 +115,7 @@ public class JooqAvroRecordWriterSupplier extends AbstractConfigurableSupplier<J
       }
       Checksum c = new Checksum(path);
       Path targetName = this.workingPath.resolve(c.asUUID().get().toString() + ".avro");
-      return cet.withReturningTranslation(() -> new BasicIBChecksumPathType(path, c, AVRO_BINARY).moveTo(targetName));
+      return cet.withReturningTranslation(() -> new DefaultIBResource(path, c, of(AVRO_BINARY)).moveTo(targetName));
     }
 
   }

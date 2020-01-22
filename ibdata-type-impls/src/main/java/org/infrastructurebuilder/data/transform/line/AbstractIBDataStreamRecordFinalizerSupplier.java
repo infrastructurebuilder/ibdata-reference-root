@@ -43,7 +43,7 @@ abstract public class AbstractIBDataStreamRecordFinalizerSupplier<T> implements 
     return log;
   }
 
-  protected PathSupplier getWps() {
+  protected PathSupplier getWorkingPathSupplier() {
     return wps;
   }
 

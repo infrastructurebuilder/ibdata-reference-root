@@ -60,7 +60,7 @@ public class IBDataAvroUtilsTest {
     ConfigMap init= new ConfigMap();
     cms = new DefaultConfigMapSupplier(init);
     gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps,() -> log, gds).configure(init);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps,() -> log, gds).configure(cms);
     au = aus.get();
     Path p = wps.getTestClasses().resolve("ba.avsc");
     schema = au.avroSchemaFromString(p.toAbsolutePath().toString());
@@ -126,6 +126,6 @@ public class IBDataAvroUtilsTest {
 
   @Test(expected = IBDataException.class)
   public void testFromMapAndWpNulled() {
-    au.fromMapAndWP(wps.getTestClasses(), null);
+    au.getGenericRecordWriterFrom(wps.getTestClasses(), null);
   }
 }

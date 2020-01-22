@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
@@ -56,19 +57,19 @@ public class GenericAvroIBDataRecordFinalizerSupplier
   @Inject
   public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
       LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
-    this(wps, l, null, aus);
+    super(wps, l, null);
+    this.aus = requireNonNull(aus);
   }
 
   private GenericAvroIBDataRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms,
       IBDataAvroUtilsSupplier aus) {
     super(ps, l, cms);
-    this.aus = requireNonNull(aus);
+    this.aus = (IBDataAvroUtilsSupplier) requireNonNull(aus).configure(cms);
   }
 
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<GenericRecord> configure(ConfigMapSupplier cms) {
-    return new GenericAvroIBDataRecordFinalizerSupplier(getWps(), () -> getLog(), cms,
-        (IBDataAvroUtilsSupplier) aus.configure(cms.get()));
+    return new GenericAvroIBDataRecordFinalizerSupplier(getWorkingPathSupplier(), () -> getLog(), cms, aus);
   }
 
   @Override
@@ -76,8 +77,8 @@ public class GenericAvroIBDataRecordFinalizerSupplier
     ConfigMap config = getCms().get();
     String schemaString = config.getString(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM);
     // The working path needs to be stable and pre-existent
-    return new GenericAvroIBDataStreamRecordFinalizer(NAME, getWps().get().resolve(UUID.randomUUID().toString()),
-        getLog(), config, schemaString);
+    return new GenericAvroIBDataStreamRecordFinalizer(NAME,
+        getWorkingPathSupplier().get().resolve(UUID.randomUUID().toString()), getLog(), config, schemaString);
   }
 
   public final class GenericAvroIBDataStreamRecordFinalizer
@@ -87,7 +88,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
     public GenericAvroIBDataStreamRecordFinalizer(String id, Path workingPath, Logger l, ConfigMap map,
         String schemaLocation) {
-      super(id, workingPath, l, map, Optional.of(aus.get().fromMapAndWP(workingPath, schemaLocation)));
+      super(id, workingPath, l, map, of(aus.get().getGenericRecordWriterFrom(workingPath, schemaLocation)));
       this.numberOfRowsToSkip = Integer.parseInt(map.getOrDefault(NUMBER_OF_ROWS_TO_SKIP_PARAM, "0"));
     }
 
@@ -103,12 +104,12 @@ public class GenericAvroIBDataRecordFinalizerSupplier
 
     @Override
     public Optional<String> produces() {
-      return Optional.of(IBConstants.AVRO_BINARY);
+      return of(IBConstants.AVRO_BINARY);
     }
 
     @Override
     public Optional<List<Class<?>>> accepts() {
-      return Optional.of(ACCEPTABLE_TYPES);
+      return of(ACCEPTABLE_TYPES);
     }
 
     @Override
@@ -121,7 +122,7 @@ public class GenericAvroIBDataRecordFinalizerSupplier
           StructuredFieldMetadata fm = new StructuredFieldMetadata();
           fm.setIndex(i);
           IBDataStructuredDataMetadataType mdt = getMetadataTypeFromField(fields[i]);
-          // FIXME  These moved to the schema!
+          // FIXME These moved to the schema!
 //          fm.setMetadataType(mdt.name());
 //          fm.setNullable(new Boolean(fields[i].schema().isNullable()).toString());
 //          try {
@@ -135,72 +136,32 @@ public class GenericAvroIBDataRecordFinalizerSupplier
       for (int i = 0; i < fields.length; ++i) {
         int j = i;
         StructuredFieldMetadata element = current.getFields().get(i);
-        /* FIXME These moved to the schema!
-        element.getType().ifPresent(mdt -> {
-          Field field = fields[j];
-          LogicalType lt = field.schema().getLogicalType();
-          if (lt instanceof Date) {
-            LogicalType qt = lt;
-            lt = qt;
-          }
-          BigInteger v2;
-          Object val = recordToWrite.get(j);
-          BigInteger max2;
-          BigInteger min2;
-          long ll;
-          switch (mdt) {
-          case DOUBLE:
-          case FLOAT:
-            BigDecimal v = new BigDecimal((double) val);
-            BigDecimal min = element.getMinRealValue().orElse(v);
-            if (v.compareTo(min) <= 0)
-              element.setMin(v.toString());
-            BigDecimal max = element.getMaxRealValue().orElse(v);
-            if (v.compareTo(max) >= 0)
-              element.setMax(v.toString());
-            break;
-          case INT:
-          case LONG:
-          case STRING:
-          case BYTES:
-            switch (mdt) {
-            case BYTES:
-              ll = ((byte[]) val).length;
-              break;
-            case INT:
-              val = ((Integer) val).longValue();
-            case LONG:
-              ll = (long) val;
-              break;
-            case STRING:
-              ll = (long) (val.toString()).length();
-              break;
-            default:
-              throw new IBDataException("Impossible");
-            }
-            v2 = BigInteger.valueOf(ll);
-            min2 = element.getMinIntValue().orElse(v2);
-            max2 = element.getMaxIntValue().orElse(v2);
-            if (v2.compareTo(min2) <= 0)
-              element.setMin(v2.toString());
-            if (v2.compareTo(max2) >= 0)
-              element.setMax(v2.toString());
-            break;
-          case DATE:
-            break;
-          case TIMESTAMP:
-            break;
-          default:
-            break;
-          }
-        });
-        */
+        /*
+         * FIXME These moved to the schema! element.getType().ifPresent(mdt -> { Field
+         * field = fields[j]; LogicalType lt = field.schema().getLogicalType(); if (lt
+         * instanceof Date) { LogicalType qt = lt; lt = qt; } BigInteger v2; Object val
+         * = recordToWrite.get(j); BigInteger max2; BigInteger min2; long ll; switch
+         * (mdt) { case DOUBLE: case FLOAT: BigDecimal v = new BigDecimal((double) val);
+         * BigDecimal min = element.getMinRealValue().orElse(v); if (v.compareTo(min) <=
+         * 0) element.setMin(v.toString()); BigDecimal max =
+         * element.getMaxRealValue().orElse(v); if (v.compareTo(max) >= 0)
+         * element.setMax(v.toString()); break; case INT: case LONG: case STRING: case
+         * BYTES: switch (mdt) { case BYTES: ll = ((byte[]) val).length; break; case
+         * INT: val = ((Integer) val).longValue(); case LONG: ll = (long) val; break;
+         * case STRING: ll = (long) (val.toString()).length(); break; default: throw new
+         * IBDataException("Impossible"); } v2 = BigInteger.valueOf(ll); min2 =
+         * element.getMinIntValue().orElse(v2); max2 =
+         * element.getMaxIntValue().orElse(v2); if (v2.compareTo(min2) <= 0)
+         * element.setMin(v2.toString()); if (v2.compareTo(max2) >= 0)
+         * element.setMax(v2.toString()); break; case DATE: break; case TIMESTAMP:
+         * break; default: break; } });
+         */
       }
       return current;
     }
 
     private IBDataStructuredDataMetadataType getMetadataTypeFromField(Field field) {
-      //      IBDataStructuredDataMetadataType t;
+      // IBDataStructuredDataMetadataType t;
       Schema s = field.schema();
       if (s.isUnion()) {
         s = s.getTypes().get(s.getTypes().size() - 1);
@@ -217,18 +178,18 @@ public class GenericAvroIBDataRecordFinalizerSupplier
       case STRING:
         String thisTypeString = s.getType().getName().toUpperCase();
         return IBDataStructuredDataMetadataType.valueOf(thisTypeString);
-      //      case MAP:
-      //        break;
-      //      case NULL:
-      //        break;
-      //      case RECORD:
-      //        break;
-      //      case ARRAY:
-      //        break;
-      //      case FIXED:
-      //        break;
-      //      case UNION:
-      //        break;
+      // case MAP:
+      // break;
+      // case NULL:
+      // break;
+      // case RECORD:
+      // break;
+      // case ARRAY:
+      // break;
+      // case FIXED:
+      // break;
+      // case UNION:
+      // break;
       default:
         return null;
       }

@@ -43,7 +43,7 @@ import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,13 +68,13 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
 
   @Override
   public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), getWps(), cms, getTypeToExtensionMapper());
+    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), getWorkingPathSupplier(), cms, getTypeToExtensionMapper());
   }
 
   @Override
-  protected TransformationIBDataSetFinalizer getInstance(PathSupplier workingPath, Optional<Object> in) {
+  protected TransformationIBDataSetFinalizer getInstance(PathSupplier workingPath, Object in) {
     return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
-        getWps().get());
+        getWorkingPathSupplier().get());
   }
 
   private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBTransformation,Object> {
@@ -84,7 +84,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet inboundDataSet, IBTransformation target,
+    public IBResource finalize(IBDataSet inboundDataSet, IBTransformation target,
         List<IBDataStreamSupplier> ibdssList, List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir)
         throws IOException {
       DataSet targetDataSet = target.asDataSet();

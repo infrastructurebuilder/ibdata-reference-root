@@ -23,7 +23,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DefaultIBDatabaseDialectMapperTest {
+  private static final String JDBC_H2 = "jdbc:h2:";
+
   private static final Logger log = LoggerFactory.getLogger(DefaultIBDatabaseDialectMapperTest.class);
 
   private static final String ORG_HIBERNATE_DIALECT_H2_DIALECT = "org.hibernate.dialect.H2Dialect";
@@ -105,7 +106,13 @@ public class DefaultIBDatabaseDialectMapperTest {
       }
 
       @Override
-      public Optional<Supplier<DataSource>> getDataSourceSupplier(String jdbcURL, Optional<BasicCredentials> creds) {
+      public Optional<Supplier<DataSource>> getDataSourceSupplier(URLAndCreds in) {
+        return empty();
+      }
+
+      @Override
+      public Optional<IBSchema> schemaFrom(URLAndCreds in, String query, String nameSpace, String name,
+          Optional<String> desc) {
         return empty();
       }
     };
@@ -116,7 +123,7 @@ public class DefaultIBDatabaseDialectMapperTest {
 
   @Test
   public void testFrom() {
-    Optional<IBDatabaseDialect> q = d.getSupplier(SQLDialect.H2.name()).get().getDialect("jdbc:h2:");
+    Optional<IBDatabaseDialect> q = d.getSupplierForURL(JDBC_H2).get().getDialect(JDBC_H2);
     assertNotNull(q);
     assertTrue(q.isPresent());
     IBDatabaseDialect v = q.get();

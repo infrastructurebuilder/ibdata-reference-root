@@ -20,7 +20,7 @@ import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -58,7 +58,7 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
   private final static TestingPathSupplier wps = new TestingPathSupplier();
   private final static Logger log = LoggerFactory.getLogger(DefaultIBDataRecordBasedTransformerTest.class);
   private IBDataDataStreamRecordFinalizerSupplier<String> finalizerSupplier;
-  private Map<String, IBDataRecordTransformerSupplier> rs;
+  private Map<String, IBDataRecordTransformerSupplier<?, ?>> rs;
   private Path p;
   private DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer t;
   private Path thePath;
@@ -79,8 +79,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
   private List<IBDataStream> suppliedStreams;
   private List<String> transformersList = Arrays.asList("test1", "test2");
   private final Date creationDate = new Date();
-  private IBDataRecordTransformerSupplier test1;
-  private IBDataRecordTransformerSupplier test2;
+  private IBDataRecordTransformerSupplier<String, String> test1;
+  private IBDataRecordTransformerSupplier<String, String> test2;
   private Transformer transformer;
 
   @Before
@@ -125,7 +125,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
   }
 
   private IBDataStream getStreamFromURL(String resource) throws Exception {
-    IBChecksumPathType c = readPathTypeFromFile(resource);
+    IBResource c = readPathTypeFromFile(resource);
     Metadata metadata = IBMetadataUtils.emptyXpp3Supplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
         c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()), empty(),
@@ -133,7 +133,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
     return new DefaultIBDataStream(i, c);
   }
 
-  private IBChecksumPathType readPathTypeFromFile(String resource) throws Exception {
+  private IBResource readPathTypeFromFile(String resource) throws Exception {
     try (InputStream in = IBUtils.translateToWorkableArchiveURL(resource).openStream()) {
       return copyToDeletedOnExitTempChecksumAndPath(thePath, "abc", "b", in);
     }
@@ -179,16 +179,16 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     @Override
     public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
-      return new DefaultTestingIBDataRecordTransformerSupplier(type, getWps(), cms, () -> getLogger());
+      return new DefaultTestingIBDataRecordTransformerSupplier(type, getWorkingPathSupplier(), cms, () -> getLogger());
     }
 
     @Override
     protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
       switch (type) {
       case 1:
-        return new Test1(getWps().get(), getConfigSupplier().get(), log);
+        return new Test1(getWorkingPathSupplier().get(), getConfigSupplier().get(), log);
       case 2:
-        return new Test2(getWps().get(), getConfigSupplier().get(), log);
+        return new Test2(getWorkingPathSupplier().get(), getConfigSupplier().get(), log);
       default:
         throw new IBDataException("Wrong type, moron");
       }

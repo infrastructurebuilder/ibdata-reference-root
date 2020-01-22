@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.avro.generic.GenericRecord;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;

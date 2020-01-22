@@ -15,7 +15,11 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySortedMap;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_OCTET_STREAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -23,7 +27,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +43,8 @@ import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
-import org.infrastructurebuilder.util.files.BasicIBChecksumPathType;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.DefaultIBResource;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -63,7 +66,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     wps.finalize();
   }
 
-  private AbstractIBDataSetFinalizerSupplier<Dummy,Object> c;
+  private AbstractIBDataSetFinalizerSupplier<Dummy, Object> c;
   private DefaultTypeToExtensionMapper t2e;
   private DefaultConfigMapSupplier cms;
   private IBDataSet dsi1;
@@ -73,6 +76,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
   @Before
   public void setUp() throws Exception {
     dummyPath = wps.get();
+    Files.copy(wps.getTestClasses().resolve("rick.jpg"), dummyPath.resolve("rick.jpg"));
     t2e = new DefaultTypeToExtensionMapper();
     cms = new DefaultConfigMapSupplier();
     cms.addValue("path", dummyPath);
@@ -91,17 +95,17 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
   }
 
-  private AbstractIBDataSetFinalizerSupplier<Dummy,Object> getSupplier(Logger log, TestingPathSupplier wps,
+  private AbstractIBDataSetFinalizerSupplier<Dummy, Object> getSupplier(Logger log, TestingPathSupplier wps,
       DefaultConfigMapSupplier cms, DefaultTypeToExtensionMapper t2e) {
-    return new AbstractIBDataSetFinalizerSupplier<Dummy,Object>(log, wps, cms, t2e) {
+    return new AbstractIBDataSetFinalizerSupplier<Dummy, Object>(log, wps, cms, t2e) {
 
       @Override
-      public AbstractIBDataSetFinalizerSupplier<Dummy,Object> getConfiguredSupplier(ConfigMapSupplier cms) {
+      public AbstractIBDataSetFinalizerSupplier<Dummy, Object> getConfiguredSupplier(ConfigMapSupplier cms) {
         return this;
       }
 
       @Override
-      protected IBDataSetFinalizer<Dummy> getInstance(PathSupplier workingPath, Optional<Object> nothing) {
+      protected IBDataSetFinalizer<Dummy> getInstance(PathSupplier workingPath, Object nothing) {
         return new DummyFinalizer(getConfig().get(), getConfig().get().get("path"));
       }
 
@@ -133,8 +137,8 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     IBDataSetFinalizer<Dummy> v = c.configure(cms).get();
     assertNotNull(v.getWorkingPath());
     assertTrue(Files.isDirectory(v.getWorkingPath()));
-    IBChecksumPathType g = v.finalize(dsi1, new Dummy(), Collections.emptyList(), Optional.empty());
-    assertEquals(dummyPath, g.getPath());
+    IBResource g = v.finalize(dsi1, new Dummy(), emptyList(), empty());
+    assertEquals(dummyPath, g.getPath().getParent());
     assertEquals(new Checksum().toString(), g.getChecksum().toString());
   }
 
@@ -153,17 +157,17 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
   }
 
-  public final static class DummyFinalizer extends AbstractIBDataSetFinalizer<Dummy, Object>  {
+  public final static class DummyFinalizer extends AbstractIBDataSetFinalizer<Dummy, Object> {
 
     public DummyFinalizer(ConfigMap map, Path p) {
       super(map, p);
     }
 
     @Override
-    public IBChecksumPathType finalize(IBDataSet dsi1, Dummy target, List<IBDataStreamSupplier> suppliers,
+    public IBResource finalize(IBDataSet dsi1, Dummy target, List<IBDataStreamSupplier> suppliers,
         List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir) throws IOException {
       getConfig();
-      return new BasicIBChecksumPathType(getWorkingPath(), new Checksum());
+      return new DefaultIBResource(getWorkingPath().resolve("rick.jpg"), new Checksum(), of(APPLICATION_OCTET_STREAM));
     }
 
   };

@@ -51,7 +51,7 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
 
   @Override
   public ArrayJoinIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArrayJoinIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new ArrayJoinIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

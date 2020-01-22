@@ -52,7 +52,7 @@ public class OpenCSVToNameMapIBDataLineTransformerSupplier
 
   @Override
   public OpenCSVToNameMapIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new OpenCSVToNameMapIBDataLineTransformerSupplier(getWps(), cms, () -> getLogger());
+    return new OpenCSVToNameMapIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
   }
 
   @Override

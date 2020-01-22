@@ -17,7 +17,7 @@ package org.infrastructurebuilder.data;
 
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SUFFIX;
-import static org.infrastructurebuilder.util.files.DefaultIBChecksumPathType.copyToDeletedOnExitTempChecksumAndPath;
+import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,12 +28,12 @@ import org.apache.avro.file.SeekableInput;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.artifacts.ChecksumEnabled;
 import org.infrastructurebuilder.util.artifacts.SourcePathEnabled;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 
 public final class DefaultSeekableInputFromInputStream implements SeekableInput, ChecksumEnabled, SourcePathEnabled {
 
   private final SeekableFileInput proxy;
-  private final IBChecksumPathType cset;
+  private final IBResource cset;
 
   public DefaultSeekableInputFromInputStream(Path targetPath, InputStream stream) throws IOException {
     cset = copyToDeletedOnExitTempChecksumAndPath(targetPath, IBDATA_PREFIX, IBDATA_SUFFIX, stream);

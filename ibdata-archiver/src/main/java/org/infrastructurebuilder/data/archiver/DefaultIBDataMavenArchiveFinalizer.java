@@ -15,12 +15,15 @@
  */
 package org.infrastructurebuilder.data.archiver;
 
-import java.nio.file.Files;
+import static java.nio.file.Files.newDirectoryStream;
+import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.IBDataException.cet;
+
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,9 +35,8 @@ import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.FileSet;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
-import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.LoggerSupplier;
-import org.infrastructurebuilder.util.files.IBChecksumPathType;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 
 @Named(DefaultIBDataMavenArchiveFinalizer.NAME)
@@ -43,8 +45,8 @@ public class DefaultIBDataMavenArchiveFinalizer extends AbstractArchiveFinalizer
   public static final String NAME = "default-ibdata";
   private IBDataLateBindingFinalizerConfigSupplier configSupplier;
   private Logger logger;
-  private IBChecksumPathType config = null;
-  private List vFiles = Collections.emptyList();
+  private IBResource config = null;
+  private List<Path> vFiles = Collections.emptyList();
 
   @Inject
   public DefaultIBDataMavenArchiveFinalizer(LoggerSupplier logger, IBDataLateBindingFinalizerConfigSupplier cffconfigSupplier) {
@@ -56,10 +58,10 @@ public class DefaultIBDataMavenArchiveFinalizer extends AbstractArchiveFinalizer
   @Override
   public void finalizeArchiveCreation(final Archiver archiver) throws ArchiverException {
     logger.info("Finalizing " + this + " with " + archiver);
-    config = Optional.ofNullable(configSupplier.get())
+    config = ofNullable(configSupplier.get())
         .orElseThrow(() -> new ArchiverException("No finalizer config available"));
-    vFiles = new ArrayList();
-    IBDataException.cet.withReturningTranslation(() -> Files.newDirectoryStream(config.getPath())).forEach(vFiles::add);
+    vFiles = new ArrayList<>();
+    cet.withReturningTranslation(() -> newDirectoryStream(config.getPath())).forEach(vFiles::add);
     FileSet fs = new DefaultFileSet(config.getPath().toFile());
     archiver.addFileSet(fs);
     //    // Only valid entry criteria

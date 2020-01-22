@@ -37,8 +37,8 @@
   <name>${project.artifactId}</name>
   <description>IBData types for avro-specific transformation</description>
   <properties>
-    <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>91</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>1</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>50</test.coverage.percentage.required>
   </properties>
 
   <dependencies>
@@ -49,7 +49,6 @@
     <dependency>
       <groupId>org.jooq</groupId>
       <artifactId>joor-java-8</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>

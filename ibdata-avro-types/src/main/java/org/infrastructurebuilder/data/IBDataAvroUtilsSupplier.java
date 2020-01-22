@@ -15,9 +15,8 @@
  */
 package org.infrastructurebuilder.data;
 
-import org.infrastructurebuilder.util.config.ConfigMap;
-import org.infrastructurebuilder.util.config.ConfigurableSupplier;
+import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
-public interface IBDataAvroUtilsSupplier extends ConfigurableSupplier<IBDataAvroUtils, ConfigMap, Object> {
+public interface IBDataAvroUtilsSupplier extends CMSConfigurableSupplier<IBDataAvroUtils,  Object> {
 
 }

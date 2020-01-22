@@ -15,13 +15,14 @@
  */
 package org.infrastructurebuilder.data.util.files;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.*;
-import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.IBConstants.APPLICATION_ACCESS;
+import static java.util.Collections.emptySortedSet;
+import static java.util.Collections.singleton;
+import static org.infrastructurebuilder.IBConstants.*;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORD;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORDX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_PDF;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_PPTX;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_VND_OASIS_SPREADSHEET;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XLS;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XLSX;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XML;
@@ -29,10 +30,14 @@ import static org.infrastructurebuilder.IBConstants.APPLICATION_ZIP;
 import static org.infrastructurebuilder.IBConstants.AVRO;
 import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
 import static org.infrastructurebuilder.IBConstants.CSV;
-import static org.infrastructurebuilder.IBConstants.*;
+import static org.infrastructurebuilder.IBConstants.DEFAULT_EXTENSION;
+import static org.infrastructurebuilder.IBConstants.DOC;
 import static org.infrastructurebuilder.IBConstants.DOCX;
+import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
 import static org.infrastructurebuilder.IBConstants.MDB;
+import static org.infrastructurebuilder.IBConstants.ODS;
 import static org.infrastructurebuilder.IBConstants.PDF;
+import static org.infrastructurebuilder.IBConstants.PPT;
 import static org.infrastructurebuilder.IBConstants.PSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_CSV;
 import static org.infrastructurebuilder.IBConstants.TEXT_PLAIN;
@@ -43,12 +48,10 @@ import static org.infrastructurebuilder.IBConstants.TXT;
 import static org.infrastructurebuilder.IBConstants.XLS;
 import static org.infrastructurebuilder.IBConstants.XLSX;
 import static org.infrastructurebuilder.IBConstants.XML;
-import static org.infrastructurebuilder.IBConstants.*;
+import static org.infrastructurebuilder.IBConstants.ZIP;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -80,6 +83,7 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       put(APPLICATION_PDF, PDF);
       put(APPLICATION_PPTX, PPT);
       put(AVRO_BINARY, AVRO);
+      put(AVRO_SCHEMA, AVSC);
       put("application/x-tika-msoffice", DEFAULT_EXTENSION);
       put(APPLICATION_VND_OASIS_SPREADSHEET, ODS);
     }
