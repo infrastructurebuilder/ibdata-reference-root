@@ -32,7 +32,6 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.GAV;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
@@ -112,7 +111,7 @@ abstract public class AbstractIBDatabaseDriverSupplier
   public Optional<Supplier<DataSource>> getDataSourceSupplier(URLAndCreds u) {
     return getDatabaseDriverClassName(u.getUrl()).map(driverClass -> {
       // cet.withTranslation(() -> Class.forName(driverClass));
-      final BasicDataSource d = new BasicDataSource(); // FIXME Ensure that d is closed
+      final BasicDataSource d = new BasicDataSource(); // FIXME Ensure that d is closed?
       d.setDriverClassName(driverClass);
       d.setUrl(u.getUrl());
       u.getCreds().ifPresent(cr -> {

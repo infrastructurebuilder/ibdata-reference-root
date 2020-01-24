@@ -86,6 +86,7 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       put(AVRO_SCHEMA, AVSC);
       put("application/x-tika-msoffice", DEFAULT_EXTENSION);
       put(APPLICATION_VND_OASIS_SPREADSHEET, ODS);
+      put(APPLICATION_LIQUIBASE_CHANGELOG, XML);
     }
   };
 

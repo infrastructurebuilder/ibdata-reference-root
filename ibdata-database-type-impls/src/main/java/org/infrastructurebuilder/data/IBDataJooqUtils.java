@@ -32,6 +32,7 @@ import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.LO
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.STRING;
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.TIMESTAMP;
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.UNKNOWN;
+import static org.infrastructurebuilder.data.IBSchema.SCHEMA_IO_TYPE;
 
 import java.util.List;
 import java.sql.JDBCType;
@@ -62,9 +63,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3Dom> {
+  public final static String INBOUND_TYPE = Result.class.getName() + "<" + Record.class.getName() + "<";
   public final static Logger log = LoggerFactory.getLogger(IBDataJooqUtils.class);
 
-  Logger getLog();
 //
 //  public static Field getFieldFromType(String key, org.jooq.Field<?> field, DataType<?> dt, boolean isNullable) {
 //    log.trace("key = {}, field = {}, dt = {}, isNullable = {}", key, field, dt, isNullable);
@@ -301,9 +302,9 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
         List<org.jooq.Schema> eSchemas = q.getSchemas();
         List<String> symbols = new ArrayList<>();
         // TODO work on enums
+        throw new IBDataException("Type " + dt + " of field '" + field.getName() + "' cannot be processed");
       } else {
-        // throw new IBDataException("Type " + dt + " of field '" + field.getName() + "'
-        // cannot be processed");
+        throw new IBDataException("Type " + dt + " of field '" + field.getName() + "' cannot be processed");
       }
     }
     f1.setTransientStructuredFieldMetadata(sfmd);
@@ -405,21 +406,19 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
     schema.setFields(l);
     List<SchemaIndex> indexes = new ArrayList<>();
     // TODO Get indexes somehow
-    schema.setIndexes(indexes );
+    schema.setIndexes(indexes);
     schema.setMetadata(md);
     schema.setMimeType(IBSCHEMA_MIME_TYPE);
     return schema;
   }
 
-  public static SchemaField toIBSchemaField(Field<?> r) {
-
-    SchemaField f = IBDataJooqUtils.getIBFieldFromType(-1, r.getName(), r, r.getDataType(), true /* Default to true */,
-        "0.0.0", Optional.empty(), Optional.empty(), 0);
-
-    return f;
+  @Override
+  default Optional<String> getInboundType() {
+    return Optional.of(INBOUND_TYPE);
   }
 
-//  public static IBDataDatabaseCreationResult createDatabaseFrom() {
-//
-//  }
+  @Override
+  default Optional<String> getOutboundType() {
+    return Optional.of(SCHEMA_IO_TYPE);
+  }
 }

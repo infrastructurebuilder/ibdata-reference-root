@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
+import org.infrastructurebuilder.data.h2.H2DatabaseDriverSupplier;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.GAV;
 import org.jooq.SQLDialect;
@@ -52,6 +53,7 @@ public class DefaultIBDatabaseDialectMapperTest {
   public void setUp() throws Exception {
 
     Map<String, IBDataDatabaseDriverSupplier> z = new HashMap<>();
+    IBDataDatabaseDriverSupplier kk = new H2DatabaseDriverSupplier(() -> log);
     IBDataDatabaseDriverSupplier i = new IBDataDatabaseDriverSupplier() {
 
       @Override
@@ -66,7 +68,7 @@ public class DefaultIBDatabaseDialectMapperTest {
 
       @Override
       public String getHint() {
-        return "H2";
+        return "NADA";
       }
 
       @Override
@@ -75,7 +77,7 @@ public class DefaultIBDatabaseDialectMapperTest {
 
           @Override
           public String get() {
-            return "H2";
+            return "NADA";
           }
 
           @Override
@@ -117,7 +119,8 @@ public class DefaultIBDatabaseDialectMapperTest {
       }
     };
     i.getLog().debug("Test Setup");
-    z.put(SQLDialect.H2.name(), i);
+    z.put(SQLDialect.H2.name(), kk);
+    z.put("NADA", i);
     d = new DefaultIBDatabaseDialectMapper(z);
   }
 

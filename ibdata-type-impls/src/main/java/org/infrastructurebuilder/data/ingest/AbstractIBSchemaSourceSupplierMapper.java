@@ -18,9 +18,12 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 import org.infrastructurebuilder.data.AbstractIBSchemaSourceSupplier;
 import org.infrastructurebuilder.data.IBSchemaSource;
+import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -31,11 +34,14 @@ abstract public class AbstractIBSchemaSourceSupplierMapper<P> implements IBSchem
   private final LoggerSupplier log;
   private final TypeToExtensionMapper mapper;
   private final PathSupplier wps;
+  private final CredentialsFactory credentialsFactory;
 
-  public AbstractIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper, PathSupplier wps) {
+  public AbstractIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper, PathSupplier wps,
+      CredentialsFactory f) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
     this.wps = requireNonNull(wps);
+    this.credentialsFactory = requireNonNull(f);
   }
 
   @Override
@@ -46,6 +52,15 @@ abstract public class AbstractIBSchemaSourceSupplierMapper<P> implements IBSchem
   }
 
 //  abstract public List<String> getHeaders();
+
+  protected CredentialsFactory getCredentialsFactory() {
+    return credentialsFactory;
+  }
+
+  @Override
+  public Optional<BasicCredentials> getCredentialsFor(String query) {
+    return credentialsFactory.getCredentialsFor(query);
+  }
 
   public Logger getLog() {
     return log.get();

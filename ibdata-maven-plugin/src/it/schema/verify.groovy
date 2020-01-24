@@ -21,3 +21,4 @@ assert buildLog.text.contains("About to execute ingest")
 assert buildLog.text.contains("[INFO] Data ingestion is complete with ")
 
 assert buildLog.text.contains("About to execute package")
+assert buildLog.text.contains("Schema Ingestion : 1 suppliers")

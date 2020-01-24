@@ -91,6 +91,8 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
 
   private JooqAvroRecordWriterSupplier jrws;
 
+  private DefaultConfigMapSupplier cms;
+
   @Before
   public void setUp() throws Exception {
     c = new ConfigMap();
@@ -99,11 +101,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
     c.put("url", theUrl);
     c.put("query", "SELECT * FROM TEST ORDER BY ID;");
     c.put(IBDataConstants.DATE_FORMATTER, "yyyy-MM-dd");
+    cms = new DefaultConfigMapSupplier(c);
 
     t2e = new DefaultTypeToExtensionMapper();
     gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    jrws = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> log, aus).configure(new DefaultConfigMapSupplier(c));
+    aus = (DefaultIBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    jrws = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> log, aus).configure(cms);
     d = new DefaultDatabaseIBDataSourceSupplierMapper(wps, () -> log, t2e, jrws);
     b = new DefaultIBDataStreamIdentifierConfigBean();
     b.setDescription("desc");

@@ -18,7 +18,6 @@ package org.infrastructurebuilder.data.ingest;
 import static java.util.Collections.synchronizedSortedMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 

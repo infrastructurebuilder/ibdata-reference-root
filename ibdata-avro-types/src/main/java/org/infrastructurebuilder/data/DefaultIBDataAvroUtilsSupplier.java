@@ -183,7 +183,7 @@ public class DefaultIBDataAvroUtilsSupplier extends AbstractCMSConfigurableSuppl
       // Initially, just the first IBSchema is relevant
       IBSchema r = s.get(0);
 
-      SortedSet<IBIndex> indexes = r.getSchemaIndexes();
+      SortedSet<IBIndex> indexes = r.getSchemaIndexes();  // TODO Add Index advice to Avro
 
       StringBuilder doc = new StringBuilder(r.getDescription().orElseThrow(() -> new IBDataException("Description cannot be null")))
           // UUID

@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data.ingest;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -34,11 +36,11 @@ import org.apache.maven.project.MavenProject;
 import org.infrastructurebuilder.data.AbstractIBDataMavenComponent;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataIngesterSupplier;
-import org.infrastructurebuilder.data.IBSchemaIngesterSupplier;
 import org.infrastructurebuilder.data.IBDataSetFinalizer;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
+import org.infrastructurebuilder.data.IBSchemaIngesterSupplier;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
@@ -128,6 +130,8 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
         // do the ingestion
         .ingest(dsSupplierFactory.mapIngestionToSourceSuppliers(ingest));
 
+    getLog().info(format("DataStream Ingestion : %d suppliers", dsSuppliers.size()));
+
     // Ingest ALL defined schemas in the Ingestion
     Optional<String> theSchemaIngesterHint = ofNullable(requireNonNull(ingest).getSchemaIngester());
 
@@ -144,6 +148,8 @@ public final class IBDataIngestMavenComponent extends AbstractIBDataMavenCompone
             .stream().collect(toList()))
         .orElseGet(() -> emptyList());
     ;
+
+    getLog().info(format("Schema Ingestion : %d suppliers", schemaSuppliers.size()));
     try {
       return finalizer.finalize(null, ingest, dsSuppliers, schemaSuppliers, getBaseDir());
     } catch (IOException e) {

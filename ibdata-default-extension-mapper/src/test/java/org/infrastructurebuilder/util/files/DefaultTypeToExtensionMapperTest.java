@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.util.files;
 
+import static org.infrastructurebuilder.IBConstants.APPLICATION_LIQUIBASE_CHANGELOG;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_XML;
 import static org.infrastructurebuilder.IBConstants.DEFAULT_EXTENSION;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
@@ -45,7 +46,7 @@ public class DefaultTypeToExtensionMapperTest {
 
   @Test
   public void testReverseMap1() {
-    assertEquals(new TreeSet<>(Arrays.asList(IBDATA_SCHEMA, APPLICATION_XML)), t2e.reverseMapFromExtension(XML));
+    assertEquals(new TreeSet<>(Arrays.asList(IBDATA_SCHEMA, APPLICATION_XML, APPLICATION_LIQUIBASE_CHANGELOG)), t2e.reverseMapFromExtension(XML));
   }
 
 }

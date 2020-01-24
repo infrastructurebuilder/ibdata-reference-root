@@ -15,15 +15,11 @@
  */
 package org.infrastructurebuilder.data.sql;
 
-import java.util.function.Supplier;
-
-import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.ConfigurableSupplier;
+import org.infrastructurebuilder.data.URLAndCreds;
+import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
 import liquibase.Liquibase;
 
-public interface LiquibaseSupplier extends Supplier<Liquibase> { // ConfigurableSupplier<Liquibase, ConfigMapSupplier> {
-  public static final String SOURCE_URL = "sourceURL";
-  public static final String CREDS = "credentials";
+public interface LiquibaseSupplier extends CMSConfigurableSupplier<Liquibase, URLAndCreds> {
 
 }

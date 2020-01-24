@@ -19,5 +19,5 @@ assert buildLog.exists()
 assert buildLog.text.contains("BUILD SUCCESS")
 assert buildLog.text.contains("About to execute ingest")
 assert buildLog.text.contains("[INFO] Data ingestion is complete with ")
-
+assert buildLog.text.contains("DataStream Ingestion : 10 suppliers")
 assert buildLog.text.contains("About to execute package")

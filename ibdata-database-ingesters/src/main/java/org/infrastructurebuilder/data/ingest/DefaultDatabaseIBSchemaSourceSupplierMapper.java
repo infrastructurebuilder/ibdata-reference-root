@@ -52,6 +52,7 @@ import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -66,8 +67,8 @@ public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchem
 
   @Inject
   public DefaultDatabaseIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
-    super(log, mapper, workingPathSupplier);
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, CredentialsFactory credsFactory) {
+    super(log, mapper, workingPathSupplier, credsFactory);
   }
 
   @Override

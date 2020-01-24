@@ -49,9 +49,11 @@ import org.infrastructurebuilder.data.AbstractIBSchemaSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.data.Metadata;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -66,8 +68,8 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
 
   @Inject
   public InlineIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
-    super(log, mapper, workingPathSupplier);
+      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, CredentialsFactory cf) {
+    super(log, mapper, workingPathSupplier, cf);
   }
 
   @Override
@@ -141,11 +143,12 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
       Path path = workingPath.get().resolve(UUID.randomUUID().toString() + ".xml");
       // We read it as a string, clone it, then write the clone out to a path
       try (Writer w = Files.newBufferedWriter(path)) {
+
         new PersistedIBSchemaXpp3Writer().write(w, cet.withReturningTranslation(() ->
         // From new reader
         new PersistedIBSchemaXpp3Reader()
             // read
-            .read(new StringReader(in))).clone());
+            .read(new StringReader(in)).forceIndexUpdatePostRead().clone()));
         // Inline schemas only have the persisted schema as an asset
         Map<String, IBResource> r = new HashMap<>();
         r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));

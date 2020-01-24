@@ -38,10 +38,6 @@ public interface IBDataAvroToLiquibaseUtils {
       throw new IBDataException("Subrecord processing should not happen here");
     case ENUM:
       return "varchar(255)";
-    // case ARRAY:
-    // throw new IBDataException("Array processing not completed");
-    // case MAP:
-    // throw new IBDataException("Map processing not completed");
     case UNION:
       //
       List<Schema> l = schema.getTypes();
@@ -98,6 +94,8 @@ public interface IBDataAvroToLiquibaseUtils {
           throw new IBDataException("Unknown logical type " + schema.getLogicalType().getName());
         }
       return "varchar(255)";
+    case ARRAY:
+    case MAP:
     default:
       throw new IBDataException("Cannot process type" + schema.getType().name());
     }

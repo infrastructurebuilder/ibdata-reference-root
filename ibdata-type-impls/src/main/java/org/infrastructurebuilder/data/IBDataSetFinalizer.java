@@ -40,7 +40,7 @@ public interface IBDataSetFinalizer<T extends DataSetEnabled> {
    * @param suppliers List of the IBDataStream suppliers used here
    * @param basedir   Optional string that is the absolute path of Maven's
    *                  ${basedir}
-   * @return an IBChecksumPathType
+   * @return an {@link IBResource}
    * @throws IOException
    */
   default IBResource finalize(IBDataSet dsi1, T target, List<IBDataStreamSupplier> suppliers,

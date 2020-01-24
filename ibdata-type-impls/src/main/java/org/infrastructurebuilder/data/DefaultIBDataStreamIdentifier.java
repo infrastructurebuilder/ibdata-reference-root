@@ -46,6 +46,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final String originalRowCount;
   private IBDataStructuredDataMetadata structuredDataMetadata = null;
   private String temporaryId;
+  private String credentialsQuery;
 
   public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource<?> source,
       IBResource ibPathChecksumType, Date now) {
@@ -82,9 +83,9 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   };
 
-  public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name, Optional<String> description,
-      Checksum checksum, Date creationDate, Metadata metadata, String mimeType, Optional<String> path, Optional<String> oLength,
-      Optional<String> oRowCount) {
+  public DefaultIBDataStreamIdentifier(UUID id, Optional<String> url, Optional<String> name,
+      Optional<String> description, Checksum checksum, Date creationDate, Metadata metadata, String mimeType,
+      Optional<String> path, Optional<String> oLength, Optional<String> oRowCount) {
     this.id = id;
     this.url = requireNonNull(url);
     this.name = requireNonNull(name);
@@ -100,7 +101,8 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   public DefaultIBDataStreamIdentifier(IBDataStreamIdentifier ds) {
     this(ds.getId(), ds.getUrl(), ds.getName(), ds.getDescription(), ds.getChecksum(), ds.getCreationDate(),
-        ds.getMetadata(), ds.getMimeType(), ofNullable(ds.getPath()), ofNullable(ds.getOriginalLength()), ofNullable(ds.getOriginalRowCount()));
+        ds.getMetadata(), ds.getMimeType(), ofNullable(ds.getPath()), ofNullable(ds.getOriginalLength()),
+        ofNullable(ds.getOriginalRowCount()));
   }
 
   @Override
@@ -175,24 +177,17 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
     if (getClass() != obj.getClass())
       return false;
     DefaultIBDataStreamIdentifier other = (DefaultIBDataStreamIdentifier) obj;
-    return Objects.equals(checksum, other.checksum)
-        && Objects.equals(creationDate, other.creationDate)
-        && Objects.equals(description, other.description)
-        && Objects.equals(id, other.id)
-        && Objects.equals(metadata, other.metadata)
-        && Objects.equals(mimeType, other.mimeType)
-        && Objects.equals(name, other.name)
-        && Objects.equals(originalLength, other.originalLength)
-        && Objects.equals(originalRowCount, other.originalRowCount)
-        && Objects.equals(path, other.path)
-        && Objects.equals(structuredDataMetadata, other.structuredDataMetadata)
-        && Objects.equals(url, other.url);
+    return Objects.equals(checksum, other.checksum) && Objects.equals(creationDate, other.creationDate)
+        && Objects.equals(description, other.description) && Objects.equals(id, other.id)
+        && Objects.equals(metadata, other.metadata) && Objects.equals(mimeType, other.mimeType)
+        && Objects.equals(name, other.name) && Objects.equals(originalLength, other.originalLength)
+        && Objects.equals(originalRowCount, other.originalRowCount) && Objects.equals(path, other.path)
+        && Objects.equals(structuredDataMetadata, other.structuredDataMetadata) && Objects.equals(url, other.url);
   }
-
 
   @Override
   public Optional<IBDataStructuredDataMetadata> getStructuredDataMetadata() {
-    return ofNullable(this.structuredDataMetadata );
+    return ofNullable(this.structuredDataMetadata);
   }
 
   public void setStructuredDataMetadata(IBDataStructuredDataMetadata structuredDataMetadata) {
@@ -226,5 +221,14 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   public void setTemporaryId(String temporaryId) {
     this.temporaryId = temporaryId;
+  }
+
+  public void setCredentialsQuery(String credentialsQuery) {
+    this.credentialsQuery = credentialsQuery;
+  }
+
+  @Override
+  public Optional<String> getCredentialsQuery() {
+    return ofNullable(this.credentialsQuery);
   }
 }

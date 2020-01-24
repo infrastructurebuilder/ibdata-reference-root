@@ -15,29 +15,20 @@
  */
 package org.infrastructurebuilder.data;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 
-import org.apache.avro.Schema;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.infrastructurebuilder.IBConstants;
-import org.infrastructurebuilder.data.model.PersistedIBSchema;
-import org.infrastructurebuilder.data.model.SchemaField;
-import org.infrastructurebuilder.data.model.SchemaIndex;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;

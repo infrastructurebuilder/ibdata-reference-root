@@ -34,7 +34,6 @@ abstract public class AbstractIBSchemaSource<P>
     extends AbstractConfigurableSupplier<Map<String, IBResource>, ConfigMap, P> implements IBSchemaSource<P> {
 
   protected final String id;
-//  protected final String source;
   protected final Optional<BasicCredentials> creds;
   protected final Optional<Checksum> checksum;
   protected final Optional<Metadata> metadata;

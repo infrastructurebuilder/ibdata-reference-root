@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.infrastructurebuilder.data.CredentialsFactory;
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.config.ConfigMap;
 
 public class DefaultIBIngestion implements IBIngestion {

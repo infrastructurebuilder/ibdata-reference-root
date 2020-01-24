@@ -27,7 +27,6 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.configuration.xml.XmlPlexusConfiguration;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.IBDataIngester;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataWorkingPathSupplier;
@@ -138,7 +137,7 @@ public class IBDataIngestMavenComponentTest {
     ingester = s.get();
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
-    //    IBChecksumPathType p = dic.ingest(config, ingester);
+    //    IBResource p = dic.ingest(config, ingester);
     //    assertNotNull(p);
   }
 
@@ -162,7 +161,7 @@ public class IBDataIngestMavenComponentTest {
     //    DefaultIBDataEngine e = new DefaultIBDataEngine(Collections.emptyMap());
     dataSourceSuppliers = Collections.emptyMap();
 
-    //    IBChecksumPathType qq = dic.ingest(config, ingester);
+    //    IBResource qq = dic.ingest(config, ingester);
     //
     //    assertNotNull(qq);
     //    assertEquals(IBDataIngester.APPLICATION_IBDATA_ARCHIVE, qq.getType());
