@@ -15,19 +15,21 @@
  */
 package org.infrastructurebuilder.data;
 
-import java.util.Optional;
+import static java.util.Objects.requireNonNull;
 
-import org.apache.avro.Schema;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.infrastructurebuilder.util.CredentialsFactory;
+import org.infrastructurebuilder.util.URLAndCreds;
 
-public class AvroSchemaDAO extends AbstractIBDataDecoratedDAO<Schema> {
+public class IBDataConfiguredDataSource extends BasicDataSource {
 
-  public AvroSchemaDAO(Schema s, String thisVersion, Optional<String> source) {
-    super(s.getNamespace(), s.getName(), thisVersion, s.getDoc(), source, s);
+  public IBDataConfiguredDataSource(String driverClass, URLAndCreds u, CredentialsFactory cf) {
+    setDriverClassName(driverClass);
+    setUrl(u.getUrl());
+    requireNonNull(cf).getCredentialsFor(u).ifPresent(cr -> {
+      setUsername(cr.getKeyId());
+      cr.getSecret().ifPresent(secret -> setPassword(secret));
+    });
+
   }
-
-  @Override
-  public Class<Schema> getType() {
-    return Schema.class;
-  }
-
 }

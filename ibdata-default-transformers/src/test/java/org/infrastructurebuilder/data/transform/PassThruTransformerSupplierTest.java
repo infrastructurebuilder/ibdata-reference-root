@@ -83,8 +83,7 @@ public class PassThruTransformerSupplierTest {
     x1.setHint(PassThruTransformerSupplier.NAME);
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
-    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"));
-    x.forceDefaults(GROUP, ARTIFACT, VERSION);
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
     p = new PassThruTransformerSupplier(wps, () -> log);
     finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(wps, () -> log);

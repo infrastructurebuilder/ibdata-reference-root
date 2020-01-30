@@ -19,10 +19,12 @@ import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toCollection;
 import static org.infrastructurebuilder.util.artifacts.Weighted.comparator;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,11 +36,11 @@ import org.infrastructurebuilder.util.CredentialsSupplier;
 @Named
 public class DefaultCredentialsFactory implements CredentialsFactory {
 
-  private final SortedSet<CredentialsSupplier> ss;
+  private final List<CredentialsSupplier> ss;
 
   @Inject
   public DefaultCredentialsFactory(Map<String, CredentialsSupplier> credentialsSuppliers) {
-    this.ss = credentialsSuppliers.values().stream().sorted(comparator()).collect(toCollection(TreeSet::new));
+    this.ss = credentialsSuppliers.values().stream().sorted(comparator()).collect(Collectors.toList());
   }
 
   @Override

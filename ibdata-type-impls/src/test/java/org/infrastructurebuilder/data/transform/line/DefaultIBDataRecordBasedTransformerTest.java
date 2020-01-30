@@ -126,7 +126,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   private IBDataStream getStreamFromURL(String resource) throws Exception {
     IBResource c = readPathTypeFromFile(resource);
-    Metadata metadata = IBMetadataUtils.emptyXpp3Supplier.get();
+    Metadata metadata = IBMetadataUtils.emptyMetadataSupplier.get();
     IBDataStreamIdentifier i = new DefaultIBDataStreamIdentifier(null, of(resource), of("abc"), of("desc"),
         c.getChecksum(), creationDate, metadata, c.getType(), of(c.getPath().relativize(thePath).toString()), empty(),
         empty());

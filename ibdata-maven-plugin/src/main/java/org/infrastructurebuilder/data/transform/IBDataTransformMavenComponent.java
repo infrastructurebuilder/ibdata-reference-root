@@ -98,17 +98,24 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
 
   /*
    * Injected constructor.
-   * @param workingPathSupplier  Late bound PathSupplier, which is setup within _setup() to contain the working directory
+   *
+   * @param workingPathSupplier Late bound PathSupplier, which is setup within
+   * _setup() to contain the working directory
+   *
    * @param log Maven log
-   * @param defaultTypeToExtensionMapper a TypeToExtensionMapper, which maps mime types to file extensions
+   *
+   * @param defaultTypeToExtensionMapper a TypeToExtensionMapper, which maps mime
+   * types to file extensions
+   *
    * @param allRecordFinalizers
+   *
    * @param allTransformers
    */
   @Inject
   public IBDataTransformMavenComponent(
       // Versions mapper
       IBArtifactVersionMapper artifactVersionMapper,
-      // Late-bound  PathSupplier.  Must be set in the executor before use
+      // Late-bound PathSupplier. Must be set in the executor before use
       @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
       // The logger
       Log log,
@@ -120,10 +127,10 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       Map<String, IBDataTransformerSupplier> allTransformers,
       // All available IBDataDataStreamRecordFinalizerSupplier instances
       Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers,
-      Map<String, IBDataSetFinalizerSupplier<?,?>> allDSFinalizers, IBStreamerFactory streamerFactory,
+      Map<String, IBDataSetFinalizerSupplier<?, ?>> allDSFinalizers, IBStreamerFactory streamerFactory,
       IBDataEngine engine) {
-    super(artifactVersionMapper, workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier, allDSFinalizers,
-        streamerFactory);
+    super(artifactVersionMapper, workingPathSupplier, log, defaultTypeToExtensionMapper, mavenConfigMapSupplier,
+        allDSFinalizers, streamerFactory);
     this.allTransformers = requireNonNull(allTransformers);
     this.allRecordFinalizers = requireNonNull(allRecordFinalizers);
     this.engine = requireNonNull(engine);
@@ -142,8 +149,8 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
       // Config supplied from plguin in pom
       List<DefaultIBTransformation> transformations) throws MojoFailureException {
 
-    Map<UUID, IBDataStream> availableStreams = this.engine.getAvailableDataStreamIds().stream().map(this.engine::fetchDataSetById)
-        .filter(Optional::isPresent).map(Optional::get)
+    Map<UUID, IBDataStream> availableStreams = this.engine.getAvailableDataStreamIds().stream()
+        .map(this.engine::fetchDataSetById).filter(Optional::isPresent).map(Optional::get)
         // To the stream suppliers
         .flatMap(s -> s.getStreamSuppliers().stream())
         // call the supplier
@@ -153,26 +160,25 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     // Every Transformation produces a single DataStream
     try { // Outer catch for throwing MojoFailureException if anything goes awry
       IBDataTransformationResult ref = null;
-      for (DefaultIBTransformation transformation : transformations) {
-        requireNonNull(transformation); // FIXME is this redundant?
+      for (DefaultIBTransformation tran : transformations) {
         // Inject the required stuff here
-        transformation.forceDefaults(p.getGroupId(), p.getArtifactId(), p.getVersion());
+        DefaultIBTransformation transformation = requireNonNull(tran).withIdentifiers(p.getGroupId(), p.getArtifactId(),
+            p.getVersion());
         // Set name and desc if null
         if (transformation.getName() == null)
-          transformation.setName(p.getName());
-        if (transformation.getName() == null)
-          throw new IBDataException("Transformation name required for " + transformation.getId());
+          transformation.setName(Optional.ofNullable(p.getName())
+              .orElseThrow(() -> new IBDataException("Transformation name required for " + transformation.getId())));
         if (transformation.getDescription() == null)
-          transformation.setDescription(p.getDescription());
-        if (transformation.getDescription() == null)
-          throw new IBDataException("Transformation description required for " + transformation.getId());
+          transformation.setDescription(Optional.ofNullable(p.getDescription()).orElseThrow(
+              () -> new IBDataException("Transformation description required for " + transformation.getId())));
 
         // Get the configured finalizer
         // Acquire DataSet finalizer
         IBDataSetFinalizer<DefaultIBTransformation> finalizer;
         try {
-          finalizer = (IBDataSetFinalizer<DefaultIBTransformation>) getDataSetFinalizerSupplier(transformation.getFinalizer(),
-              transformation.getFinalizerConfig()); //,              Optional.ofNullable(ref).map(IBDataTransformationResult::getWorkingPathSupplier)*/);
+          finalizer = (IBDataSetFinalizer<DefaultIBTransformation>) getDataSetFinalizerSupplier(
+              transformation.getFinalizer(), transformation.getFinalizerConfig()); // ,
+                                                                                   // Optional.ofNullable(ref).map(IBDataTransformationResult::getWorkingPathSupplier)*/);
         } catch (ClassCastException e) {
           throw new IBDataException("Finalizer " + transformation.getFinalizer() + " in transformation "
               + transformation.getId() + " was not considered viable", e);
@@ -223,7 +229,8 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
             // supplies Optional dataset
             .get()
             // Map the dataset to the finalized dataset
-            .map(r -> cet.withReturningTranslation(() -> finalizer.finalize(r, transformation, r.getStreamSuppliers(), getBaseDir())))
+            .map(r -> cet.withReturningTranslation(
+                () -> finalizer.finalize(r, transformation, r.getStreamSuppliers(), getBaseDir())))
             // Or throw exception if no such dataset exists
             .orElseThrow(() -> new IBDataException("Failed to finalize.  IBDataSet unavailable from processing"));
       }

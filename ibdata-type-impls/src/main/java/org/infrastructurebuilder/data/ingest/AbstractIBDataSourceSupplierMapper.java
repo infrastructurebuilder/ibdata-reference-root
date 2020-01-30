@@ -23,6 +23,9 @@ import java.util.Optional;
 import org.infrastructurebuilder.data.AbstractIBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
+import org.infrastructurebuilder.data.IBDatabaseDialectMapper;
+import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
@@ -32,11 +35,14 @@ abstract public class AbstractIBDataSourceSupplierMapper<T> implements IBDataSou
   private final Logger log;
   private final TypeToExtensionMapper mapper;
   private final PathSupplier wps;
+  private final CredentialsFactory cf;
 
-  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps) {
+  public AbstractIBDataSourceSupplierMapper(Logger log, TypeToExtensionMapper mapper, PathSupplier wps,
+      CredentialsFactory cf) {
     this.log = requireNonNull(log);
     this.mapper = requireNonNull(mapper);
     this.wps = requireNonNull(wps);
+    this.cf = requireNonNull(cf);
   }
 
   @Override
@@ -55,6 +61,10 @@ abstract public class AbstractIBDataSourceSupplierMapper<T> implements IBDataSou
     return mapper;
   }
 
+  public CredentialsFactory getCredentialsFactory() {
+    return cf;
+  }
+
   @Override
   public PathSupplier getWorkingPathSupplier() {
     return wps;
@@ -62,8 +72,9 @@ abstract public class AbstractIBDataSourceSupplierMapper<T> implements IBDataSou
 
   public class DefaultIBDataSourceSupplier<T> extends AbstractIBDataSourceSupplier<T> {
 
-    public DefaultIBDataSourceSupplier(String id, IBDataSource<T> src, PathSupplier wps) {
-      super(id, src, wps);
+    public DefaultIBDataSourceSupplier(String id, IBDataSource<T> src, PathSupplier wps,
+        Optional<BasicCredentials> creds) {
+      super(id, src, wps, creds);
     }
 
   }

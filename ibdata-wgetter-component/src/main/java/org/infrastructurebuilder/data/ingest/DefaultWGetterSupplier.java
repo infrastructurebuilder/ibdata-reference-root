@@ -77,6 +77,7 @@ import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
@@ -99,21 +100,24 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
   private final PathSupplier cacheDirectory;
   private final ArchiverManager archiverManager;
   private final PathSupplier workingDirectory;
+  private final CredentialsFactory cf;
 
   @Inject
   public DefaultWGetterSupplier(LoggerSupplier log, TypeToExtensionMapper t2e,
       @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
-      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier, ArchiverManager archiverManager) {
+      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier, ArchiverManager archiverManager,
+      CredentialsFactory cf) {
     this.log = requireNonNull(log).get();
     this.t2e = requireNonNull(t2e);
     this.cacheDirectory = requireNonNull(cacheDirSupplier);
     this.archiverManager = requireNonNull(archiverManager);
     this.workingDirectory = requireNonNull(workingPathSupplier);
+    this.cf = requireNonNull(cf);
   }
 
   @Override
   public WGetter get() {
-    return new DefaultWGetter(log, t2e, cacheDirectory.get(), workingDirectory.get(), this.archiverManager);
+    return new DefaultWGetter(log, t2e, cacheDirectory.get(), workingDirectory.get(), this.archiverManager, this.cf);
   }
 
   /*
@@ -126,9 +130,10 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
     private final Log log;
     private final ArchiverManager am;
     private final Path workingDir;
+    private final CredentialsFactory cf;
 
     public DefaultWGetter(Logger log, TypeToExtensionMapper t2e, Path cacheDir, Path workingDir,
-        ArchiverManager archiverManager) {
+        ArchiverManager archiverManager, CredentialsFactory cf) {
       // this.wps = requireNonNull(wps);
       this.wget = new WGet();
       // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then
@@ -142,6 +147,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       this.log = l2;
       this.am = requireNonNull(archiverManager);
       this.workingDir = requireNonNull(workingDir);
+      this.cf = requireNonNull(cf);
     }
 
     @Override

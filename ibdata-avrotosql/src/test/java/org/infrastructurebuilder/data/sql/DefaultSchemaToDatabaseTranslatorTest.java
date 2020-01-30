@@ -20,29 +20,24 @@ import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.avro.Schema;
-import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
-import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.DefaultIBDatabaseDialectMapper;
-import org.infrastructurebuilder.data.IBDataAvroUtils;
 import org.infrastructurebuilder.data.IBDataDatabaseDriverSupplier;
 import org.infrastructurebuilder.data.IBDatabaseDialectMapper;
 import org.infrastructurebuilder.data.IBSchema;
-import org.infrastructurebuilder.data.URLAndCreds;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.schema.IBSchemaTranslator;
 import org.infrastructurebuilder.data.sqlite.SQLiteDatabaseDriverSupplier;
+import org.infrastructurebuilder.util.CredentialsFactory;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -86,21 +81,24 @@ public class DefaultSchemaToDatabaseTranslatorTest {
   private List<IBSchema> s;
 
   private PersistedIBSchema schema;
+  private CredentialsFactory cf;
 
   @Before
   public void setUp() throws Exception {
+
     schema = new PersistedIBSchema();
     schema.setNameSpace("");
     schema.setName("name");
-    s = Arrays.asList(
-        schema
+    s = Arrays.asList(schema
 //        new DefaultIBDataAvroUtilsSupplier(wps, () -> log, new DefaultGenericDataSupplier(wps, () -> log))
 //        .get().avroSchemaFromString(v.toExternalForm())
 
-        );
-    suppliers = Arrays.asList(new SQLiteDatabaseDriverSupplier(l));
+    );
+
+    cf = new FakeCredentialsFactory();
+    suppliers = Arrays.asList(new SQLiteDatabaseDriverSupplier(wps, l, cf));
     dMapper = new DefaultIBDatabaseDialectMapper(suppliers.stream().collect(toMap(k -> k.getHint(), identity())));
-    ls = new DefaultLiquibaseSupplier(wps, l, suppliers, dMapper);
+    ls = new DefaultLiquibaseSupplier(wps, l, suppliers, dMapper, cf);
     cm = new ConfigMap();
     String s = wps.getTestClasses().resolve("test.mv.db").toAbsolutePath().toString();
     String jdbcurl = "jdbc:sqlite:" + s;

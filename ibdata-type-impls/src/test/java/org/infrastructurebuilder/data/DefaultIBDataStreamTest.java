@@ -94,7 +94,7 @@ public class DefaultIBDataStreamTest {
     p1 = wps.get();
     path = p1.resolve(UUID.randomUUID().toString() + ".jpg");
     path2 = p1.resolve(UUID.randomUUID().toString() + ".txt");
-    metadata = IBMetadataUtils.emptyXpp3Supplier.get();
+    metadata = IBMetadataUtils.emptyMetadataSupplier.get();
     mimeType = JPG;
     rick = getClass().getResourceAsStream("/rick.jpg");
     checksum = copyAndDigest(rick, path);

@@ -29,8 +29,8 @@
   <name>${project.artifactId}</name>
   <description>Maven plugin for IBData</description>
   <properties>
-    <jacoco.max.missed.classes>78</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>77</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>8</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>60</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

@@ -31,6 +31,7 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -69,7 +70,7 @@ public class DefaultWGetterSupplierTest {
   @Before
   public void setUp() throws Exception {
     this.ws = new DefaultWGetterSupplier(() -> log, new DefaultTypeToExtensionMapper(), wps, wps,
-        new FakeArchiverManager());
+        new FakeArchiverManager(), new FakeCredentialsFactory());
   }
 
   @After

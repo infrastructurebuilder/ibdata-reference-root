@@ -18,16 +18,19 @@ package org.infrastructurebuilder.data.mysql;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MysqlDatabaseDriverSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(MysqlDatabaseDriverSupplierTest.class);
+  public final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @Test
   public void testH2DatabaseDriverSupplier() {
-    MysqlDatabaseDriverSupplier q = new MysqlDatabaseDriverSupplier(() -> log);
+    MysqlDatabaseDriverSupplier q = new MysqlDatabaseDriverSupplier(wps,() -> log, new FakeCredentialsFactory());
     assertNotNull(q);
     assertEquals("MYSQL", q.getHint());
   }

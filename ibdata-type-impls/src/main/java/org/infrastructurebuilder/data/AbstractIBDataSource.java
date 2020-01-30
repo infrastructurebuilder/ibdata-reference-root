@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
@@ -28,14 +29,14 @@ import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSupplier<List<IBResource>,ConfigMap, P>
+abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSupplier<List<IBResource>, ConfigMap, P>
     implements IBDataSource<P> {
 
   protected final String id;
-  protected final String source;
-  protected final Optional<BasicCredentials> creds;
+  protected final URLAndCreds source;
   protected final Optional<Checksum> checksum;
   protected final Optional<Metadata> metadata;
+  protected final Optional<String> namespace;
   protected final Optional<String> name;
   protected final Optional<String> desc;
   private final boolean expandArchives;
@@ -48,15 +49,15 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
       // Temp id
       , String id
       // "URL" or JDBC URL etc
-      , String source
+      , URLAndCreds source
       // True if we expand archives
       , boolean expand
+      // Namespace
+      , Optional<String> namespace
       // Name
       , Optional<String> name
       // Description
       , Optional<String> desc
-      // Creds
-      , Optional<BasicCredentials> creds
       // Target value checksum
       , Optional<Checksum> checksum
       // Metdata
@@ -68,22 +69,17 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
     super(wps, config.orElse(null), () -> logger, param);
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
-    this.creds = requireNonNull(creds);
     this.checksum = requireNonNull(checksum);
     this.metadata = requireNonNull(metadata);
+    this.namespace = requireNonNull(namespace);
     this.name = requireNonNull(name);
     this.desc = requireNonNull(desc);
     this.expandArchives = expand;
   }
 
   @Override
-  public String getSourceURL() {
+  public URLAndCreds getSource() {
     return source;
-  }
-
-  @Override
-  public Optional<BasicCredentials> getCredentials() {
-    return creds;
   }
 
   @Override
@@ -102,6 +98,11 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
   }
 
   @Override
+  public Optional<String> getNamespace() {
+    return this.namespace;
+  }
+
+  @Override
   public Optional<String> getName() {
     return this.name;
   }
@@ -117,7 +118,7 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
   }
 
   /**
-   * Override this to acquire additional configuration  OR ELSE IT NEVER HAPPENED!
+   * Override this to acquire additional configuration OR ELSE IT NEVER HAPPENED!
    */
   @Override
   public IBDataSource<P> configure(ConfigMap config) {

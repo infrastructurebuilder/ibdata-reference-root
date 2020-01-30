@@ -54,6 +54,8 @@ import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
+import org.infrastructurebuilder.util.CredentialsFactory;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -96,6 +98,7 @@ public class DefaultIBDataIngesterSupplierTest {
   private Date now = new Date();
   private Checksum filesDotTxtChecksum;
   private DataStream random;
+  private CredentialsFactory cf;
 
   @Before
   public void setUp() throws Exception {
@@ -124,8 +127,9 @@ public class DefaultIBDataIngesterSupplierTest {
     ibdataset = new DefaultIBDataSet(dset);
     random = new DataStream();
     random.setTemporaryId(UUID.randomUUID().toString());
+    cf = new FakeCredentialsFactory();
 
-    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
+    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -139,7 +143,7 @@ public class DefaultIBDataIngesterSupplierTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier(), Optional.empty());
       }
 
       @Override
@@ -148,7 +152,7 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -166,7 +170,7 @@ public class DefaultIBDataIngesterSupplierTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier(), Optional.empty());
       }
 
       @Override

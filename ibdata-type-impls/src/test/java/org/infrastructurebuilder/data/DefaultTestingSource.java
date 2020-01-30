@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import org.infrastructurebuilder.util.DefaultURLAndCreds;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
@@ -38,14 +39,14 @@ public class DefaultTestingSource extends AbstractIBDataSource<String> {
     // random id
         , UUID.randomUUID().toString()
         // Source
-        , source
+        , new DefaultURLAndCreds(source)
         // expand archives
         , true
+        // Napespace
+        , empty()
         // Name
         , empty()
         // Description
-        , empty()
-        // Creds
         , empty()
         // Target value checksum
         , empty()
@@ -55,16 +56,6 @@ public class DefaultTestingSource extends AbstractIBDataSource<String> {
         , empty()
         // No param
         , null);
-  }
-
-  @Override
-  public Optional<String> getName() {
-    return empty();
-  }
-
-  @Override
-  public Optional<String> getDescription() {
-    return empty();
   }
 
   @Override

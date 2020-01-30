@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data.ingest;
 
 import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
@@ -49,6 +50,8 @@ import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
+import org.infrastructurebuilder.util.CredentialsFactory;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -90,6 +93,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
   private Checksum filesDotTxtChecksum;
   private AbstractIBDataSourceSupplierMapper<String> dssm, dssmPass, dssmFail;
   private DataStream random;
+  private CredentialsFactory cf;
 
   @Before
   public void setUp() throws Exception {
@@ -118,10 +122,11 @@ public class AbstractIBDataSourceSupplierMapperTest {
     ibdataset = new DefaultIBDataSet(dset);
     random = new DataStream();
     random.setTemporaryId(UUID.randomUUID().toString());
-    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
+    cf = new FakeCredentialsFactory();
+    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
 
       @Override
-      public IBDataSourceSupplier<String> getSupplierFor( IBDataStreamIdentifier v) {
+      public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
         IBDataSource<String> ibds = new DefaultTestingSource("dummy:source") {
           public List<IBResource> get() {
             try (InputStream source = newInputStream(f)) {
@@ -132,7 +137,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier(), empty());
       }
 
       @Override
@@ -141,7 +146,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmFail = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
+    dssmFail = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps,cf) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -159,7 +164,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier(), empty());
       }
 
       @Override
@@ -168,7 +173,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -186,7 +191,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
             }
           }
         };
-        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier());
+        return new DefaultIBDataSourceSupplier<String>("X", ibds, getWorkingPathSupplier(), empty());
       }
 
       @Override

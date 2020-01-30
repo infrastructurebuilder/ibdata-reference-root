@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyMetadataSupplier;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource<?> source,
       IBResource ibPathChecksumType, Date now) {
-    String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSourceURL());
+    String src = ibPathChecksumType.getSourceURL().map(URL::toExternalForm).orElse(source.getSource().getUrl());
     Path localPath = ibPathChecksumType.getPath();
     String size = ibPathChecksumType.size().toString();
     String p = requireNonNull(workingPath).relativize(localPath).toString();
@@ -69,7 +69,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
         //
         , now
         //
-        , source.getMetadata().orElse(emptyXpp3Supplier.get())
+        , source.getMetadata().orElse(emptyMetadataSupplier.get())
         //
         , ibPathChecksumType.getType()
         //

@@ -15,13 +15,16 @@
  */
 package org.infrastructurebuilder.data.mariadb;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.jooq.SQLDialect.MARIADB;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
 
 import liquibase.database.core.MariaDBDatabase;
 
@@ -30,8 +33,8 @@ public class MariadbDatabaseDriverSupplier extends AbstractIBDatabaseDriverSuppl
   static final String NAME = "MARIADB";
 
   @Inject
-  public MariadbDatabaseDriverSupplier(LoggerSupplier l) {
-    super(l, MARIADB.name(), MariaDBDatabase.class.getCanonicalName(), "org.mariadb.jdbc:mariadb-java-client:");
+  public MariadbDatabaseDriverSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,LoggerSupplier l, CredentialsFactory cf) {
+    super(wps, l, MARIADB.name(), MariaDBDatabase.class.getCanonicalName(), cf, "org.mariadb.jdbc:mariadb-java-client:");
   }
 
 }

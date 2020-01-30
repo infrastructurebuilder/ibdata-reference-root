@@ -15,7 +15,7 @@
  */
 package org.infrastructurebuilder.data.sql;
 
-import org.infrastructurebuilder.data.URLAndCreds;
+import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
 import liquibase.Liquibase;

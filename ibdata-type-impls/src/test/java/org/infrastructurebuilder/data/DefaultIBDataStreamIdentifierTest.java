@@ -18,7 +18,7 @@ package org.infrastructurebuilder.data;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBMetadataUtils.emptyDocumentSupplier;
-import static org.infrastructurebuilder.data.IBMetadataUtils.emptyXpp3Supplier;
+import static org.infrastructurebuilder.data.IBMetadataUtils.emptyMetadataSupplier;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -63,7 +63,7 @@ public class DefaultIBDataStreamIdentifierTest {
     description = of("dsdescription");
     checksum = new Checksum("cdef");
     creationDate = new Date();
-    metadata = emptyXpp3Supplier.get();
+    metadata = emptyMetadataSupplier.get();
     mimeType = IBConstants.APPLICATION_OCTET_STREAM;
     path = of("./");
     i = new DefaultIBDataStreamIdentifier(id, url, name, description, checksum, creationDate, metadata, mimeType, path,

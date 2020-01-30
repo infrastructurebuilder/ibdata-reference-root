@@ -15,6 +15,7 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.data.IBDataConstants.H_2;
@@ -34,7 +35,13 @@ import javax.sql.DataSource;
 
 import org.infrastructurebuilder.data.h2.H2DatabaseDriverSupplier;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
+import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.DefaultURLAndCreds;
+import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.GAV;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.jooq.SQLDialect;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,17 +50,27 @@ import org.slf4j.LoggerFactory;
 
 public class DefaultIBDatabaseDialectMapperTest {
   private static final String JDBC_H2 = "jdbc:h2:";
+  private static final URLAndCreds jdbcH2 = new DefaultURLAndCreds(JDBC_H2);
 
   private static final Logger log = LoggerFactory.getLogger(DefaultIBDatabaseDialectMapperTest.class);
+  public final static TestingPathSupplier wps = new TestingPathSupplier();
 
   private static final String ORG_HIBERNATE_DIALECT_H2_DIALECT = "org.hibernate.dialect.H2Dialect";
   private DefaultIBDatabaseDialectMapper d;
 
+  private CredentialsFactory cf;
+
   @Before
   public void setUp() throws Exception {
+    cf = new CredentialsFactory() {
 
+      @Override
+      public Optional<BasicCredentials> getCredentialsFor(String query) {
+        return of(new DefaultBasicCredentials("SA", empty()));
+      }
+    };
     Map<String, IBDataDatabaseDriverSupplier> z = new HashMap<>();
-    IBDataDatabaseDriverSupplier kk = new H2DatabaseDriverSupplier(() -> log);
+    IBDataDatabaseDriverSupplier kk = new H2DatabaseDriverSupplier(wps, () -> log, cf);
     IBDataDatabaseDriverSupplier i = new IBDataDatabaseDriverSupplier() {
 
       @Override
@@ -72,17 +89,17 @@ public class DefaultIBDatabaseDialectMapperTest {
       }
 
       @Override
-      public Optional<IBDatabaseDialect> getDialect(String jdbcUrl) {
+      public Optional<IBDatabaseDialect> getDialect(URLAndCreds jdbcUrl) {
         return of(new IBDatabaseDialect() {
 
           @Override
-          public String get() {
+          public String getJooqName() {
             return "NADA";
           }
 
           @Override
           public Optional<String> springDbName() {
-            return of(get());
+            return of(getJooqName());
           }
 
           @Override
@@ -94,16 +111,21 @@ public class DefaultIBDatabaseDialectMapperTest {
           public Optional<String> hibernateDialectClass() {
             return of(ORG_HIBERNATE_DIALECT_H2_DIALECT);
           }
+
+          @Override
+          public Map<String, Object> getDbUnitConfigurationUpdates() {
+            return emptyMap();
+          }
         });
       }
 
       @Override
-      public Optional<String> getDatabaseDriverClassName(String jdbcUrl) {
+      public Optional<String> getDatabaseDriverClassName(URLAndCreds jdbcUrl) {
         return of("ABCDEFG");
       }
 
       @Override
-      public boolean respondsTo(String jdbcURL) {
+      public boolean respondsTo(URLAndCreds jdbcURL) {
         return false;
       }
 
@@ -113,8 +135,14 @@ public class DefaultIBDatabaseDialectMapperTest {
       }
 
       @Override
-      public Optional<IBSchema> schemaFrom(URLAndCreds in, String query, String nameSpace, String name,
+      public CredentialsFactory getCredentialsFactory() {
+        return cf;
+      }
+
+      @Override
+      public Optional<Map<String, IBResource>> schemaFrom(URLAndCreds in, String query, String nameSpace, String name,
           Optional<String> desc) {
+        // TODO Auto-generated method stub
         return empty();
       }
     };
@@ -126,11 +154,11 @@ public class DefaultIBDatabaseDialectMapperTest {
 
   @Test
   public void testFrom() {
-    Optional<IBDatabaseDialect> q = d.getSupplierForURL(JDBC_H2).get().getDialect(JDBC_H2);
+    Optional<IBDatabaseDialect> q = d.getSupplierForURL(jdbcH2).get().getDialect(jdbcH2);
     assertNotNull(q);
     assertTrue(q.isPresent());
     IBDatabaseDialect v = q.get();
-    assertEquals(H_2, v.get());
+    assertEquals(H_2, v.getJooqName());
     assertEquals(LIQUIBASE_DATABASE_CORE_H2_DATABASE, v.liquibaseDatabaseClass());
     assertEquals(H_2, v.springDbName().get());
     assertEquals(ORG_HIBERNATE_DIALECT_H2_DIALECT, v.hibernateDialectClass().get());

@@ -15,13 +15,25 @@
  */
 package org.infrastructurebuilder.data;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 abstract public class AbstractIBDataSourceSupplier<P> extends AbstractIBDataSupplier<IBDataSource<P>>
     implements IBDataSourceSupplier<P> {
 
-  public AbstractIBDataSourceSupplier(String id, IBDataSource <P> src, PathSupplier workingPath) {
+  private Optional<BasicCredentials> creds;
+
+  public AbstractIBDataSourceSupplier(String id, IBDataSource<P> src, PathSupplier workingPath,
+      Optional<BasicCredentials> creds) {
     super(id, src, workingPath);
+    this.creds = Objects.requireNonNull(creds);
+  }
+
+  public Optional<BasicCredentials> getCredentials() {
+    return creds;
   }
 
   @Override

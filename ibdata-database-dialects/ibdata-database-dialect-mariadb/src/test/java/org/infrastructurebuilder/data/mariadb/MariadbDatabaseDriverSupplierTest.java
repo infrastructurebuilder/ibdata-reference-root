@@ -18,16 +18,19 @@ package org.infrastructurebuilder.data.mariadb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MariadbDatabaseDriverSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(MariadbDatabaseDriverSupplierTest.class);
+  public final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @Test
   public void testDatabaseDriverSupplier() {
-    MariadbDatabaseDriverSupplier q = new MariadbDatabaseDriverSupplier(() -> log);
+    MariadbDatabaseDriverSupplier q = new MariadbDatabaseDriverSupplier(wps,() -> log, new FakeCredentialsFactory());
     assertNotNull(q);
     assertEquals("MARIADB", q.getHint());
   }

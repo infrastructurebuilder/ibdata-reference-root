@@ -97,8 +97,7 @@ public class AddStreamTransformerSupplierTest {
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
     x1.setTargetStreamMetadata(new Metadata());
-    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"));
-    x.forceDefaults(GROUP, ARTIFACT, VERSION);
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
     p = new AddStreamTransformerSupplier(wps, () -> log);
     finalWP = wps.get();

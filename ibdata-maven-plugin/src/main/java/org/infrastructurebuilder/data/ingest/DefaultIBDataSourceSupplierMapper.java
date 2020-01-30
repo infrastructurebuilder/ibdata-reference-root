@@ -47,8 +47,10 @@ import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.PathSupplier;
@@ -64,8 +66,9 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
 
   @Inject
   public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e, WGetterSupplier wgs,
-      ArchiverManager am, @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier) {
-    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier);
+      ArchiverManager am, @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
+      CredentialsFactory cf) {
+    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier, cf);
     this.wgs = requireNonNull(wgs);
     this.archiverManager = requireNonNull(am);
   }
@@ -78,6 +81,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   @Override
   public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
     String temporaryId = v.getTemporaryId().orElse(null);
+    URLAndCreds jdbcURL = v.getURLAndCreds().orElseThrow(() -> new IBDataException("No url for " + temporaryId));
     return new DefaultIBDataSourceSupplier<String>(
         // Temp id for this
         temporaryId,
@@ -88,9 +92,11 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
             // Log (always)
             , getLog()
             // URL
-            , v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId))
+            , jdbcURL
             // Expand archives
             , v.isExpandArchives()
+            // namespace
+            , Optional.empty() // FIXME Get a namespace somehow
             // Name
             , v.getName()
             // desc
@@ -107,7 +113,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
             , this.archiverManager
             // Mapper
             , getMapper()),
-        getWorkingPathSupplier());
+        getWorkingPathSupplier(), getCredentialsFactory().getCredentialsFor(jdbcURL));
   }
 
   public class DefaultIBDataSource extends AbstractIBDataSource<String> {
@@ -117,12 +123,12 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     private final TypeToExtensionMapper mapper;
     private List<IBResource> read;
 
-    private DefaultIBDataSource(PathSupplier wps, Logger log, String id, String sourceUrl, boolean expandArchives,
-        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Metadata> metadata,
-        Optional<ConfigMap> additionalConfig, Optional<String> name, Optional<String> description,
-        Optional<String> mimeType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
+    private DefaultIBDataSource(PathSupplier wps, Logger log, String id, URLAndCreds sourceUrl, boolean expandArchives,
+        Optional<Checksum> checksum, Optional<Metadata> metadata, Optional<ConfigMap> additionalConfig,
+        Optional<String> namespace, Optional<String> name, Optional<String> description, Optional<String> mimeType,
+        WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
-      super(wps, log, id, sourceUrl, expandArchives, name, description, creds, checksum, metadata, additionalConfig,
+      super(wps, log, id, sourceUrl, expandArchives, namespace, name, description, checksum, metadata, additionalConfig,
           (String) null);
       this.mimeType = mimeType;
       this.wgs = requireNonNull(wgs);
@@ -130,17 +136,18 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
       this.mapper = requireNonNull(mapper);
     }
 
-    public DefaultIBDataSource(PathSupplier wps, Logger log, String source, boolean expandArchives,
-        Optional<String> name, Optional<String> description, Optional<Checksum> checksum, Optional<Metadata> metadata,
-        Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
-      this(wps, log, randomUUID().toString(), source, expandArchives, empty(), checksum, metadata, empty(), name,
+    public DefaultIBDataSource(PathSupplier wps, Logger log, URLAndCreds source, boolean expandArchives,
+        Optional<String> namespace, Optional<String> name, Optional<String> description, Optional<Checksum> checksum,
+        Optional<Metadata> metadata, Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am,
+        TypeToExtensionMapper mapper) {
+      this(wps, log, randomUUID().toString(), source, expandArchives, checksum, metadata, empty(), namespace, name,
           description, targetType, wgs, am, mapper);
     }
 
     @Override
     public IBDataSource<String> configure(ConfigMap config) {
-      return new DefaultIBDataSource(getWorkingPathSupplier(), getLog(), getId(), getSourceURL(), isExpandArchives(),
-          getCredentials(), getChecksum(), getMetadata(), of(config), getName(), getDescription(), getMimeType(),
+      return new DefaultIBDataSource(getWorkingPathSupplier(), getLog(), getId(), getSource(), isExpandArchives(),
+          getChecksum(), getMetadata(), of(config), getNamespace(), getName(), getDescription(), getMimeType(),
           this.wgs, this.am, this.mapper);
     }
 
@@ -155,12 +162,14 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {
           List<IBResource> localRead;
-          URL src = IBUtils.translateToWorkableArchiveURL(source);
+          URL src = IBUtils.translateToWorkableArchiveURL(source.getUrl());
           WGetter wget = wgs.get();
           switch (src.getProtocol()) {
           case "http":
           case "https":
-            localRead = wget.collectCacheAndCopyToChecksumNamedFile(false, getCredentials(),
+            localRead = wget.collectCacheAndCopyToChecksumNamedFile(false,
+                // Creds
+                getCredentialsFactory().getCredentialsFor(source),
                 // Target directory
                 targetPath,
                 // URL

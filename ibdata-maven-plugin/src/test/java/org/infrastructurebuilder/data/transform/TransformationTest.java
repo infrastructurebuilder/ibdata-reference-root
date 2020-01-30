@@ -70,8 +70,8 @@ public class TransformationTest {
 
   @Test
   public void testAsDataSet() {
-    t.forceDefaults("A", "B", VERSION);
-    t.forceDefaults("A", "B", VERSION);
+    t.withIdentifiers("A", "B", VERSION);
+    t.withIdentifiers("A", "B", VERSION);
 
     t.setName(NAME);
     assertEquals(NAME, t.getName());

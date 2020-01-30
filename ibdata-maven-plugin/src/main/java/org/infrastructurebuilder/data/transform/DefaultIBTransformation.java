@@ -43,6 +43,27 @@ public class DefaultIBTransformation implements IBTransformation {
   private String groupId, artifactId, version, name, description;
   private XmlPlexusConfiguration metadata;
 
+  public DefaultIBTransformation() {
+  }
+
+  public DefaultIBTransformation(DefaultIBTransformation d, String groupId2, String artifactId2, String version2) {
+    this();
+    this.id = d.id;
+    this.transformers = d.transformers.stream().collect(Collectors.toList());
+    this.finalizer = d.finalizer;
+    this.finalizerConfig = d.finalizerConfig.entrySet().stream()
+        .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue()));
+    this.groupId = groupId2;
+    this.artifactId = artifactId2;
+    this.version = version2;
+    this.name = d.name;
+    this.description = d.description;
+    this.metadata = d.metadata;
+    if (this.metadata == null)
+      this.metadata = new XmlPlexusConfiguration("metadata"); // FIXME Where do we make metadata happen for a
+                                                              // transformer
+  }
+
   @Override
   public String toString() {
     return "Transformation [id=" + id + ", transformers=" + transformers + ", finalizer=" + finalizer + ", groupId="
@@ -118,17 +139,14 @@ public class DefaultIBTransformation implements IBTransformation {
   @Override
   public ConfigMap getFinalizerConfig() {
     return new ConfigMap(finalizerConfig.entrySet().stream().collect(toMap(k -> k.getKey(), v -> v.getValue())));
-
   }
 
-  @Override
-  public void forceDefaults(String groupId, String artifactId, String version) {
-    setGroupId(groupId);
-    setArtifactId(artifactId);
-    setVersion(version);
-    if (this.metadata == null)
-      this.metadata = new XmlPlexusConfiguration("metadata"); // FIXME Where do we make metadata happen for a
-                                                              // transformer
+  public DefaultIBTransformation withIdentifiers(String groupId, String artifactId, String version) {
+    return this.copy(groupId, artifactId, version);
+  }
+
+  private DefaultIBTransformation copy(String groupId2, String artifactId2, String version2) {
+    return new DefaultIBTransformation(this, groupId2, artifactId2, version2);
   }
 
   @Override

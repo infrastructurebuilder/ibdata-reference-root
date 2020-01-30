@@ -21,8 +21,10 @@ import static org.infrastructurebuilder.IBConstants.DEFAULT_EXTENSION;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
 import static org.infrastructurebuilder.IBConstants.XML;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
@@ -46,7 +48,9 @@ public class DefaultTypeToExtensionMapperTest {
 
   @Test
   public void testReverseMap1() {
-    assertEquals(new TreeSet<>(Arrays.asList(IBDATA_SCHEMA, APPLICATION_XML, APPLICATION_LIQUIBASE_CHANGELOG)), t2e.reverseMapFromExtension(XML));
+    SortedSet<String> t = t2e.reverseMapFromExtension(XML);
+    assertEquals(5, t.size());
+    assertTrue(t.contains(APPLICATION_XML));
   }
 
 }

@@ -74,7 +74,7 @@ public final class DefaultIBSchemaDAOSupplierBuilder implements IBSchemaDAOSuppl
             new DefaultIBDataStream(
                 // Identity
                 new DefaultIBDataStreamIdentifier(
-                    // Not intiially required
+                    // Not initially required
                     null
                     // No URL by default
                     , empty()
@@ -83,7 +83,9 @@ public final class DefaultIBSchemaDAOSupplierBuilder implements IBSchemaDAOSuppl
                     // desc
                     , src.getDescription()
                     // Checksum of the file data
-                    , v.getValue().getChecksum(), new Date()
+                    , v.getValue().getChecksum()
+                    // Now-ish
+                    , new Date()
                     // Metadata or default value
                     , src.getMetadata().orElse(new Metadata())
                     // Ascribed Mime type

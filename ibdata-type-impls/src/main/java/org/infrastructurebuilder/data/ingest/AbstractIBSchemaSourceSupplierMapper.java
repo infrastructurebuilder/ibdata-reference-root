@@ -57,7 +57,6 @@ abstract public class AbstractIBSchemaSourceSupplierMapper<P> implements IBSchem
     return credentialsFactory;
   }
 
-  @Override
   public Optional<BasicCredentials> getCredentialsFor(String query) {
     return credentialsFactory.getCredentialsFor(query);
   }

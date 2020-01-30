@@ -87,7 +87,7 @@ public class DefaultIBDataIngesterSupplier extends AbstractIBDataIngesterSupplie
       List<IBDataStreamSupplier> l2 =
           // map configured source to
       list.stream().flatMap(source -> {
-        getLog().info(format("Mapping %s from %s", source.getId(), source.getSourceURL()));
+        getLog().info(format("Mapping %s from %s", source.getId(), source.getSource().getUrl()));
         getLog().info("Source type is " + source.getClass().getCanonicalName());
         return source.get().stream()
             .map(ibPathChecksumType -> toIBDataStreamSupplier(getWorkingPath(), source, ibPathChecksumType, now));

@@ -78,8 +78,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"));
-    x.forceDefaults(GROUP, ARTIFACT, VERSION);
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
 
     cms = new DefaultConfigMapSupplier();
     fs = new DefaultIBDataSetTransformationFinalizerSupplier(wps, () -> log, new DefaultTypeToExtensionMapper());

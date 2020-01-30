@@ -16,10 +16,13 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.infrastructurebuilder.IBConstants.DBUNIT_DTD;
 import static org.infrastructurebuilder.IBConstants.IBSCHEMA_MIME_TYPE;
 import static org.infrastructurebuilder.data.IBDataConstants.JDBC_TYPE_NAME;
+import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.BOOLEAN;
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.BYTES;
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.DATE;
@@ -34,17 +37,29 @@ import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.TI
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.UNKNOWN;
 import static org.infrastructurebuilder.data.IBSchema.SCHEMA_IO_TYPE;
 
-import java.util.List;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
 import java.sql.JDBCType;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.DataSetException;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatDtdDataSet;
 import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.model.SchemaField;
@@ -52,6 +67,9 @@ import org.infrastructurebuilder.data.model.SchemaIndex;
 import org.infrastructurebuilder.data.model.StructuredFieldMetadata;
 import org.infrastructurebuilder.data.schema.IBSchemaTranslator;
 import org.infrastructurebuilder.util.IBUtils;
+import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.files.DefaultIBResource;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.jooq.Catalog;
 import org.jooq.DataType;
 import org.jooq.EnumType;

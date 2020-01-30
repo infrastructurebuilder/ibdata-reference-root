@@ -15,11 +15,15 @@
  */
 package org.infrastructurebuilder.data.h2;
 
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.PathSupplier;
 
 import liquibase.database.core.H2Database;
 
@@ -28,8 +32,8 @@ public class H2DatabaseDriverSupplier extends AbstractIBDatabaseDriverSupplier {
   static final String H2 = "H2";
 
   @Inject
-  public H2DatabaseDriverSupplier(LoggerSupplier l) {
-    super(l, org.jooq.SQLDialect.H2.name(), H2Database.class.getCanonicalName(), "org.h2database:h2:");
+  public H2DatabaseDriverSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,LoggerSupplier l, CredentialsFactory cf) {
+    super(wps, l, org.jooq.SQLDialect.H2.name(), H2Database.class.getCanonicalName(), cf, "org.h2database:h2:");
   }
 
 }

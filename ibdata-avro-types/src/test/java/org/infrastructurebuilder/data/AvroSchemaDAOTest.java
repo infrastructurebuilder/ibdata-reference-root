@@ -42,7 +42,7 @@ public class AvroSchemaDAOTest {
   @Before
   public void setUp() throws Exception {
 
-    a = new AvroSchemaDAO("!"   , "B", "1.0", "desc", Optional.empty(), Schema.createEnum("A", "B", "c", Arrays.asList("A","B")));
+    a = new AvroSchemaDAO(Schema.createEnum("A", "B", "c", Arrays.asList("A", "B")), "1.0", Optional.empty());
   }
 
   @After

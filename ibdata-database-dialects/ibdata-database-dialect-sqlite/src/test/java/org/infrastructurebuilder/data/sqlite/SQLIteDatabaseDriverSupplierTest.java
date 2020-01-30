@@ -15,23 +15,22 @@
  */
 package org.infrastructurebuilder.data.sqlite;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import org.infrastructurebuilder.data.sqlite.SQLiteDatabaseDriverSupplier;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SQLIteDatabaseDriverSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(SQLIteDatabaseDriverSupplierTest.class);
+  public final static TestingPathSupplier wps = new TestingPathSupplier();
 
   @Test
   public void testDatabaseDriverSupplier() {
-    SQLiteDatabaseDriverSupplier q = new SQLiteDatabaseDriverSupplier(() -> log);
+    SQLiteDatabaseDriverSupplier q = new SQLiteDatabaseDriverSupplier(wps,() -> log, new FakeCredentialsFactory());
     assertNotNull(q);
     assertEquals("SQLITE", q.getHint());
   }

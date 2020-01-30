@@ -22,32 +22,35 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.IBConstants.AVRO_BINARY;
-import static org.infrastructurebuilder.data.IBDataConstants.DIALECT;
+import static org.infrastructurebuilder.IBConstants.*;
+import static org.infrastructurebuilder.data.IBDataConstants.*;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-import static org.infrastructurebuilder.data.IBDataConstants.NAMESPACE;
 import static org.infrastructurebuilder.data.IBDataConstants.QUERY;
 import static org.infrastructurebuilder.data.IBDataConstants.SCHEMA;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.sql.DataSource;
 
 import org.apache.avro.Schema;
 import org.infrastructurebuilder.data.AbstractIBDataSource;
+import org.infrastructurebuilder.data.IBDataDatabaseDriverSupplier;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
+import org.infrastructurebuilder.data.IBDatabaseDialectMapper;
 import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.util.BasicCredentials;
-import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
+import org.infrastructurebuilder.util.DefaultURLAndCreds;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
@@ -67,12 +70,15 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   public static final String DEFAULT_NAMESPACE = "org.infrastructurebuilder.data";
 
   private final JooqAvroRecordWriterSupplier jrws;
+  private final IBDatabaseDialectMapper dm;
 
   @Inject
   public DefaultDatabaseIBDataSourceSupplierMapper(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, TypeToExtensionMapper t2e, JooqAvroRecordWriterSupplier jrws) {
-    super(requireNonNull(l).get(), requireNonNull(t2e), wps);
+      LoggerSupplier l, TypeToExtensionMapper t2e, JooqAvroRecordWriterSupplier jrws, CredentialsFactory cf,
+      IBDatabaseDialectMapper dm) {
+    super(requireNonNull(l).get(), requireNonNull(t2e), wps, cf);
     this.jrws = requireNonNull(jrws);
+    this.dm = requireNonNull(dm);
   }
 
   @Override
@@ -83,12 +89,32 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   @Override
   public IBDataSourceSupplier<Schema> getSupplierFor(IBDataStreamIdentifier v) {
     String temporaryId = v.getTemporaryId().orElse(null);
-    return new DefaultIBDataSourceSupplier<Schema>(temporaryId,
-        new DefaultDatabaseIBDataSource(getWorkingPathSupplier(), getLog(), temporaryId,
-            v.getUrl().orElseThrow(() -> new IBDataException("No url for " + temporaryId)), false, empty(),
-            ofNullable(v.getChecksum()), of(v.getMetadata()), empty(), v.getName(), v.getDescription(), getMapper(),
-            /* this.aus, */ this.jrws),
-        getWorkingPathSupplier());
+    URLAndCreds jdbcURL = v.getURLAndCreds().get();
+//    new DefaultURLAndCreds(v.getUrl().get(), v.getCredentialsQuery());
+    Optional<BasicCredentials> creds = v.getCredentialsQuery()
+        .flatMap(q -> getCredentialsFactory().getCredentialsFor(q));
+    IBDataDatabaseDriverSupplier supplier = dm.getSupplierForURL(jdbcURL)
+        .orElseThrow(() -> new IBDataException("No  IBDataDatabaseDriverSupplier available for " + jdbcURL));
+    return new DefaultIBDataSourceSupplier<Schema>(temporaryId // temp id TODO Fixme
+        , new DefaultDatabaseIBDataSource( // The supplier instance
+            getWorkingPathSupplier() // PathSupplier
+            , getLog() // Logger
+            , temporaryId // Temporary id (TODO to be remapped )
+            , jdbcURL // source
+            , false // Databases don't have archives to expand
+            , ofNullable(v.getChecksum()) // This checksum
+            , of(v.getMetadata()) // Metadata
+            , empty() // Additional config?
+            , empty() // Namespace (FIXME where does namespace come from?)
+            , v.getName() // Name (used as the table)
+            , v.getDescription() // desc
+            , getMapper() // Type mapper
+            , this.jrws // Jooq writer (TODO remove the need for this)
+            , supplier // The driver supplier
+        ) // That's the source supplier
+        , getWorkingPathSupplier() // Still have to supply this upwards
+        , creds // creds again
+    );
   }
 
   public class DefaultDatabaseIBDataSource extends AbstractIBDataSource<Schema> implements AutoCloseable {
@@ -100,15 +126,17 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 //    private final IBDataAvroUtilsSupplier aus;
     private final JooqAvroRecordWriterSupplier jwrs;
 
-    public DefaultDatabaseIBDataSource(PathSupplier wps, Logger l, String tempId, String source, boolean expand,
-        Optional<BasicCredentials> creds, Optional<Checksum> checksum, Optional<Metadata> metadata,
-        Optional<ConfigMap> additionalConfig, Optional<String> name, Optional<String> description,
-        TypeToExtensionMapper t2e, /* IBDataAvroUtilsSupplier jds, */JooqAvroRecordWriterSupplier jrws) {
+    private final IBDataDatabaseDriverSupplier supplier;
 
-      super(wps, l, tempId, source, false /* Databases y'all */, name, description, creds, checksum, metadata,
+    public DefaultDatabaseIBDataSource(PathSupplier wps, Logger l, String tempId, URLAndCreds source, boolean expand,
+        Optional<Checksum> checksum, Optional<Metadata> metadata, Optional<ConfigMap> additionalConfig,
+        Optional<String> namespace, Optional<String> name, Optional<String> description, TypeToExtensionMapper t2e,
+        /* IBDataAvroUtilsSupplier jds, */JooqAvroRecordWriterSupplier jrws, IBDataDatabaseDriverSupplier supplier) {
+
+      super(wps, l, tempId, source, false /* Databases y'all */, namespace, name, description, checksum, metadata,
           additionalConfig, null);
+      this.supplier = requireNonNull(supplier);
       this.t2e = t2e;
-//      this.aus = requireNonNull(jds);
       this.jwrs = requireNonNull(jrws);
     }
 
@@ -122,19 +150,17 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     @Override
     public DefaultDatabaseIBDataSource configure(ConfigMap config) {
-      return new DefaultDatabaseIBDataSource(getWorkingPathSupplier(), getLog(), getId(), getSourceURL(), false,
-          getCredentials(), getChecksum(), getMetadata(), of(config), getName(), getDescription(), t2e,
-          (JooqAvroRecordWriterSupplier) this.jwrs.configure(new DefaultConfigMapSupplier(config)));
+      return new DefaultDatabaseIBDataSource(getWorkingPathSupplier(), getLog(), getId(), getSource(), false,
+          getChecksum(), getMetadata(), of(config), getNamespace(), getName(), getDescription(), t2e,
+          (JooqAvroRecordWriterSupplier) this.jwrs.configure(new DefaultConfigMapSupplier(config)), this.supplier);
     }
 
     @Override
     public List<IBResource> getInstance(PathSupplier workingPath, Schema in) {
       if (conn == null) {
-        String url = getSourceURL();
-        BasicCredentials bc = getCredentials().orElse(new DefaultBasicCredentials("SA", empty()));
-        conn = IBDataException.cet.withReturningTranslation(
-            () -> DriverManager.getConnection(url, bc.getKeyId(), bc.getSecret().orElse(null)));
-
+        DataSource odss = supplier.getDataSourceSupplier(getSource()).map(Supplier::get)
+            .orElseThrow(() -> new IBDataException("No DataSource available for " + getSource()));
+        conn = IBDataException.cet.withReturningTranslation(() -> odss.getConnection());
       }
       ConfigMap cfg = getConfig();
       String sql = cfg.getString(QUERY);
@@ -142,15 +168,16 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
       if (!getName().isPresent())
         throw new IBDataException("Name is required to produce record");
       String recordName = getName().get();
-      return ofNullable(getSourceURL()).map(source -> {
+      return ofNullable(getSource().getUrl()).map(source -> { // Never null
         if (this.read == null) {
           Optional<String> sString;
-          if (source.startsWith("jdbc:")) {
+//          if (source.startsWith("jdbc:")) {  // Always true at this point
+
             DSLContext create = DSL.using(conn, dialect);
             final Result<Record> result;
             final Result<Record> firstResult = create.fetch(sql);
             sString = ofNullable(cfg.getString(SCHEMA));
-            String namespace = cfg.getOrDefault(NAMESPACE, DEFAULT_NAMESPACE);
+            String namespace = getNamespace().orElse(DEFAULT_NAMESPACE);
 //            Schema avroSchema = sString
 //                // Either we already have a schema
 //                .map(qq -> this.aus.get().avroSchemaFromString(qq))
@@ -161,8 +188,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
                                                                                // schema
             getLog().info("Reading data from dataset");
             read = singletonList(this.jwrs.get().writeRecords(result));
-          } else
-            throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
+// Removed for always-true-ness
+//          } else
+//            throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);
         }
         return read;
       }).orElse(emptyList());

@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
@@ -41,9 +44,11 @@ import org.jooq.TableRecord;
 import org.jooq.impl.CustomRecord;
 import org.slf4j.Logger;
 
+@Named
 public class DefaultIBDataJooqUtilsSupplier extends AbstractCMSConfigurableSupplier<IBDataJooqUtils, Object> {
   public static final String JOOQ_RESULT_REPRESENTATIONAL_VALUE = "org.jooq.Result<Record>";
 
+  @Inject
   public DefaultIBDataJooqUtilsSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l) {
     super(wps, config, l, null);
   }

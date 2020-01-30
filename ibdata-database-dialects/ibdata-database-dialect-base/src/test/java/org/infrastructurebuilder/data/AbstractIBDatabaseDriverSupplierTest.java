@@ -15,11 +15,16 @@
  */
 package org.infrastructurebuilder.data;
 
+import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier.generateLiquibaseChangelog;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -27,10 +32,18 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.DefaultURLAndCreds;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.URLAndCreds;
+import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
+import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +55,7 @@ import liquibase.database.core.MySQLDatabase;
 public class AbstractIBDatabaseDriverSupplierTest {
 
   private static final String JDBC_MYSQL = "jdbc:mysql:";
+  private static final URLAndCreds jdbcMysql = new DefaultURLAndCreds(JDBC_MYSQL, empty());
   private static final String MYSQL = "MYSQL";
   public final static Logger log = LoggerFactory.getLogger(AbstractIBDatabaseDriverSupplierTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
@@ -55,18 +69,28 @@ public class AbstractIBDatabaseDriverSupplierTest {
   private AbstractIBDatabaseDriverSupplier conf;
   private IBDataDatabaseDriverSupplier s;
   private String lqClass;
+  private CredentialsFactory cf;
 
   @Before
   public void setUp() throws Exception {
     lqClass = MySQLDatabase.class.getCanonicalName();
-    ab = new FakeAbstractIBDatabaseDriverSupplier(() -> log, MYSQL, lqClass, "X:Y:1.0.0");
+    ab = new FakeAbstractIBDatabaseDriverSupplier(wps, () -> log, MYSQL, lqClass, "X:Y:1.0.0");
     conf = (AbstractIBDatabaseDriverSupplier) ab;
     s = conf;
+    cf = new CredentialsFactory() {
+
+      @Override
+      public Optional<BasicCredentials> getCredentialsFor(String query) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+
+    };
   }
 
   @Test
   public void testGetDialect() {
-    assertFalse(conf.getDialect("ABC:def").isPresent());
+    assertFalse(conf.getDialect(new DefaultURLAndCreds("ABC:def", empty())).isPresent());
   }
 
   @Test
@@ -82,20 +106,20 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   @Test
   public void testNoSuchDriver() {
-    FakeAbstractIBDatabaseDriverSupplier abc = new FakeAbstractIBDatabaseDriverSupplier(() -> log, MYSQL,
+    FakeAbstractIBDatabaseDriverSupplier abc = new FakeAbstractIBDatabaseDriverSupplier(wps, () -> log, MYSQL,
         "No.Such.Driver.Classfile", "X:Y:1.0.0");
     assertFalse(abc.getDatabase().isPresent());
   }
 
   @Test
   public void testGet() {
-    assertEquals("MySQL" /* Dunno why */, s.getDialect(JDBC_MYSQL).get().get());
+    assertEquals("MySQL" /* Dunno why */, s.getDialect(jdbcMysql).get().getJooqName());
   }
 
   @Test
   public void testGetDatabaseDriverClassName() {
-    assertTrue(conf.respondsTo(JDBC_MYSQL));
-    assertEquals("com.mysql.cj.jdbc.Driver", conf.getDatabaseDriverClassName(JDBC_MYSQL).get());
+    assertTrue(conf.respondsTo(jdbcMysql));
+    assertEquals("com.mysql.cj.jdbc.Driver", conf.getDatabaseDriverClassName(jdbcMysql).get());
   }
 
   @Test
@@ -105,40 +129,68 @@ public class AbstractIBDatabaseDriverSupplierTest {
 
   @Test(expected = SQLException.class)
   public void testFailingConnection1() throws SQLException {
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, Optional.of(new DefaultBasicCredentials("SA", Optional.of("")))));
+    Optional<Supplier<DataSource>> k = conf
+        .getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, empty()));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
 
   @Test(expected = SQLException.class)
   public void testFailingConnection2a() throws SQLException {
-    BasicCredentials creds = new DefaultBasicCredentials("A", Optional.of("B"));
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, Optional.empty()));
+    BasicCredentials creds = new DefaultBasicCredentials("A", of("B"));
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, empty()));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
 
   @Test(expected = SQLException.class)
   public void testFailingConnection2b() throws SQLException {
-    BasicCredentials creds = new DefaultBasicCredentials("A", Optional.empty());
-    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, Optional.empty()));
+    BasicCredentials creds = new DefaultBasicCredentials("A", empty());
+    Optional<Supplier<DataSource>> k = conf.getDataSourceSupplier(new DefaultURLAndCreds(JDBC_MYSQL, empty()));
     Supplier<DataSource> l = k.get();
     Connection m = l.get().getConnection();
   }
 
   @Test
   public void testDialect1() {
-    IBDatabaseDialect d = s.getDialect(JDBC_MYSQL).get();
+    IBDatabaseDialect d = s.getDialect(jdbcMysql).get();
     assertTrue(d.hibernateDialectClass().isPresent());
     assertNotNull(d.liquibaseDatabaseClass());
     assertTrue(d.springDbName().isPresent());
   }
 
+  @Test
+  public void testWriteDTD() throws SQLException {
+    Path workingPath = wps.get();
+    String s = wps.getTestClasses().resolve("test.trace.db").toAbsolutePath().toString();
+    String jdbcurl = "jdbc:sqlite:" + s;
+    final BasicDataSource d = new BasicDataSource(); // FIXME How to ensure that d is closed?
+    d.setDriverClassName("org.sqlite.JDBC");
+    d.setUrl(jdbcurl);
+    IBResource v;
+    try (Connection conn = d.getConnection()) {
+      v = generateLiquibaseChangelog(conn, workingPath, of(asList("TABLE2")), empty());
+      Path p = v.getPath();
+      assertEquals(IBConstants.LIQUIBASE_SCHEMA, v.getType());
+    }
+    log.info("Wrote LB Schema : " + v.getPath());
+
+    try (Connection conn = d.getConnection()) {
+      v = AbstractIBDatabaseDriverSupplier.generateDbunitDTDSchema(conn, workingPath);
+      Path p = v.getPath();
+      assertEquals(IBConstants.DBUNIT_DTD, v.getType());
+      log.info("Wrote DTD : " + v.getPath());
+    }
+
+    d.close();
+
+  }
+
   public static final class FakeAbstractIBDatabaseDriverSupplier extends AbstractIBDatabaseDriverSupplier {
 
-    protected FakeAbstractIBDatabaseDriverSupplier(LoggerSupplier l, String hint, String liquibaseDatabaseClass,
-        String... list) {
-      super(l, hint, liquibaseDatabaseClass, list);
+    protected FakeAbstractIBDatabaseDriverSupplier(PathSupplier wps, LoggerSupplier l, String hint,
+        String liquibaseDatabaseClass, String... list) {
+      super(wps, l, hint, liquibaseDatabaseClass, new FakeCredentialsFactory(), list);
     }
 
   }

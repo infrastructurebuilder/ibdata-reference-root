@@ -23,6 +23,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.infrastructurebuilder.util.URLAndCreds;
+
 @Named
 public class DefaultIBDatabaseDialectMapper implements IBDatabaseDialectMapper {
 
@@ -34,9 +36,8 @@ public class DefaultIBDatabaseDialectMapper implements IBDatabaseDialectMapper {
   }
 
   @Override
-  public final Optional<IBDataDatabaseDriverSupplier> getSupplierForURL(String jdbcURL) {
+  public final Optional<IBDataDatabaseDriverSupplier> getSupplierForURL(URLAndCreds jdbcURL) {
     return suppliers.values().stream().filter(s -> s.respondsTo(jdbcURL)).findAny();
   }
-
 
 }

@@ -45,7 +45,6 @@
 <!-- <groupId>org.jooq.trial</groupId>  -->
       <groupId>org.jooq</groupId>
       <artifactId>jooq</artifactId>
-      <version>${jooq.jooq.version}</version>
     </dependency>
     <dependency>
       <groupId>org.liquibase</groupId>
