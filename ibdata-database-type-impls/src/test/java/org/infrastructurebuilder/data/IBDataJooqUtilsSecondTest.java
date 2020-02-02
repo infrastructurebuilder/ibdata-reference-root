@@ -39,8 +39,14 @@ import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -63,12 +69,11 @@ public class IBDataJooqUtilsSecondTest {
 
   public final static Logger log = LoggerFactory.getLogger(IBDataJooqUtilsSecondTest.class);
 
-  private static TestingPathSupplier wps;
+  private static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    wps = new TestingPathSupplier();
-  }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -160,8 +165,8 @@ public class IBDataJooqUtilsSecondTest {
       PersistedIBSchemaXpp3Writer writer = new PersistedIBSchemaXpp3Writer();
       writer.write(w, ibSchema);
     }
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = new DefaultIBDataAvroUtilsSupplier(ibr, gds);
   }
 
   @After
@@ -179,7 +184,7 @@ public class IBDataJooqUtilsSecondTest {
     Optional<List<Schema>> alaschema = local.to(Arrays.asList(ibSchema.clone()));
     Schema ls = alaschema.get().get(0);
     configMap.put(JooqAvroRecordWriterSupplier.SCHEMA, ls);
-    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> getLog(), aus)
+    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(ibr, aus)
         .configure(cms);
     w = (JooqRecordWriter) w2.get();
     read = w.writeRecords(result);

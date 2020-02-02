@@ -39,9 +39,14 @@ import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.line.StringIBDataStreamRecordFinalizerSupplier;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,6 +59,10 @@ import org.slf4j.LoggerFactory;
 public class PassThruTransformerSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(PassThruTransformerSupplierTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -85,8 +94,8 @@ public class PassThruTransformerSupplierTest {
     x1.setSources(Collections.emptyList());
     x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
-    p = new PassThruTransformerSupplier(wps, () -> log);
-    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(wps, () -> log);
+    p = new PassThruTransformerSupplier(ibr);
+    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(ibr);
     finalizer = finalizerSupplier.configure(cms).get();
     finalData = new DataSet();
     finalData.setUuid(UUID.randomUUID().toString());

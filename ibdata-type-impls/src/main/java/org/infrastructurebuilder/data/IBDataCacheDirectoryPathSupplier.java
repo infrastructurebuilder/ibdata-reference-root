@@ -17,9 +17,12 @@ package org.infrastructurebuilder.data;
 
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
 
-import org.infrastructurebuilder.util.config.AbstractPathSupplierHolder;
+import java.nio.file.Path;
+
+import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.TSupplier;
 
 @javax.inject.Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER)
 @javax.inject.Singleton
-public class IBDataCacheDirectoryPathSupplier extends AbstractPathSupplierHolder {
+public class IBDataCacheDirectoryPathSupplier extends TSupplier<Path> implements PathSupplier {
 }

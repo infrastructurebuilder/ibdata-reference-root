@@ -49,14 +49,14 @@ public class GenericProtobufIBDataRecordFinalizerSupplier
     this(wps, l, null);
   }
 
-  private GenericProtobufIBDataRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
+  private GenericProtobufIBDataRecordFinalizerSupplier(IBRuntimeUtils ibr,  ConfigMapSupplier cms) {
     super(ps, l, cms);
   }
 
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<com.google.protobuf.GeneratedMessageV3> configure(
       ConfigMapSupplier cms) {
-    return new GenericProtobufIBDataRecordFinalizerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
+    return new GenericProtobufIBDataRecordFinalizerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override

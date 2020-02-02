@@ -33,9 +33,15 @@ import org.infrastructurebuilder.data.GenericDataSupplier;
 import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.transform.line.AbstractMapToAvroGenericRecordIBDataLineTransformer;
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +61,11 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
 
   private AbstractMapToAvroGenericRecordIBDataLineTransformer test;
   private Map<String, Object> testData = new HashMap<>();
-  private TestingPathSupplier wps = new TestingPathSupplier();
+  private static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
   private Path workingPath;
 
   private IBDataAvroUtilsSupplier aus;
@@ -76,7 +86,7 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
     testData.put("id", "1");
     testData.put("index", "1");
     testData.put("A", "B");
-    //    Object[] a = Arrays.asList("A", "B", 1, 2, 3).toArray(new Object[0]);
+    // Object[] a = Arrays.asList("A", "B", 1, 2, 3).toArray(new Object[0]);
     Properties p1 = new Properties();
     try (InputStream in = getClass().getResourceAsStream("/" + LOAD1_PROPERTIES)) {
       p1.load(in);
@@ -93,9 +103,10 @@ public class AbstractMapToGenericRecordIBDataLineTransformerTest {
 
     cms = new DefaultConfigMapSupplier(new ConfigMap(p1));
 
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps,() -> log, gds);
-    DefaultMapToGenericRecordIBDataLineTransformerSupplier s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(() -> workingPath, () -> log, aus).configure(cms);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = new DefaultIBDataAvroUtilsSupplier(ibr, gds);
+    DefaultMapToGenericRecordIBDataLineTransformerSupplier s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(
+        ibr, aus).configure(cms);
     test = (AbstractMapToAvroGenericRecordIBDataLineTransformer) s.get();
   }
 

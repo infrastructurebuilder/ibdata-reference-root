@@ -50,10 +50,15 @@ import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.line.StringIBDataStreamRecordFinalizerSupplier;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -66,10 +71,9 @@ import org.slf4j.LoggerFactory;
 public class AddStreamTransformerSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(AddStreamTransformerSupplierTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -97,13 +101,17 @@ public class AddStreamTransformerSupplierTest {
     x1.setFailOnAnyError(true);
     x1.setSources(Collections.emptyList());
     x1.setTargetStreamMetadata(new Metadata());
-    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"), GROUP, ARTIFACT, VERSION);
     cms = new DefaultConfigMapSupplier();
-    p = new AddStreamTransformerSupplier(wps, () -> log);
+    p = new AddStreamTransformerSupplier(ibr);
     finalWP = wps.get();
 //    .resolve(UUID.randomUUID().toString());
 //    Files.createDirectories(finalWP.getParent());
-    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> finalWP, () -> log);
+    IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(() -> finalWP, log, new DefaultGAV(new FakeIBVersionsSupplier()),
+        new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+        });
+
+    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(ibr);
     finalizer = finalizerSupplier.configure(cms).get();
     finalData = new DataSet();
     finalData.setUuid(UUID.randomUUID().toString());
@@ -169,7 +177,6 @@ public class AddStreamTransformerSupplierTest {
     IBDataTransformationResult q = t.transform(x1, ds, suppliedStreams, true);
     assertTrue(q.get().isPresent());
   }
-
 
   @Test
   public void testFinalizerGet() {

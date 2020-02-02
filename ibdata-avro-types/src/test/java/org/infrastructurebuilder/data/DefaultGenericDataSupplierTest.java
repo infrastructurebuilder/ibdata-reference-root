@@ -21,9 +21,15 @@ import java.time.LocalDate;
 
 import org.apache.avro.Conversion;
 import org.apache.avro.generic.GenericData;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -36,6 +42,10 @@ import org.slf4j.LoggerFactory;
 public class DefaultGenericDataSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultGenericDataSupplierTest.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -51,7 +61,7 @@ public class DefaultGenericDataSupplierTest {
   @Before
   public void setUp() throws Exception {
     config = new DefaultConfigMapSupplier();
-    d = new DefaultGenericDataSupplier(wps, () -> log).configure(config);
+    d = new DefaultGenericDataSupplier(ibr).configure(config);
   }
 
   @After

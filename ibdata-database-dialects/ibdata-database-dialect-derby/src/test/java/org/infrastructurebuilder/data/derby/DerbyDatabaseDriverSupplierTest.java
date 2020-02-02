@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -26,11 +27,11 @@ import org.slf4j.LoggerFactory;
 
 public class DerbyDatabaseDriverSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(DerbyDatabaseDriverSupplierTest.class);
-  public final static TestingPathSupplier wps = new TestingPathSupplier();
+  public final static IBRuntimeUtilsTesting ibr = new IBRuntimeUtilsTesting(log);
 
   @Test
   public void testDatabaseDriverSupplier() {
-    DerbyDatabaseDriverSupplier q = new DerbyDatabaseDriverSupplier(wps, () -> log, new FakeCredentialsFactory());
+    DerbyDatabaseDriverSupplier q = new DerbyDatabaseDriverSupplier(ibr);
     assertNotNull(q);
     assertEquals("DERBY", q.getHint());
   }

@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,9 +31,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.data.type.IBDataType;
+import org.infrastructurebuilder.data.type.IBDataTypeHandler;
+import org.infrastructurebuilder.data.type.IBDataTypeTranslator;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.jooq.Field;
 import org.jooq.Record;
@@ -47,42 +49,46 @@ import org.slf4j.Logger;
 @Named
 public class DefaultIBDataJooqUtilsSupplier extends AbstractCMSConfigurableSupplier<IBDataJooqUtils, Object> {
   public static final String JOOQ_RESULT_REPRESENTATIONAL_VALUE = "org.jooq.Result<Record>";
+  private final IBDataTypeHandler tf;
 
   @Inject
-  public DefaultIBDataJooqUtilsSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l) {
-    super(wps, config, l, null);
+  public DefaultIBDataJooqUtilsSupplier(IBRuntimeUtils ibr, ConfigMapSupplier config, IBDataTypeHandler tf) {
+    super(ibr, config, null);
+    this.tf = requireNonNull(tf);
   }
 
-  private DefaultIBDataJooqUtilsSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l, Object param) {
-    super(wps, config, l, param);
+  private DefaultIBDataJooqUtilsSupplier(IBRuntimeUtils ibr, ConfigMapSupplier config, IBDataTypeHandler tf,
+      Object param) {
+    super(ibr, config, param);
+    this.tf = tf;
   }
 
   @Override
   public DefaultIBDataJooqUtilsSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
     Object param = null;
-    return new DefaultIBDataJooqUtilsSupplier(getWorkingPathSupplier(), cms, () -> getLog(), param);
+    return new DefaultIBDataJooqUtilsSupplier(getRuntimeUtils(), cms, this.tf, param);
   }
 
   @Override
-  protected IBDataJooqUtils getInstance(PathSupplier wps, Object in) {
-    return new DefaultIBDataJooqUtils(getLog(), wps.get(), in);
+  protected IBDataJooqUtils getInstance(IBRuntimeUtils ibr, Object in) {
+    return new DefaultIBDataJooqUtils(getRuntimeUtils(), this.tf, in);
   }
 
   private class DefaultIBDataJooqUtils implements IBDataJooqUtils {
 
-    private final Logger log;
-    private final Path workingPath;
     private final Object in;
+    private final IBRuntimeUtils ibr;
+    private final IBDataTypeHandler tf;
 
-    public DefaultIBDataJooqUtils(Logger log, Path workingPath, Object in) {
-      this.log = log;
-      this.workingPath = workingPath;
+    public DefaultIBDataJooqUtils(IBRuntimeUtils ibr, IBDataTypeHandler tf, Object in) {
+      this.ibr = ibr;
       this.in = in;
+      this.tf = tf;
     }
 
     @Override
     public Logger getLog() {
-      return log;
+      return ibr.getLog();
     }
 
     @Override
@@ -100,12 +106,9 @@ public class DefaultIBDataJooqUtilsSupplier extends AbstractCMSConfigurableSuppl
       if (requireNonNull(s, "Inbound list of IBSchema").size() == 0)
         return of(Collections.emptyList());
 
-
       /*
        * Liquibase changelog generation
        */
-
-
 
       List<Record> list = new ArrayList<>();
       // Second and subsequent schema are considered subordinate
@@ -131,10 +134,12 @@ public class DefaultIBDataJooqUtilsSupplier extends AbstractCMSConfigurableSuppl
       String name = r.getName().orElseThrow(() -> new IBDataException("Name cannot be null"));
 
       // TODO What to do with r.getMetadata()?
-      List<Field> l = r.getSchemaFields().parallelStream().filter(sd -> !sd.isDeprecated())
-          .map(IBDataJooqUtils::toJooqField).collect(toList());
+      List<Field<?>> l = r.getSchemaFields().parallelStream().filter(sd -> !sd.isDeprecated())
+          .map(f -> (Field<?>) tf.getTranslatorFor(f.getIBDataType(tf).getType())
+              .orElseThrow(() -> new IBDataException("Unbtranslatable field " + f)).from(f))
+          .collect(toList());
 
-      Table<? extends TableRecord> t;
+      Table<? extends TableRecord<?>> t;
       CustomRecord<?> cr = null;
 
       list.add(cr);

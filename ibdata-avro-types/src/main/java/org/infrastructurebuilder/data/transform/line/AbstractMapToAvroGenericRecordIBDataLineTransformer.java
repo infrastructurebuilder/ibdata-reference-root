@@ -15,7 +15,6 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -28,15 +27,15 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.util.config.ConfigMap;
-import org.slf4j.Logger;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 
 abstract public class AbstractMapToAvroGenericRecordIBDataLineTransformer
     extends AbstractAvroGenericIBDataLineTransformer<Map<String, Object>> {
 
   private final List<String> alreadyWarned = new ArrayList<>();
 
-  protected AbstractMapToAvroGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
-    super(workingPath, config, l);
+  protected AbstractMapToAvroGenericRecordIBDataLineTransformer(IBRuntimeUtils workingPath, ConfigMap config) {
+    super(workingPath, config);
   }
 
   @Override

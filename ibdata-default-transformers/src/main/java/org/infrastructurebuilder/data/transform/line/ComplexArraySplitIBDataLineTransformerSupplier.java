@@ -53,7 +53,7 @@
 //  }
 //
 //  @Override
-//  protected IBDataRecordTransformer<String, String[]> getUnconfiguredTransformerInstance(Path workingPath) {
+//  protected IBDataRecordTransformer<String, String[]> getUnconfiguredTransformerInstance() {
 //    return new ComplexArraySplitIBDataLineTransformer() {
 //
 //      @Override

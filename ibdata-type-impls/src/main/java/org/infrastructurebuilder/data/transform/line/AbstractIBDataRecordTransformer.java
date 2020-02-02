@@ -25,31 +25,34 @@ import java.util.List;
 import java.util.Optional;
 
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBDataRecordTransformer<I, O> implements IBDataRecordTransformer<I, O> {
 
-  private final Path workingPath;
+  private final IBRuntimeUtils ibr;
   private final ConfigMap config;
-  private final Logger logger;
 
-  public AbstractIBDataRecordTransformer(Path ps, Logger l) {
-    this(ps, null, l);
+  public AbstractIBDataRecordTransformer(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  protected AbstractIBDataRecordTransformer(Path ps, ConfigMap config, Logger l) {
-    this.workingPath = requireNonNull(ps);
+  protected AbstractIBDataRecordTransformer(IBRuntimeUtils ps, ConfigMap config) {
+    this.ibr = requireNonNull(ps);
     this.config = config;
-    this.logger = requireNonNull(l);
+  }
+
+  public IBRuntimeUtils getRuntimeUtils() {
+    return ibr;
   }
 
   @Override
   public Logger getLogger() {
-    return logger;
+    return ibr.getLog();
   }
 
   protected Path getWorkingPath() {
-    return workingPath;
+    return ibr.getWorkingPath();
   }
 
   protected ConfigMap getConfig() {

@@ -19,9 +19,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
@@ -35,6 +41,10 @@ import org.slf4j.LoggerFactory;
 abstract public class AbstractTTestClass<T extends AbstractIBDataRecordTransformerSupplier<I, O>, I, O> {
   public final static Logger log = LoggerFactory.getLogger(AbstractTTestClass.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  public final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -69,7 +79,7 @@ abstract public class AbstractTTestClass<T extends AbstractIBDataRecordTransform
 
   @Before
   public void setUp() throws Exception {
-    t = getT(wps, () -> log);
+    t = getT(ibr);
   }
 
   @After
@@ -99,7 +109,7 @@ abstract public class AbstractTTestClass<T extends AbstractIBDataRecordTransform
 
   abstract Class<O> getO();
 
-  abstract T getT(PathSupplier wps, LoggerSupplier l);
+  abstract T getT(IBRuntimeUtils t);
 
   abstract O getSuccessTestValue();
 

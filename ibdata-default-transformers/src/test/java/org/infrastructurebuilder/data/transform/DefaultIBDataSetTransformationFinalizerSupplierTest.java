@@ -40,10 +40,15 @@ import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.ConfigurableSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.After;
@@ -57,10 +62,10 @@ import org.slf4j.LoggerFactory;
 public class DefaultIBDataSetTransformationFinalizerSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplierTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -81,7 +86,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
     x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
 
     cms = new DefaultConfigMapSupplier();
-    fs = new DefaultIBDataSetTransformationFinalizerSupplier(wps, () -> log, new DefaultTypeToExtensionMapper());
+    fs = new DefaultIBDataSetTransformationFinalizerSupplier(ibr);
     finalData = new DataSet();
     finalData.setUuid(UUID.randomUUID().toString());
     now = new Date(1570968733117L);

@@ -36,11 +36,17 @@ import java.util.UUID;
 import org.infrastructurebuilder.data.ingest.IBDataSchemaIngestionConfig;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
@@ -56,6 +62,10 @@ import org.slf4j.LoggerFactory;
 public class AbstractIBDataSetFinalizerSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(AbstractIBDataSetFinalizerSupplierTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -91,13 +101,13 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     d.setMetadata(new Metadata());
     d.setVersion("1.0");
     dsi1 = new DefaultIBDataSet(d);
-    c = getSupplier(log, wps, cms, t2e);
+    c = getSupplier(ibr, cms, t2e);
 
   }
 
-  private AbstractIBDataSetFinalizerSupplier<Dummy, Object> getSupplier(Logger log, TestingPathSupplier wps,
+  private AbstractIBDataSetFinalizerSupplier<Dummy, Object> getSupplier(IBRuntimeUtils ibr,
       DefaultConfigMapSupplier cms, DefaultTypeToExtensionMapper t2e) {
-    return new AbstractIBDataSetFinalizerSupplier<Dummy, Object>(log, wps, cms, t2e) {
+    return new AbstractIBDataSetFinalizerSupplier<Dummy, Object>(ibr, cms) {
 
       @Override
       public AbstractIBDataSetFinalizerSupplier<Dummy, Object> getConfiguredSupplier(ConfigMapSupplier cms) {
@@ -105,7 +115,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
       }
 
       @Override
-      protected IBDataSetFinalizer<Dummy> getInstance(PathSupplier workingPath, Object nothing) {
+      protected IBDataSetFinalizer<Dummy> getInstance(IBRuntimeUtils ibr, Object nothing) {
         return new DummyFinalizer(getConfig().get(), getConfig().get().get("path"));
       }
 
@@ -118,7 +128,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
 
   @Test
   public void testGetTypeToExtensionMapper() {
-    assertEquals(t2e, c.getTypeToExtensionMapper());
+    assertNotNull(c.getTypeToExtensionMapper());
   }
 
   @Test(expected = IBDataException.class)
@@ -127,7 +137,7 @@ public class AbstractIBDataSetFinalizerSupplierTest {
     dummyPath = dummyPath.resolve("X");
     cms.addValue("path", dummyPath);
     IBUtils.writeString(dummyPath, "ABC"); // Creates the file
-    c = getSupplier(log, wps, cms, t2e);
+    c = getSupplier(ibr, cms, t2e);
     IBDataSetFinalizer<Dummy> v = c.configure(cms).get();
 
   }

@@ -19,53 +19,51 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_ENTITY;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.infrastructurebuilder.data.IBDataDecoratedDAO;
 import org.infrastructurebuilder.data.IBSchema;
 import org.infrastructurebuilder.data.schema.IBSchemaTranslator;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.integration.commandline.CommandLineUtils;
 
+@Named
 public class DefaultSchemaToLiquibaseTranslatorSupplier
     extends AbstractCMSConfigurableSupplier<IBSchemaTranslator<IBSchema, LiquibaseDAO>, URLAndCreds> {
   private final LiquibaseSupplier ls;
 
-  public DefaultSchemaToLiquibaseTranslatorSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, LiquibaseSupplier ls) {
-    super(wps, null, l);
+  @Inject
+  public DefaultSchemaToLiquibaseTranslatorSupplier(IBRuntimeUtils ibr, LiquibaseSupplier ls) {
+    super(ibr, null);
     this.ls = requireNonNull(ls);
   }
 
-  private DefaultSchemaToLiquibaseTranslatorSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l,
-      LiquibaseSupplier lbs) {
-    super(wps, cms, l);
+  private DefaultSchemaToLiquibaseTranslatorSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms, LiquibaseSupplier lbs) {
+    super(ibr, cms);
     this.ls = (LiquibaseSupplier) requireNonNull(lbs).configure(cms);
   }
 
   @Override
   public DefaultSchemaToLiquibaseTranslatorSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultSchemaToLiquibaseTranslatorSupplier(getWorkingPathSupplier(), cms, () -> getLog(), this.ls);
+    return new DefaultSchemaToLiquibaseTranslatorSupplier(getRuntimeUtils(), cms, this.ls);
   }
 
   @Override
-  protected DefaultSchemaToLiquibaseTranslator getInstance(PathSupplier wps, URLAndCreds in) {
+  protected DefaultSchemaToLiquibaseTranslator getInstance(IBRuntimeUtils ibr, URLAndCreds in) {
     return new DefaultSchemaToLiquibaseTranslator(getLog(), ls);
   }
 
@@ -84,19 +82,21 @@ public class DefaultSchemaToLiquibaseTranslatorSupplier
       return this.log;
     }
 
+    /*
     @Override
     public Optional<String> getInboundType() {
       return IBSchemaTranslator.super.getInboundType(); // Outbound only
     }
 
     @Override
-    public Optional<String> getOutboundType() {
-      return of(LiquibaseDAO.class.getName());
-    }
-
-    @Override
     public Optional<List<IBSchema>> from(List<IBDataDecoratedDAO<IBSchema>> s) {
       return IBSchemaTranslator.super.from(s); // Outbound only
+    }
+     */
+
+    @Override
+    public Optional<String> getOutboundType() {
+      return of(LiquibaseDAO.class.getName());
     }
 
     @Override
@@ -115,8 +115,7 @@ public class DefaultSchemaToLiquibaseTranslatorSupplier
       String author = IBDATA_ENTITY;
       DiffOutputControl diffOutputControl = new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema,
           includeTablespace, schemaComparison);
-      Path changeLogFile = cet.withReturningTranslation(() -> Files.createTempFile("liquibase-", ".xml"))
-          .toAbsolutePath();
+      Path changeLogFile = getRuntimeUtils().getWorkingPath().resolve("liquibase-" + UUID.randomUUID().toString() + ".xml").toAbsolutePath();
       cet.withTranslation(
           () -> CommandLineUtils.doGenerateChangeLog(changeLogFile.toString(), this.liquibase.get().getDatabase(),
               s.getNameSpace().get(), s.getName().get(), snapshotTypes, author, context, dataDir, diffOutputControl));

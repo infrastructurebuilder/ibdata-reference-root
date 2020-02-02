@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data.transform;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.nio.file.Files;
@@ -38,11 +37,10 @@ import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 @Named(AddStreamTransformerSupplier.ADD_STREAM)
@@ -51,29 +49,28 @@ public class AddStreamTransformerSupplier extends AbstractIBDataTransformerSuppl
   public static final String ADDED_PATH = "addedPath";
 
   @Inject
-  public AddStreamTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier loggerSupplier) {
-    this(wps, loggerSupplier, null);
+  public AddStreamTransformerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private AddStreamTransformerSupplier(PathSupplier wps, LoggerSupplier loggerSupplier, ConfigMapSupplier cms) {
-    super(wps, loggerSupplier, cms);
+  private AddStreamTransformerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public AddStreamTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new AddStreamTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
+    return new AddStreamTransformerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected AddStreamTransformer getConfiguredTransformerInstance(Path workingPath) {
-    return new AddStreamTransformer(getWorkingPathSupplier().get(), getLog(), getConfig());
+  protected AddStreamTransformer getConfiguredTransformerInstance() {
+    return new AddStreamTransformer(getRuntimeUtils(), getConfig());
   }
 
   public static class AddStreamTransformer extends AbstractIBDataTransformer {
 
-    private AddStreamTransformer(Path path, Logger l, ConfigMap cm) {
-      super(path, l, cm);
+    private AddStreamTransformer(IBRuntimeUtils ibr, ConfigMap cm) {
+      super(ibr, cm);
     }
 
     @Override

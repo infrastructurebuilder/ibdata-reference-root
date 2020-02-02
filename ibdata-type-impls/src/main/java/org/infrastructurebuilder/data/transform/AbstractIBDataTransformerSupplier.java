@@ -25,35 +25,32 @@ import org.infrastructurebuilder.util.LoggerEnabled;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBDataTransformerSupplier implements IBDataTransformerSupplier, LoggerEnabled {
-  private final PathSupplier wps;
+  private final IBRuntimeUtils ibr;
   private final ConfigMapSupplier config;
-  private final LoggerSupplier logger;
 
-  public AbstractIBDataTransformerSupplier(
-      // These go into your impls
-      PathSupplier wps, LoggerSupplier l) {
-    this(wps, l, null);
+  public AbstractIBDataTransformerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
   protected AbstractIBDataTransformerSupplier(
       // These go into your impls
-      PathSupplier wps, LoggerSupplier l, ConfigMapSupplier cms) {
-    this.wps = Objects.requireNonNull(wps);
+      IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    this.ibr = Objects.requireNonNull(ibr);
     this.config = cms;
-    this.logger = Objects.requireNonNull(l);
   }
 
   public PathSupplier getWorkingPathSupplier() {
-    return wps;
+    return () -> ibr.getWorkingPath();
   }
 
   @Override
   public Logger getLog() {
-    return this.logger.get();
+    return this.ibr.getLog();
   }
 
   public ConfigMap getConfig() {
@@ -70,14 +67,18 @@ abstract public class AbstractIBDataTransformerSupplier implements IBDataTransfo
 
   @Override
   public IBDataTransformer get() {
-    return getConfiguredTransformerInstance(this.wps.get());
+    return getConfiguredTransformerInstance();
   }
 
+  public IBRuntimeUtils getRuntimeUtils() {
+    return ibr;
+  }
   /**
    * Must return a new instance of an IBDataTransformer
+   *
    * @param workingPath
    * @return
    */
-  protected abstract IBDataTransformer getConfiguredTransformerInstance(Path workingPath);
+  protected abstract IBDataTransformer getConfiguredTransformerInstance();
 
 }

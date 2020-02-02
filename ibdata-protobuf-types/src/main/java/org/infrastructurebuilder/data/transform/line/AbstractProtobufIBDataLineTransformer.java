@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 
 abstract public class AbstractProtobufIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, com.google.protobuf.GeneratedMessageV3> {
 
-  public AbstractProtobufIBDataLineTransformer(Path workingPath, Logger l) {
+  public AbstractProtobufIBDataLineTransformer(IBRuntimeUtils workingPath) {
     this(workingPath, null, l);
   }
 

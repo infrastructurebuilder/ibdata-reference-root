@@ -20,22 +20,21 @@ import java.util.Objects;
 
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBDataTransformer implements IBDataTransformer {
 
-  private final Path workingPath;
+  private final IBRuntimeUtils ibr;
   private final ConfigMap config;
-  private final Logger logger;
 
-  public AbstractIBDataTransformer(Path p, Logger l) {
-    this(p, l, new ConfigMap());
+  public AbstractIBDataTransformer(IBRuntimeUtils p) {
+    this(p, new ConfigMap());
   }
 
-  protected AbstractIBDataTransformer(Path workingPath, Logger l,  ConfigMap config) {
-    this.workingPath = Objects.requireNonNull(workingPath);
+  protected AbstractIBDataTransformer(IBRuntimeUtils workingPath, ConfigMap config) {
+    this.ibr = Objects.requireNonNull(workingPath);
     this.config = config;
-    this.logger = Objects.requireNonNull(l);
   }
 
   protected ConfigMap getConfig() {
@@ -43,11 +42,11 @@ abstract public class AbstractIBDataTransformer implements IBDataTransformer {
   }
 
   public Path getWorkingPath() {
-    return workingPath;
+    return ibr.getWorkingPath();
   }
 
   @Override
   public Logger getLog() {
-    return this.logger;
+    return ibr.getLog();
   }
 }

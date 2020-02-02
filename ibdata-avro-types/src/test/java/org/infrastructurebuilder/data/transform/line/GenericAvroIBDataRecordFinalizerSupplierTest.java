@@ -41,11 +41,17 @@ import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStructuredDataFieldMetadata;
+import org.infrastructurebuilder.data.IbdataAvroTypesVersioning;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.line.GenericAvroIBDataRecordFinalizerSupplier.GenericAvroIBDataStreamRecordFinalizer;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -59,6 +65,9 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
 
   public final static Logger log = LoggerFactory.getLogger(GenericAvroIBDataRecordFinalizerSupplierTest.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new IbdataAvroTypesVersioning()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -83,9 +92,9 @@ public class GenericAvroIBDataRecordFinalizerSupplierTest {
     schemaString = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString();
     cms.addValue(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaString);
     cms.addValue(IBDataStreamRecordFinalizer.NUMBER_OF_ROWS_TO_SKIP_PARAM, "1");
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    g = new GenericAvroIBDataRecordFinalizerSupplier(wps, () -> log, aus);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = new DefaultIBDataAvroUtilsSupplier(ibr, gds);
+    g = new GenericAvroIBDataRecordFinalizerSupplier(ibr, aus);
 
   }
 

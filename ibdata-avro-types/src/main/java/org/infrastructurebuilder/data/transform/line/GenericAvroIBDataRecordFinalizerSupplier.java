@@ -17,7 +17,6 @@ package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -40,10 +39,9 @@ import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataStructuredDataMetadataType;
 import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;
 import org.infrastructurebuilder.data.model.StructuredFieldMetadata;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 @Named(GenericAvroIBDataRecordFinalizerSupplier.NAME)
@@ -55,21 +53,20 @@ public class GenericAvroIBDataRecordFinalizerSupplier
   private final IBDataAvroUtilsSupplier aus;
 
   @Inject
-  public GenericAvroIBDataRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
-    super(wps, l, null);
+  public GenericAvroIBDataRecordFinalizerSupplier(IBRuntimeUtils ibr, IBDataAvroUtilsSupplier aus) {
+    super(ibr, null);
     this.aus = requireNonNull(aus);
   }
 
-  private GenericAvroIBDataRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms,
+  private GenericAvroIBDataRecordFinalizerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms,
       IBDataAvroUtilsSupplier aus) {
-    super(ps, l, cms);
+    super(ibr, cms);
     this.aus = (IBDataAvroUtilsSupplier) requireNonNull(aus).configure(cms);
   }
 
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<GenericRecord> configure(ConfigMapSupplier cms) {
-    return new GenericAvroIBDataRecordFinalizerSupplier(getWorkingPathSupplier(), () -> getLog(), cms, aus);
+    return new GenericAvroIBDataRecordFinalizerSupplier(getRuntimeUtils(), cms, aus);
   }
 
   @Override

@@ -37,8 +37,8 @@
   <name>${project.artifactId}</name>
   <description>IBData types for avro-specific transformation</description>
   <properties>
-    <jacoco.max.missed.classes>1</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>50</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>6</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>05</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

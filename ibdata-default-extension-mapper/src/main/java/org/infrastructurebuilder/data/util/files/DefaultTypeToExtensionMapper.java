@@ -17,7 +17,7 @@ package org.infrastructurebuilder.data.util.files;
 
 import static java.util.Collections.emptySortedSet;
 import static java.util.Collections.singleton;
-import static org.infrastructurebuilder.IBConstants.APPLICATION_ACCESS;
+import static org.infrastructurebuilder.IBConstants.*;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_LIQUIBASE_CHANGELOG;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORD;
 import static org.infrastructurebuilder.IBConstants.APPLICATION_MSWORDX;
@@ -110,6 +110,8 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       put(PROTOBUF2, PROTO);
       put(PROTOBUF3, PROTO);
       put(DBUNIT_DTD, DTD);
+      put(JSON_TYPE, JSON_EXT);
+      put(NLD_JSON_TYPE, NLD_JSON_EXT);
     }
   };
 

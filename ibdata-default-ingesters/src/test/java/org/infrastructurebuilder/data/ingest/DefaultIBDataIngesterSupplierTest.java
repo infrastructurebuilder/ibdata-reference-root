@@ -50,6 +50,7 @@ import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
+import org.infrastructurebuilder.data.IbdataDefaultIngestersVersioning;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.model.DataStream;
@@ -57,8 +58,12 @@ import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
@@ -73,6 +78,10 @@ import org.slf4j.Logger;
 public class DefaultIBDataIngesterSupplierTest {
   public final static Logger log = getLogger(DefaultIBDataIngesterSupplierTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new IbdataDefaultIngestersVersioning()), new FakeCredentialsFactory(),
+      new IBArtifactVersionMapper() {
+      });
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -108,13 +117,13 @@ public class DefaultIBDataIngesterSupplierTest {
     configMap = new ConfigMap();
     // configMap.put(CACHE_DIRECTORY_CONFIG_ITEM, cache.toString());
     cms = new DefaultConfigMapSupplier(configMap);
-    ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(wps, () -> log, t2e);
+    ibdfs = new DefaultIBDataSetIngestionFinalizerSupplier(ibr);
     ibdfs = (DefaultIBDataSetIngestionFinalizerSupplier) ibdfs.configure(cms);
-    dis = new DefaultIBDataIngesterSupplier(wps, () -> log);
+    dis = new DefaultIBDataIngesterSupplier(ibr);
     dsi = new DefaultIBDataSetIdentifier();
     dsi.setDescription("desc");
     dsi.setName("name");
-    dsi.setPath(f.toString());
+    dsi.setPath(f);
     dsi.injectGAV("X", "Y", "1.0");
     i = new FakeIBIngestion(dsi);
     dss = new TreeMap<>();
@@ -129,7 +138,7 @@ public class DefaultIBDataIngesterSupplierTest {
     random.setTemporaryId(UUID.randomUUID().toString());
     cf = new FakeCredentialsFactory();
 
-    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
+    dssm = new AbstractIBDataSourceSupplierMapper<String>(ibr) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -152,7 +161,7 @@ public class DefaultIBDataIngesterSupplierTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(ibr) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {

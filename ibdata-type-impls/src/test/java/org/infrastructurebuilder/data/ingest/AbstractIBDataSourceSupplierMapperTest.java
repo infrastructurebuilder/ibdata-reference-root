@@ -22,6 +22,7 @@ import static java.util.Optional.of;
 import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -53,15 +54,19 @@ import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -69,10 +74,9 @@ public class AbstractIBDataSourceSupplierMapperTest {
   private static final String DUMMY = "dummy:";
   public final static Logger log = getLogger(AbstractIBDataSourceSupplierMapperTest.class);
   public final static TestingPathSupplier wps = new TestingPathSupplier();
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -109,7 +113,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     dsi = new DefaultIBDataSetIdentifier();
     dsi.setDescription("desc");
     dsi.setName("name");
-    dsi.setPath(f.toString());
+    dsi.setPath(f);
     dsi.injectGAV("X", "Y", "1.0");
     i = new FakeIBIngestion(dsi);
     dss = new TreeMap<>();
@@ -123,7 +127,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
     random = new DataStream();
     random.setTemporaryId(UUID.randomUUID().toString());
     cf = new FakeCredentialsFactory();
-    dssm = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
+    dssm = new AbstractIBDataSourceSupplierMapper<String>(ibr) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -146,7 +150,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmFail = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps,cf) {
+    dssmFail = new AbstractIBDataSourceSupplierMapper<String>(ibr) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -173,7 +177,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
       }
 
     };
-    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(log, t2e, wps, cf) {
+    dssmPass = new AbstractIBDataSourceSupplierMapper<String>(ibr) {
 
       @Override
       public IBDataSourceSupplier<String> getSupplierFor(IBDataStreamIdentifier v) {
@@ -210,7 +214,7 @@ public class AbstractIBDataSourceSupplierMapperTest {
 
   @Test
   public void testAccessors() {
-    assertEquals(t2e, dssm.getMapper());
+    assertNotNull(dssm.getMapper());
     assertTrue(dssm.getHeaders().contains(DUMMY));
     assertEquals(1, dssm.getHeaders().size());
     dssm.getLog().info("Logging");

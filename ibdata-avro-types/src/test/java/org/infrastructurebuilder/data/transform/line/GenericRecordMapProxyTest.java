@@ -36,7 +36,13 @@ import org.infrastructurebuilder.data.DefaultGenericDataSupplier;
 import org.infrastructurebuilder.data.DefaultIBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.GenericDataSupplier;
 import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -50,6 +56,10 @@ public class GenericRecordMapProxyTest {
   public final static Logger log = LoggerFactory.getLogger(GenericRecordMapProxyTest.class);
 
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -70,8 +80,8 @@ public class GenericRecordMapProxyTest {
   @Before
   public void setUp() throws Exception {
     DefaultConfigMapSupplier cms = new DefaultConfigMapSupplier();
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(ibr, gds).configure(cms);
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     b = new GenericRecordBuilder(schema);
     r = new GenericData.Record(schema);

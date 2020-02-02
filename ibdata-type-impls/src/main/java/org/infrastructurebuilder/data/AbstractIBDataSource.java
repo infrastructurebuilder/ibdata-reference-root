@@ -25,6 +25,7 @@ import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
@@ -42,10 +43,8 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
   private final boolean expandArchives;
 
   public AbstractIBDataSource(
-      // PathSupplier target
-      PathSupplier wps,
-      // Logger
-      Logger logger
+      // IBR
+      IBRuntimeUtils ibr
       // Temp id
       , String id
       // "URL" or JDBC URL etc
@@ -66,7 +65,7 @@ abstract public class AbstractIBDataSource<P> extends AbstractConfigurableSuppli
       , Optional<ConfigMap> config
       // Parameter
       , P param) {
-    super(wps, config.orElse(null), () -> logger, param);
+    super(ibr, config.orElse(null), param);
     this.id = requireNonNull(id);
     this.source = requireNonNull(source);
     this.checksum = requireNonNull(checksum);

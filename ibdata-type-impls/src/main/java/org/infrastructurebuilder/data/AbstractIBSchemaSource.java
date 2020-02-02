@@ -26,6 +26,7 @@ import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
@@ -40,8 +41,8 @@ abstract public class AbstractIBSchemaSource<P>
   protected final Optional<String> name;
   protected final Optional<String> desc;
 
-  public AbstractIBSchemaSource(PathSupplier wps, Logger logger) {
-    super(wps, null, () -> logger, null);
+  public AbstractIBSchemaSource(IBRuntimeUtils ibr) {
+    super(ibr, null, null);
     this.id = null;
     this.creds = empty();
     this.checksum = empty();
@@ -50,10 +51,8 @@ abstract public class AbstractIBSchemaSource<P>
     this.desc = empty();
   }
 
-  protected AbstractIBSchemaSource(PathSupplier wps
-  // Logger
-      , Logger logger
-      // Temp id
+  protected AbstractIBSchemaSource(IBRuntimeUtils ibr
+  // Temp id
       , String id
 //      // "URL" or JDBC URL etc
 //      , String source
@@ -72,7 +71,7 @@ abstract public class AbstractIBSchemaSource<P>
       // The param
       , P parameter) {
 
-    super(wps, config.orElse(null), () -> logger, parameter);
+    super(ibr, config.orElse(null), parameter);
     this.id = requireNonNull(id);
 //    this.source = requireNonNull(source);
     this.creds = requireNonNull(creds);

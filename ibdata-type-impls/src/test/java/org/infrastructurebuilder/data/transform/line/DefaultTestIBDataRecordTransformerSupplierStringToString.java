@@ -20,14 +20,15 @@ import java.nio.file.Path;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 public class DefaultTestIBDataRecordTransformerSupplierStringToString
     extends AbstractIBDataRecordTransformerSupplier<String, String> {
 
-  protected DefaultTestIBDataRecordTransformerSupplierStringToString(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    super(wps, cms, l);
+  protected DefaultTestIBDataRecordTransformerSupplierStringToString(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
@@ -41,18 +42,19 @@ public class DefaultTestIBDataRecordTransformerSupplierStringToString
   }
 
   @Override
-  protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new StringToStringRecordTransformer(getWorkingPathSupplier().get(), getLogger());
+  protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance() {
+    return new StringToStringRecordTransformer(getRuntimeUtils());
   }
 
   public static class StringToStringRecordTransformer extends AbstractIBDataRecordTransformer<String, String> {
 
-    public StringToStringRecordTransformer(Path path, Logger l) {
-      super(path, l);
+    public StringToStringRecordTransformer(IBRuntimeUtils path) {
+      super(path);
     }
 
-    private StringToStringRecordTransformer(Path workingPath, ConfigMap config, Logger l) {
-      super(workingPath, config, l);
+    private StringToStringRecordTransformer(IBRuntimeUtils
+        workingPath, ConfigMap config) {
+      super(workingPath, config);
     }
 
     @Override
@@ -61,8 +63,8 @@ public class DefaultTestIBDataRecordTransformerSupplierStringToString
     }
 
     @Override
-    public IBDataRecordTransformer<String,String> configure(ConfigMap config) {
-      return new StringToStringRecordTransformer(getWorkingPath(), config, getLogger());
+    public IBDataRecordTransformer<String, String> configure(ConfigMap config) {
+      return new StringToStringRecordTransformer(getRuntimeUtils(), config);
     }
 
     @Override

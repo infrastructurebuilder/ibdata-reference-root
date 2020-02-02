@@ -30,14 +30,26 @@ import org.apache.avro.generic.GenericRecord;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.model.SchemaField;
 import org.infrastructurebuilder.data.schema.IBSchemaTranslator;
+import org.infrastructurebuilder.data.type.BooleanIBDataType;
+import org.infrastructurebuilder.data.type.BytesIBDataType;
+import org.infrastructurebuilder.data.type.DateIBDataType;
+import org.infrastructurebuilder.data.type.DoubleIBDataType;
+import org.infrastructurebuilder.data.type.EnumIBDataType;
+import org.infrastructurebuilder.data.type.FloatIBDataType;
+import org.infrastructurebuilder.data.type.IntIBDataType;
+import org.infrastructurebuilder.data.type.KeyIBDataType;
+import org.infrastructurebuilder.data.type.LongIBDataType;
+import org.infrastructurebuilder.data.type.StringIBDataType;
+import org.infrastructurebuilder.data.type.TimestampIBDataType;
+import org.infrastructurebuilder.data.type.UnsignedIntIBDataType;
+import org.infrastructurebuilder.data.type.UnsignedLongIBDataType;
 import org.joor.Reflect;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public interface IBDataAvroUtils extends IBSchemaTranslator<Schema,Schema> {
+public interface IBDataAvroUtils extends IBSchemaTranslator<Schema, Schema> {
   public static final String NO_SCHEMA_CONFIG_FOR_MAPPER = "No schema config for mapper-";
-  public final static String JAR_PREFIX = "jar:"; // TODO Move to IBConstants next core release
 
   /**
    * Produces a DataFileWriter for the schema provided. If supplied, a GenericData
@@ -80,8 +92,8 @@ public interface IBDataAvroUtils extends IBSchemaTranslator<Schema,Schema> {
     if (field.hasDefaultValue()) {
       String actualDefault;
       try {
-      JsonNode j = Reflect.on(field).get("defaultValue");
-      actualDefault = j.toPrettyString();
+        JsonNode j = Reflect.on(field).get("defaultValue");
+        actualDefault = j.toPrettyString();
       } catch (Throwable t) {
         actualDefault = "*FAILED_TO_OBTAIN*|" + t.getClass() + "|" + t.getMessage();
       }
@@ -98,56 +110,36 @@ public interface IBDataAvroUtils extends IBSchemaTranslator<Schema,Schema> {
     boolean isNullable = f.isNullable();
     String doc = f.getDescription() + " Since " + f.getVersionAppeared();
     String key = f.getName();
-    switch (f.getMdType().orElseThrow(() -> new IBDataException("Translation unavailable for " + f.getType()))) {
-    case BOOLEAN:
+    String k = f.getType();
+    if (BooleanIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().booleanType() : builder().booleanType(), doc);
-      break;
-    case BYTES:
+    } else if (BytesIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().bytesType() : builder().bytesType(), doc);
-      break;
-    case DATE:
+    } else if (DateIBDataType.TYPE.equals(k)) {
       schema = LogicalTypes.date().addToSchema(Schema.create(Schema.Type.INT));
       f1 = new Field(key, isNullable ? nullable().type(schema) : schema, doc);
-      break;
-    case DOUBLE:
+    } else if (DoubleIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().doubleType() : builder().doubleType(), doc);
-      break;
-    case ENUM:
+    } else if (EnumIBDataType.TYPE.equals(k)) {
       schema = SchemaBuilder.enumeration(key).symbols(f.getEnumerations().toArray(new String[0]));
       f1 = new Field(key, isNullable ? nullable().type(schema) : schema, doc);
-      break;
-    case FLOAT:
+    } else if (FloatIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().floatType() : builder().floatType(), doc);
-      break;
-    case UINT: // Avro doesn't have unsigned types
-    case INT:
+    } else if (IntIBDataType.TYPE.equals(k) || UnsignedIntIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().intType() : builder().intType(), doc);
-      break;
-    case KEY:
+    } else if (KeyIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().stringType() : builder().stringType(), doc);
-      break;
-    case ULONG:
-    case LONG:
+    } else if (LongIBDataType.TYPE.equals(k) || UnsignedLongIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().longType() : builder().longType(), doc);
-      break;
-    case STRING:
+    } else if (StringIBDataType.TYPE.equals(k)) {
       f1 = new Field(key, isNullable ? nullable().stringType() : builder().stringType(), doc);
-      break;
-    case TIMESTAMP:
+    } else if (TimestampIBDataType.TYPE.equals(k)) {
       schema = LogicalTypes.timeMillis().addToSchema(Schema.create(Schema.Type.INT));
       f1 = new Field(key, isNullable ? nullable().type(schema) : schema, doc);
-      break;
-    case NLDELIMITEDJSON:
-    case NLDELIMITEDSTRINGS:
-    case REF:
-    case STREAM:
-    case UNKNOWN:
-    case CONST:
-    default:
+    } else {
       throw new IBDataException("Cannot currently handle " + f.getType());
     }
     return f1;
   }
-
 
 }

@@ -15,9 +15,6 @@
  */
 package org.infrastructurebuilder.data.transform;
 
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-
-import java.nio.file.Path;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -28,11 +25,9 @@ import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
-import org.slf4j.Logger;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 
 @Named(StreamJoiningTransformSupplier.STREAM_JOIN)
 public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSupplier {
@@ -40,32 +35,32 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
   public static final String STREAM_JOIN = "stream-join";
 
   @Inject
-  public StreamJoiningTransformSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log) {
-    this(wps, log, null);
+  public StreamJoiningTransformSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private StreamJoiningTransformSupplier(PathSupplier wps, LoggerSupplier l, ConfigMapSupplier cms) {
-    super(wps, l, cms);
+  private StreamJoiningTransformSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public StreamJoiningTransformSupplier configure(ConfigMapSupplier cms) {
-    return new StreamJoiningTransformSupplier(getWorkingPathSupplier(),() -> getLog(), cms);
+    return new StreamJoiningTransformSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataTransformer getConfiguredTransformerInstance(Path workingPath) {
-    return new StreamJoiningTransformer(workingPath, getLog());
+  protected IBDataTransformer getConfiguredTransformerInstance() {
+    return new StreamJoiningTransformer(getRuntimeUtils());
   }
 
   private class StreamJoiningTransformer extends AbstractIBDataTransformer {
 
-    public StreamJoiningTransformer(Path p, Logger l) {
-      this(p, l , new ConfigMap());
+    public StreamJoiningTransformer(IBRuntimeUtils ibr) {
+      this(ibr, new ConfigMap());
     }
 
-    public StreamJoiningTransformer(Path p, Logger l,  ConfigMap config) {
-      super(p, l, config);
+    public StreamJoiningTransformer(IBRuntimeUtils ibr, ConfigMap config) {
+      super(ibr, config);
     }
 
     @Override
@@ -74,9 +69,10 @@ public class StreamJoiningTransformSupplier extends AbstractIBDataTransformerSup
     }
 
     @Override
-    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds, List<IBDataStream> suppliedStreams,  boolean failOnError) {
+    public IBDataTransformationResult transform(Transformer transformer, IBDataSet ds,
+        List<IBDataStream> suppliedStreams, boolean failOnError) {
       throw new IBDataException("Stream Joiner Not implemented ");
-      //      return new DefaultIBDataTransformationResult(null);
+      // return new DefaultIBDataTransformationResult(null);
     }
 
   }

@@ -33,11 +33,18 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
   private static final long serialVersionUID = -1385333942182011178L;
   private final Map<UUID, IBDataStreamSupplier> streamSuppliers;
 
-  public final static DefaultIBDataSet readWithSuppliers(DataSet ds, Supplier<Path> pathToRoot) {
+  public final static DefaultIBDataSet decorateAddingSuppliers(DataSet ds, Supplier<Path> pathToRoot) {
     Map<UUID, IBDataStreamSupplier> v = ds.getStreams().stream()
-        .map(d ->      new DefaultIBDataStreamSupplier(DefaultIBDataStream.from(d, pathToRoot)))
+        .map(d -> new DefaultIBDataStreamSupplier(DefaultIBDataStream.from(d, pathToRoot)))
         .collect(Collectors.toMap(k -> k.get().getId(), Function.identity()));
-    return new DefaultIBDataSet(ds, v);
+    DefaultIBDataSet d = new DefaultIBDataSet(ds, v);
+    d.setPath(pathToRoot.get());
+    d.getSchemas().stream().forEach(schema -> {
+        schema.getSchemaAssets().stream().forEach(asset-> {
+          // TODO Setup the assets for the data set that I just read
+        });
+    });
+    return d;
   }
 
   public DefaultIBDataSet(DataSet ds) {
@@ -45,16 +52,16 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
   }
 
   private DefaultIBDataSet(IBDataSetIdentifier ds, Map<UUID, IBDataStreamSupplier> streamSuppliers) {
-    super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
-        ds.getDescription(), ds.getPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
+    super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(), ds.getDescription(),
+        ds.getPathAsPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
 
     );
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 
   private DefaultIBDataSet(IBDataSet ds, Map<UUID, IBDataStreamSupplier> streamSuppliers) {
-    super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(),
-        ds.getDescription(), ds.getPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
+    super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(), ds.getDescription(),
+        ds.getPathAsPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 
@@ -71,8 +78,4 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
     return this.streamSuppliers.values().stream().collect(toList());
   }
 
-  @Override
-  protected DefaultIBDataSet setUnderlyingPath(Path p) {
-    return (DefaultIBDataSet) super.setUnderlyingPath(p);
-  }
 }

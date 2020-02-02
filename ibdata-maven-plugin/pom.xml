@@ -103,7 +103,7 @@
     <dependency>
       <groupId>org.infrastructurebuilder.util</groupId>
       <artifactId>settings-supplier-component</artifactId>
-      <version>0.10.1-SNAPSHOT</version>
+      <version>0.10.1</version>
     </dependency>
   </dependencies>
   <build>

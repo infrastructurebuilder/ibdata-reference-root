@@ -15,20 +15,18 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import java.nio.file.Path;
-
 import org.apache.avro.generic.IndexedRecord;
 import org.infrastructurebuilder.util.config.ConfigMap;
-import org.slf4j.Logger;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 
 abstract public class AbstractAvroGenericIBDataLineTransformer<I> extends AbstractIBDataRecordTransformer<I, IndexedRecord> {
 
-  public AbstractAvroGenericIBDataLineTransformer(Path workingPath, Logger l) {
-    this(workingPath, null, l);
+  public AbstractAvroGenericIBDataLineTransformer(IBRuntimeUtils workingPath) {
+    this(workingPath, null);
   }
 
-  protected AbstractAvroGenericIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l) {
-    super(workingPath, config, l);
+  protected AbstractAvroGenericIBDataLineTransformer(IBRuntimeUtils workingPath, ConfigMap config) {
+    super(workingPath, config);
   }
 
 

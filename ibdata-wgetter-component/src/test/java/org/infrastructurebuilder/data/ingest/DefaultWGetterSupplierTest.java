@@ -34,6 +34,8 @@ import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.After;
@@ -53,12 +55,8 @@ public class DefaultWGetterSupplierTest {
   private static final Optional<Checksum> CHECKSUM = Optional.of(new Checksum(
       "d06b93c883f8126a04589937a884032df031b05518eed9d433efb6447834df2596aebd500d69b8283e5702d988ed49655ae654c1683c7a4ae58bfa6b92f2b73a"));
   private final static Logger log = LoggerFactory.getLogger(DefaultWGetterSupplierTest.class);
-  private static TestingPathSupplier wps;
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    wps = new TestingPathSupplier();
-  }
+  private final static IBRuntimeUtilsTesting ibr = new IBRuntimeUtilsTesting(log);
+  private final static TestingPathSupplier wps = ibr.getTestingPathSupplier();
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -69,8 +67,7 @@ public class DefaultWGetterSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    this.ws = new DefaultWGetterSupplier(() -> log, new DefaultTypeToExtensionMapper(), wps, wps,
-        new FakeArchiverManager(), new FakeCredentialsFactory());
+    this.ws = new DefaultWGetterSupplier(ibr, wps, new FakeArchiverManager());
   }
 
   @After

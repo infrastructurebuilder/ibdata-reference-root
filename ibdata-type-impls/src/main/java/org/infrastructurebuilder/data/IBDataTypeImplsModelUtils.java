@@ -16,8 +16,9 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.DefaultIBDataSet.decorateAddingSuppliers;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.IBDataModelUtils.mapInputStreamToDataSet;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapInputStreamToDataSet;
 
 import java.net.URL;
 import java.nio.file.FileSystem;
@@ -44,20 +45,10 @@ public interface IBDataTypeImplsModelUtils {
 //  };
 //
 
-  // FIXME Relocate to IBDataEngine
-  public static Optional<FileSystemProvider> getZipFSProvider() {
-    FileSystemProvider retVal = null;
-    for (FileSystemProvider provider : FileSystemProvider.installedProviders()) {
-      if ("jar".equals(provider.getScheme()))
-        retVal = provider;
-    }
-    return Optional.ofNullable(retVal);
-  }
-
   /**
    * Map the URL pointing to a dataset XML file to a dataset if possible
    */
-  public static final Function<URL, Optional<DefaultIBDataSet>> mapDataSetToDefaultIBDataSet = (url) -> {
+  public static final Function<URL, Optional<DefaultIBDataSet>> mapURLToDefaultIBDataSet = (url) -> {
     try {
       Objects.requireNonNull(url, "Mapping URL");
       log.info("Mapping " + url.toExternalForm());
@@ -101,15 +92,14 @@ public interface IBDataTypeImplsModelUtils {
           .map(u -> cet.withReturningTranslation(() -> Files.newInputStream(u)))
           // // to ExtendedDataSet
           .map(mapInputStreamToDataSet).map(ds -> {
-            ds.setPath(left.toExternalForm());
+            ds.setPath(left);
             return ds;
           });
 
       // optDataSet contains the DataSet instance that was read from the source XML
       // WITH ITs ROOT SET!
 
-      return optDataSet
-          .map(ds -> DefaultIBDataSet.readWithSuppliers(ds, () -> datasetRoot).setUnderlyingPath(datasetRoot));
+      return optDataSet.map(ds -> decorateAddingSuppliers(ds, () -> datasetRoot));
     } catch (IBDataException e) {
       // TODO Error checking
       return Optional.empty();

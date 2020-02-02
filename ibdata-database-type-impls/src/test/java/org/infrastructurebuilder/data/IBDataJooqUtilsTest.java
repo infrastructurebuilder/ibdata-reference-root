@@ -40,9 +40,15 @@ import org.infrastructurebuilder.data.ingest.DefaultIBDataStreamIdentifierConfig
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.DefaultBasicCredentials;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -69,12 +75,11 @@ public class IBDataJooqUtilsTest {
 
   public final static Logger log = LoggerFactory.getLogger(IBDataJooqUtilsTest.class);
 
-  private static TestingPathSupplier wps;
+  private static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    wps = new TestingPathSupplier();
-  }
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -166,9 +171,9 @@ public class IBDataJooqUtilsTest {
     configMap.put(JooqAvroRecordWriterSupplier.TARGET, targetPath);
     configMap.put(JooqAvroRecordWriterSupplier.SCHEMA, schema); //schemaFile.toAbsolutePath().toUri().toURL().toExternalForm());
     cms = new DefaultConfigMapSupplier(configMap);
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> getLog(), aus).configure(cms);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = new DefaultIBDataAvroUtilsSupplier(ibr, gds);
+    w2 = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(ibr, aus).configure(cms);
     w = (JooqRecordWriter) w2.get();
     read = w.writeRecords(result);
   }

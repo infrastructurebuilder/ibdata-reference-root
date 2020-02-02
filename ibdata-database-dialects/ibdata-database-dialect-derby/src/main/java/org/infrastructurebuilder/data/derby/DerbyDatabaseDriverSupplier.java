@@ -23,6 +23,7 @@ import javax.inject.Named;
 import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 import liquibase.database.core.DerbyDatabase;
@@ -32,8 +33,8 @@ public class DerbyDatabaseDriverSupplier extends AbstractIBDatabaseDriverSupplie
   static final String DERBY = "DERBY";
 
   @Inject
-  public DerbyDatabaseDriverSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,LoggerSupplier l, CredentialsFactory cf) {
-    super(wps, l, DERBY, DerbyDatabase.class.getCanonicalName(), cf, "groupId:artifactId:");
+  public DerbyDatabaseDriverSupplier(IBRuntimeUtils ibr) {
+    super(ibr, DERBY, DerbyDatabase.class.getCanonicalName(),  "groupId:artifactId:");
   }
 
 

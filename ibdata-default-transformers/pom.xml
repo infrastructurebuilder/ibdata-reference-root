@@ -27,8 +27,8 @@
   <name>${project.artifactId}</name>
   <description>Transformers for IBData</description>
   <properties>
-    <jacoco.max.missed.classes>14</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>34</test.coverage.percentage.required>
+    <jacoco.max.missed.classes>19</jacoco.max.missed.classes>
+    <test.coverage.percentage.required>05</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

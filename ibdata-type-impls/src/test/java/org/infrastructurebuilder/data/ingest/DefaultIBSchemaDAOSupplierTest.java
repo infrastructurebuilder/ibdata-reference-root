@@ -73,7 +73,7 @@ public class DefaultIBSchemaDAOSupplierTest {
   private IBSchemaSource<Object> src;
   private Map<String, IBDataStreamSupplier> map;
   private IBSchemaDAOSupplierBuilder b;
-  private DefaultIBDataSchemaIngestionConfig d1;
+  private DefaultIBDataSchemaIngestionConfigBean d1;
 
   private PersistedIBSchema schema;
 
@@ -83,7 +83,7 @@ public class DefaultIBSchemaDAOSupplierTest {
 
   @Before
   public void setUp() throws Exception {
-    d1 = new DefaultIBDataSchemaIngestionConfig();
+    d1 = new DefaultIBDataSchemaIngestionConfigBean();
     d1.setTemporaryId(ID);
     d1.setDescription(DESCRIPTION);
     schema = new PersistedIBSchema().clone();

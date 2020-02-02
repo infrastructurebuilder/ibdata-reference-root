@@ -18,8 +18,7 @@ package org.infrastructurebuilder.data;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_IBDATASET_XML;
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.getZipFSProvider;
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
+import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -64,7 +63,7 @@ public class IBDataTypeImplsModelUtilsTest {
   public void testMapDataSetToDefaultIBDataSetFromJar() throws MalformedURLException {
     URL url = IBUtils
         .translateToWorkableArchiveURL("jar:" + testJar.toUri().toURL().toExternalForm() + "!" + IBDATA_IBDATASET_XML);
-    Optional<DefaultIBDataSet> q = mapDataSetToDefaultIBDataSet.apply(url);
+    Optional<DefaultIBDataSet> q = mapURLToDefaultIBDataSet.apply(url);
     assertTrue(q.isPresent());
     assertEquals("86c74030-b133-345a-be07-ad4cec057780", q.get().getUuid().toString());
   }
@@ -76,14 +75,9 @@ public class IBDataTypeImplsModelUtilsTest {
     Path p = testDir.resolve(IBDATA).resolve(IBDATASET_XML);
     URL testDirURL = testDir.toUri().toURL();
     URL url = p.toUri().toURL();
-    Optional<DefaultIBDataSet> q = mapDataSetToDefaultIBDataSet.apply(url);
+    Optional<DefaultIBDataSet> q = mapURLToDefaultIBDataSet.apply(url);
     assertTrue(q.isPresent());
     assertEquals("99139ebc-4c01-3c93-89c1-2219c7e4ebf6", q.get().getUuid().toString());
-  }
-
-  @Test
-  public void testGetZipFSProvider() {
-    assertTrue(getZipFSProvider().isPresent());
   }
 
 }

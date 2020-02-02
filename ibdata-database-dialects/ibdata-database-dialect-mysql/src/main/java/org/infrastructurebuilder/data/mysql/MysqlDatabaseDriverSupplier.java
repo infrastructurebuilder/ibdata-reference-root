@@ -23,6 +23,7 @@ import javax.inject.Named;
 import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 
 import liquibase.database.core.MySQLDatabase;
@@ -32,8 +33,8 @@ public class MysqlDatabaseDriverSupplier extends AbstractIBDatabaseDriverSupplie
   static final String MYSQL = "MYSQL";
 
   @Inject
-  public MysqlDatabaseDriverSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,LoggerSupplier l, CredentialsFactory cf) {
-    super(wps, l, MYSQL, MySQLDatabase.class.getCanonicalName(), cf, "mysql:mysql-connector-java:");
+  public MysqlDatabaseDriverSupplier(IBRuntimeUtils ibr) {
+    super(ibr, MYSQL, MySQLDatabase.class.getCanonicalName(),  "mysql:mysql-connector-java:");
   }
 
 }

@@ -23,6 +23,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
@@ -51,12 +52,16 @@ import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
 import org.infrastructurebuilder.data.transform.FakeIBTransformation;
 import org.infrastructurebuilder.data.transform.Transformer;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
-import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.junit.Before;
@@ -89,8 +94,9 @@ public class DefaultIBDataRecordBasedTransformerTest {
     transformersList.forEach(t -> sj.add(t + MAP_SPLITTER + t));
     thePath = wps.get();
     rs = new HashMap<>();
-    test1 = new DefaultTestingIBDataRecordTransformerSupplier(1, () -> thePath, () -> log);
-    test2 = new DefaultTestingIBDataRecordTransformerSupplier(2, () -> thePath, () -> log);
+    IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(() -> thePath, log);
+    test1 = new DefaultTestingIBDataRecordTransformerSupplier(1, ibr);
+    test2 = new DefaultTestingIBDataRecordTransformerSupplier(2, ibr);
     rs.put("test1", test1);
     rs.put("test2", test2);
     HashMap<String, Object> hm = new HashMap<>();
@@ -98,9 +104,10 @@ public class DefaultIBDataRecordBasedTransformerTest {
     hm.put("A", "A");
     cfg = new ConfigMap(hm);
     cms = new DefaultConfigMapSupplier().addConfiguration(cfg);
+
     // s1 = new DefaultTestIBDataRecordTransformerSupplierStringToString();
-    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(() -> thePath, () -> log).configure(cms);
-    t = new DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer(thePath, log, cms.get(), rs,
+    finalizerSupplier = new StringIBDataStreamRecordFinalizerSupplier(ibr).configure(cms);
+    t = new DefaultIBDataRecordBasedTransformerSupplier.DefaultIBDataRecordBasedTransformer(ibr, cms.get(), rs,
         finalizerSupplier.get());
     DataSet d1 = new DataSet();
     d1.setUuid(UUID.randomUUID().toString());
@@ -153,7 +160,7 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
   @Test
   public void testGetLogger() {
-    assertEquals(log, t.getLog());
+    assertNotNull(t.getLog());
   }
 
   public class DefaultTestingIBDataRecordTransformerSupplier
@@ -161,14 +168,13 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     private int type;
 
-    public DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, LoggerSupplier l) {
-      super(wps, null, l);
+    public DefaultTestingIBDataRecordTransformerSupplier(int type, IBRuntimeUtils wps) {
+      super(wps, null);
       this.type = type;
     }
 
-    private DefaultTestingIBDataRecordTransformerSupplier(int type, PathSupplier wps, ConfigMapSupplier cms,
-        LoggerSupplier l) {
-      super(wps, cms, l);
+    private DefaultTestingIBDataRecordTransformerSupplier(int type, IBRuntimeUtils wps, ConfigMapSupplier cms) {
+      super(wps, cms);
       this.type = type;
     }
 
@@ -179,16 +185,16 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     @Override
     public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
-      return new DefaultTestingIBDataRecordTransformerSupplier(type, getWorkingPathSupplier(), cms, () -> getLogger());
+      return new DefaultTestingIBDataRecordTransformerSupplier(type, getRuntimeUtils(), cms);
     }
 
     @Override
-    protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
+    protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance() {
       switch (type) {
       case 1:
-        return new Test1(getWorkingPathSupplier().get(), getConfigSupplier().get(), log);
+        return new Test1(getRuntimeUtils(), getConfigSupplier().get());
       case 2:
-        return new Test2(getWorkingPathSupplier().get(), getConfigSupplier().get(), log);
+        return new Test2(getRuntimeUtils(), getConfigSupplier().get());
       default:
         throw new IBDataException("Wrong type, moron");
       }
@@ -196,8 +202,8 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     public class Test1 extends AbstractIBDataRecordTransformer<String, String> {
 
-      protected Test1(Path ps, ConfigMap config, Logger l) {
-        super(ps, config, l);
+      protected Test1(IBRuntimeUtils ibr, ConfigMap config) {
+        super(ibr, config);
       }
 
       @Override
@@ -229,9 +235,9 @@ public class DefaultIBDataRecordBasedTransformerTest {
 
     public class Test2 extends AbstractIBDataRecordTransformer<String, String> {
 
-      protected Test2(Path ps, ConfigMap config, Logger l) {
-        super(ps, config, l);
-        assertEquals(log, getLogger());
+      protected Test2(IBRuntimeUtils ps, ConfigMap config) {
+        super(ps, config);
+        assertNotNull(getLogger());
         assertEquals(thePath, getWorkingPath());
         assertEquals("A", getConfiguration("A"));
         assertEquals("A", getObjectConfiguration("A", null));

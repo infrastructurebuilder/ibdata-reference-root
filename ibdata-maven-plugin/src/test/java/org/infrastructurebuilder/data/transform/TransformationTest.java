@@ -70,8 +70,8 @@ public class TransformationTest {
 
   @Test
   public void testAsDataSet() {
-    t.withIdentifiers("A", "B", VERSION);
-    t.withIdentifiers("A", "B", VERSION);
+    t = t.withIdentifiers("A", "B", VERSION);
+    t = t.withIdentifiers("A", "B", VERSION);
 
     t.setName(NAME);
     assertEquals(NAME, t.getName());
@@ -86,8 +86,7 @@ public class TransformationTest {
     assertEquals(NAME, s.getName().get());
     assertEquals(DESC, s.getDescription().get());
     Object q = s.getMetadata();
-    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<A/>", q.toString());
+    assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<A/>", q.toString());
   }
 
   @Test

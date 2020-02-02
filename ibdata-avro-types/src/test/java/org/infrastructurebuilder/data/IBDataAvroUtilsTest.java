@@ -32,8 +32,14 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.IBException;
 import org.infrastructurebuilder.data.transform.BA;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -44,6 +50,10 @@ import org.slf4j.LoggerFactory;
 public class IBDataAvroUtilsTest {
   public final static Logger log = LoggerFactory.getLogger(IBDataAvroUtilsTest.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
   private Schema schema;
   private Record r;
   private Map<String, Field> fields;
@@ -59,8 +69,8 @@ public class IBDataAvroUtilsTest {
 
     ConfigMap init= new ConfigMap();
     cms = new DefaultConfigMapSupplier(init);
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps,() -> log, gds).configure(cms);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(ibr, gds).configure(cms);
     au = aus.get();
     Path p = wps.getTestClasses().resolve("ba.avsc");
     schema = au.avroSchemaFromString(p.toAbsolutePath().toString());

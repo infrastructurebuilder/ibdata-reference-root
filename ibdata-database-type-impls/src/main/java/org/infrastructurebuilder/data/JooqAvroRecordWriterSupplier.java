@@ -37,6 +37,7 @@ import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
@@ -51,34 +52,28 @@ public class JooqAvroRecordWriterSupplier extends AbstractCMSConfigurableSupplie
   private final IBDataAvroUtilsSupplier aus;
 
   @Inject
-  public JooqAvroRecordWriterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l,
-      IBDataAvroUtilsSupplier aus) {
-    super(wps, null, l);
+  public JooqAvroRecordWriterSupplier(IBRuntimeUtils ibr, IBDataAvroUtilsSupplier aus) {
+    super(ibr, null);
     this.aus = requireNonNull(aus);
   }
 
-  private JooqAvroRecordWriterSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l,
-      IBDataAvroUtilsSupplier aus) {
-    super(wps, config, l, (Schema) config.get().get(SCHEMA));
+  private JooqAvroRecordWriterSupplier(IBRuntimeUtils ibr, ConfigMapSupplier config, IBDataAvroUtilsSupplier aus) {
+    super(ibr, config, (Schema) config.get().get(SCHEMA));
     this.aus = (IBDataAvroUtilsSupplier) requireNonNull(aus).configure(config);
   }
 
   @Override
   public JooqAvroRecordWriterSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new JooqAvroRecordWriterSupplier(
-        // My working path supplier
-        getWorkingPathSupplier()
-        // The config
+    return new JooqAvroRecordWriterSupplier(getRuntimeUtils()
+    // The config
         , cms
-        // Logger supplier
-        , () -> getLog()
         // Avro utils supplier
         , this.aus);
   }
 
   @Override
-  protected JooqRecordWriter getInstance(PathSupplier wps, Schema in) {
-    return new JooqRecordWriter(getLog(), wps.get(), () -> in, this.aus.get());
+  protected JooqRecordWriter getInstance(IBRuntimeUtils ibr, Schema in) {
+    return new JooqRecordWriter(getLog(), ibr.getWorkingPath(), () -> in, this.aus.get());
   }
 
   /**

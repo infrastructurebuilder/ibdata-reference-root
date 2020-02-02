@@ -75,6 +75,7 @@ import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.artifacts.GAV;
 import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
@@ -105,16 +106,12 @@ abstract public class AbstractIBDatabaseDriverSupplier implements IBDataDatabase
   private final String lbDatabaseClassName;
   private final List<DefaultGAV> gavs;
   private final Database database;
-  private final Logger log;
-  private final CredentialsFactory cf;
-  private final PathSupplier wps;
+  private final IBRuntimeUtils ibr;
 
-  protected AbstractIBDatabaseDriverSupplier(PathSupplier wps, LoggerSupplier l, String hint,
-      String liquibaseDatabaseClass, CredentialsFactory cf, String... list) {
-    this.wps = requireNonNull(wps, "Working path supplier");
-    this.log = requireNonNull(l, "LoggerSupplier").get();
+  protected AbstractIBDatabaseDriverSupplier(IBRuntimeUtils ibr, String hint, String liquibaseDatabaseClass,
+      String... list) {
+    this.ibr = requireNonNull(ibr, "IBRuntimeUtils");
     this.hint = requireNonNull(hint, "Driver hint");
-    this.cf = requireNonNull(cf, "CredentialsFactory");
     this.lbDatabaseClassName = requireNonNull(liquibaseDatabaseClass, "Liquibase Database Classname");
     Database db;
     try {
@@ -129,17 +126,17 @@ abstract public class AbstractIBDatabaseDriverSupplier implements IBDataDatabase
   }
 
   public PathSupplier getWorkingPathSupplier() {
-    return wps;
+    return () -> ibr.getWorkingPath();
   }
 
   @Override
   public Logger getLog() {
-    return this.log;
+    return ibr.getLog();
   }
 
   @Override
   public CredentialsFactory getCredentialsFactory() {
-    return cf;
+    return ibr;
   }
 
   @Override

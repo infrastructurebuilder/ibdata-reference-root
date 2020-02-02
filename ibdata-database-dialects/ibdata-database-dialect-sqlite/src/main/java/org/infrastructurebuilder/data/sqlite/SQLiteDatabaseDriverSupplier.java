@@ -15,15 +15,11 @@
  */
 package org.infrastructurebuilder.data.sqlite;
 
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.AbstractIBDatabaseDriverSupplier;
-import org.infrastructurebuilder.util.CredentialsFactory;
-import org.infrastructurebuilder.util.LoggerSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 
 import liquibase.database.core.SQLiteDatabase;
 
@@ -32,8 +28,8 @@ public class SQLiteDatabaseDriverSupplier extends AbstractIBDatabaseDriverSuppli
   static final String SQLITE = "sqlite";
 
   @Inject
-  public SQLiteDatabaseDriverSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,LoggerSupplier l, CredentialsFactory cf) {
-    super(wps,l, org.jooq.SQLDialect.SQLITE.name(), SQLiteDatabase.class.getCanonicalName(), cf, "org.xerial:sqlite-jdbc:");
+  public SQLiteDatabaseDriverSupplier(IBRuntimeUtils ibr) {
+    super(ibr, org.jooq.SQLDialect.SQLITE.name(), SQLiteDatabase.class.getCanonicalName(), "org.xerial:sqlite-jdbc:");
   }
 
 }

@@ -58,7 +58,6 @@ public class DefaultIBIngestion implements IBIngestion {
 
   @Override
   public String getSchemaIngester() {
-//    return ofNullable(this.schemaIngester).orElse(getId());
     return this.schemaIngester;
   }
 

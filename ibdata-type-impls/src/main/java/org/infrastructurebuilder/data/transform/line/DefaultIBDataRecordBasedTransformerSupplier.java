@@ -29,6 +29,7 @@ import org.infrastructurebuilder.data.transform.AbstractIBDataTransformerSupplie
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -41,49 +42,46 @@ public class DefaultIBDataRecordBasedTransformerSupplier extends AbstractIBDataT
   private final IBDataStreamRecordFinalizer finalizer;
 
   @Inject
-  public DefaultIBDataRecordBasedTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineTransformerSuppliers) {
-    this(wps, l, null, dataLineTransformerSuppliers, null);
+  public DefaultIBDataRecordBasedTransformerSupplier(IBRuntimeUtils ibr,
+      Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineTransformerSuppliers) {
+    this(ibr, null, dataLineTransformerSuppliers, null);
   }
 
-  protected DefaultIBDataRecordBasedTransformerSupplier(PathSupplier wps,
-      //
-      LoggerSupplier l,
+  protected DefaultIBDataRecordBasedTransformerSupplier(IBRuntimeUtils ibr,
       // All config all the time
       ConfigMapSupplier cms,
       // All the available data line suppliers
       Map<String, IBDataRecordTransformerSupplier<?, ?>> dataLineTransformerSuppliers,
       IBDataStreamRecordFinalizer finalizer) {
-    super(wps, l, cms);
+    super(ibr, cms);
     this.dataLineSuppliers = dataLineTransformerSuppliers;
     this.finalizer = finalizer;
   }
 
   @Override
-  protected IBDataTransformer getConfiguredTransformerInstance(Path workingPath) {
-    return new DefaultIBDataRecordBasedTransformer(workingPath, getLog(), getConfig(), this.dataLineSuppliers,
+  protected IBDataTransformer getConfiguredTransformerInstance() {
+    return new DefaultIBDataRecordBasedTransformer(getRuntimeUtils(), getConfig(), this.dataLineSuppliers,
         this.finalizer);
   }
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), cms,
-        this.dataLineSuppliers, this.finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getRuntimeUtils(), cms, this.dataLineSuppliers,
+        this.finalizer);
   }
 
   @Override
   public DefaultIBDataRecordBasedTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer finalizer) {
-    return new DefaultIBDataRecordBasedTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), null,
-        dataLineSuppliers, finalizer);
+    return new DefaultIBDataRecordBasedTransformerSupplier(getRuntimeUtils(), null, dataLineSuppliers, finalizer);
   }
 
   public static class DefaultIBDataRecordBasedTransformer extends AbstractIBDataRecordBasedTransformer {
 
-    protected DefaultIBDataRecordBasedTransformer(Path workingPath, Logger l, ConfigMap config,
+    protected DefaultIBDataRecordBasedTransformer(IBRuntimeUtils ibr, ConfigMap config,
         Map<String, IBDataRecordTransformerSupplier<?, ?>> dataRecTransformerSuppliers,
         // finalizer
         IBDataStreamRecordFinalizer finalizer) {
-      super(workingPath, l, config, dataRecTransformerSuppliers, finalizer);
+      super(ibr, config, dataRecTransformerSuppliers, finalizer);
     }
 
     @Override

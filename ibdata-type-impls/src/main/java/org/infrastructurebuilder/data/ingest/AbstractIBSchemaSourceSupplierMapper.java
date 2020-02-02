@@ -25,23 +25,17 @@ import org.infrastructurebuilder.data.IBSchemaSource;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBSchemaSourceSupplierMapper<P> implements IBSchemaSourceSupplierMapper {
 
-  private final LoggerSupplier log;
-  private final TypeToExtensionMapper mapper;
-  private final PathSupplier wps;
-  private final CredentialsFactory credentialsFactory;
+  private final IBRuntimeUtils ibr;
 
-  public AbstractIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper, PathSupplier wps,
-      CredentialsFactory f) {
-    this.log = requireNonNull(log);
-    this.mapper = requireNonNull(mapper);
-    this.wps = requireNonNull(wps);
-    this.credentialsFactory = requireNonNull(f);
+  public AbstractIBSchemaSourceSupplierMapper(IBRuntimeUtils ibr) {
+    this.ibr = requireNonNull(ibr);
   }
 
   @Override
@@ -54,24 +48,28 @@ abstract public class AbstractIBSchemaSourceSupplierMapper<P> implements IBSchem
 //  abstract public List<String> getHeaders();
 
   protected CredentialsFactory getCredentialsFactory() {
-    return credentialsFactory;
+    return ibr;
+  }
+
+  public IBRuntimeUtils getRuntimeUtils() {
+    return ibr;
   }
 
   public Optional<BasicCredentials> getCredentialsFor(String query) {
-    return credentialsFactory.getCredentialsFor(query);
+    return getCredentialsFactory().getCredentialsFor(query);
   }
 
   public Logger getLog() {
-    return log.get();
+    return ibr.getLog();
   }
 
   public TypeToExtensionMapper getMapper() {
-    return mapper;
+    return ibr;
   }
 
   @Override
   public Path getWorkingPath() {
-    return wps.get();
+    return ibr.getWorkingPath();
   }
 
   public class DefaultIBSchemaSourceSupplier extends AbstractIBSchemaSourceSupplier<P> {

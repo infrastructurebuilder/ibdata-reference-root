@@ -24,6 +24,12 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.infrastructurebuilder.util.DefaultURLAndCreds;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
@@ -33,9 +39,13 @@ import org.slf4j.LoggerFactory;
 public class DefaultTestingSource extends AbstractIBDataSource<String> {
   public final static Logger log = LoggerFactory.getLogger(DefaultTestingSource.class);
   private final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   public DefaultTestingSource(String source) {
-    super(wps, log
+    super(ibr
     // random id
         , UUID.randomUUID().toString()
         // Source
@@ -64,7 +74,7 @@ public class DefaultTestingSource extends AbstractIBDataSource<String> {
   }
 
   @Override
-  protected List<IBResource> getInstance(PathSupplier workingPath, String in) {
+  protected List<IBResource> getInstance(IBRuntimeUtils ibr, String in) {
     return emptyList();
   }
 

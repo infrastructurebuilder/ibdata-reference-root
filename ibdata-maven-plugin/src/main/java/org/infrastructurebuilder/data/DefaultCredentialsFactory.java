@@ -16,14 +16,12 @@
 package org.infrastructurebuilder.data;
 
 import static java.util.Optional.empty;
-import static java.util.stream.Collectors.toCollection;
+import static org.infrastructurebuilder.IBConstants.DEFAULT;
 import static org.infrastructurebuilder.util.artifacts.Weighted.comparator;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -33,7 +31,7 @@ import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.CredentialsSupplier;
 
-@Named
+@Named(DEFAULT)
 public class DefaultCredentialsFactory implements CredentialsFactory {
 
   private final List<CredentialsSupplier> ss;

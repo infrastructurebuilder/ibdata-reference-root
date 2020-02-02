@@ -49,15 +49,19 @@ import org.infrastructurebuilder.data.JooqAvroRecordWriterSupplier;
 import org.infrastructurebuilder.data.h2.H2DatabaseDriverSupplier;
 import org.infrastructurebuilder.data.util.files.DefaultTypeToExtensionMapper;
 import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -65,13 +69,10 @@ import org.slf4j.LoggerFactory;
 
 public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultDatabaseIBDataSourceSupplierMapperTest.class);
-
-  private static TestingPathSupplier wps;
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    wps = new TestingPathSupplier();
-  }
+  private final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -79,8 +80,6 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
   }
 
   private ConfigMap c;
-
-  private TypeToExtensionMapper t2e;
 
   private DefaultDatabaseIBDataSourceSupplierMapper d;
 
@@ -104,8 +103,6 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
 
   private DefaultIBDatabaseDialectMapper dm;
 
-  private FakeCredentialsFactory cf;
-
   @Before
   public void setUp() throws Exception {
     c = new ConfigMap();
@@ -116,16 +113,14 @@ public class DefaultDatabaseIBDataSourceSupplierMapperTest {
     c.put(IBDataConstants.DATE_FORMATTER, "yyyy-MM-dd");
     cms = new DefaultConfigMapSupplier(c);
 
-    cf = new FakeCredentialsFactory();
-    t2e = new DefaultTypeToExtensionMapper();
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = (DefaultIBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
-    jrws = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(wps, () -> log, aus).configure(cms);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = (DefaultIBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(ibr, gds).configure(cms);
+    jrws = (JooqAvroRecordWriterSupplier) new JooqAvroRecordWriterSupplier(ibr, aus).configure(cms);
     suppliers = new HashMap<>();
-    H2DatabaseDriverSupplier s = new H2DatabaseDriverSupplier(wps, () -> log, cf);
+    H2DatabaseDriverSupplier s = new H2DatabaseDriverSupplier(ibr);
     suppliers.put(s.getHint(), s);
     dm = new DefaultIBDatabaseDialectMapper(suppliers);
-    d = new DefaultDatabaseIBDataSourceSupplierMapper(wps, () -> log, t2e, jrws, cf, dm);
+    d = new DefaultDatabaseIBDataSourceSupplierMapper(ibr, jrws, dm);
     b = new DefaultIBDataStreamIdentifierConfigBean();
     b.setDescription("desc");
     b.setId(UUID.randomUUID().toString());

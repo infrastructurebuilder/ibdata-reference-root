@@ -16,7 +16,6 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,51 +30,49 @@ import javax.inject.Named;
 import org.eclipse.sisu.Typed;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizer;
 import org.infrastructurebuilder.data.AbstractIBDataSetFinalizerSupplier;
-import org.infrastructurebuilder.data.IBDataModelUtils;
 import org.infrastructurebuilder.data.IBDataSet;
 import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.util.LoggerSupplier;
+import org.infrastructurebuilder.data.model.IBDataModelUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
-import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named(DefaultIBDataSetIngestionFinalizerSupplier.DEFAULT_INGEST)
 @Typed(IBDataSetFinalizerSupplier.class)
-public class DefaultIBDataSetIngestionFinalizerSupplier extends AbstractIBDataSetFinalizerSupplier<IBIngestion,Object> {
+public class DefaultIBDataSetIngestionFinalizerSupplier
+    extends AbstractIBDataSetFinalizerSupplier<IBIngestion, Object> {
 
   public static final String DEFAULT_INGEST = "default-ingest";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetIngestionFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, TypeToExtensionMapper t2e) {
-    this(l.get(), wps, null, t2e);
+  public DefaultIBDataSetIngestionFinalizerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private DefaultIBDataSetIngestionFinalizerSupplier(Logger logger, PathSupplier workingPath, ConfigMapSupplier cms,
-      TypeToExtensionMapper t2e) {
-    super(logger, workingPath, cms, t2e);
+  private DefaultIBDataSetIngestionFinalizerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public DefaultIBDataSetIngestionFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetIngestionFinalizerSupplier(getLog(), getWorkingPathSupplier(), cms, getTypeToExtensionMapper());
+    return new DefaultIBDataSetIngestionFinalizerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IngestionIBDataSetFinalizer getInstance(PathSupplier workingPath, Object in) {
+  protected IngestionIBDataSetFinalizer getInstance(IBRuntimeUtils ibr, Object in) {
     return new IngestionIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
-        workingPath.get());
+        ibr.getWorkingPath());
   }
 
-  private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBIngestion,Object> {
+  private class IngestionIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBIngestion, Object> {
 
     public IngestionIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath);

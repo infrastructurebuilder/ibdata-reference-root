@@ -21,7 +21,6 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.infrastructurebuilder.IBConstants.DEFAULT;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 
 import java.io.IOException;
@@ -48,15 +47,11 @@ import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
-import org.infrastructurebuilder.util.CredentialsFactory;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
-import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-import org.slf4j.Logger;
 
 @Named("database")
 public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSupplierMapper<IBJDBCQuery> {
@@ -64,10 +59,8 @@ public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchem
   private IBDatabaseDialectMapper ddm;
 
   @Inject
-  public DefaultDatabaseIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, CredentialsFactory credsFactory,
-      IBDatabaseDialectMapper ddM) {
-    super(log, mapper, workingPathSupplier, credsFactory);
+  public DefaultDatabaseIBSchemaSourceSupplierMapper(IBRuntimeUtils ibr, IBDatabaseDialectMapper ddM) {
+    super(ibr);
     this.ddm = requireNonNull(ddM);
   }
 
@@ -87,14 +80,8 @@ public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchem
             // TempID
             v.getTemporaryId(),
             // Schema source
-            new DatabaseQueryIBSchemaSource(
-                //
-                this.getCredentialsFactory()
-                // wps
-                , () -> getWorkingPath()
-                // log
-                , getLog()
-                // id
+            new DatabaseQueryIBSchemaSource(getRuntimeUtils()
+            // id
                 , v.getTemporaryId()
                 // name
                 , v.getName()
@@ -116,16 +103,12 @@ public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchem
 
     private IBDataDatabaseDriverSupplier dds;
 
-    public DatabaseQueryIBSchemaSource(PathSupplier wps, Logger logger) {
-      super(wps, logger);
+    public DatabaseQueryIBSchemaSource(IBRuntimeUtils ibr) {
+      super(ibr);
     }
 
-    public DatabaseQueryIBSchemaSource(CredentialsFactory cf,
-        // Working path supplier
-        PathSupplier workingPathSupplier
-        // logger
-        , Logger logger
-        // id
+    public DatabaseQueryIBSchemaSource(IBRuntimeUtils ibr
+    // id
         , String id
         // name
         , Optional<String> name
@@ -139,18 +122,17 @@ public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchem
         , IBJDBCQuery parameter
         // dds
         , IBDataDatabaseDriverSupplier dds) {
-      super(workingPathSupplier, logger, id, name, desc, cf.getCredentialsFor(parameter), empty(), metadata, config,
-          parameter);
+      super(ibr, id, name, desc, ibr.getCredentialsFor(parameter), empty(), metadata, config, parameter);
       this.dds = Objects.requireNonNull(dds);
     }
 
     @Override
-    protected Map<String, IBResource> getInstance(PathSupplier workingPath, IBJDBCQuery db) {
+    protected Map<String, IBResource> getInstance(IBRuntimeUtils ibr, IBJDBCQuery db) {
 
       Supplier<DataSource> s = dds.getDataSourceSupplier(db)
           .orElseThrow(() -> new IBDataException("No data source supplier for " + db.getUrl()));
       String in = requireNonNull(db, "URL and creds").getUrl();
-      Path path = workingPath.get().resolve(UUID.randomUUID().toString() + ".xml");
+      Path path = ibr.getWorkingPath().resolve(UUID.randomUUID().toString() + ".xml");
       // We read it as a string, clone it, then write the clone out to a path
       try (Writer w = Files.newBufferedWriter(path)) {
         new PersistedIBSchemaXpp3Writer().write(w,

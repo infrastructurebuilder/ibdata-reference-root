@@ -18,6 +18,7 @@ package org.infrastructurebuilder.data;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -30,13 +31,8 @@ import org.infrastructurebuilder.data.model.DataSet;
 abstract public class AbstractIBDataSet extends DataSet implements IBDataSet {
   private static final long serialVersionUID = 3647886656035674148L;
 
-//  protected AbstractIBDataSet(IBDataSet set) {
-//    this(requireNonNull(set).getUuid(), set.getCreationDate(), set.getMetadata(), set.getName(), set.getDescription(),
-//        set.getPath(), set.getGroupId(), set.getArtifactId(), set.getVersion());
-//  }
-
   public AbstractIBDataSet(UUID id, Date date, Xpp3Dom metadata, Optional<String> name, Optional<String> description,
-      Optional<String> path, String groupId, String artifactId, String version) {
+      Optional<Path> path, String groupId, String artifactId, String version) {
     super();
     setCreationDate(requireNonNull(date, getClass().getCanonicalName() + "." + "creationDate"));
     setDescription(requireNonNull(description, getClass().getCanonicalName() + "." + "description").orElse(null));

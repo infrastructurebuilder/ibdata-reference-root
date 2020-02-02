@@ -45,10 +45,16 @@ import org.infrastructurebuilder.data.Formatters;
 import org.infrastructurebuilder.data.GenericDataSupplier;
 import org.infrastructurebuilder.data.IBDataAvroUtilsSupplier;
 import org.infrastructurebuilder.data.IBDataException;
+import org.infrastructurebuilder.data.IbdataAvroTypesVersioning;
 import org.infrastructurebuilder.data.transform.line.DefaultMapToGenericRecordIBDataLineTransformerSupplier.DefaultMapSSToGenericRecordIBDataLineTransformer;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -64,6 +70,10 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
 
   public static final String BA = "ba";
   private final static TestingPathSupplier wps = new TestingPathSupplier();
+
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new IbdataAvroTypesVersioning()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -89,9 +99,9 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplierTest {
     cm = new ConfigMap();
     cm.put(DefaultMapToGenericRecordIBDataLineTransformerSupplier.SCHEMA_PARAM, schemaFile.toString());
     cms = new DefaultConfigMapSupplier().addConfiguration(cm);
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds);
-    s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(wps, () -> log, aus);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = new DefaultIBDataAvroUtilsSupplier(ibr, gds);
+    s = new DefaultMapToGenericRecordIBDataLineTransformerSupplier(ibr, aus);
   }
 
   @After

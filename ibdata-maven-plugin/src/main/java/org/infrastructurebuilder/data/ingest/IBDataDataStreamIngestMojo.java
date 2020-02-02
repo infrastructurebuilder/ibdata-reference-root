@@ -28,7 +28,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
-import org.infrastructurebuilder.data.IBDataModelUtils;
+import org.infrastructurebuilder.data.model.IBDataModelUtils;
 import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.files.IBResource;
 

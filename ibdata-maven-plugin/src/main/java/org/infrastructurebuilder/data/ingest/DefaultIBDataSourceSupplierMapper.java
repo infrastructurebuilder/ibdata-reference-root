@@ -22,7 +22,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SUFFIX;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToDeletedOnExitTempChecksumAndPath;
 
@@ -46,17 +45,14 @@ import org.infrastructurebuilder.data.IBDataSource;
 import org.infrastructurebuilder.data.IBDataSourceSupplier;
 import org.infrastructurebuilder.data.IBDataStreamIdentifier;
 import org.infrastructurebuilder.data.Metadata;
-import org.infrastructurebuilder.util.BasicCredentials;
-import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-import org.slf4j.Logger;
 
 @Named
 public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSupplierMapper<String> {
@@ -65,10 +61,8 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
   private final ArchiverManager archiverManager;
 
   @Inject
-  public DefaultIBDataSourceSupplierMapper(LoggerSupplier l, TypeToExtensionMapper t2e, WGetterSupplier wgs,
-      ArchiverManager am, @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
-      CredentialsFactory cf) {
-    super(requireNonNull(l).get(), requireNonNull(t2e), workingPathSupplier, cf);
+  public DefaultIBDataSourceSupplierMapper(IBRuntimeUtils ibr, WGetterSupplier wgs, ArchiverManager am) {
+    super(requireNonNull(ibr));
     this.wgs = requireNonNull(wgs);
     this.archiverManager = requireNonNull(am);
   }
@@ -87,10 +81,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
         temporaryId,
         // datasource
         new DefaultIBDataSource(
-            // working path supplier
-            getWorkingPathSupplier()
-            // Log (always)
-            , getLog()
+            getRuntimeUtils()
             // URL
             , jdbcURL
             // Expand archives
@@ -123,12 +114,12 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     private final TypeToExtensionMapper mapper;
     private List<IBResource> read;
 
-    private DefaultIBDataSource(PathSupplier wps, Logger log, String id, URLAndCreds sourceUrl, boolean expandArchives,
+    private DefaultIBDataSource(IBRuntimeUtils ibr, String id, URLAndCreds sourceUrl, boolean expandArchives,
         Optional<Checksum> checksum, Optional<Metadata> metadata, Optional<ConfigMap> additionalConfig,
         Optional<String> namespace, Optional<String> name, Optional<String> description, Optional<String> mimeType,
         WGetterSupplier wgs, ArchiverManager am, TypeToExtensionMapper mapper) {
 
-      super(wps, log, id, sourceUrl, expandArchives, namespace, name, description, checksum, metadata, additionalConfig,
+      super(ibr, id, sourceUrl, expandArchives, namespace, name, description, checksum, metadata, additionalConfig,
           (String) null);
       this.mimeType = mimeType;
       this.wgs = requireNonNull(wgs);
@@ -136,19 +127,19 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
       this.mapper = requireNonNull(mapper);
     }
 
-    public DefaultIBDataSource(PathSupplier wps, Logger log, URLAndCreds source, boolean expandArchives,
+    public DefaultIBDataSource(IBRuntimeUtils ibr, URLAndCreds source, boolean expandArchives,
         Optional<String> namespace, Optional<String> name, Optional<String> description, Optional<Checksum> checksum,
         Optional<Metadata> metadata, Optional<String> targetType, WGetterSupplier wgs, ArchiverManager am,
         TypeToExtensionMapper mapper) {
-      this(wps, log, randomUUID().toString(), source, expandArchives, checksum, metadata, empty(), namespace, name,
+      this(ibr, randomUUID().toString(), source, expandArchives, checksum, metadata, empty(), namespace, name,
           description, targetType, wgs, am, mapper);
     }
 
     @Override
     public IBDataSource<String> configure(ConfigMap config) {
-      return new DefaultIBDataSource(getWorkingPathSupplier(), getLog(), getId(), getSource(), isExpandArchives(),
-          getChecksum(), getMetadata(), of(config), getNamespace(), getName(), getDescription(), getMimeType(),
-          this.wgs, this.am, this.mapper);
+      return new DefaultIBDataSource(getRuntimeUtils(), getId(), getSource(), isExpandArchives(), getChecksum(),
+          getMetadata(), of(config), getNamespace(), getName(), getDescription(), getMimeType(), this.wgs, this.am,
+          this.mapper);
     }
 
     @Override
@@ -157,7 +148,7 @@ public class DefaultIBDataSourceSupplierMapper extends AbstractIBDataSourceSuppl
     }
 
     @Override
-    public List<IBResource> getInstance(PathSupplier workingPath, String in) {
+    public List<IBResource> getInstance(IBRuntimeUtils ibr, String in) {
       Path targetPath = getWorkingPathSupplier().get();
       return ofNullable(targetPath).map(target -> {
         if (this.read == null) {

@@ -15,10 +15,7 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-
 import java.lang.reflect.Array;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +24,9 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
-import org.slf4j.Logger;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 
 @Named(ArrayToNumberedColumIBDataLineTransformerSupplier.ARRAY_TO_NUMBERED_COL)
 public class ArrayToNumberedColumIBDataLineTransformerSupplier
@@ -39,24 +34,22 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
   public static final String ARRAY_TO_NUMBERED_COL = "array-to-numbered-column";
 
   @javax.inject.Inject
-  public ArrayToNumberedColumIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l) {
-    this(wps, null, l);
+  public ArrayToNumberedColumIBDataLineTransformerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private ArrayToNumberedColumIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    super(wps, cms, l);
+  private ArrayToNumberedColumIBDataLineTransformerSupplier(IBRuntimeUtils wps, ConfigMapSupplier cms) {
+    super(wps, cms);
   }
 
   @Override
   public ArrayToNumberedColumIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArrayToNumberedColumIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
+    return new ArrayToNumberedColumIBDataLineTransformerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataRecordTransformer<String[], Map<String, String>> getUnconfiguredTransformerInstance(
-      Path workingPath) {
-    return new ArrayToNumberedColumIBDataLineTransformer(workingPath, getLogger());
+  protected IBDataRecordTransformer<String[], Map<String, String>> getUnconfiguredTransformerInstance() {
+    return new ArrayToNumberedColumIBDataLineTransformer(getRuntimeUtils());
   }
 
   @Override
@@ -76,16 +69,16 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
      * @param ps
      * @param config
      */
-    protected ArrayToNumberedColumIBDataLineTransformer(Path ps, ConfigMap config, Logger l) {
-      super(ps, config, l);
+    protected ArrayToNumberedColumIBDataLineTransformer(IBRuntimeUtils ps, ConfigMap config) {
+      super(ps, config);
       this.format = getConfiguration(FORMAT_KEY, FORMAT);
     }
 
     /**
      * @param ps
      */
-    protected ArrayToNumberedColumIBDataLineTransformer(Path ps, Logger l) {
-      super(ps, l);
+    protected ArrayToNumberedColumIBDataLineTransformer(IBRuntimeUtils ps) {
+      super(ps);
       this.format = null;
     }
 
@@ -105,7 +98,7 @@ public class ArrayToNumberedColumIBDataLineTransformerSupplier
 
     @Override
     public IBDataRecordTransformer<String[], Map<String, String>> configure(ConfigMap cms) {
-      return new ArrayToNumberedColumIBDataLineTransformer(getWorkingPath(), cms, getLogger());
+      return new ArrayToNumberedColumIBDataLineTransformer(getRuntimeUtils(), cms);
     }
 
     @Override

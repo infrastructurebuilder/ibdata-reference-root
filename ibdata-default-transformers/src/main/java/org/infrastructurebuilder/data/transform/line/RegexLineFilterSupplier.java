@@ -29,6 +29,7 @@ import javax.inject.Named;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -37,22 +38,22 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
   public static final String REGEX_LINE_FILTER = "regex-line-filter";
 
   @javax.inject.Inject
-  public RegexLineFilterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
-    this(wps, null, l);
+  public RegexLineFilterSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private RegexLineFilterSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    super(wps, cms, l);
+  private RegexLineFilterSupplier(IBRuntimeUtils wps, ConfigMapSupplier cms) {
+    super(wps, cms);
   }
 
   @Override
   public RegexLineFilterSupplier configure(ConfigMapSupplier cms) {
-    return new RegexLineFilterSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
+    return new RegexLineFilterSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new RegexLineFilter(workingPath, getLogger());
+  protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance() {
+    return new RegexLineFilter(getRuntimeUtils(), null);
   }
 
   private class RegexLineFilter extends AbstractIBDataRecordTransformer<String, String> {
@@ -66,21 +67,14 @@ public class RegexLineFilterSupplier extends AbstractIBDataRecordTransformerSupp
      * @param ps
      * @param config
      */
-    public RegexLineFilter(Path ps, ConfigMap config, Logger l) {
-      super(ps, config, l);
+    public RegexLineFilter(IBRuntimeUtils ps, ConfigMap config) {
+      super(ps, config);
       this.splitRegex = Pattern.compile(Pattern.quote(getConfiguration(REGEX, DEFAULT_REGEX)));
-    }
-
-    /**
-     * @param ps
-     */
-    public RegexLineFilter(Path ps, Logger l) {
-      this(ps, new ConfigMap(), l);
     }
 
     @Override
     public IBDataRecordTransformer<String, String> configure(ConfigMap cms) {
-      return new RegexLineFilter(getWorkingPath(), cms, getLogger());
+      return new RegexLineFilter(getRuntimeUtils(), cms);
     }
 
     @Override

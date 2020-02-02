@@ -79,8 +79,8 @@ package org.infrastructurebuilder.data.transform.line;
 //     * @param config
 //     */
 //    @SuppressWarnings("unchecked")
-//    protected StructuredMetadataCollectorTransformer(Path ps, ConfigMap config, Logger l) {
-//      super(ps, config, l);
+//    protected StructuredMetadataCollectorTransformer(IBRuntimeUtils ps, ConfigMap config) {
+//      super(ps, config);
 //      try {
 //        this.format = (List<String>) getOptionalObjectConfiguration(FIELD_KEY)
 //            .orElseThrow(() -> new IBDataException("No " + FIELD_KEY + " found in config"));
@@ -115,7 +115,7 @@ package org.infrastructurebuilder.data.transform.line;
 //
 //    @Override
 //    public IBDataRecordTransformer<String[], Map<String, String>> configure(ConfigMap cms) {
-//      return new StructuredMetadataCollectorTransformer(getWorkingPath(), cms, getLogger());
+//      return new StructuredMetadataCollectorTransformer(getRuntimeUtils(), cms);
 //    }
 //
 //    @Override

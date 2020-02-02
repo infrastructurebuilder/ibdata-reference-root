@@ -38,13 +38,17 @@ import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.FakeCredentialsFactory;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.URLAndCreds;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +56,11 @@ import org.slf4j.LoggerFactory;
 public class DefaultSchemaToDatabaseTranslatorTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultSchemaToDatabaseTranslatorTest.class);
 
-  private static TestingPathSupplier wps;
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    wps = new TestingPathSupplier();
-  }
+  private final static IBRuntimeUtilsTesting ibr = new IBRuntimeUtilsTesting(log);
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
-    wps.finalize();
+    ibr.getTestingPathSupplier().finalize();
   }
 
   private LoggerSupplier l = () -> log;
@@ -81,7 +80,6 @@ public class DefaultSchemaToDatabaseTranslatorTest {
   private List<IBSchema> s;
 
   private PersistedIBSchema schema;
-  private CredentialsFactory cf;
 
   @Before
   public void setUp() throws Exception {
@@ -94,17 +92,15 @@ public class DefaultSchemaToDatabaseTranslatorTest {
 //        .get().avroSchemaFromString(v.toExternalForm())
 
     );
-
-    cf = new FakeCredentialsFactory();
-    suppliers = Arrays.asList(new SQLiteDatabaseDriverSupplier(wps, l, cf));
+    suppliers = Arrays.asList(new SQLiteDatabaseDriverSupplier(ibr));
     dMapper = new DefaultIBDatabaseDialectMapper(suppliers.stream().collect(toMap(k -> k.getHint(), identity())));
-    ls = new DefaultLiquibaseSupplier(wps, l, suppliers, dMapper, cf);
+    ls = new DefaultLiquibaseSupplier(ibr, suppliers, dMapper);
     cm = new ConfigMap();
-    String s = wps.getTestClasses().resolve("test.mv.db").toAbsolutePath().toString();
+    String s = ibr.getTestingPathSupplier().getTestClasses().resolve("test.trace.db").toAbsolutePath().toString();
     String jdbcurl = "jdbc:sqlite:" + s;
     cms = new DefaultConfigMapSupplier(cm);
     cm.put(URLAndCreds.SOURCE_URL, jdbcurl);
-    s2d = (DefaultSchemaToLiquibaseTranslatorSupplier) new DefaultSchemaToLiquibaseTranslatorSupplier(wps, l, ls)
+    s2d = (DefaultSchemaToLiquibaseTranslatorSupplier) new DefaultSchemaToLiquibaseTranslatorSupplier(ibr, ls)
         .configure(cms);
 //    URL v = wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toUri().toURL();
   }

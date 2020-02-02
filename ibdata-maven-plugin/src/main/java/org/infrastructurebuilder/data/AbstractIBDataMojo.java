@@ -130,9 +130,9 @@ public abstract class AbstractIBDataMojo extends AbstractMojo {
 
   protected void _setup() throws MojoFailureException {
     IBDataException.cet.withTranslation(() -> Files.createDirectories(workingDirectory.toPath()));
-    workingPathSupplier.setPath(workingDirectory.toPath()); // workingPathSupplier is a Singleton
+    workingPathSupplier.setT(workingDirectory.toPath()); // workingPathSupplier is a Singleton
     if (getSession() != null) {
-      cacheDirSupplier.setPath(Paths.get(getSession().getLocalRepository().getBasedir()).resolve(".cache")
+      cacheDirSupplier.setT(Paths.get(getSession().getLocalRepository().getBasedir()).resolve(".cache")
           .resolve("download-maven-plugin").toAbsolutePath());
     }
     getComponent().setMojoExecution(getMojo());

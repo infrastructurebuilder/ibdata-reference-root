@@ -80,13 +80,12 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
     ds.setCreationDate(new Date());
     ds.setMetadata(new Metadata());
 
-    ds.setPath(IBDataException.cet
-        .withReturningTranslation(() -> workingPath.toAbsolutePath().toUri().toURL().toExternalForm()));
+    ds.setPath(cet.withReturningTranslation(() -> workingPath));
     return new DefaultIBDataTransformationResult(new DefaultIBDataSet(ds), workingPath);
   };
 
   public final static Function<IBResource, IBDataTransformationResult> fromPrevious = (previous) -> {
-    Optional<DefaultIBDataSet> ds = IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet.apply(
+    Optional<DefaultIBDataSet> ds = IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet.apply(
         cet.withReturningTranslation(() -> previous.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL()));
     return new DefaultIBDataTransformationResult(ds.get(), previous.getPath());
   };

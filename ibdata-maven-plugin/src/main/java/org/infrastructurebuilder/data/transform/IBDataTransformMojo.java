@@ -36,7 +36,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.infrastructurebuilder.data.AbstractIBDataMojo;
-import org.infrastructurebuilder.data.IBDataModelUtils;
+import org.infrastructurebuilder.data.model.IBDataModelUtils;
 import org.infrastructurebuilder.util.files.IBResource;
 
 @Mojo(name = "transform", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)

@@ -23,7 +23,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.MAP_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.RECORD_SPLITTER;
 import static org.infrastructurebuilder.data.IBDataConstants.TRANSFORMERSLIST;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.IBDataModelUtils.getStructuredSupplyTypeClass;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.getStructuredSupplyTypeClass;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -60,6 +60,7 @@ import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,10 +74,10 @@ abstract public class AbstractIBDataRecordBasedTransformer extends AbstractIBDat
   private int countOfRowsSkippedSoFar = 0;
   private final List<String> firstType;
 
-  protected AbstractIBDataRecordBasedTransformer(Path workingPath, Logger log, ConfigMap config,
+  protected AbstractIBDataRecordBasedTransformer(IBRuntimeUtils ibr, ConfigMap config,
       Map<String, IBDataRecordTransformerSupplier<?, ?>> dataRecTransformerSuppliers,
       IBDataStreamRecordFinalizer<?> finalizer) {
-    super(workingPath, log, config);
+    super(ibr, config);
     List<Class<?>> _fType = Collections.emptyList();
     this.dataLineSuppliers = dataRecTransformerSuppliers;
     this.configuredFinalizer = finalizer;

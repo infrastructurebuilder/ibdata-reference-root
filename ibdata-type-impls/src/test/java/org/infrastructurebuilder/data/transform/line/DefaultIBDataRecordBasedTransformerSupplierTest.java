@@ -24,7 +24,13 @@ import java.util.Map;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.transform.line.DefaultTestIBDataRecordTransformerSupplierStringToString.StringToStringRecordTransformer;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -38,6 +44,10 @@ public class DefaultIBDataRecordBasedTransformerSupplierTest {
   public final static Logger log = LoggerFactory.getLogger(DefaultIBDataRecordBasedTransformerSupplierTest.class);
 
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   private static final String NAME = StringToStringRecordTransformer.class.getCanonicalName();
 
@@ -62,10 +72,10 @@ public class DefaultIBDataRecordBasedTransformerSupplierTest {
   @Before
   public void setUp() throws Exception {
     dataLineTransformerSuppliers = new HashMap<>();
-    drts = new DefaultTestIBDataRecordTransformerSupplierStringToString(wps, cms, () -> log);
+    drts = new DefaultTestIBDataRecordTransformerSupplierStringToString(ibr, cms);
     dataLineTransformerSuppliers.put(NAME, drts);
     cms = new DefaultConfigMapSupplier();
-    s = new DefaultIBDataRecordBasedTransformerSupplier(wps, () -> log, dataLineTransformerSuppliers);
+    s = new DefaultIBDataRecordBasedTransformerSupplier(ibr, dataLineTransformerSuppliers);
   }
 
   @After

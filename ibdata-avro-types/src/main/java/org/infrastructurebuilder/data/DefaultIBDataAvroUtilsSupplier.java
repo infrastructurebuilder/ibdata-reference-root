@@ -23,8 +23,8 @@ import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.IBConstants.FILE_PREFIX;
 import static org.infrastructurebuilder.IBConstants.HTTPS_PREFIX;
 import static org.infrastructurebuilder.IBConstants.HTTP_PREFIX;
+import static org.infrastructurebuilder.IBConstants.JAR_PREFIX;
 import static org.infrastructurebuilder.IBConstants.ZIP_PREFIX;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.IBUtils.translateToWorkableArchiveURL;
 
@@ -54,9 +54,9 @@ import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.model.SchemaField;
 import org.infrastructurebuilder.data.model.SchemaIndex;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -67,25 +67,23 @@ public class DefaultIBDataAvroUtilsSupplier extends AbstractCMSConfigurableSuppl
   private final GenericDataSupplier gds;
 
   @Inject
-  public DefaultIBDataAvroUtilsSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier ls,
-      GenericDataSupplier gds) {
-    super(wps, null, ls);
+  public DefaultIBDataAvroUtilsSupplier(IBRuntimeUtils ibr, GenericDataSupplier gds) {
+    super(ibr, null);
     this.gds = requireNonNull(gds);
   }
 
-  private DefaultIBDataAvroUtilsSupplier(PathSupplier wps, ConfigMapSupplier config, LoggerSupplier l,
-      GenericDataSupplier gds) {
-    super(wps, config, l);
+  private DefaultIBDataAvroUtilsSupplier(IBRuntimeUtils ibr, ConfigMapSupplier config, GenericDataSupplier gds) {
+    super(ibr, config);
     this.gds = (GenericDataSupplier) requireNonNull(gds).configure(config);
   }
 
   @Override
   public DefaultIBDataAvroUtilsSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataAvroUtilsSupplier(getWorkingPathSupplier(), cms, () -> getLog(), gds);
+    return new DefaultIBDataAvroUtilsSupplier(getRuntimeUtils(), cms, gds);
   }
 
   @Override
-  protected IBDataAvroUtils getInstance(PathSupplier wps, Object in) {
+  protected IBDataAvroUtils getInstance(IBRuntimeUtils ibr, Object in) {
     return new DefaultIBDataAvroUtils(getLog(), gds.get());
   }
 
@@ -161,7 +159,7 @@ public class DefaultIBDataAvroUtilsSupplier extends AbstractCMSConfigurableSuppl
       List<SchemaField> fields = schema.getFields().stream().map(IBDataAvroUtils::toIBSchemaField).collect(toList());
       List<SchemaIndex> indexes = new ArrayList<>();
       for (int i = 0; i < fields.size(); ++i) {
-         //  TODO       fields.get(i).setVersionAppeared(versionAppeared);
+        // TODO fields.get(i).setVersionAppeared(versionAppeared);
         fields.get(i).setIndex(i);
       }
       p.setMetadata(metadata);
@@ -183,17 +181,18 @@ public class DefaultIBDataAvroUtilsSupplier extends AbstractCMSConfigurableSuppl
       // Initially, just the first IBSchema is relevant
       IBSchema r = s.get(0);
 
-      SortedSet<IBIndex> indexes = r.getSchemaIndexes();  // TODO Add Index advice to Avro
+      SortedSet<IBIndex> indexes = r.getSchemaIndexes(); // TODO Add Index advice to Avro
 
-      StringBuilder doc = new StringBuilder(r.getDescription().orElseThrow(() -> new IBDataException("Description cannot be null")))
-          // UUID
-          .append("\n| UUID: ").append(r.getUuid().toString())
-          // Mime type
-          .append("\n| Content-Type: ").append(r.getMimeType())
-          // Source
-          .append("\n| Original-URL: ").append(r.getUrl().orElse("Unknown"))
-          // Creation date
-          .append("\n| Creation-Date: ").append(r.getCreationDate().toGMTString());
+      StringBuilder doc = new StringBuilder(
+          r.getDescription().orElseThrow(() -> new IBDataException("Description cannot be null")))
+              // UUID
+              .append("\n| UUID: ").append(r.getUuid().toString())
+              // Mime type
+              .append("\n| Content-Type: ").append(r.getMimeType())
+              // Source
+              .append("\n| Original-URL: ").append(r.getUrl().orElse("Unknown"))
+              // Creation date
+              .append("\n| Creation-Date: ").append(r.getCreationDate().toGMTString());
       String namespace = r.getNameSpace().orElseThrow(() -> new IBDataException("Namespace cannot be null"));
       String name = r.getName().orElseThrow(() -> new IBDataException("Name cannot be null"));
 

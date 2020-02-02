@@ -18,38 +18,40 @@ package org.infrastructurebuilder.data.transform.line;
 import static java.util.Objects.requireNonNull;
 
 import org.infrastructurebuilder.data.IBDataDataStreamRecordFinalizerSupplier;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
-abstract public class AbstractIBDataStreamRecordFinalizerSupplier<T> implements IBDataDataStreamRecordFinalizerSupplier<T> {
+abstract public class AbstractIBDataStreamRecordFinalizerSupplier<T>
+    implements IBDataDataStreamRecordFinalizerSupplier<T> {
 
   private final ConfigMapSupplier cms;
-  private final PathSupplier wps;
-  private final Logger log;
+  private final IBRuntimeUtils ibr;
 
-  public AbstractIBDataStreamRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l) {
-    this(ps, l, null);
+  public AbstractIBDataStreamRecordFinalizerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  protected AbstractIBDataStreamRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
-    this.wps = requireNonNull(ps);
-    this.log = requireNonNull(l).get();
+  protected AbstractIBDataStreamRecordFinalizerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    this.ibr = requireNonNull(ibr);
     this.cms = cms;
   }
 
   public Logger getLog() {
-    return log;
+    return ibr.getLog();
   }
 
   protected PathSupplier getWorkingPathSupplier() {
-    return wps;
+    return () -> ibr.getWorkingPath();
   }
 
   protected ConfigMapSupplier getCms() {
     return cms;
   }
 
+  public IBRuntimeUtils getRuntimeUtils() {
+    return ibr;
+  }
 
 }

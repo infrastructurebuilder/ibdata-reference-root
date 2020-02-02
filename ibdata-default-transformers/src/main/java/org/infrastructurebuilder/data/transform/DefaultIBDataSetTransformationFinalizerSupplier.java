@@ -17,7 +17,7 @@ package org.infrastructurebuilder.data.transform;
 
 import static java.util.Objects.requireNonNull;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-import static org.infrastructurebuilder.data.IBDataModelUtils.forceToFinalizedPath;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.forceToFinalizedPath;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -42,6 +42,7 @@ import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -50,45 +51,42 @@ import org.slf4j.LoggerFactory;
 
 @Named(DefaultIBDataSetTransformationFinalizerSupplier.NAME)
 public class DefaultIBDataSetTransformationFinalizerSupplier
-    extends AbstractIBDataSetFinalizerSupplier<IBTransformation,Object> {
+    extends AbstractIBDataSetFinalizerSupplier<IBTransformation, Object> {
 
   static final String NAME = "default-transform";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetTransformationFinalizerSupplier.class);
 
   @Inject
-  public DefaultIBDataSetTransformationFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      @Nullable @Named("maven-log") LoggerSupplier l, TypeToExtensionMapper t2e) {
-    this(l.get(), wps, null, t2e);
+  public DefaultIBDataSetTransformationFinalizerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private DefaultIBDataSetTransformationFinalizerSupplier(Logger logger, PathSupplier workingPath,
-      ConfigMapSupplier cms, TypeToExtensionMapper t2e) {
-    super(logger, workingPath, cms, t2e);
+  private DefaultIBDataSetTransformationFinalizerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public DefaultIBDataSetTransformationFinalizerSupplier getConfiguredSupplier(ConfigMapSupplier cms) {
-    return new DefaultIBDataSetTransformationFinalizerSupplier(getLog(), getWorkingPathSupplier(), cms, getTypeToExtensionMapper());
+    return new DefaultIBDataSetTransformationFinalizerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected TransformationIBDataSetFinalizer getInstance(PathSupplier workingPath, Object in) {
+  protected TransformationIBDataSetFinalizer getInstance(IBRuntimeUtils ibr, Object in) {
     return new TransformationIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         getWorkingPathSupplier().get());
   }
 
-  private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBTransformation,Object> {
+  private class TransformationIBDataSetFinalizer extends AbstractIBDataSetFinalizer<IBTransformation, Object> {
 
     public TransformationIBDataSetFinalizer(ConfigMap config, Path workingPath) {
       super(config, workingPath.resolve(UUID.randomUUID().toString()));
     }
 
     @Override
-    public IBResource finalize(IBDataSet inboundDataSet, IBTransformation target,
-        List<IBDataStreamSupplier> ibdssList, List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir)
-        throws IOException {
+    public IBResource finalize(IBDataSet inboundDataSet, IBTransformation target, List<IBDataStreamSupplier> ibdssList,
+        List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir) throws IOException {
       DataSet targetDataSet = target.asDataSet();
-      targetDataSet.setPath(inboundDataSet.getPath().orElse(null));
+      targetDataSet.setPath(inboundDataSet.getPathAsPath().orElse(null));
 
       return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, schemaSuppliers,
           getTypeToExtensionMapper(), basedir);

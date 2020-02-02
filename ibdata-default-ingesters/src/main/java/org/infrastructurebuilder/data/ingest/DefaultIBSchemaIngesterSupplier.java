@@ -33,6 +33,7 @@ import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -42,29 +43,29 @@ public class DefaultIBSchemaIngesterSupplier<T> extends AbstractIBSchemaIngester
   public static final String NAME = "default";
 
   @Inject
-  public DefaultIBSchemaIngesterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier log) {
-    this(wps, log, null);
+  public DefaultIBSchemaIngesterSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private DefaultIBSchemaIngesterSupplier(PathSupplier wps, LoggerSupplier log, ConfigMapSupplier cms) {
-    super(wps, log, cms);
+  private DefaultIBSchemaIngesterSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
-  final protected IBSchemaIngester getInstance(PathSupplier workingPath, T in) {
-    return new DefaultIBSchemaIngester(workingPath.get(), getLog(), getConfig().get());
+  final protected IBSchemaIngester getInstance(IBRuntimeUtils ibr, T in) {
+    return new DefaultIBSchemaIngester(ibr, getConfig().get());
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public DefaultIBSchemaIngesterSupplier<T> getConfiguredSupplier(ConfigMapSupplier config) {
-    return new DefaultIBSchemaIngesterSupplier(getWorkingPathSupplier(), () -> getLog(), config);
+    return new DefaultIBSchemaIngesterSupplier(getRuntimeUtils(), config);
   }
 
   public final class DefaultIBSchemaIngester extends AbstractIBSchemaIngester {
 
-    public DefaultIBSchemaIngester(Path workingPath, Logger log, ConfigMap config) {
-      super(workingPath, log, config);
+    public DefaultIBSchemaIngester(IBRuntimeUtils ibr, ConfigMap config) {
+      super(ibr, config);
     }
 
 //            return source.get().stream()
@@ -81,7 +82,7 @@ public class DefaultIBSchemaIngesterSupplier<T> extends AbstractIBSchemaIngester
           .values().stream()
           // Get the IBDataSchemaIngestionConfig
           .map(sourceSupplier -> {
-           return DefaultIBSchemaDAOSupplierBuilder.newInstance()
+            return DefaultIBSchemaDAOSupplierBuilder.newInstance()
                 // Capture this source
                 .withSource(sourceSupplier.get())
                 // Carry over config

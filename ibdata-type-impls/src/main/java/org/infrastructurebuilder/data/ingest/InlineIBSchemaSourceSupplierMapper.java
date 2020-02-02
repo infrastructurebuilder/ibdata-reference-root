@@ -26,7 +26,6 @@ import static org.infrastructurebuilder.IBConstants.DESCRIPTION;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
 import static org.infrastructurebuilder.IBConstants.NAME;
 import static org.infrastructurebuilder.IBConstants.TEMPORARYID;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataConstants.METADATA;
 import static org.infrastructurebuilder.data.IBDataConstants.SCHEMA;
 import static org.infrastructurebuilder.data.IBDataException.cet;
@@ -52,23 +51,19 @@ import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
 import org.infrastructurebuilder.util.BasicCredentials;
-import org.infrastructurebuilder.util.CredentialsFactory;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
-import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-import org.slf4j.Logger;
 
 @Named("inline")
 public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSupplierMapper<Xpp3Dom> {
 
   @Inject
-  public InlineIBSchemaSourceSupplierMapper(LoggerSupplier log, TypeToExtensionMapper mapper,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier, CredentialsFactory cf) {
-    super(log, mapper, workingPathSupplier, cf);
+  public InlineIBSchemaSourceSupplierMapper(IBRuntimeUtils ibr) {
+    super(ibr);
   }
 
   @Override
@@ -84,7 +79,7 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
             // TempID
             v.getTemporaryId(),
             // Schema source
-            new InlineIBSchemaSource(() -> getWorkingPath(), getLog())
+            new InlineIBSchemaSource(getRuntimeUtils())
                 // Configured with the ingestion config
                 .configure(v.asConfigMap()),
             // workingPath
@@ -93,16 +88,12 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
 
   public class InlineIBSchemaSource extends AbstractIBSchemaSource<Xpp3Dom> {
 
-    public InlineIBSchemaSource(PathSupplier wps, Logger logger) {
-      super(wps, logger);
+    public InlineIBSchemaSource(IBRuntimeUtils ibr) {
+      super(ibr);
     }
 
-    private InlineIBSchemaSource(
-        // Working path supplier
-        PathSupplier workingPathSupplier
-        // logger
-        , Logger logger
-        // id
+    private InlineIBSchemaSource(IBRuntimeUtils ibr
+    // id
         , String id
         // name
         , Optional<String> name
@@ -118,7 +109,7 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
         , Optional<ConfigMap> config
         // And the param supplied
         , Xpp3Dom parameter) {
-      super(workingPathSupplier, logger, id, name, desc, creds, empty(), metadata, config, parameter);
+      super(ibr, id, name, desc, creds, empty(), metadata, config, parameter);
     }
 
     @Override
@@ -130,16 +121,15 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
       Optional<String> desc2 = config.getOptionalString(DESCRIPTION);
       Optional<String> name2 = config.getOptionalString(NAME);
       Xpp3Dom param = config.get(SCHEMA);
-      return new InlineIBSchemaSource(getWorkingPathSupplier(), getLog(), id, name2, desc2, creds2, metadata2,
-          of(config), param);
+      return new InlineIBSchemaSource(getRuntimeUtils(), id, name2, desc2, creds2, metadata2, of(config), param);
     }
 
     @Override
-    protected Map<String, IBResource> getInstance(PathSupplier workingPath, Xpp3Dom inline) {
+    protected Map<String, IBResource> getInstance(IBRuntimeUtils ibr, Xpp3Dom inline) {
       Xpp3Dom j = ofNullable(requireNonNull(inline, "Supplied Xpp3Dom for inline schema").getChild("schema"))
           .orElseThrow(() -> new IBDataException("The child of <inline> must be a <schema/>"));
       String in = j.toString();
-      Path path = workingPath.get().resolve(UUID.randomUUID().toString() + ".xml");
+      Path path = ibr.getWorkingPath().resolve(UUID.randomUUID().toString() + ".xml");
       // We read it as a string, clone it, then write the clone out to a path
       try (Writer w = Files.newBufferedWriter(path)) {
 

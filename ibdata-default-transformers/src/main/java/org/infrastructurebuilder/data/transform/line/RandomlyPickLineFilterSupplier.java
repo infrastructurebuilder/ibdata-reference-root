@@ -17,7 +17,6 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -28,10 +27,9 @@ import java.util.Random;
 import javax.inject.Named;
 
 import org.infrastructurebuilder.data.IBDataConstants;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 @Named(RandomlyPickLineFilterSupplier.RANDMOM_LINE_FILTER)
@@ -39,22 +37,22 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
   public static final String RANDMOM_LINE_FILTER = "random-line-filter";
 
   @javax.inject.Inject
-  public RandomlyPickLineFilterSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
-    this(wps, null, l);
+  public RandomlyPickLineFilterSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private RandomlyPickLineFilterSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    super(wps, cms, l);
+  private RandomlyPickLineFilterSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public RandomlyPickLineFilterSupplier configure(ConfigMapSupplier cms) {
-    return new RandomlyPickLineFilterSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
+    return new RandomlyPickLineFilterSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataRecordTransformer<Object, Object> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new RandomLineFilter(workingPath, getLogger());
+  protected IBDataRecordTransformer<Object, Object> getUnconfiguredTransformerInstance() {
+    return new RandomLineFilter(getRuntimeUtils());
   }
 
   @Override
@@ -74,21 +72,21 @@ public class RandomlyPickLineFilterSupplier extends AbstractIBDataRecordTransfor
      * @param ps
      * @param config
      */
-    public RandomLineFilter(Path ps, ConfigMap config, Logger l) {
-      super(ps, config, l);
+    public RandomLineFilter(IBRuntimeUtils ps, ConfigMap config) {
+      super(ps, config);
       this.random = Float.parseFloat((getConfiguration(RANDOMVAL, DEFAULT_RANDOM)));
     }
 
     /**
      * @param ps
      */
-    public RandomLineFilter(Path ps, Logger l) {
-      this(ps, new ConfigMap(), l);
+    public RandomLineFilter(IBRuntimeUtils ps) {
+      this(ps, new ConfigMap());
     }
 
     @Override
     public IBDataRecordTransformer<Object, Object> configure(ConfigMap cms) {
-      return new RandomLineFilter(getWorkingPath(), cms, getLogger());
+      return new RandomLineFilter(getRuntimeUtils(), cms);
     }
 
     @Override

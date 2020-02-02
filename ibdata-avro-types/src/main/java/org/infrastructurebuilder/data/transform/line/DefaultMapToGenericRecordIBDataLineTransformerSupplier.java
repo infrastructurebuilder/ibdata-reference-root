@@ -41,6 +41,7 @@ import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -53,15 +54,14 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
   private final IBDataAvroUtilsSupplier aus;
 
   @Inject
-  public DefaultMapToGenericRecordIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
-    super(wps, null, l);
+  public DefaultMapToGenericRecordIBDataLineTransformerSupplier(IBRuntimeUtils ibr, IBDataAvroUtilsSupplier aus) {
+    super(ibr, null);
     this.aus = requireNonNull(aus);
   }
 
-  private DefaultMapToGenericRecordIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms,
-      LoggerSupplier l, IBDataAvroUtilsSupplier aus) {
-    super(wps, cms, l);
+  private DefaultMapToGenericRecordIBDataLineTransformerSupplier(IBRuntimeUtils wps, ConfigMapSupplier cms,
+      IBDataAvroUtilsSupplier aus) {
+    super(wps, cms);
     this.aus = (IBDataAvroUtilsSupplier) requireNonNull(aus).configure(cms);
   }
 
@@ -72,14 +72,12 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
 
   @Override
   public DefaultMapToGenericRecordIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new DefaultMapToGenericRecordIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger(),
-        this.aus);
+    return new DefaultMapToGenericRecordIBDataLineTransformerSupplier(getRuntimeUtils(), cms, this.aus);
   }
 
   @Override
-  protected IBDataRecordTransformer<Map<String, Object>, IndexedRecord> getUnconfiguredTransformerInstance(
-      Path workingPath) {
-    return new DefaultMapSSToGenericRecordIBDataLineTransformer(workingPath, getLogger(), aus.get());
+  protected IBDataRecordTransformer<Map<String, Object>, IndexedRecord> getUnconfiguredTransformerInstance() {
+    return new DefaultMapSSToGenericRecordIBDataLineTransformer(getRuntimeUtils(), null, aus.get());
   }
 
   public static class DefaultMapSSToGenericRecordIBDataLineTransformer
@@ -93,9 +91,9 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
      * @param workingPath
      * @param config
      */
-    private DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, ConfigMap config, Logger l,
+    private DefaultMapSSToGenericRecordIBDataLineTransformer(IBRuntimeUtils workingPath, ConfigMap config,
         IBDataAvroUtils aus) {
-      super(workingPath, config, l);
+      super(workingPath, config);
       this.aus = requireNonNull(aus);
       if (config != null && !config.keySet().contains(SCHEMA_PARAM))
         throw new IBDataException(NO_SCHEMA_CONFIG_FOR_MAPPER);
@@ -114,8 +112,8 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
     /**
      * @param workingPath
      */
-    public DefaultMapSSToGenericRecordIBDataLineTransformer(Path workingPath, Logger l, IBDataAvroUtils aus) {
-      this(workingPath, null, l, aus);
+    public DefaultMapSSToGenericRecordIBDataLineTransformer(IBRuntimeUtils workingPath, IBDataAvroUtils aus) {
+      this(workingPath, null, aus);
     }
 
     @Override
@@ -144,7 +142,7 @@ public class DefaultMapToGenericRecordIBDataLineTransformerSupplier
 
     @Override
     public IBDataRecordTransformer<Map<String, Object>, IndexedRecord> configure(ConfigMap cms) {
-      return new DefaultMapSSToGenericRecordIBDataLineTransformer(getWorkingPath(), cms, getLogger(), aus);
+      return new DefaultMapSSToGenericRecordIBDataLineTransformer(getRuntimeUtils(), cms, aus);
     }
 
     @SuppressWarnings("unchecked")

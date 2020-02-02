@@ -40,7 +40,7 @@ import org.infrastructurebuilder.util.DefaultBasicCredentials;
 import org.infrastructurebuilder.util.DefaultURLAndCreds;
 import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.GAV;
-import org.infrastructurebuilder.util.config.TestingPathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.jooq.SQLDialect;
 import org.junit.Before;
@@ -53,7 +53,7 @@ public class DefaultIBDatabaseDialectMapperTest {
   private static final URLAndCreds jdbcH2 = new DefaultURLAndCreds(JDBC_H2);
 
   private static final Logger log = LoggerFactory.getLogger(DefaultIBDatabaseDialectMapperTest.class);
-  public final static TestingPathSupplier wps = new TestingPathSupplier();
+  public final static IBRuntimeUtilsTesting ibr = new IBRuntimeUtilsTesting(log);
 
   private static final String ORG_HIBERNATE_DIALECT_H2_DIALECT = "org.hibernate.dialect.H2Dialect";
   private DefaultIBDatabaseDialectMapper d;
@@ -70,7 +70,7 @@ public class DefaultIBDatabaseDialectMapperTest {
       }
     };
     Map<String, IBDataDatabaseDriverSupplier> z = new HashMap<>();
-    IBDataDatabaseDriverSupplier kk = new H2DatabaseDriverSupplier(wps, () -> log, cf);
+    IBDataDatabaseDriverSupplier kk = new H2DatabaseDriverSupplier(ibr);
     IBDataDatabaseDriverSupplier i = new IBDataDatabaseDriverSupplier() {
 
       @Override

@@ -66,6 +66,17 @@ import org.infrastructurebuilder.data.model.SchemaField;
 import org.infrastructurebuilder.data.model.SchemaIndex;
 import org.infrastructurebuilder.data.model.StructuredFieldMetadata;
 import org.infrastructurebuilder.data.schema.IBSchemaTranslator;
+import org.infrastructurebuilder.data.type.BooleanIBDataType;
+import org.infrastructurebuilder.data.type.BytesIBDataType;
+import org.infrastructurebuilder.data.type.DateIBDataType;
+import org.infrastructurebuilder.data.type.DoubleIBDataType;
+import org.infrastructurebuilder.data.type.EnumIBDataType;
+import org.infrastructurebuilder.data.type.FloatIBDataType;
+import org.infrastructurebuilder.data.type.IntIBDataType;
+import org.infrastructurebuilder.data.type.KeyIBDataType;
+import org.infrastructurebuilder.data.type.LongIBDataType;
+import org.infrastructurebuilder.data.type.StringIBDataType;
+import org.infrastructurebuilder.data.type.TimestampIBDataType;
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
@@ -84,8 +95,8 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
   public final static String INBOUND_TYPE = Result.class.getName() + "<" + Record.class.getName() + "<";
   public final static Logger log = LoggerFactory.getLogger(IBDataJooqUtils.class);
 
-//
-//  public static Field getFieldFromType(String key, org.jooq.Field<?> field, DataType<?> dt, boolean isNullable) {
+
+//  public static Field<?> getFieldFromType(String key, org.jooq.Field<?> field, DataType<?> dt, boolean isNullable) {
 //    log.trace("key = {}, field = {}, dt = {}, isNullable = {}", key, field, dt, isNullable);
 //    Schema schema, logicalField;
 //    Field f1;
@@ -161,7 +172,7 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
 //      throw new IBDataException("Type " + dt + " of field '" + field.getName() + "' cannot be processed");
 //    return f1;
 //  }
-//
+
 //  public static Schema avroSchemaFromRecordResults(Logger log, String namespace, String name, String doc,
 //      Result<Record> records) {
 //    log.warn("Reading entire dataset (" + records.size() + " records) to determine schema.");
@@ -203,9 +214,6 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
 //    return Schema.createRecord(name, doc, namespace, false, l);
 //  }
 
-  public static Field<?> toJooqField(IBField f) {
-    return null;
-  }
 
   public static SchemaField getIBFieldFromType(int index, String key, org.jooq.Field<?> field, DataType<?> dt,
       boolean isNullable, String thisVersion, Optional<Object> minIn, Optional<Object> maxIn, int uniques) {
@@ -232,29 +240,29 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
     switch (jdbcType) {
     case BIT:
     case BOOLEAN:
-      f1.setType(BOOLEAN.name());
+      f1.setType(BooleanIBDataType.TYPE);
       break;
     case NUMERIC:
     case DECIMAL:
       sfmd.setMin(minIn.map(Object::toString).map(Long::parseLong).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(Long::parseLong).map(l -> l.toString()).orElse(null));
-      f1.setType(LONG.name());
+      f1.setType(LongIBDataType.TYPE);
       break;
     case FLOAT:
       sfmd.setMin(minIn.map(Object::toString).map(Float::parseFloat).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(Float::parseFloat).map(l -> l.toString()).orElse(null));
-      f1.setType(FLOAT.name());
+      f1.setType(FloatIBDataType.TYPE);
       break;
     case LONGVARBINARY:
     case VARBINARY:
     case BLOB:
-      f1.setType(BYTES.name());
+      f1.setType(BytesIBDataType.TYPE);
       break;
     case DOUBLE:
     case REAL:
       sfmd.setMin(minIn.map(Object::toString).map(Double::parseDouble).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(Double::parseDouble).map(l -> l.toString()).orElse(null));
-      f1.setType(DOUBLE.name());
+      f1.setType(DoubleIBDataType.TYPE);
       break;
     case SMALLINT:
     case BIGINT:
@@ -262,14 +270,14 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
     case INTEGER:
       sfmd.setMin(minIn.map(Object::toString).map(Integer::parseInt).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(Integer::parseInt).map(l -> l.toString()).orElse(null));
-      f1.setType(INT.name());
+      f1.setType(IntIBDataType.TYPE);
       break;
     case DATE:
-      f1.setType(DATE.name());
+      f1.setType(DateIBDataType.TYPE);
       break;
     case TIMESTAMP:
     case TIMESTAMP_WITH_TIMEZONE:
-      f1.setType(TIMESTAMP.name());
+      f1.setType(TimestampIBDataType.TYPE);
       break;
     case BINARY:
     case NCLOB:
@@ -280,18 +288,18 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
     case LONGNVARCHAR:
       sfmd.setMin(minIn.map(Object::toString).map(String::length).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(String::length).map(l -> l.toString()).orElse(null));
-      f1.setType(STRING.name());
+      f1.setType(StringIBDataType.TYPE);
       break;
     case CHAR:
     case VARCHAR:
       sfmd.setMin(minIn.map(Object::toString).map(String::length).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(String::length).map(l -> l.toString()).orElse(null));
-      f1.setType(STRING.name());
+      f1.setType(StringIBDataType.TYPE);
       break;
     case ROWID:
       sfmd.setMin(minIn.map(Object::toString).map(String::length).map(l -> l.toString()).orElse(null));
       sfmd.setMax(maxIn.map(Object::toString).map(String::length).map(l -> l.toString()).orElse(null));
-      f1.setType(KEY.name());
+      f1.setType(KeyIBDataType.TYPE);
       break;
     case STRUCT:
     case ARRAY:
@@ -313,7 +321,7 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
 
       if (dt.isEnum()) {
         // TODO Work on Enums
-        f1.setType(ENUM.name());
+        f1.setType(EnumIBDataType.TYPE);
         EnumType t = (EnumType) dt;
         Optional<org.jooq.Schema> s = Optional.ofNullable(t.getSchema());
         Catalog q = t.getCatalog();

@@ -17,22 +17,18 @@ package org.infrastructurebuilder.data;
 
 import org.infrastructurebuilder.data.ingest.AbstractIBDataConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-import org.slf4j.Logger;
 
 public abstract class AbstractIBDataSetFinalizerSupplier<T extends DataSetEnabled,P>
     extends AbstractIBDataConfigurableSupplier<IBDataSetFinalizer<T>,P> implements IBDataSetFinalizerSupplier<T,P> {
-  private final TypeToExtensionMapper t2e;
 
-  protected AbstractIBDataSetFinalizerSupplier(Logger logger, PathSupplier workingPathSupplier, ConfigMapSupplier cms,
-      TypeToExtensionMapper t2e) {
-    super(workingPathSupplier, () -> logger, cms);
-    this.t2e = t2e;
+  protected AbstractIBDataSetFinalizerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   protected TypeToExtensionMapper getTypeToExtensionMapper() {
-    return t2e;
+    return getRuntimeUtils();
   }
 
 }

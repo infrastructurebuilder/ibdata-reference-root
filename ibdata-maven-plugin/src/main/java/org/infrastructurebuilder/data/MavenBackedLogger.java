@@ -23,9 +23,14 @@ import javax.inject.Named;
 import org.apache.maven.plugin.logging.Log;
 import org.slf4j.helpers.MarkerIgnoringBase;
 
+@SuppressWarnings("deprecation")
 @Named(MavenBackedLogger.MAVEN_BACKED_LOGGER)
 public class MavenBackedLogger extends MarkerIgnoringBase {
 
+  /**
+   *
+   */
+  private static final long serialVersionUID = -5327970994973529358L;
   static final String MAVEN_BACKED_LOGGER = "maven-backed-logger";
   private final Log l;
 

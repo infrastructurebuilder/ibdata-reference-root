@@ -22,11 +22,10 @@ import java.util.Map;
 
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.transform.Record;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 
 public class ArrayToNameMapIBDataLineTransformerSupplierTest
     extends AbstractTTestClass<ArrayToNameMapIBDataLineTransformerSupplier, String[], Map<String, String>> {
@@ -43,8 +42,8 @@ public class ArrayToNameMapIBDataLineTransformerSupplierTest
   }
 
   @Override
-  ArrayToNameMapIBDataLineTransformerSupplier getT(PathSupplier wps, LoggerSupplier l) {
-    return new ArrayToNameMapIBDataLineTransformerSupplier(wps, l);
+  ArrayToNameMapIBDataLineTransformerSupplier getT(IBRuntimeUtils wps) {
+    return new ArrayToNameMapIBDataLineTransformerSupplier(wps);
   }
 
   @Override

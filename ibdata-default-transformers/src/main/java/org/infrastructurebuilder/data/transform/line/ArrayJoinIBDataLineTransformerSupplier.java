@@ -15,8 +15,6 @@
  */
 package org.infrastructurebuilder.data.transform.line;
 
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-
 import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -28,10 +26,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 @Named(ArrayJoinIBDataLineTransformerSupplier.TOSTRING_ARRAY_JOIN)
@@ -40,23 +37,22 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
   public static final List<String> ACCEPTABLE_TYPES = Arrays.asList(Array.class.getCanonicalName());
 
   @javax.inject.Inject
-  public ArrayJoinIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l) {
-    this(wps, null, l);
+  public ArrayJoinIBDataLineTransformerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private ArrayJoinIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    super(wps, cms, l);
+  private ArrayJoinIBDataLineTransformerSupplier(IBRuntimeUtils wps, ConfigMapSupplier cms) {
+    super(wps, cms);
   }
 
   @Override
   public ArrayJoinIBDataLineTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new ArrayJoinIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
+    return new ArrayJoinIBDataLineTransformerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataRecordTransformer<Object[], String> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new ArrayJoinIBDataLineTransformer(workingPath, getLogger());
+  protected IBDataRecordTransformer<Object[], String> getUnconfiguredTransformerInstance() {
+    return new ArrayJoinIBDataLineTransformer(getRuntimeUtils());
   }
 
   @Override
@@ -73,16 +69,16 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
     private final String delimiter;
     private final Optional<String> prefix, suffix;
 
-    ArrayJoinIBDataLineTransformer(Path workingPath, Logger l) {
-      this(workingPath, new ConfigMap(), l);
+    ArrayJoinIBDataLineTransformer(IBRuntimeUtils workingPath) {
+      this(workingPath, new ConfigMap());
     }
 
     /**
      * @param ps
      * @param config
      */
-    ArrayJoinIBDataLineTransformer(Path ps, ConfigMap config, Logger l) {
-      super(ps, config, l);
+    ArrayJoinIBDataLineTransformer(IBRuntimeUtils ps, ConfigMap config) {
+      super(ps, config);
       this.delimiter = Pattern.quote(getConfiguration(DELIMITER, DEFAULT_DELIMITER));
       this.prefix = Optional.ofNullable(getConfiguration(PREFIX));
       this.suffix = Optional.ofNullable(getConfiguration(SUFFIX));
@@ -90,7 +86,7 @@ public class ArrayJoinIBDataLineTransformerSupplier extends AbstractIBDataRecord
 
     @Override
     public IBDataRecordTransformer<Object[], String> configure(ConfigMap cms) {
-      return new ArrayJoinIBDataLineTransformer(getWorkingPath(), cms, getLogger());
+      return new ArrayJoinIBDataLineTransformer(getRuntimeUtils(), cms);
     }
 
     @Override

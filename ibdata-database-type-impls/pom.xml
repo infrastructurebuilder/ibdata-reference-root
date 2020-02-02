@@ -38,7 +38,7 @@
   <description>IBData ingesters for JDBC databases</description>
   <properties>
     <jacoco.max.missed.classes>2</jacoco.max.missed.classes>
-    <test.coverage.percentage.required>58</test.coverage.percentage.required>
+    <test.coverage.percentage.required>05</test.coverage.percentage.required>
   </properties>
 
   <dependencies>

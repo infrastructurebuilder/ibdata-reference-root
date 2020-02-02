@@ -28,8 +28,13 @@ import java.util.stream.Stream;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.infrastructurebuilder.data.model.DataStream;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -45,6 +50,10 @@ public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
 
   public static final String LOAD1 = "ba.avro";
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new IbdataAvroTypesVersioning()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -75,8 +84,8 @@ public class DefaultAvroIBGenericRecordDataStreamSupplierTest {
     id.setSha512(CHECKSUM);
     id.setMetadata(new Metadata());
     DefaultConfigMapSupplier cms = new DefaultConfigMapSupplier();
-    gds = new DefaultGenericDataSupplier(wps, () -> log);
-    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    gds = new DefaultGenericDataSupplier(ibr);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(ibr, gds).configure(cms);
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBGenericRecordDataStreamSupplier(targetPath, stream, parallel, schema);

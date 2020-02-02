@@ -23,9 +23,9 @@ import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapDataSetToDefaultIBDataSet;
+import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.spi.FileSystemProvider;
@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +45,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.infrastructurebuilder.data.model.DataSchema;
+import org.infrastructurebuilder.data.model.PersistedIBSchema;
+import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.slf4j.Logger;
 
@@ -73,10 +77,18 @@ public class DefaultIBDataEngine implements IBDataEngine {
   }
 
   @Override
+  public void reset() {
+    log.debug("Resetting data engine");
+    this.cachedDataSets.clear();
+    this.additionalURLS.clear();
+    log.info("Data engine reset");
+  }
+
+  @Override
   public synchronized int prepopulate() {
 
     if (cachedDataSets.size() == 0) {
-      Optional<FileSystemProvider> fsp = IBDataTypeImplsModelUtils.getZipFSProvider();
+      Optional<FileSystemProvider> fsp = IBDataEngine.getZipFSProvider();
       URLClassLoader c = (URLClassLoader) getClass().getClassLoader();
       ArrayList<URL> urls = new ArrayList<>();
       urls.addAll(getAdditionalURLS());
@@ -106,7 +118,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
               // a CP scanner....
               // kv, true)
               // Convert supplier URL to Extended Dataset
-              .map(mapDataSetToDefaultIBDataSet)
+              .map(mapURLToDefaultIBDataSet)
               // Only get them if they're here Optional::stream in Java 11
               .filter(Optional::isPresent).map(Optional::get)
               // Collection
@@ -139,9 +151,9 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
   @Override
   public Optional<IBDataStream> fetchDataStreamByMetadataPatternMatcher(Map<String, Pattern> patternMap) {
-    throw new IBDataException("not implemented yet");
-    // return Optional.empty(); // FIXME implement
-    // fetchDataStreamByMetadataPatternMatcher
+    throw new IBDataException("not yet implemented");
+    // return Optional.empty();
+    // FIXME implement fetchDataStreamByMetadataPatternMatcher
   }
 
   @Override
@@ -151,12 +163,24 @@ public class DefaultIBDataEngine implements IBDataEngine {
 
   @Override
   public Optional<IBSchema> fetchSchemaById(UUID id) {
-    Optional<DataSchema> a = ofNullable(cachedDataSets.values().parallelStream()
-        .flatMap(ds -> ds.getSchemas().parallelStream()).filter(s -> s.getUuid().equals(id)).findAny().orElse(null));
+    Optional<DataSchema> a = cachedDataSets.values().parallelStream().flatMap(ds -> ds.getSchemas().parallelStream())
+        .filter(s -> s.getUuid().equals(id)).findAny();
 
-    Optional<InputStream> b = a.map(c -> c.getUuid()).flatMap(this::fetchDataStreamById).map(IBDataStream::get);
+    Optional<IBDataSchemaAsset> q = a.map(DataSchema::getSchemaAssets)
+        .flatMap(l -> l.stream().filter(p -> id.equals(p.getAssetUUID())).findFirst());
 
-    return Optional.empty();
+    return a.map(DataSchema::getUuid).flatMap(this::fetchDataStreamById).map(IBDataStream::get).map(in -> {
+      DataSchema ds = a.get();
+      List<IBDataSchemaAsset> assets = ds.getSchemaAssets();
+      try {
+        PersistedIBSchema s = new PersistedIBSchemaXpp3Reader().read(in).forceIndexUpdatePostRead().clone();
+        return s;
+      } catch (IOException | XmlPullParserException e) {
+        throw new IBDataException(e);
+      } finally {
+        cet.withTranslation(() -> in.close());
+      }
+    });
   }
 
 }

@@ -36,6 +36,7 @@ import org.infrastructurebuilder.data.model.DataStreamStructuredMetadata;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
@@ -46,18 +47,17 @@ public class StringIBDataStreamRecordFinalizerSupplier extends AbstractIBDataStr
   public static final List<Class<?>> ACCEPTABLE_TYPES = Arrays.asList(String.class);
 
   @Inject
-  public StringIBDataStreamRecordFinalizerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l) {
-    this(wps, l, null);
+  public StringIBDataStreamRecordFinalizerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private StringIBDataStreamRecordFinalizerSupplier(PathSupplier ps, LoggerSupplier l, ConfigMapSupplier cms) {
-    super(ps, l, cms);
+  private StringIBDataStreamRecordFinalizerSupplier(IBRuntimeUtils ibr,  ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public IBDataDataStreamRecordFinalizerSupplier<String> configure(ConfigMapSupplier cms) {
-    return new StringIBDataStreamRecordFinalizerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
+    return new StringIBDataStreamRecordFinalizerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override

@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,7 @@ public class IngestionTest {
     targetDs.setVersion("1.0.0-SNAPSHOT");
     targetDs.setName("name");
     targetDs.setDescription("description");
-    targetDs.setPath("/");
+    targetDs.setPath(Paths.get("/"));
     targetDs.setMetadata(new Metadata());
     targetDs.setModelEncoding("UTF-8");
     targetDs.setModelVersion("1.0.0");
@@ -84,7 +85,7 @@ public class IngestionTest {
     ids.setMetadata(metadata);
     ids.setName("name");
     ids.setDescription("description");
-    ids.setPath("/");
+    ids.setPath(Paths.get("/"));
     ds = ids.copy();
 
   }

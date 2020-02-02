@@ -97,7 +97,7 @@ public class DefaultMapToProtobufIBDataLineTransformerSupplier
     /**
      * @param workingPath
      */
-    public DefaultMapSSToProtobufIBDataLineTransformer(Path workingPath, Logger l) {
+    public DefaultMapSSToProtobufIBDataLineTransformer(IBRuntimeUtils workingPath) {
       this(workingPath, null, l);
     }
 
@@ -123,7 +123,7 @@ public class DefaultMapToProtobufIBDataLineTransformerSupplier
     @Override
     public IBDataRecordTransformer<Map<String, Object>, com.google.protobuf.GeneratedMessageV3> configure(
         ConfigMap cms) {
-      return new DefaultMapSSToProtobufIBDataLineTransformer(getWorkingPath(), cms, getLogger());
+      return new DefaultMapSSToProtobufIBDataLineTransformer(getRuntimeUtils(), cms);
     }
 
     @Override

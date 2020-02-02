@@ -20,7 +20,6 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToTempChecksumAndPath;
 
@@ -33,7 +32,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -77,15 +75,13 @@ import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.codehaus.plexus.util.StringUtils;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.util.BasicCredentials;
-import org.infrastructurebuilder.util.CredentialsFactory;
 import org.infrastructurebuilder.util.IBUtils;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.artifacts.Checksum;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
-import org.slf4j.Logger;
 
 import com.googlecode.download.maven.plugin.internal.HttpFileRequester;
 import com.googlecode.download.maven.plugin.internal.SignatureUtils;
@@ -95,29 +91,23 @@ import com.googlecode.download.maven.plugin.internal.cache.DownloadCache;
 @Named
 public class DefaultWGetterSupplier implements WGetterSupplier {
 
-  private final Logger log;
-  private final TypeToExtensionMapper t2e;
   private final PathSupplier cacheDirectory;
   private final ArchiverManager archiverManager;
   private final PathSupplier workingDirectory;
-  private final CredentialsFactory cf;
+  private final IBRuntimeUtils ibr;
 
   @Inject
-  public DefaultWGetterSupplier(LoggerSupplier log, TypeToExtensionMapper t2e,
-      @Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier workingPathSupplier,
-      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier, ArchiverManager archiverManager,
-      CredentialsFactory cf) {
-    this.log = requireNonNull(log).get();
-    this.t2e = requireNonNull(t2e);
+  public DefaultWGetterSupplier(IBRuntimeUtils ibr,
+      @Named(IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER) PathSupplier cacheDirSupplier, ArchiverManager archiverManager) {
+    this.ibr = requireNonNull(ibr);
     this.cacheDirectory = requireNonNull(cacheDirSupplier);
     this.archiverManager = requireNonNull(archiverManager);
-    this.workingDirectory = requireNonNull(workingPathSupplier);
-    this.cf = requireNonNull(cf);
+    this.workingDirectory = requireNonNull(() -> ibr.getWorkingPath());
   }
 
   @Override
   public WGetter get() {
-    return new DefaultWGetter(log, t2e, cacheDirectory.get(), workingDirectory.get(), this.archiverManager, this.cf);
+    return new DefaultWGetter(ibr, cacheDirectory.get(), this.archiverManager);
   }
 
   /*
@@ -126,14 +116,14 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
    */
   private class DefaultWGetter implements WGetter {
 
+    private final IBRuntimeUtils ibr;
     private final WGet wget;
     private final Log log;
     private final ArchiverManager am;
     private final Path workingDir;
-    private final CredentialsFactory cf;
 
-    public DefaultWGetter(Logger log, TypeToExtensionMapper t2e, Path cacheDir, Path workingDir,
-        ArchiverManager archiverManager, CredentialsFactory cf) {
+    public DefaultWGetter(IBRuntimeUtils ibr, Path cacheDir, ArchiverManager archiverManager) {
+      this.ibr = ibr;
       // this.wps = requireNonNull(wps);
       this.wget = new WGet();
       // FIXME Add dep on version > 0.10.0 of iblogging-maven-component and then
@@ -142,12 +132,11 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
 //      Logger localLogger = requireNonNull(log); // FIXME (See above)
       Log l2 = new DefaultLog(new ConsoleLogger(0, WGetter.class.getCanonicalName()));
       this.wget.setLog(l2);
-      this.wget.setT2EMapper(Objects.requireNonNull(t2e));
+      this.wget.setT2EMapper(ibr);
       this.wget.setCacheDirectory(requireNonNull(cacheDir).toFile());
       this.log = l2;
       this.am = requireNonNull(archiverManager);
-      this.workingDir = requireNonNull(workingDir);
-      this.cf = requireNonNull(cf);
+      this.workingDir = requireNonNull(ibr.getWorkingPath());
     }
 
     @Override
@@ -196,7 +185,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
       File outputDirectory = targetDir.toFile();
       String outputFileName = source.toAbsolutePath().toString();
       try {
-        String type = t2e.getExtensionForType(src.getType()).substring(1);
+        String type = ibr.getExtensionForType(src.getType()).substring(1);
         UnArchiver unarchiver = this.am.getUnArchiver(type);
         log.debug("Unarchiver type is " + type + " " + unarchiver.toString());
         unarchiver.setSourceFile(outputFile);
@@ -211,8 +200,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         for (Path p : IBUtils.allFilesInTree(targetDir)) {
           String tPath = cet.withReturningTranslation(() -> p.toUri().toURL().toExternalForm())
               .substring(rPath.length());
-          IBResource q = cet
-              .withReturningTranslation(() -> copyToTempChecksumAndPath(tempPath, p, oSource, tPath));
+          IBResource q = cet.withReturningTranslation(() -> copyToTempChecksumAndPath(tempPath, p, oSource, tPath));
           l.add(q);
         }
 
@@ -485,7 +473,8 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
          */
         Checksum finalChecksum;
 //        if (!haveFile) {
-        File cached = cache.getArtifact(this.uri, null /* this.md5 */, null /* this.sha1 */, null /* this.sha256 */, this.sha512);
+        File cached = cache.getArtifact(this.uri, null /* this.md5 */, null /* this.sha1 */, null /* this.sha256 */,
+            this.sha512);
         if (this.deleteIfPresent && cached != null && cached.exists()) {
           getLog().warn("Deleting cached file " + cached);
           cached.delete();
@@ -497,7 +486,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
           boolean done = false;
           while (!done && this.retries > 0) {
             try {
-              getLog().debug("Getting " + this.uri.toASCIIString() + " to file " + outputFile );
+              getLog().debug("Getting " + this.uri.toASCIIString() + " to file " + outputFile);
               doGet(outputFile);
               // if (this.md5 != null) {
               // SignatureUtils.verifySignature(outputFile, this.md5,
@@ -535,7 +524,8 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         String computedType = pVal.getType();
         if (this.mimeType == null)
           this.mimeType = computedType;
-        cache.install(this.uri, outputFile, null /* this.md5 */, null /* this.sha1 */, null /* this.sha256 */ , finalChecksum.toString());
+        cache.install(this.uri, outputFile, null /* this.md5 */, null /* this.sha1 */, null /* this.sha256 */ ,
+            finalChecksum.toString());
         /* Get the "final name" */
         String finalFileName = finalChecksum.asUUID().get().toString() + t2e.getExtensionForType(this.mimeType);
         Path newTarget = outputPath.resolve(finalFileName);
@@ -553,8 +543,7 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         //// buildContext.refresh(outputFile);
         Path outPath = newTarget;
 
-        DefaultIBResource retVal = new DefaultIBResource(outPath, finalChecksum,
-            ofNullable(this.mimeType));
+        DefaultIBResource retVal = new DefaultIBResource(outPath, finalChecksum, ofNullable(this.mimeType));
         retVal.setSource(this.uri.toURL().toExternalForm());
         List<IBResource> retVall = new ArrayList<>();
         retVall.add(retVal);

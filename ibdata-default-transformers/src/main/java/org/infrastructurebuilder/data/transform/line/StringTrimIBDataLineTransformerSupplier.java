@@ -16,7 +16,6 @@
 package org.infrastructurebuilder.data.transform.line;
 
 import static java.util.Optional.ofNullable;
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -24,10 +23,9 @@ import java.util.List;
 
 import javax.inject.Named;
 
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 @Named(StringTrimIBDataLineTransformerSupplier.STRING_TRIM)
@@ -36,22 +34,22 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
   private static final List<String> ACCEPTABLE_TYPES = Arrays.asList(String.class.getCanonicalName());
 
   @javax.inject.Inject
-  public StringTrimIBDataLineTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
-    this(wps, null, l);
+  public StringTrimIBDataLineTransformerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  private StringTrimIBDataLineTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    super(wps, cms, l);
+  private StringTrimIBDataLineTransformerSupplier(IBRuntimeUtils wps, ConfigMapSupplier cms) {
+    super(wps, cms);
   }
 
   @Override
   public AbstractIBDataRecordTransformerSupplier<String, String> configure(ConfigMapSupplier cms) {
-    return new StringTrimIBDataLineTransformerSupplier(getWorkingPathSupplier(), cms, () -> getLogger());
+    return new StringTrimIBDataLineTransformerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance(Path workingPath) {
-    return new StringTrimIBDataLineTransformer(workingPath, getLogger());
+  protected IBDataRecordTransformer<String, String> getUnconfiguredTransformerInstance() {
+    return new StringTrimIBDataLineTransformer(getRuntimeUtils());
   }
 
   @Override
@@ -65,15 +63,15 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
      * @param ps
      * @param config
      */
-    protected StringTrimIBDataLineTransformer(Path ps, ConfigMap config, Logger l) {
-      super(ps, config, l);
+    protected StringTrimIBDataLineTransformer(IBRuntimeUtils ps, ConfigMap config) {
+      super(ps, config);
     }
 
     /**
      * @param ps
      */
-    protected StringTrimIBDataLineTransformer(Path ps, Logger l) {
-      super(ps, l);
+    protected StringTrimIBDataLineTransformer(IBRuntimeUtils ps) {
+      super(ps);
     }
 
     @Override
@@ -88,7 +86,7 @@ public class StringTrimIBDataLineTransformerSupplier extends AbstractIBDataRecor
 
     @Override
     public IBDataRecordTransformer<String, String> configure(ConfigMap cms) {
-      return new StringTrimIBDataLineTransformer(getWorkingPath(), cms, getLogger());
+      return new StringTrimIBDataLineTransformer(getRuntimeUtils(), cms);
     }
 
     @Override

@@ -15,14 +15,12 @@
  */
 package org.infrastructurebuilder.data;
 
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
+import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_LOCAL_GAV_SUPPLIER;
 
-import java.nio.file.Path;
-
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.artifacts.GAV;
 import org.infrastructurebuilder.util.config.TSupplier;
 
-@javax.inject.Named(IBDATA_WORKING_PATH_SUPPLIER)
+@javax.inject.Named(IBDATA_LOCAL_GAV_SUPPLIER)
 @javax.inject.Singleton
-public class IBDataWorkingPathSupplier extends TSupplier<Path> implements PathSupplier {
+public class IBDataWorkingGAVSupplier extends TSupplier<GAV> {
 }

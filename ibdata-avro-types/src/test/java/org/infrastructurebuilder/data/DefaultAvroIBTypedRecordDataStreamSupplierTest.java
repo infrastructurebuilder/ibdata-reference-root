@@ -28,8 +28,13 @@ import java.util.stream.Stream;
 import org.apache.avro.Schema;
 import org.infrastructurebuilder.data.model.DataStream;
 import org.infrastructurebuilder.data.transform.BA;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -45,6 +50,10 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
 
   private static final String LOAD1 = "ba.avro";
   public final static TestingPathSupplier wps = new TestingPathSupplier();
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new IbdataAvroTypesVersioning()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
+
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -79,8 +88,8 @@ public class DefaultAvroIBTypedRecordDataStreamSupplierTest {
     id.setMetadata(new Metadata());
     stream = new DefaultIBDataStream(id, wps.getTestClasses().resolve(LOAD1));
     cms = new DefaultConfigMapSupplier();
-    gds = (GenericDataSupplier) new DefaultGenericDataSupplier(wps, () -> log).configure(cms);
-    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(wps, () -> log, gds).configure(cms);
+    gds = (GenericDataSupplier) new DefaultGenericDataSupplier(ibr).configure(cms);
+    aus = (IBDataAvroUtilsSupplier) new DefaultIBDataAvroUtilsSupplier(ibr, gds).configure(cms);
     schema = aus.get().avroSchemaFromString(wps.getTestClasses().resolve("ba.avsc").toAbsolutePath().toString());
     q = new DefaultAvroIBTypedRecordDataStreamSupplier<BA>(targetPath, stream, new BA().getSpecificData(), parallel);
   }

@@ -15,8 +15,6 @@
  */
 package org.infrastructurebuilder.data.transform;
 
-import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
-
 import java.nio.file.Path;
 import java.util.List;
 
@@ -29,9 +27,8 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
-import org.infrastructurebuilder.util.config.PathSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.slf4j.Logger;
 
 @Named(PassThruTransformerSupplier.NAME)
@@ -40,33 +37,33 @@ public class PassThruTransformerSupplier extends AbstractIBDataTransformerSuppli
   public static final String NAME = "pass-thru";
 
   @Inject
-  public PassThruTransformerSupplier(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps, LoggerSupplier l) {
-    this(wps, l, null);
+  public PassThruTransformerSupplier(IBRuntimeUtils ibr) {
+    this(ibr, null);
   }
 
-  public PassThruTransformerSupplier(PathSupplier wps, LoggerSupplier l, ConfigMapSupplier cms) {
-    super(wps, l, cms);
+  public PassThruTransformerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    super(ibr, cms);
   }
 
   @Override
   public PassThruTransformerSupplier configure(ConfigMapSupplier cms) {
-    return new PassThruTransformerSupplier(getWorkingPathSupplier(), () -> getLog(), cms);
+    return new PassThruTransformerSupplier(getRuntimeUtils(), cms);
   }
 
   @Override
-  protected IBDataTransformer getConfiguredTransformerInstance(Path wps2) {
-    return new PassThruTransformer(wps2, getLog());
+  protected IBDataTransformer getConfiguredTransformerInstance() {
+    return new PassThruTransformer(getRuntimeUtils());
   }
 
   @Override
   public PassThruTransformerSupplier withFinalizer(IBDataStreamRecordFinalizer<?> finalizer) {
-    return new PassThruTransformerSupplier(getWorkingPathSupplier(), () -> getLog());
+    return new PassThruTransformerSupplier(getRuntimeUtils());
   }
 
   private final class PassThruTransformer extends AbstractIBDataTransformer {
 
-    public PassThruTransformer(Path wps2, Logger l) {
-      super(wps2, l);
+    public PassThruTransformer(IBRuntimeUtils ibr) {
+      super(ibr);
     }
 
     @Override

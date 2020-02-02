@@ -27,13 +27,18 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataStreamRecordFinalizer;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
+import org.infrastructurebuilder.util.FakeCredentialsFactory;
+import org.infrastructurebuilder.util.artifacts.IBArtifactVersionMapper;
+import org.infrastructurebuilder.util.artifacts.impl.DefaultGAV;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.FakeIBVersionsSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
+import org.infrastructurebuilder.util.config.IBRuntimeUtilsTesting;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +47,9 @@ public class StreamJoiningTransformSupplierTest {
   final static Logger log = LoggerFactory.getLogger(StreamJoiningTransformSupplierTest.class);
 
   final static TestingPathSupplier wps = new TestingPathSupplier();
-
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+  private final static IBRuntimeUtils ibr = new IBRuntimeUtilsTesting(wps, log,
+      new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
+      });
 
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
@@ -66,7 +70,7 @@ public class StreamJoiningTransformSupplierTest {
   @Before
   public void setUp() throws Exception {
     cms = new DefaultConfigMapSupplier();
-    s = new StreamJoiningTransformSupplier(wps, () -> log);
+    s = new StreamJoiningTransformSupplier(ibr);
   }
 
   @After

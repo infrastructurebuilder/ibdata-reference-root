@@ -54,6 +54,7 @@ import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.DefaultConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
@@ -73,10 +74,9 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
   private final IBDatabaseDialectMapper dm;
 
   @Inject
-  public DefaultDatabaseIBDataSourceSupplierMapper(@Named(IBDATA_WORKING_PATH_SUPPLIER) PathSupplier wps,
-      LoggerSupplier l, TypeToExtensionMapper t2e, JooqAvroRecordWriterSupplier jrws, CredentialsFactory cf,
+  public DefaultDatabaseIBDataSourceSupplierMapper(IBRuntimeUtils ibr, JooqAvroRecordWriterSupplier jrws,
       IBDatabaseDialectMapper dm) {
-    super(requireNonNull(l).get(), requireNonNull(t2e), wps, cf);
+    super(ibr);
     this.jrws = requireNonNull(jrws);
     this.dm = requireNonNull(dm);
   }
@@ -97,8 +97,7 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
         .orElseThrow(() -> new IBDataException("No  IBDataDatabaseDriverSupplier available for " + jdbcURL));
     return new DefaultIBDataSourceSupplier<Schema>(temporaryId // temp id TODO Fixme
         , new DefaultDatabaseIBDataSource( // The supplier instance
-            getWorkingPathSupplier() // PathSupplier
-            , getLog() // Logger
+            getRuntimeUtils() // IBR
             , temporaryId // Temporary id (TODO to be remapped )
             , jdbcURL // source
             , false // Databases don't have archives to expand
@@ -128,12 +127,12 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     private final IBDataDatabaseDriverSupplier supplier;
 
-    public DefaultDatabaseIBDataSource(PathSupplier wps, Logger l, String tempId, URLAndCreds source, boolean expand,
+    public DefaultDatabaseIBDataSource(IBRuntimeUtils ibr, String tempId, URLAndCreds source, boolean expand,
         Optional<Checksum> checksum, Optional<Metadata> metadata, Optional<ConfigMap> additionalConfig,
         Optional<String> namespace, Optional<String> name, Optional<String> description, TypeToExtensionMapper t2e,
         /* IBDataAvroUtilsSupplier jds, */JooqAvroRecordWriterSupplier jrws, IBDataDatabaseDriverSupplier supplier) {
 
-      super(wps, l, tempId, source, false /* Databases y'all */, namespace, name, description, checksum, metadata,
+      super(ibr, tempId, source, false /* Databases y'all */, namespace, name, description, checksum, metadata,
           additionalConfig, null);
       this.supplier = requireNonNull(supplier);
       this.t2e = t2e;
@@ -150,13 +149,13 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
 
     @Override
     public DefaultDatabaseIBDataSource configure(ConfigMap config) {
-      return new DefaultDatabaseIBDataSource(getWorkingPathSupplier(), getLog(), getId(), getSource(), false,
-          getChecksum(), getMetadata(), of(config), getNamespace(), getName(), getDescription(), t2e,
+      return new DefaultDatabaseIBDataSource(getRuntimeUtils(), getId(), getSource(), false, getChecksum(),
+          getMetadata(), of(config), getNamespace(), getName(), getDescription(), t2e,
           (JooqAvroRecordWriterSupplier) this.jwrs.configure(new DefaultConfigMapSupplier(config)), this.supplier);
     }
 
     @Override
-    public List<IBResource> getInstance(PathSupplier workingPath, Schema in) {
+    public List<IBResource> getInstance(IBRuntimeUtils ibr, Schema in) {
       if (conn == null) {
         DataSource odss = supplier.getDataSourceSupplier(getSource()).map(Supplier::get)
             .orElseThrow(() -> new IBDataException("No DataSource available for " + getSource()));
@@ -173,21 +172,21 @@ public class DefaultDatabaseIBDataSourceSupplierMapper extends AbstractIBDataSou
           Optional<String> sString;
 //          if (source.startsWith("jdbc:")) {  // Always true at this point
 
-            DSLContext create = DSL.using(conn, dialect);
-            final Result<Record> result;
-            final Result<Record> firstResult = create.fetch(sql);
-            sString = ofNullable(cfg.getString(SCHEMA));
-            String namespace = getNamespace().orElse(DEFAULT_NAMESPACE);
+          DSLContext create = DSL.using(conn, dialect);
+          final Result<Record> result;
+          final Result<Record> firstResult = create.fetch(sql);
+          sString = ofNullable(cfg.getString(SCHEMA));
+          String namespace = getNamespace().orElse(DEFAULT_NAMESPACE);
 //            Schema avroSchema = sString
 //                // Either we already have a schema
 //                .map(qq -> this.aus.get().avroSchemaFromString(qq))
 //                // Or we have to produce one
 //                .orElse(IBDataJooqUtils.schemaFromRecordResults(getLog(), namespace, recordName,
 //                    getDescription().orElse(""), firstResult));
-            result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the
-                                                                               // schema
-            getLog().info("Reading data from dataset");
-            read = singletonList(this.jwrs.get().writeRecords(result));
+          result = (!sString.isPresent()) ? create.fetch(sql) : firstResult; // Read again if we had to create the
+                                                                             // schema
+          getLog().info("Reading data from dataset");
+          read = singletonList(this.jwrs.get().writeRecords(result));
 // Removed for always-true-ness
 //          } else
 //            throw new IBDataException("Processor " + getId() + " cannot handle protocol for " + source);

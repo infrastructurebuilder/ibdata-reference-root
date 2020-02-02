@@ -1,4 +1,5 @@
 package org.infrastructurebuilder.data.transform.line;
+
 /**
  * Copyright © 2019 admin (admin@infrastructurebuilder.org)
  *
@@ -18,25 +19,31 @@ package org.infrastructurebuilder.data.transform.line;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
+import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.config.PathSupplier;
 import org.slf4j.Logger;
 
 abstract public class AbstractIBDataRecordTransformerSupplier<I, O> implements IBDataRecordTransformerSupplier<I, O> {
-  private final PathSupplier wps;
+  private final IBRuntimeUtils ibr;
   private final ConfigMapSupplier config;
-  private Logger logger;
 
-  protected AbstractIBDataRecordTransformerSupplier(PathSupplier wps, ConfigMapSupplier cms, LoggerSupplier l) {
-    this.wps = Objects.requireNonNull(wps);
+  protected AbstractIBDataRecordTransformerSupplier(IBRuntimeUtils ibr, ConfigMapSupplier cms) {
+    this.ibr = Objects.requireNonNull(ibr);
     this.config = cms;
-    this.logger = l.get();
+  }
+
+  public IBRuntimeUtils getRuntimeUtils() {
+    return ibr;
   }
 
   @Override
   public IBDataRecordTransformer<I, O> get() {
-    return getUnconfiguredTransformerInstance(this.wps.get()).configure(getConfigSupplier().get());
+    return getUnconfiguredTransformerInstance().configure(getConfigSupplier().get());
+  }
+
+  public Logger getLogger() {
+    return ibr.getLog();
   }
 
   @Override
@@ -44,23 +51,18 @@ abstract public class AbstractIBDataRecordTransformerSupplier<I, O> implements I
 
   /**
    * Must return a new instance of an IBDataTransformer
+   *
    * @param workingPath
    * @return
    */
-  protected abstract IBDataRecordTransformer<I, O> getUnconfiguredTransformerInstance(Path workingPath);
+  protected abstract IBDataRecordTransformer<I, O> getUnconfiguredTransformerInstance();
 
   protected PathSupplier getWorkingPathSupplier() {
-    return wps;
+    return () -> ibr.getWorkingPath();
   }
 
   protected ConfigMapSupplier getConfigSupplier() {
     return config;
   }
-
-  @Override
-  public Logger getLogger() {
-    return this.logger;
-  }
-
 
 }
