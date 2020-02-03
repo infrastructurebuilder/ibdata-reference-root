@@ -117,7 +117,7 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   }
 
   @Override
-  public Optional<Path> getPathIfAvailable() {
+  public Optional<Path> getPathAsPath() {
     return ofNullable(this.cpt).map(IBResource::getPath);
 
   }

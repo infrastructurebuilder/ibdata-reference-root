@@ -26,12 +26,12 @@ import static java.util.stream.Collectors.toList;
 import static liquibase.diff.output.StandardObjectChangeFilter.FilterType.EXCLUDE;
 import static liquibase.diff.output.StandardObjectChangeFilter.FilterType.INCLUDE;
 import static org.dbunit.database.search.TablesDependencyHelper.getAllDependentTables;
+import static org.infrastructurebuilder.IBConstants.APPLICATION_LIQUIBASE_CHANGELOG;
 import static org.infrastructurebuilder.IBConstants.DBUNIT_DTD;
 import static org.infrastructurebuilder.IBConstants.DBUNIT_FLATXML;
 import static org.infrastructurebuilder.IBConstants.DEFAULT;
 import static org.infrastructurebuilder.IBConstants.DTD;
-import static org.infrastructurebuilder.IBConstants.IBSCHEMA_MIME_TYPE;
-import static org.infrastructurebuilder.IBConstants.LIQUIBASE_SCHEMA;
+import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
 import static org.infrastructurebuilder.IBConstants.XML;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.data.IBDataJooqUtils.ibSchemaFromRecordResults;
@@ -54,7 +54,6 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
@@ -70,7 +69,6 @@ import org.infrastructurebuilder.IBConstants;
 import org.infrastructurebuilder.data.model.PersistedIBSchema;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
 import org.infrastructurebuilder.util.CredentialsFactory;
-import org.infrastructurebuilder.util.LoggerSupplier;
 import org.infrastructurebuilder.util.URLAndCreds;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.artifacts.GAV;
@@ -181,7 +179,7 @@ abstract public class AbstractIBDatabaseDriverSupplier implements IBDataDatabase
       Optional<String> where) {
     Map<String, IBResource> k = new HashMap<>();
     IBResource a = generateLiquibaseChangelog(conn, workingPath, of(asList(tableName)), empty());
-    k.put(LIQUIBASE_SCHEMA, a);
+    k.put(APPLICATION_LIQUIBASE_CHANGELOG, a);
     IBResource b = cet.withReturningTranslation(() -> generateDbunitDTDSchema(conn, workingPath).moveTo(workingPath));
     String relativeDTD = b.getPath().getFileName().toString(); // Since the name's set bu moveTo above, it'll remain set
     k.put(DBUNIT_DTD, b);
@@ -313,7 +311,7 @@ abstract public class AbstractIBDatabaseDriverSupplier implements IBDataDatabase
         .setDiffOutputControl(diffOutputControl);
 
     cet.withTranslation(() -> command.execute());
-    return new DefaultIBResource(pdtd, new Checksum(pdtd), of(LIQUIBASE_SCHEMA));
+    return new DefaultIBResource(pdtd, new Checksum(pdtd), of(APPLICATION_LIQUIBASE_CHANGELOG));
 
   }
 
@@ -338,7 +336,7 @@ abstract public class AbstractIBDatabaseDriverSupplier implements IBDataDatabase
           Path p = workingPath.resolve(UUID.randomUUID() + XML);
           try (Writer ww = Files.newBufferedWriter(p)) {
             writer.write(ww, daSche);
-            k.put(DEFAULT, new DefaultIBResource(p, new Checksum(p), of(IBSCHEMA_MIME_TYPE)));
+            k.put(DEFAULT, new DefaultIBResource(p, new Checksum(p), of(IBDATA_SCHEMA)));
           }
         } catch (DataAccessException | SQLException | IOException e) {
           getLog().error(FAILED_TO_QUERY_SCHEMA_FOR + in.getUrl());

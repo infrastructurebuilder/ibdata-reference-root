@@ -42,7 +42,11 @@
   <build>
 
     <plugins>
-      <plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-resources-plugin</artifactId>
+    </plugin>
+    <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
@@ -69,8 +73,8 @@
                 <ingester>default</ingester>
                 <schemaIngester>default</schemaIngester>
                 <dataSet>
-                  <name>jeff</name>
-                  <description>Describe Jeff in 5 words</description>
+                  <name>jeffTheSchemaIngestedDataSet</name>
+                  <description>Describe in small words how you feel</description>
                   <metadata>
                     <y>
                       <x />
@@ -82,11 +86,11 @@
                       <name>The ABCDEF Schema</name>
                       <description>Here is a description of this schema</description>
                       <metadata>
-                        <someAdditiona>
+                        <someAdditional>
                           <metadata>here</metadata>
                           <and>here</and>
                           <andHere />
-                        </someAdditiona>
+                        </someAdditional>
                         <randoStartDate>2019-12-31</randoStartDate>
                       </metadata>
                       <inline>
@@ -139,23 +143,47 @@
               </ingest>
             </configuration>
           </execution>
+          <execution>
+            <id>ExecutionTheSecord</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>ingest</goal>
+            </goals>
+            <configuration>
+              <ingest>
+                <id>two</id>
+                <ingester>default</ingester>
+                <schemaIngester>default</schemaIngester>
+                <dataSet>
+                  <name>frankTheSchemaIngestedFromAFileDataSet</name>
+                  <description>Describe in small words how FRANK feels</description>
+                  <metadata>
+                    <x />
+                  </metadata>
+                  <dataSchemas>
+                    <dataSchema>
+                      <temporaryId>TWOTWOTWO</temporaryId>
+                      <name>The 222 Schema</name>
+                      <description>Schema 222 description</description>
+                      <metadata>
+                        <someAdditional>
+                          <metadata>here</metadata>
+                          <and>here</and>
+                          <andHere />
+                        </someAdditional>
+                        <randoStartDate>2019-12-31</randoStartDate>
+                      </metadata>
+                      <urls>
+                        <url>file://${basedir}/src/main/resources/input.xml</url>
+                      </urls>
+                    </dataSchema>
+                  </dataSchemas>
+                  <dataStreams />
+                </dataSet>
+              </ingest>
+            </configuration>
+          </execution>
         </executions>
-        <configuration>
-          <skip>false</skip>
-          <ingestionConfig>
-            <id>id</id>
-            <dataSet>
-              <name>name</name>
-              <description>desc</description>
-              <metadata>
-                <x>
-                  <y>z                  </y>
-                  <xx.tty />
-                </x>
-              </metadata>
-            </dataSet>
-          </ingestionConfig>
-        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -42,7 +42,7 @@
   <properties>
     <test.coverage.percentage.required>99</test.coverage.percentage.required> <!--100 actually -->
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <ibcore.bom.version>0.16.0.0-SNAPSHOT</ibcore.bom.version>
+    <ibcore.bom.version>0.16.0.1</ibcore.bom.version>
     <ibdata.api.version>0.16.0-SNAPSHOT</ibdata.api.version>
   </properties>
   <url>${github.url.base}/${project.artifactId}</url>

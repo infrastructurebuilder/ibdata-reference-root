@@ -28,17 +28,14 @@ import static org.infrastructurebuilder.IBConstants.NAME;
 import static org.infrastructurebuilder.IBConstants.TEMPORARYID;
 import static org.infrastructurebuilder.data.IBDataConstants.METADATA;
 import static org.infrastructurebuilder.data.IBDataConstants.SCHEMA;
-import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapUTF8StringToPersistedSchema;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.writeSchemaToPath;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,13 +45,10 @@ import org.infrastructurebuilder.data.AbstractIBSchemaSource;
 import org.infrastructurebuilder.data.IBDataException;
 import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.data.Metadata;
-import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
-import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
 import org.infrastructurebuilder.util.BasicCredentials;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.IBRuntimeUtils;
-import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
 
@@ -129,22 +123,11 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
       Xpp3Dom j = ofNullable(requireNonNull(inline, "Supplied Xpp3Dom for inline schema").getChild("schema"))
           .orElseThrow(() -> new IBDataException("The child of <inline> must be a <schema/>"));
       String in = j.toString();
-      Path path = ibr.getWorkingPath().resolve(UUID.randomUUID().toString() + ".xml");
-      // We read it as a string, clone it, then write the clone out to a path
-      try (Writer w = Files.newBufferedWriter(path)) {
 
-        new PersistedIBSchemaXpp3Writer().write(w, cet.withReturningTranslation(() ->
-        // From new reader
-        new PersistedIBSchemaXpp3Reader()
-            // read
-            .read(new StringReader(in)).forceIndexUpdatePostRead().clone()));
-        // Inline schemas only have the persisted schema as an asset
-        Map<String, IBResource> r = new HashMap<>();
-        r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));
-        return unmodifiableMap(r);
-      } catch (IOException e) {
-        throw new IBDataException(String.format("Failed to persist InlineIBSchema to %s", path.toString()), e);
-      }
+      Path path = writeSchemaToPath.apply(ibr, mapUTF8StringToPersistedSchema.apply(in));
+      Map<String, IBResource> r = new HashMap<>();
+      r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));
+      return unmodifiableMap(r);
     }
 
   }

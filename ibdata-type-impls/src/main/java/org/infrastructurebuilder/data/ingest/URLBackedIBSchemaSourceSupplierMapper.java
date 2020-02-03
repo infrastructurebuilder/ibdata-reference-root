@@ -19,126 +19,124 @@ import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.IBConstants.CREDENTIALS;
 import static org.infrastructurebuilder.IBConstants.DEFAULT;
+import static org.infrastructurebuilder.IBConstants.DESCRIPTION;
 import static org.infrastructurebuilder.IBConstants.IBDATA_SCHEMA;
-import static org.infrastructurebuilder.IBConstants.UTF8;
+import static org.infrastructurebuilder.IBConstants.NAME;
+import static org.infrastructurebuilder.IBConstants.TEMPORARYID;
+import static org.infrastructurebuilder.data.IBDataConstants.METADATA;
+import static org.infrastructurebuilder.data.IBDataConstants.SCHEMA;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.model.IBDataModelUtils.*;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapURLToPersistedSchema;
 import static org.infrastructurebuilder.data.model.IBDataModelUtils.writeSchemaToPath;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.sql.DataSource;
 
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.infrastructurebuilder.data.AbstractIBSchemaSource;
-import org.infrastructurebuilder.data.IBDataDatabaseDriverSupplier;
+import org.infrastructurebuilder.data.IBDataConstants;
 import org.infrastructurebuilder.data.IBDataException;
-import org.infrastructurebuilder.data.IBDatabaseDialectMapper;
 import org.infrastructurebuilder.data.IBSchemaSourceSupplier;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Writer;
+import org.infrastructurebuilder.util.BasicCredentials;
+import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.artifacts.Checksum;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.IBRuntimeUtils;
 import org.infrastructurebuilder.util.files.DefaultIBResource;
 import org.infrastructurebuilder.util.files.IBResource;
 
-@Named("database")
-public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSupplierMapper<IBJDBCQuery> {
-
-  private IBDatabaseDialectMapper ddm;
+@Named("urls")
+public class URLBackedIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSupplierMapper<List<URL>> {
 
   @Inject
-  public DefaultDatabaseIBSchemaSourceSupplierMapper(IBRuntimeUtils ibr, IBDatabaseDialectMapper ddM) {
+  public URLBackedIBSchemaSourceSupplierMapper(IBRuntimeUtils ibr) {
     super(ibr);
-    this.ddm = requireNonNull(ddM);
   }
 
   @Override
   public boolean respondsTo(IBDataSchemaIngestionConfig v) {
-    return v.getJDBCQuery().isPresent();
+    return v.getUrls().isPresent();
   }
 
   @Override
   public Optional<IBSchemaSourceSupplier> getSupplierFor(IBDataSchemaIngestionConfig v) {
-    IBJDBCQuery q = v.getJDBCQuery().get();
-    IBDataDatabaseDriverSupplier s = ddm.getSupplierForURL(q)
-        .orElseThrow(() -> new IBDataException("No supplier for " + q.getUrl()));
     return of(
         // Always present if respondsTo works properly
         new DefaultIBSchemaSourceSupplier(
             // TempID
             v.getTemporaryId(),
             // Schema source
-            new DatabaseQueryIBSchemaSource(getRuntimeUtils()
-            // id
-                , v.getTemporaryId()
-                // name
-                , v.getName()
-                // desc
-                , v.getDescription()
-                // meta
-                , Optional.of(v.getMetadata())
-                // config (useless)
-                , Optional.empty()
-                // URLAndCreds
-                , q
-                // DDS
-                , s)
+            new URLListIBSchemaSource(getRuntimeUtils())
+                // Configured with the ingestion config
+                .configure(v.asConfigMap()),
             // workingPath
-            , () -> getWorkingPath(), v));
+            () -> getWorkingPath(), v));
   }
 
-  public class DatabaseQueryIBSchemaSource extends AbstractIBSchemaSource<IBJDBCQuery> {
+  public class URLListIBSchemaSource extends AbstractIBSchemaSource<List<URL>> {
 
-    private IBDataDatabaseDriverSupplier dds;
-
-    public DatabaseQueryIBSchemaSource(IBRuntimeUtils ibr) {
+    public URLListIBSchemaSource(IBRuntimeUtils ibr) {
       super(ibr);
     }
 
-    public DatabaseQueryIBSchemaSource(IBRuntimeUtils ibr
+    private URLListIBSchemaSource(IBRuntimeUtils ibr
     // id
         , String id
         // name
         , Optional<String> name
         // desc
         , Optional<String> desc
+        // creds
+        , Optional<BasicCredentials> creds
+//        // checksum always empty
+//        , Optional<Checksum> checksum
         // metadata
         , Optional<Metadata> metadata
         // config
         , Optional<ConfigMap> config
         // And the param supplied
-        , IBJDBCQuery parameter
-        // dds
-        , IBDataDatabaseDriverSupplier dds) {
-      super(ibr, id, name, desc, ibr.getCredentialsFor(parameter), empty(), metadata, config, parameter);
-      this.dds = Objects.requireNonNull(dds);
+        , List<URL> parameter) {
+      super(ibr, id, name, desc, creds, empty(), metadata, config, parameter);
     }
 
     @Override
-    protected Map<String, IBResource> getInstance(IBRuntimeUtils ibr, IBJDBCQuery db) {
+    public URLListIBSchemaSource configure(ConfigMap config) {
+      String id = config.getOrDefault(TEMPORARYID, "default");
+      Optional<Metadata> metadata2 = of(config.get(METADATA));
+//      Optional<Checksum> checksum2 = empty(); // No checksum for inlines
+      Optional<BasicCredentials> creds2 = ofNullable(config.get(CREDENTIALS));
+      Optional<String> desc2 = config.getOptionalString(DESCRIPTION);
+      Optional<String> name2 = config.getOptionalString(NAME);
+      List<URL> param = config.get(IBDataConstants.URLS);
+      return new URLListIBSchemaSource(getRuntimeUtils(), id, name2, desc2, creds2, metadata2, of(config), param);
+    }
 
-      Supplier<DataSource> s = dds.getDataSourceSupplier(db)
-          .orElseThrow(() -> new IBDataException("No data source supplier for " + db.getUrl()));
-      String in = requireNonNull(db, "URL and creds").getUrl();
-      // We read it as a string, clone it, then write the clone out to a path
-      Path path = writeSchemaToPath.apply(ibr, mapUTF8StringToPersistedSchema.apply(in));
-      // Inline schemas only have the persisted schema as an asset
+    @Override
+    protected Map<String, IBResource> getInstance(IBRuntimeUtils ibr, List<URL> urls) {
+      if (requireNonNull(urls, "Supplied URL List for read schema").size() != 1)
+        throw new IBDataException("Currently system only handles a single URL at at time");
+      URL u = urls.get(0);
+      Path path = writeSchemaToPath.apply(ibr, mapURLToPersistedSchema.apply(u));
+      // URL-based schemas only have the persisted schema as an asset
       Map<String, IBResource> r = new HashMap<>();
       r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));
       return unmodifiableMap(r);

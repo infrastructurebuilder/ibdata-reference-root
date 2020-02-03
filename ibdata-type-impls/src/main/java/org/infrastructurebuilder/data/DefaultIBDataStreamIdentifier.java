@@ -47,6 +47,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private IBDataStructuredDataMetadata structuredDataMetadata = null;
   private String temporaryId;
   private String credentialsQuery;
+  private UUID referencedSchemaId;
 
   public final static IBDataStreamSupplier toIBDataStreamSupplier(Path workingPath, IBDataSource<?> source,
       IBResource ibPathChecksumType, Date now) {
@@ -206,7 +207,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
 
   @Override
   public Optional<UUID> getReferencedSchemaId() {
-    return empty();
+    return ofNullable(this.referencedSchemaId);
   }
 
   @Override

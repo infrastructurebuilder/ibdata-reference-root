@@ -434,7 +434,7 @@ public interface IBDataJooqUtils extends IBSchemaTranslator<Result<Record>, Xpp3
     // TODO Get indexes somehow
     schema.setIndexes(indexes);
     schema.setMetadata(md);
-    schema.setMimeType(IBSCHEMA_MIME_TYPE);
+    schema.setMimeType(IBConstants.IBDATA_SCHEMA);
     return schema;
   }
 

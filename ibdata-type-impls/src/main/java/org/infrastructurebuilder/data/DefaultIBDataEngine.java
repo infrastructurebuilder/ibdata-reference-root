@@ -24,6 +24,7 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapInputStreamToPersistedSchema;
 
 import java.io.IOException;
 import java.net.URL;
@@ -172,14 +173,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
     return a.map(DataSchema::getUuid).flatMap(this::fetchDataStreamById).map(IBDataStream::get).map(in -> {
       DataSchema ds = a.get();
       List<IBDataSchemaAsset> assets = ds.getSchemaAssets();
-      try {
-        PersistedIBSchema s = new PersistedIBSchemaXpp3Reader().read(in).forceIndexUpdatePostRead().clone();
-        return s;
-      } catch (IOException | XmlPullParserException e) {
-        throw new IBDataException(e);
-      } finally {
-        cet.withTranslation(() -> in.close());
-      }
+      return mapInputStreamToPersistedSchema.apply(in);
     });
   }
 

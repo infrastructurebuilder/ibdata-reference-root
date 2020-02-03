@@ -22,7 +22,7 @@
   <parent>
     <groupId>org.infrastructurebuilder.data</groupId>
     <artifactId>ibdata-reference-root</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.3.6-SNAPSHOT</version>
   </parent>
   <artifactId>ibdata-protobuf-types</artifactId>
   <packaging>jar</packaging>

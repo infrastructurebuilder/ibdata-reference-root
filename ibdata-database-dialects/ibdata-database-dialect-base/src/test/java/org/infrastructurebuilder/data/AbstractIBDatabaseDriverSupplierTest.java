@@ -172,7 +172,7 @@ public class AbstractIBDatabaseDriverSupplierTest {
     try (Connection conn = d.getConnection()) {
       v = generateLiquibaseChangelog(conn, workingPath, of(asList("TABLE2")), empty());
       Path p = v.getPath();
-      assertEquals(IBConstants.LIQUIBASE_SCHEMA, v.getType());
+      assertEquals(IBConstants.APPLICATION_LIQUIBASE_CHANGELOG, v.getType());
     }
     log.info("Wrote LB Schema : " + v.getPath());
 

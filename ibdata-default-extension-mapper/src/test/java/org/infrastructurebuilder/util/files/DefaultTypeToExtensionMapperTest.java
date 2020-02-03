@@ -49,7 +49,7 @@ public class DefaultTypeToExtensionMapperTest {
   @Test
   public void testReverseMap1() {
     SortedSet<String> t = t2e.reverseMapFromExtension(XML);
-    assertEquals(5, t.size());
+    assertEquals(4, t.size());
     assertTrue(t.contains(APPLICATION_XML));
   }
 

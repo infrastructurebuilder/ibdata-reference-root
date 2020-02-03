@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
+import static org.infrastructurebuilder.data.IBDataConstants.ORIGINAL_ASSET;
 
 import java.util.Date;
 import java.util.Map;
@@ -66,34 +67,33 @@ public final class DefaultIBSchemaDAOSupplierBuilder implements IBSchemaDAOSuppl
   @Override
   public final IBSchemaDAOSupplier build() {
 
-    Map<String, IBDataStreamSupplier> map = src.get().entrySet().parallelStream()
-        .collect(toMap(e -> e.getKey(), v ->
-        // Create a new supplier from the available data
-        new DefaultIBDataStreamSupplier(
-            // Stream
-            new DefaultIBDataStream(
-                // Identity
-                new DefaultIBDataStreamIdentifier(
-                    // Not initially required
-                    null
-                    // No URL by default
-                    , empty()
-                    // Name
-                    , src.getName()
-                    // desc
-                    , src.getDescription()
-                    // Checksum of the file data
-                    , v.getValue().getChecksum()
-                    // Now-ish
-                    , new Date()
-                    // Metadata or default value
-                    , src.getMetadata().orElse(new Metadata())
-                    // Ascribed Mime type
-                    , v.getValue().getType()
-                    // No path, length or row count
-                    , empty(), empty(), empty())
-                // data
-                , v.getValue()))));
+    Map<String, IBDataStreamSupplier> map = src.get().entrySet().parallelStream().collect(toMap(e -> e.getKey(), v ->
+    // Create a new supplier from the available data
+    new DefaultIBDataStreamSupplier(
+        // Stream
+        new DefaultIBDataStream(
+            // Identity
+            new DefaultIBDataStreamIdentifier(
+                // Not initially required
+                null
+                // No URL by default
+                , empty()
+                // Name
+                , src.getName()
+                // desc
+                , src.getDescription()
+                // Checksum of the file data
+                , v.getValue().getChecksum()
+                // Now-ish
+                , new Date()
+                // Metadata or default value
+                , src.getMetadata().orElse(new Metadata())
+                // Ascribed Mime type
+                , v.getValue().getType()
+                // No path, length or row count
+                , empty(), empty(), empty())
+            // data
+            , v.getValue()))));
     return new InternalIBSchemaDAOSupplier(config.getTemporaryId(), new InternalIBSchemaDAO(map, src));
   }
 
@@ -123,10 +123,17 @@ public final class DefaultIBSchemaDAOSupplierBuilder implements IBSchemaDAOSuppl
 
     private final Map<String, IBDataStreamSupplier> map;
     private final IBSchemaSource<?> source;
+    private final String originalAssetName;
 
     public InternalIBSchemaDAO(Map<String, IBDataStreamSupplier> map, IBSchemaSource<?> src) {
       this.map = requireNonNull(map, "Data stream suppliers");
       this.source = requireNonNull(src, "IBSchemaSource");
+      this.originalAssetName = map.containsKey(ORIGINAL_ASSET) ? ORIGINAL_ASSET : null;
+    }
+
+    @Override
+    public String getInboundId() {
+      return src.getId();
     }
 
     @Override
@@ -139,5 +146,9 @@ public final class DefaultIBSchemaDAOSupplierBuilder implements IBSchemaDAOSuppl
       return ofNullable(source);
     }
 
+    @Override
+    public Optional<String> getOriginalAssetKeyName() {
+      return ofNullable(this.originalAssetName);
+    }
   }
 }

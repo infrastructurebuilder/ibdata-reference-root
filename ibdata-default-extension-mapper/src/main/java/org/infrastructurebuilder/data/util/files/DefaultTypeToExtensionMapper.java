@@ -103,7 +103,7 @@ public class DefaultTypeToExtensionMapper implements TypeToExtensionMapper {
       put(APPLICATION_X_TIKA_MSOFFICE, DEFAULT_EXTENSION);
       put(APPLICATION_VND_OASIS_SPREADSHEET, ODS);
       put(APPLICATION_LIQUIBASE_CHANGELOG, XML);
-      put(LIQUIBASE_SCHEMA, XML);
+//      put(LIQUIBASE_SCHEMA, XML);
       put(DBUNIT_FLATXML, XML);
       put(PROTOBUF0, PROTO);
       put(PROTOBUF1, PROTO);
