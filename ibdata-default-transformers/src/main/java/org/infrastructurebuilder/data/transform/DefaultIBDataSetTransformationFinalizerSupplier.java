@@ -86,7 +86,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplier
     public IBResource finalize(IBDataSet inboundDataSet, IBTransformation target, List<IBDataStreamSupplier> ibdssList,
         List<IBSchemaDAOSupplier> schemaSuppliers, Optional<String> basedir) throws IOException {
       DataSet targetDataSet = target.asDataSet();
-      targetDataSet.setPath(inboundDataSet.getPathAsPath().orElse(null));
+      targetDataSet.setPath(inboundDataSet.getLocalPath().orElse(null));
 
       return forceToFinalizedPath(new Date(), getWorkingPath(), targetDataSet, ibdssList, schemaSuppliers,
           getTypeToExtensionMapper(), basedir);

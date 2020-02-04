@@ -53,7 +53,7 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
 
   private DefaultIBDataSet(IBDataSetIdentifier ds, Map<UUID, IBDataStreamSupplier> streamSuppliers) {
     super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(), ds.getDescription(),
-        ds.getPathAsPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
+        ds.getLocalPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion()
 
     );
     this.streamSuppliers = requireNonNull(streamSuppliers);
@@ -61,7 +61,7 @@ public class DefaultIBDataSet extends AbstractIBDataSet {
 
   private DefaultIBDataSet(IBDataSet ds, Map<UUID, IBDataStreamSupplier> streamSuppliers) {
     super(requireNonNull(ds).getUuid(), ds.getCreationDate(), ds.getMetadata(), ds.getName(), ds.getDescription(),
-        ds.getPathAsPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
+        ds.getLocalPath(), ds.getGroupId(), ds.getArtifactId(), ds.getVersion());
     this.streamSuppliers = requireNonNull(streamSuppliers);
   }
 

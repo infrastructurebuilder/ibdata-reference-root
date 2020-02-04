@@ -105,7 +105,7 @@
                       <temporaryId>temp2</temporaryId>
                       <name>two</name>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f2.zip?agree=yes</url>
-                      <sha512>342aed5871f72b4e9cd830b3d9fcf113694799248afa13f644c51ece5a9dcecb51b2005158013ef3b2d13aa5aa37e247736f214aa9faf0780363180aac7f0e2d</sha512>
+                      <sha512>ddc8f0d63d5e8fa58a650ef16ec0ae850e83571a7a9f2861752f7b49f1cdb545918b790e66257d15529f875bf7dc893cb314cb85dc148f00fb1f545b3552d86a</sha512>
                       <metadata>
                         <here>
                           <x>also</x>
@@ -117,7 +117,7 @@
                       <temporaryId>temp3</temporaryId>
                       <name>three</name>
                       <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f3.zip?agree=yes</url>
-                      <sha512>fe4fa7bf3ac2736a84f1b20aacc570ae710c8b6a379a676b169afe8cd58752534bd9c4751f975aac2a697fdc6d08a9fb1f555b02ec655d6032a7ee20ba885519</sha512>
+                      <sha512>18b9e05b1a97956d90d9c11b4f955d6a8aca09e8243c36f60bf0eeb3dd1f576a96e0b15b1adb3619d1bce9e607350b0db26a1a90a03935dbc4e0a3d4df9af4f9</sha512>
                       <metadata>
                         <here>
                           <x>also</x>
