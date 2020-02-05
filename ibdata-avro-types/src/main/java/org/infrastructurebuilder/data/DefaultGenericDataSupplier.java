@@ -23,7 +23,6 @@ import org.apache.avro.generic.MapProxyGenericData;
 import org.infrastructurebuilder.util.config.AbstractCMSConfigurableSupplier;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.IBRuntimeUtils;
-import org.infrastructurebuilder.util.config.PathSupplier;
 
 @Named
 public class DefaultGenericDataSupplier extends AbstractCMSConfigurableSupplier<GenericData, Formatters>

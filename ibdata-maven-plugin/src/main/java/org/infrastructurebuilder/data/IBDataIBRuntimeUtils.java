@@ -39,12 +39,12 @@ import org.infrastructurebuilder.util.files.TypeToExtensionMapper;
 
 @Named(IBDATA)
 @Singleton
-public class DefaultIBRuntimeUtils extends AbstractIBRuntimeUtils {
+public class IBDataIBRuntimeUtils extends AbstractIBRuntimeUtils {
 
   private DependenciesSupplier ds;
 
   @Inject
-  public DefaultIBRuntimeUtils(
+  public IBDataIBRuntimeUtils(
       // WPS from maven run
       @Named(IBDATA_WORKING_PATH_SUPPLIER) IBDataWorkingPathSupplier wps
       // Maven logger as an SLF4J logger

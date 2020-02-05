@@ -15,15 +15,16 @@
  */
 package org.infrastructurebuilder.data;
 
-import org.infrastructurebuilder.util.IBLoggerEnabled;
 import org.infrastructurebuilder.util.config.CMSConfigurableSupplier;
 
 /**
  * The contract for finalization:
  *
  * 1. Finalization happens for a single DataSet
+ *
  * @author mykel.alvis
  *
  */
-public interface IBDataSetFinalizerSupplier<T extends DataSetEnabled,P> extends CMSConfigurableSupplier<IBDataSetFinalizer<T>,P>, IBLoggerEnabled  {
+public interface IBDataSetFinalizerSupplier<T extends DataSetEnabled, P>
+    extends CMSConfigurableSupplier<IBDataSetFinalizer<T>, P> {
 }

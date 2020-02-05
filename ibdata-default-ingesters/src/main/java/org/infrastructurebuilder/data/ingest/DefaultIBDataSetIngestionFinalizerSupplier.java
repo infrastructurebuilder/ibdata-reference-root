@@ -16,6 +16,7 @@
 package org.infrastructurebuilder.data.ingest;
 
 import static java.util.Objects.requireNonNull;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.forceToFinalizedPath;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -35,11 +36,9 @@ import org.infrastructurebuilder.data.IBDataSetFinalizerSupplier;
 import org.infrastructurebuilder.data.IBDataStreamSupplier;
 import org.infrastructurebuilder.data.IBSchemaDAOSupplier;
 import org.infrastructurebuilder.data.model.DataSet;
-import org.infrastructurebuilder.data.model.IBDataModelUtils;
 import org.infrastructurebuilder.util.config.ConfigMap;
 import org.infrastructurebuilder.util.config.ConfigMapSupplier;
 import org.infrastructurebuilder.util.config.IBRuntimeUtils;
-import org.infrastructurebuilder.util.config.PathSupplier;
 import org.infrastructurebuilder.util.files.IBResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @Named(DefaultIBDataSetIngestionFinalizerSupplier.DEFAULT_INGEST)
 @Typed(IBDataSetFinalizerSupplier.class)
 public class DefaultIBDataSetIngestionFinalizerSupplier
-    extends AbstractIBDataSetFinalizerSupplier<IBIngestion, Object> {
+    extends AbstractIBDataSetFinalizerSupplier<IBIngestion, IBDataSet> {
 
   public static final String DEFAULT_INGEST = "default-ingest";
   public final static Logger logger = LoggerFactory.getLogger(DefaultIBDataSetIngestionFinalizerSupplier.class);
@@ -67,7 +66,7 @@ public class DefaultIBDataSetIngestionFinalizerSupplier
   }
 
   @Override
-  protected IngestionIBDataSetFinalizer getInstance(IBRuntimeUtils ibr, Object in) {
+  protected IngestionIBDataSetFinalizer getInstance(IBRuntimeUtils ibr, IBDataSet in) {
     return new IngestionIBDataSetFinalizer(requireNonNull(getConfig(), "Config supplier is null").get(),
         ibr.getWorkingPath());
   }
@@ -84,8 +83,8 @@ public class DefaultIBDataSetIngestionFinalizerSupplier
       DataSet d = target.asDataSet();
       Map<String, IBDataSchemaIngestionConfig> p = target.asSchemaIngestion();
       // dsi2 is always null. There is no "previous dataset" in ingestion
-      return IBDataModelUtils.forceToFinalizedPath(new Date(), getWorkingPath(), d, ibdssList, schemaList,
-          getTypeToExtensionMapper(), basedir);
+      return forceToFinalizedPath(new Date(), getWorkingPath(), d, ibdssList, schemaList, getTypeToExtensionMapper(),
+          basedir);
     }
 
   }
