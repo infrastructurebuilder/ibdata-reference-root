@@ -20,7 +20,6 @@ import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.MARKER_FILE;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,8 +65,7 @@ public class InjectIBData implements ParameterResolver {
     IBResource v = readIBCPT.apply(wps.getRoot().resolve(MARKER_FILE).toAbsolutePath());
     URL u = cet.withReturningTranslation(() -> v.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL());
     log.debug(() -> "About to read " + u.toExternalForm());
-    return mapURLToDefaultIBDataSet.apply(u)
-        .orElseThrow(() -> new IBDataException("No ingestion or transformation available for " + v.getPath()));
+    return DefaultIBDataSet.decorateAddingSuppliers(u); // Throws IBDataException on failure to read
   }
 
 }

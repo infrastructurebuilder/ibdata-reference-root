@@ -15,17 +15,15 @@
  */
 package org.infrastructurebuilder.data;
 
+import static org.infrastructurebuilder.data.DefaultIBDataSet.decorateAddingSuppliers;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_IBDATASET_XML;
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.Optional;
 
 import org.infrastructurebuilder.util.IBUtils;
 import org.infrastructurebuilder.util.config.TestingPathSupplier;
@@ -35,7 +33,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class IBDataTypeImplsModelUtilsTest {
+public class DefaultIBDataSet01Test {
 
   private final static TestingPathSupplier wps = new TestingPathSupplier();
   private Path testJar;
@@ -63,9 +61,8 @@ public class IBDataTypeImplsModelUtilsTest {
   public void testMapDataSetToDefaultIBDataSetFromJar() throws MalformedURLException {
     URL url = IBUtils
         .translateToWorkableArchiveURL("jar:" + testJar.toUri().toURL().toExternalForm() + "!" + IBDATA_IBDATASET_XML);
-    Optional<DefaultIBDataSet> q = mapURLToDefaultIBDataSet.apply(url);
-    assertTrue(q.isPresent());
-    assertEquals("86c74030-b133-345a-be07-ad4cec057780", q.get().getUuid().toString());
+    DefaultIBDataSet q = decorateAddingSuppliers(url);
+    assertEquals("86c74030-b133-345a-be07-ad4cec057780", q.getUuid().toString());
   }
 
   @Test
@@ -75,9 +72,8 @@ public class IBDataTypeImplsModelUtilsTest {
     Path p = testDir.resolve(IBDATA).resolve(IBDATASET_XML);
     URL testDirURL = testDir.toUri().toURL();
     URL url = p.toUri().toURL();
-    Optional<DefaultIBDataSet> q = mapURLToDefaultIBDataSet.apply(url);
-    assertTrue(q.isPresent());
-    assertEquals("99139ebc-4c01-3c93-89c1-2219c7e4ebf6", q.get().getUuid().toString());
+    DefaultIBDataSet q = decorateAddingSuppliers(url);
+    assertEquals("99139ebc-4c01-3c93-89c1-2219c7e4ebf6", q.getUuid().toString());
   }
 
 }

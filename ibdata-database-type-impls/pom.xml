@@ -56,8 +56,8 @@
       <artifactId>ibcore-read-detect</artifactId>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>ibdata-default-extension-mapper</artifactId>
+      <groupId>org.infrastructurebuilder</groupId>
+      <artifactId>ibcore-default-extension-type-mapper</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

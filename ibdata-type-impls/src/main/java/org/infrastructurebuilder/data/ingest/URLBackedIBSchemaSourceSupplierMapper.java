@@ -29,7 +29,7 @@ import static org.infrastructurebuilder.IBConstants.TEMPORARYID;
 import static org.infrastructurebuilder.data.IBDataConstants.METADATA;
 import static org.infrastructurebuilder.data.IBDataConstants.SCHEMA;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapURLToPersistedSchema;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.readSchemaFromURL;
 import static org.infrastructurebuilder.data.model.IBDataModelUtils.writeSchemaToPath;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class URLBackedIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourc
       if (requireNonNull(urls, "Supplied URL List for read schema").size() != 1)
         throw new IBDataException("Currently system only handles a single URL at at time");
       URL u = urls.get(0);
-      Path path = writeSchemaToPath.apply(ibr, mapURLToPersistedSchema.apply(u));
+      Path path = writeSchemaToPath.apply(ibr, readSchemaFromURL.apply(u));
       // URL-based schemas only have the persisted schema as an asset
       Map<String, IBResource> r = new HashMap<>();
       r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));

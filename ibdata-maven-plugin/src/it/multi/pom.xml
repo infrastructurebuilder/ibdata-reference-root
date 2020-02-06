@@ -15,14 +15,6 @@
     limitations under the License.
 
 -->
-<!-- Copyright © 2019 admin (admin@infrastructurebuilder.org) Licensed under
-  the Apache License, Version 2.0 (the "License"); you may not use this file
-  except in compliance with the License. You may obtain a copy of the License
-  at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable
-  law or agreed to in writing, software distributed under the License is distributed
-  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied. See the License for the specific language governing permissions
-  and limitations under the License. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -39,6 +31,10 @@
   <packaging>ibdata</packaging>
   <properties>
     <surefire.failIfNoTests>false</surefire.failIfNoTests>
+    <!-- <cms.gov.ncci>https://web.archive.org/web/20190830143720if_/https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/</cms.gov.ncci> -->
+    <cms.gov.ncci>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads</cms.gov.ncci>
+    <accept.string><![CDATA[?Accept=next&agree=yes]]></accept.string>
+    <file.examples.com>https://file-examples.com/wp-content/uploads</file.examples.com>
   </properties>
   <dependencies>
     <dependency>
@@ -89,10 +85,11 @@
                     </y>
                   </metadata>
                   <dataStreams>
+                    <!-- CMS.GOV did an update and now wgetter doesn't work
                     <dataStream>
                       <temporaryId>temp1</temporaryId>
                       <name>one</name>
-                      <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f1.zip?agree=yes</url>
+                      <url>${cms.gov.ncci}/2019-July-Hospital-PTP-Edits-v252-f1.zip${accept.string}</url>
                       <sha512>9a4819a37ea5fdccb9e7e6ece29807f6c57319fe84deecd67c22f8b6418399abaa48e1c318210875afae450719a5ce218abb02756281ff0bd132755ffdeeb478</sha512>
                       <metadata>
                         <here>
@@ -104,7 +101,7 @@
                     <dataStream>
                       <temporaryId>temp2</temporaryId>
                       <name>two</name>
-                      <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f2.zip?agree=yes</url>
+                      <url>${cms.gov.ncci}/2019-July-Hospital-PTP-Edits-v252-f2.zip${accept.string}</url>
                       <sha512>ddc8f0d63d5e8fa58a650ef16ec0ae850e83571a7a9f2861752f7b49f1cdb545918b790e66257d15529f875bf7dc893cb314cb85dc148f00fb1f545b3552d86a</sha512>
                       <metadata>
                         <here>
@@ -116,7 +113,7 @@
                     <dataStream>
                       <temporaryId>temp3</temporaryId>
                       <name>three</name>
-                      <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f3.zip?agree=yes</url>
+                      <url>${cms.gov.ncci}/2019-July-Hospital-PTP-Edits-v252-f3.zip${accept.string}</url>
                       <sha512>18b9e05b1a97956d90d9c11b4f955d6a8aca09e8243c36f60bf0eeb3dd1f576a96e0b15b1adb3619d1bce9e607350b0db26a1a90a03935dbc4e0a3d4df9af4f9</sha512>
                       <metadata>
                         <here>
@@ -128,7 +125,7 @@
                     <dataStream>
                       <temporaryId>temp4</temporaryId>
                       <name>four</name>
-                      <url>https://www.cms.gov/Medicare/Coding/NationalCorrectCodInitEd/downloads/2019-July-Hospital-PTP-Edits-v252-f4.zip?agree=yes</url>
+                      <url>${cms.gov.ncci}/2019-July-Hospital-PTP-Edits-v252-f4.zip${accept.string}</url>
                       <sha512>20e133a072ddd279efb5f728a61834d18d16598897c619814120b74633570c63117dfc42c6d1cee82e9ce8d6af824b5bf596529917efafb951288e0d012b9998</sha512>
                       <metadata>
                         <here>
@@ -137,10 +134,22 @@
                         <abc />
                       </metadata>
                     </dataStream>
+                     -->
+                    <dataStream>
+                      <temporaryId>four4</temporaryId>
+                      <name>four</name>
+                      <url>${file.examples.com}/2018/04/file_example_AVI_480_750kB.avi</url>
+                      <sha512>f75be67640661eb3fd5b53d88f46420de0850cb859e3377d3ebf4b6d8eb8d698aed6fd468a50bba22f58f2cf7be73a62748c19b708a0bbdbb56d2af0ba897d19</sha512>
+                      <mimeType>video/avi</mimeType>
+                      <metadata>
+                        <abc />
+                      </metadata>
+                      <expandArchives>true</expandArchives>
+                    </dataStream>
                     <dataStream>
                       <temporaryId>five5</temporaryId>
                       <name>five</name>
-                      <url>https://file-examples.com/wp-content/uploads/2017/02/zip_2MB.zip</url>
+                      <url>${file.examples.com}/2017/02/zip_2MB.zip</url>
                       <sha512>f545eeb9c46e29f5d8e29639840457de5d1bdbc34e16cbe5c1ca4b7efcbf294da0a3df41485c041cee1a25d8f0afec246cd02be1298dee9ab770a7cfed73dc71</sha512>
                       <metadata>
                         <here>

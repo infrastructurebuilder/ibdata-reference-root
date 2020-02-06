@@ -42,7 +42,7 @@
   <properties>
     <test.coverage.percentage.required>99</test.coverage.percentage.required> <!--100 actually -->
     <jacoco.max.missed.classes>0</jacoco.max.missed.classes>
-    <ibcore.bom.version>0.16.0.1</ibcore.bom.version>
+    <ibcore.bom.version>0.17.0.0-SNAPSHOT</ibcore.bom.version>
     <ibdata.api.version>0.16.0-SNAPSHOT</ibdata.api.version>
   </properties>
   <url>${github.url.base}/${project.artifactId}</url>
@@ -143,7 +143,7 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>ibdata-default-extension-mapper</artifactId>
+        <artifactId>ibcore-default-extension-type-mapper</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -208,7 +208,6 @@
   </build>
   <modules>
     <module>ibdata-testing</module>
-    <module>ibdata-default-extension-mapper</module>
     <module>ibdata-type-impls</module>
     <module>ibdata-database-type-impls</module>
     <module>ibdata-database-dialects</module>

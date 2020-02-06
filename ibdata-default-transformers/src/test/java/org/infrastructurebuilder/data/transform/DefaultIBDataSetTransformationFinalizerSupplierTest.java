@@ -66,24 +66,21 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
       new DefaultGAV(new FakeIBVersionsSupplier()), new FakeCredentialsFactory(), new IBArtifactVersionMapper() {
       });
 
-
   @AfterClass
   public static void tearDownAfterClass() throws Exception {
     wps.finalize();
   }
 
   private ConfigMapSupplier cms;
-  private IBDataSetFinalizerSupplier<?,Object> fs;
+  private IBDataSetFinalizerSupplier<?, Object> fs;
   private IBTransformation x;
-  private IBDataSet dsi;
   private DataSet finalData;
   private Date now;
-  private DefaultGAV gav;
   private DefaultIBDataSet ds;
 
   @Before
   public void setUp() throws Exception {
-    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"),GROUP, ARTIFACT, VERSION);
+    x = new FakeIBTransformation("id", NAME, DESC, new XmlPlexusConfiguration("metadata"), GROUP, ARTIFACT, VERSION);
 
     cms = new DefaultConfigMapSupplier();
     fs = new DefaultIBDataSetTransformationFinalizerSupplier(ibr);
@@ -95,7 +92,6 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
     finalData.setArtifactId(ARTIFACT);
     finalData.setVersion(VERSION);
     finalData.setMetadata(new Metadata());
-    gav = new DefaultGAV(GROUP, ARTIFACT, VERSION);
     finalData.setModelVersion("1.0");
     finalData.setDescription(DESC);
     finalData.setName(NAME);
@@ -109,7 +105,7 @@ public class DefaultIBDataSetTransformationFinalizerSupplierTest {
 
   @Test
   public void testGetAndFinalize() throws IOException {
-    ConfigurableSupplier<?, ConfigMapSupplier,?> p2 = fs.configure(cms);
+    ConfigurableSupplier<?, ConfigMapSupplier, ?> p2 = fs.configure(cms);
     IBDataSetFinalizer<IBTransformation> p = (IBDataSetFinalizer<IBTransformation>) p2.get();
     assertNotNull(p);
 

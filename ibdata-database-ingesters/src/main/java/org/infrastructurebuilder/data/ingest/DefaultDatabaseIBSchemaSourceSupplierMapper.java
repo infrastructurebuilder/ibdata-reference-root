@@ -137,7 +137,7 @@ public class DefaultDatabaseIBSchemaSourceSupplierMapper extends AbstractIBSchem
           .orElseThrow(() -> new IBDataException("No data source supplier for " + db.getUrl()));
       String in = requireNonNull(db, "URL and creds").getUrl();
       // We read it as a string, clone it, then write the clone out to a path
-      Path path = writeSchemaToPath.apply(ibr, mapUTF8StringToPersistedSchema.apply(in));
+      Path path = writeSchemaToPath.apply(ibr, readSchemaFromUTF8String.apply(in));
       // Inline schemas only have the persisted schema as an asset
       Map<String, IBResource> r = new HashMap<>();
       r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));

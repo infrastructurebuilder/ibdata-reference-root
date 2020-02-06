@@ -36,8 +36,8 @@
       <artifactId>ibdata-type-impls</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.infrastructurebuilder.data</groupId>
-      <artifactId>ibdata-default-extension-mapper</artifactId>
+      <groupId>org.infrastructurebuilder</groupId>
+      <artifactId>ibcore-default-extension-type-mapper</artifactId>
       <scope>test</scope>
     </dependency>
 

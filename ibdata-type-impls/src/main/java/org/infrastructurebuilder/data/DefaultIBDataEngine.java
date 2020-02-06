@@ -23,10 +23,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataException.cet;
-import static org.infrastructurebuilder.data.IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet;
-import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapInputStreamToPersistedSchema;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.readSchemaFromInputStream;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.spi.FileSystemProvider;
@@ -34,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,10 +43,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.infrastructurebuilder.data.model.DataSchema;
-import org.infrastructurebuilder.data.model.PersistedIBSchema;
-import org.infrastructurebuilder.data.model.io.xpp3.PersistedIBSchemaXpp3Reader;
 import org.infrastructurebuilder.util.LoggerSupplier;
 import org.slf4j.Logger;
 
@@ -119,9 +113,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
               // a CP scanner....
               // kv, true)
               // Convert supplier URL to Extended Dataset
-              .map(mapURLToDefaultIBDataSet)
-              // Only get them if they're here Optional::stream in Java 11
-              .filter(Optional::isPresent).map(Optional::get)
+              .map(DefaultIBDataSet::decorateAddingSuppliers)
               // Collection
               .collect(toMap(k -> k.getUuid(), identity()));
           ref.set(x);
@@ -173,7 +165,7 @@ public class DefaultIBDataEngine implements IBDataEngine {
     return a.map(DataSchema::getUuid).flatMap(this::fetchDataStreamById).map(IBDataStream::get).map(in -> {
       DataSchema ds = a.get();
       List<IBDataSchemaAsset> assets = ds.getSchemaAssets();
-      return mapInputStreamToPersistedSchema.apply(in);
+      return readSchemaFromInputStream.apply(in);
     });
   }
 

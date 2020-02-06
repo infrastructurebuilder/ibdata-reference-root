@@ -20,7 +20,6 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.infrastructurebuilder.IBConstants.DBUNIT_DTD;
-import static org.infrastructurebuilder.IBConstants.IBSCHEMA_MIME_TYPE;
 import static org.infrastructurebuilder.data.IBDataConstants.JDBC_TYPE_NAME;
 import static org.infrastructurebuilder.data.IBDataException.cet;
 import static org.infrastructurebuilder.data.IBDataStructuredDataMetadataType.BOOLEAN;

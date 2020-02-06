@@ -28,7 +28,7 @@ import static org.infrastructurebuilder.IBConstants.NAME;
 import static org.infrastructurebuilder.IBConstants.TEMPORARYID;
 import static org.infrastructurebuilder.data.IBDataConstants.METADATA;
 import static org.infrastructurebuilder.data.IBDataConstants.SCHEMA;
-import static org.infrastructurebuilder.data.model.IBDataModelUtils.mapUTF8StringToPersistedSchema;
+import static org.infrastructurebuilder.data.model.IBDataModelUtils.readSchemaFromUTF8String;
 import static org.infrastructurebuilder.data.model.IBDataModelUtils.writeSchemaToPath;
 
 import java.io.IOException;
@@ -124,7 +124,7 @@ public class InlineIBSchemaSourceSupplierMapper extends AbstractIBSchemaSourceSu
           .orElseThrow(() -> new IBDataException("The child of <inline> must be a <schema/>"));
       String in = j.toString();
 
-      Path path = writeSchemaToPath.apply(ibr, mapUTF8StringToPersistedSchema.apply(in));
+      Path path = writeSchemaToPath.apply(ibr, readSchemaFromUTF8String.apply(in));
       Map<String, IBResource> r = new HashMap<>();
       r.put(DEFAULT, new DefaultIBResource(path, new Checksum(path), of(IBDATA_SCHEMA)));
       return unmodifiableMap(r);

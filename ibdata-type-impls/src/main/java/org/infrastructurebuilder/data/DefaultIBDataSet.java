@@ -19,30 +19,36 @@ import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.infrastructurebuilder.data.model.DataSet;
+import org.infrastructurebuilder.data.model.IBDataModelUtils;
 
 public class DefaultIBDataSet extends AbstractIBDataSet {
   private static final long serialVersionUID = -1385333942182011178L;
   private final Map<UUID, IBDataStreamSupplier> streamSuppliers;
 
-  public final static DefaultIBDataSet decorateAddingSuppliers(DataSet ds, Supplier<Path> pathToRoot) {
+  public final static DefaultIBDataSet decorateAddingSuppliers(URL url) {
+    DataSet ds = IBDataModelUtils.fromURL(url);
+
+    ds = IBDataModelUtils.readDataSetFromURL.apply(url);
+    Path datasetRoot = ds.getLocalPath().orElseThrow(() -> new IBDataException("No underlying path"));
+
     Map<UUID, IBDataStreamSupplier> v = ds.getStreams().stream()
-        .map(d -> new DefaultIBDataStreamSupplier(DefaultIBDataStream.from(d, pathToRoot)))
+        .map(d -> new DefaultIBDataStreamSupplier(DefaultIBDataStream.from(d, () -> datasetRoot)))
         .collect(Collectors.toMap(k -> k.get().getId(), Function.identity()));
     DefaultIBDataSet d = new DefaultIBDataSet(ds, v);
-    d.setPath(pathToRoot.get());
+    d.setPath(datasetRoot);
     d.getSchemas().stream().forEach(schema -> {
-        schema.getSchemaAssets().stream().forEach(asset-> {
-          // TODO Setup the assets for the data set that I just read
-        });
+      schema.getSchemaAssets().stream().forEach(asset -> {
+        // TODO Setup the assets for the data set that I just read
+      });
     });
     return d;
   }

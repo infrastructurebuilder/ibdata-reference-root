@@ -17,6 +17,7 @@ package org.infrastructurebuilder.data.transform;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
+import static org.infrastructurebuilder.data.DefaultIBDataSet.decorateAddingSuppliers;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATASET_XML;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_WORKING_PATH_SUPPLIER;
@@ -54,7 +55,6 @@ import org.infrastructurebuilder.data.IBDataStream;
 import org.infrastructurebuilder.data.IBDataTransformationResult;
 import org.infrastructurebuilder.data.IBDataTransformer;
 import org.infrastructurebuilder.data.IBDataTransformerSupplier;
-import org.infrastructurebuilder.data.IBDataTypeImplsModelUtils;
 import org.infrastructurebuilder.data.IBStreamerFactory;
 import org.infrastructurebuilder.data.Metadata;
 import org.infrastructurebuilder.data.model.DataSet;
@@ -85,9 +85,9 @@ public final class IBDataTransformMavenComponent extends AbstractIBDataMavenComp
   };
 
   public final static Function<IBResource, IBDataTransformationResult> fromPrevious = (previous) -> {
-    Optional<DefaultIBDataSet> ds = IBDataTypeImplsModelUtils.mapURLToDefaultIBDataSet.apply(
+    DefaultIBDataSet ds = decorateAddingSuppliers(
         cet.withReturningTranslation(() -> previous.getPath().resolve(IBDATA).resolve(IBDATASET_XML).toUri().toURL()));
-    return new DefaultIBDataTransformationResult(ds.get(), previous.getPath());
+    return new DefaultIBDataTransformationResult(ds, previous.getPath());
   };
 
   private final Map<String, IBDataDataStreamRecordFinalizerSupplier<?>> allRecordFinalizers;
