@@ -25,6 +25,7 @@ import static org.infrastructurebuilder.util.IBUtils.nullSafeObjectToString;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,31 +57,45 @@ public class DefaultIBDataStream extends DefaultIBDataStreamIdentifier implement
   }
 
   public DefaultIBDataStream(IBDataStreamIdentifier identifier, Path ins, Optional<IBDataStructuredDataMetadata> sdmd) {
-    super(identifier.getId(), identifier.getUrl(), identifier.getName(), identifier.getDescription(),
-        identifier.getChecksum(), identifier.getCreationDate(), identifier.getMetadata(), identifier.getMimeType(),
-        ofNullable(identifier.getPath()), ofNullable(identifier.getOriginalLength()),
-        ofNullable(identifier.getOriginalRowCount()));
+    super(identifier.getId() // Identifier (often not valid)
+        , identifier.getUrl() // Optional source url
+        , identifier.getName() // Name
+        , identifier.getDescription() // DEsc
+        , identifier.getChecksum() // Checksum of original
+        , identifier.getCreationDate() // Creation date (will be over-written later)
+        , identifier.getMetadata() // Metadata xpp3
+        , identifier.getMimeType() // mime type
+        , ofNullable(identifier.getPath()) // Possible path
+        , ofNullable(identifier.getOriginalLength()) // Original length
+        , ofNullable(identifier.getOriginalRowCount())); // Original row count
     sdmd.ifPresent(s -> this.setStructuredDataMetadata(s));
     this.cpt = new DefaultIBResource(Objects.requireNonNull(ins), identifier.getChecksum(),
         of(identifier.getMimeType()));
     this.streamSupplier = this.cpt;
   }
 
-  public DefaultIBDataStream(IBDataStreamIdentifier identifier, IBResource ins) {
-    super(identifier.getId(), identifier.getUrl(), identifier.getName(), identifier.getDescription(),
-        requireNonNull(ins).getChecksum(), identifier.getCreationDate(), identifier.getMetadata(),
-        requireNonNull(ins).getType(),
-        nullSafeObjectToString.apply(ofNullable(ins.getPath()).map(Path::getFileName).orElse(null)),
-        ofNullable(identifier.getOriginalLength()), ofNullable(identifier.getOriginalRowCount()));
-    this.cpt = ins;
+  public DefaultIBDataStream(IBDataStreamIdentifier id, IBResource ibresource) {
+    super(id.getId()                        // id
+        , id.getUrl()                       // source
+        , id.getName()                      // name
+        , id.getDescription()               // desc
+        , requireNonNull(ibresource).getChecksum()  // checksom
+        , id.getCreationDate()              // Creation date
+        , id.getMetadata()                  // metadta
+        , requireNonNull(ibresource).getType()      // MIME
+        , nullSafeObjectToString.apply(ofNullable(ibresource.getPath()).map(Path::getFileName).orElse(null)) // Path to item
+        , ofNullable(id.getOriginalLength()) // Length
+        , ofNullable(id.getOriginalRowCount())); // Row count
+    this.cpt = ibresource;
     this.calculatedChecksum = this.cpt.getChecksum();
-    this.streamSupplier = requireNonNull(ins);
+    this.streamSupplier = requireNonNull(ibresource);
   }
 
   @Override
   public InputStream get() {
     InputStream str = cet.withReturningTranslation(() -> this.streamSupplier.get());
     createdInputStreamsForThisInstance.add(str);
+    this.creationDate = new Date();
     return str;
 
   }

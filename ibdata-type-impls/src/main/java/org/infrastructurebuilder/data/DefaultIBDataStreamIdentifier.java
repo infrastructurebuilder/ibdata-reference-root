@@ -38,7 +38,7 @@ public class DefaultIBDataStreamIdentifier implements IBDataStreamIdentifier {
   private final Optional<String> name;
   private final Optional<String> description;
   private final Checksum checksum;
-  private final Date creationDate;
+  protected Date creationDate;  // Removed final modifier to allow change at <code>.get()</code> time
   private final Metadata metadata;
   private final String path;
   private final String mimeType;
