@@ -21,6 +21,7 @@ import static java.util.Optional.ofNullable;
 import static org.infrastructurebuilder.IBConstants.IBDATA_PREFIX;
 import static org.infrastructurebuilder.data.IBDataConstants.IBDATA_DOWNLOAD_CACHE_DIR_SUPPLIER;
 import static org.infrastructurebuilder.data.IBDataException.cet;
+import static org.infrastructurebuilder.util.IBUtils.allFilesInTree;
 import static org.infrastructurebuilder.util.files.DefaultIBResource.copyToTempChecksumAndPath;
 
 import java.io.File;
@@ -197,12 +198,12 @@ public class DefaultWGetterSupplier implements WGetterSupplier {
         }
         unarchiver.extract();
         String rPath = cet.withReturningTranslation(() -> targetDir.toUri().toURL().toExternalForm());
-        for (Path p : IBUtils.allFilesInTree(targetDir)) {
-          String tPath = cet.withReturningTranslation(() -> p.toUri().toURL().toExternalForm())
+        allFilesInTree(targetDir).forEach(p -> {
+          String relPath = cet.withReturningTranslation(() -> p.toUri().toURL().toExternalForm())
               .substring(rPath.length());
-          IBResource q = cet.withReturningTranslation(() -> copyToTempChecksumAndPath(tempPath, p, oSource, tPath));
+          IBResource q = cet.withReturningTranslation(() -> copyToTempChecksumAndPath(tempPath, p, oSource, relPath));
           l.add(q);
-        }
+        });
 
         IBUtils.deletePath(targetDir);
       } catch (NoSuchArchiverException e) {
